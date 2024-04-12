@@ -10,6 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
+import java.util.stream.Stream;
 
 import com.lmt.lib.bms.BmsAt;
 
@@ -22,10 +23,10 @@ import com.lmt.lib.bms.BmsAt;
  *
  * <p>楽曲位置情報の集合からは様々な分析を行うことができ、代表的な統計情報の収集は当クラスの構築時に行われます。
  * 統計情報にはGetterからアクセスすることが可能で、アプリケーションの要求に応じてそれらの情報を活用することが
- * 可能になっています。</p>
+ * 可能になっています。より高度な統計情報を集計したい場合は{@link BeMusicStatisticsBuilder}を参照してください。</p>
  *
  * <p>また、小節番号・刻み位置や時間を用いて時間軸への高速なアクセスを行ったり、条件を指定して楽曲位置情報を
- * 検索する等の機能を提供し、Be Musicに関するアプリケーション開発のアシストを行います。</p>
+ * 検索する等の機能を提供し、Be-Musicに関するアプリケーション開発のアシストを行います。</p>
  *
  * <p>当クラスが持つ情報や機能では足りない場合には、当クラスを拡張し、処理や機能を追加してください。そのための
  * 処理実装は{@link #onCreate()}で行うことを想定しています。</p>
@@ -358,6 +359,16 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	@Override
 	public final Iterator<BeMusicPoint> iterator() {
 		return new PointIterator();
+	}
+
+	/**
+	 * 楽曲位置情報リストを走査するストリームを返します。
+	 * <p>楽曲位置情報リストは、楽曲位置の時間で昇順ソートされていることを保証します。類似の情報として「表示位置」
+	 * がありますが、楽曲位置情報リストがこの情報で昇順ソートされていることを期待するべきではありません。</p>
+	 * @return 楽曲位置情報リストを走査するストリーム
+	 */
+	public final Stream<BeMusicPoint> stream() {
+		return mPoints.stream();
 	}
 
 	/**

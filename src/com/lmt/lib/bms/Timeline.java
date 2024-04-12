@@ -2,21 +2,196 @@ package com.lmt.lib.bms;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Spliterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
- * チャンネルデータのデータを管理するコレクション。
+ * タイムラインのデータを管理するコレクション。
  * <p>当クラスで管理するのは、配列型チャンネルのノート、および値型チャンネルの小節データである。</p>
  * <p>このクラスは{@link com.lmt.lib.bms.BmsContent BmsContent}の内部データとして扱われることを想定しており、
  * クラスへのアクセスは全てのパラメータのアサーションが完了したあとであることを前提とした作りになっている。</p>
  *
  * @param <E> 拡張小節データを表す型
  */
-class ChannelDataCollection<E extends MeasureData> {
+class Timeline<E extends MeasureElement> {
+	/**
+	 * {@link BmsContent#timeline()}向けのSpliterator
+	 */
+	private class ElementSpliterator implements Spliterator<BmsElement> {
+		/** 走査開始楽曲位置の小節番号 */
+		private int mMeasureBegin;
+		/** 走査開始楽曲位置の小節の刻み位置 */
+		private double mTickBegin;
+		/** 走査終了楽曲位置の小節番号 */
+		private int mMeasureEnd;
+		/** 走査終了楽曲位置の小節の刻み位置 */
+		private double mTickEnd;
+		/** 現在走査中の小節番号 */
+		private int mCurMeasure;
+		/** 現在走査中の小節の刻み位置 */
+		private double mCurTick;
+		/** 現在の走査進行処理 */
+		private Supplier<BmsElement> mCurAdvance;
+		/** 走査進行処理で使用するイテレータ */
+		private Iterator<? extends BmsElement> mCurIterator;
+
+		/**
+		 * コンストラクタ
+		 * @param measureBegin 走査開始楽曲位置の小節番号
+		 * @param tickBegin 走査開始楽曲位置の小節の刻み位置
+		 * @param measureEnd 走査終了楽曲位置の小節番号
+		 * @param tickEnd 走査終了楽曲位置の小節の刻み位置
+		 */
+		ElementSpliterator(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
+			mMeasureBegin = measureBegin;
+			mTickBegin = tickBegin;
+			mMeasureEnd = measureEnd;
+			mTickEnd = tickEnd;
+			setup();
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public boolean tryAdvance(Consumer<? super BmsElement> action) {
+			var elem = mCurAdvance.get();
+			if (elem == null) {
+				return false;
+			} else {
+				action.accept(elem);
+				return true;
+			}
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public Spliterator<BmsElement> trySplit() {
+			return null;
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public long estimateSize() {
+			return Long.MAX_VALUE;  // サイズ計算は高コストのため不明とする
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public int characteristics() {
+			return NONNULL | ORDERED;
+		}
+
+		/**
+		 * 小節線の走査進行処理
+		 * @return 小節線のタイムライン要素
+		 */
+		private BmsElement advanceMeasureLine() {
+			// 小節線を返し、次回から小節データを走査するように設定する
+			mCurIterator = mMeasureList.get(mCurMeasure).valueIterator();
+			mCurAdvance = this::advanceMeasureValues;
+			return mMeasureList.get(mCurMeasure);
+		}
+
+		/**
+		 * 小節データの走査進行処理
+		 * @return 小節データのタイムライン要素。小節データのタイムライン要素がなければノートのタイムライン要素。
+		 */
+		private BmsElement advanceMeasureValues() {
+			if (mCurIterator.hasNext()) {
+				// 次の小節データを返す
+				return mCurIterator.next();
+			} else {
+				// 小節データがない場合は現小節の先頭からノートを走査する
+				setupForNotes();
+				return mCurAdvance.get();
+			}
+		}
+
+		/**
+		 * ノートの走査進行処理
+		 * @return ノートのタイムライン要素。現在の小節にこれ以上ノートがない場合は次小節の小節線タイムライン要素。
+		 *          楽曲の末端に到達した場合はnull。
+		 */
+		private BmsElement advanceNotes() {
+			// 走査範囲のノートが残存している場合は次のノートを返す
+			if (mCurIterator.hasNext()) {
+				return mCurIterator.next();
+			}
+
+			// 次の小節がある場合はその小節の小節線を返す
+			mCurMeasure++;
+			mCurTick = BmsSpec.TICK_MIN;
+			if ((mCurMeasure > mMeasureEnd) || (mCurMeasure >= getMeasureCount())) {
+				// タイムライン外に飛び出した場合は終端とする
+				return null;
+			} else if ((mCurMeasure == mMeasureEnd) && (mTickEnd == BmsSpec.TICK_MIN)) {
+				// 走査終了楽曲位置が小節の先頭の場合は終端とする
+				return null;
+			} else {
+				// まだ終端に到達していない場合は次小節の小節線を返す
+				return advanceMeasureLine();
+			}
+		}
+
+		/**
+		 * 走査終了
+		 * @return null
+		 */
+		private BmsElement advanceEnd() {
+			return null;
+		}
+
+		/**
+		 * Spliteratorのセットアップ処理
+		 */
+		private void setup() {
+			// 初期楽曲位置を設定する
+			mCurMeasure = mMeasureBegin;
+			mCurTick = mTickBegin;
+			mCurIterator = null;
+
+			// 初期楽曲位置から初期進行状態を判定する
+			if (mCurMeasure >= getMeasureCount()) {
+				// 最初から範囲外に飛び出ている
+				mCurAdvance = this::advanceEnd;
+			} else if (mCurTick == 0.0) {
+				// 初期楽曲位置が小節の先頭
+				mCurAdvance = this::advanceMeasureLine;
+			} else {
+				// 初期楽曲位置が小節の途中
+				setupForNotes();
+			}
+		}
+
+		/**
+		 * ノートのタイムライン要素走査のセットアップ処理
+		 */
+		private void setupForNotes() {
+			// 現楽曲位置から進行方法を判定する
+			var tickBegin = (mCurMeasure == mMeasureBegin) ? mTickBegin : BmsSpec.TICK_MIN;
+			var tickEnd = (mCurMeasure == mMeasureEnd) ? mTickEnd : Double.MAX_VALUE;
+			if (mCurMeasure >= getMeasureCount()) {
+				// 小節番号が終端に到達済み
+				mCurIterator = null;
+				mCurAdvance = this::advanceEnd;
+			} else  {
+				// 指定範囲のノートを走査する
+				var from = note1(BmsSpec.CHANNEL_MIN, BmsSpec.CHINDEX_MIN, mCurMeasure, tickBegin);
+				var to = note2(BmsSpec.CHANNEL_MIN, BmsSpec.CHINDEX_MIN, mCurMeasure, tickEnd);
+				mCurIterator = mNotes.subSet(from, true, to, false).iterator();
+				mCurAdvance =  this::advanceNotes;
+			}
+		}
+	}
+
 	/** ノートリスト生成クラス */
 	private static class NoteLister implements BmsNote.Tester {
 		/** ノート格納先リスト */
@@ -99,13 +274,13 @@ class ChannelDataCollection<E extends MeasureData> {
 	/** BMS仕様 */
 	private BmsSpec mSpec;
 	/** 拡張小節データ生成関数 */
-	private IntFunction<E> mMeasureDataCreator;
+	private IntFunction<E> mMeasureElementCreator;
 	/** 全ノート */
-	private TreeSet<BmsNote> mNotes = new TreeSet<>(BmsNote.COMPARATOR);
+	private TreeSet<BmsNote> mNotes = new TreeSet<>(BmsAddress::compare);
 	/** チャンネルデータキーごとのノートリスト */
 	private TreeMap<MutableInt, TreeSet<BmsNote>> mNotesChMap = new TreeMap<>();
-	/** 小節ごとの小節データマップ */
-	private ArrayList<E> mMeasureDataMap = new ArrayList<>();
+	/** 小節ごとの小節全体データリスト */
+	private ArrayList<E> mMeasureList = new ArrayList<>();
 	/** 検索キー用ノート1 */
 	private BmsNote mNoteTemp1 = new BmsNote();
 	/** 検索キー用ノート2 */
@@ -125,9 +300,9 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * コンストラクタ
 	 * @param measureDataCreator 小節データ生成関数
 	 */
-	ChannelDataCollection(BmsSpec spec, IntFunction<E> measureDataCreator) {
+	Timeline(BmsSpec spec, IntFunction<E> measureDataCreator) {
 		mSpec = spec;
-		mMeasureDataCreator = measureDataCreator;
+		mMeasureElementCreator = measureDataCreator;
 	}
 
 	/**
@@ -144,7 +319,7 @@ class ChannelDataCollection<E extends MeasureData> {
 		var got = mNotes.ceiling(target);
 
 		// チャンネル、楽曲位置が同一の場合のみ取得結果を返す
-		var equal = (got == null) ? false : (BmsNote.COMPARATOR.compare(target, got) == 0);
+		var equal = (got == null) ? false : (BmsAddress.compare(target, got) == 0);
 		return equal ? got : null;
 	}
 
@@ -158,7 +333,7 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @return 次のノート。そのようなノートが存在しない場合null
 	 */
 	final BmsNote getNextNote(int channel, int index, int measure, double tick, boolean inclusive) {
-		var notesCh = mNotesChMap.get(ChannelDataKey.make(mChKey, channel, index));
+		var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel, index)));
 		if (notesCh == null) {
 			// 当該チャンネルにノートがない場合はnull
 			return null;
@@ -180,7 +355,7 @@ class ChannelDataCollection<E extends MeasureData> {
 	 */
 	final BmsNote getPreviousNote(int channel, int index, int measure, double tick, boolean inclusive) {
 		// チャンネルごとのノートリストから指定位置より前にある最初のノートを取得する
-		var notesCh = mNotesChMap.get(ChannelDataKey.make(mChKey, channel, index));
+		var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel, index)));
 		if (notesCh == null) {
 			// 当該チャンネルにノートがない場合はnull
 			return null;
@@ -198,8 +373,8 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @param measure 小節番号
 	 * @return 小節データ
 	 */
-	final Object getMeasureValue(int channel, int index, int measure) {
-		return mMeasureDataMap.get(measure).getValue(channel, index);
+	final BmsElement getMeasureValue(int channel, int index, int measure) {
+		return mMeasureList.get(measure).getValue(channel, index);
 	}
 
 	/**
@@ -207,7 +382,7 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @return 小節数
 	 */
 	final int getMeasureCount() {
-		return mMeasureDataMap.size();
+		return mMeasureList.size();
 	}
 
 	/**
@@ -217,7 +392,7 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @return 配列型チャンネルのデータ数
 	 */
 	final int getNoteChannelDataCount(int channel, int measure) {
-		return mMeasureDataMap.get(measure).getNoteChannelDataCount(channel);
+		return mMeasureList.get(measure).getNoteChannelDataCount(channel);
 	}
 
 	/**
@@ -227,7 +402,7 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @return 値型チャンネルのデータ数
 	 */
 	final int getValueChannelDataCount(int channel, int measure) {
-		return mMeasureDataMap.get(measure).getValueChannelDataCount(channel);
+		return mMeasureList.get(measure).getValueChannelDataCount(channel);
 	}
 
 	/**
@@ -239,7 +414,7 @@ class ChannelDataCollection<E extends MeasureData> {
 		if ((measure < BmsSpec.MEASURE_MIN) || (measure >= getMeasureCount())) {
 			return BmsSpec.TICK_COUNT_DEFAULT;
 		} else {
-			return mMeasureDataMap.get(measure).getTickCount();
+			return mMeasureList.get(measure).getTickCount();
 		}
 	}
 
@@ -252,7 +427,7 @@ class ChannelDataCollection<E extends MeasureData> {
 		if ((measure < BmsSpec.MEASURE_MIN) || (measure >= getMeasureCount())) {
 			return Math.nextDown(BmsSpec.TICK_COUNT_DEFAULT);
 		} else {
-			return mMeasureDataMap.get(measure).getTickMax();
+			return mMeasureList.get(measure).getTickMax();
 		}
 	}
 
@@ -262,7 +437,7 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @return 拡張小節データ
 	 */
 	final E getMeasureData(int measure) {
-		var measureData = mMeasureDataMap.get(measure);
+		var measureData = mMeasureList.get(measure);
 		return measureData;
 	}
 
@@ -272,7 +447,7 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @return 指定小節のノートが存在しなければtrue、そうでなければfalse
 	 */
 	final boolean isMeasureEmptyNotes(int measure) {
-		return mMeasureDataMap.get(measure).isEmptyNotes();
+		return mMeasureList.get(measure).isEmptyNotes();
 	}
 
 	/**
@@ -352,6 +527,19 @@ class ChannelDataCollection<E extends MeasureData> {
 	}
 
 	/**
+	 * タイムラインの指定楽曲位置の範囲を走査するストリームを返す
+	 * @param measureBegin 走査開始楽曲位置の小節番号
+	 * @param tickBegin 走査開始楽曲位置の小節の刻み位置
+	 * @param measureEnd 走査終了楽曲位置の小節番号
+	 * @param tickEnd 走査終了楽曲位置の小節の刻み位置(この位置を含まない)
+	 * @return タイムラインの指定楽曲位置の範囲を走査するストリーム
+	 */
+	final Stream<BmsElement> timeline(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
+		var spliterator = new ElementSpliterator(measureBegin, tickBegin, measureEnd, tickEnd);
+		return StreamSupport.stream(spliterator, false);
+	}
+
+	/**
 	 * 指定チャンネルの全ノートを入れ替える
 	 * @param channel1 チャンネル番号1
 	 * @param index1 チャンネルインデックス1
@@ -360,8 +548,8 @@ class ChannelDataCollection<E extends MeasureData> {
 	 */
 	final void swapNoteChannel(int channel1, int index1, int channel2, int index2) {
 		// 入れ替え対象チャンネルのデータを全件取り出す
-		var set1 = mNotesChMap.get(ChannelDataKey.make(mChKey, channel1, index1));
-		var set2 = mNotesChMap.get(ChannelDataKey.make(mChKey, channel2, index2));
+		var set1 = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel1, index1)));
+		var set2 = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel2, index2)));
 
 		// 両ノートリストを一旦退避する
 		var notes1 = new ArrayList<>((set1 == null) ? Collections.emptyList() : set1);
@@ -385,12 +573,12 @@ class ChannelDataCollection<E extends MeasureData> {
 	 */
 	final void swapValueChannel(int channel1, int index1, int channel2, int index2) {
 		// 入れ替え対象チャンネルの全小節データを抜き出す
-		var values1 = pullChannelAllValues(channel1, index1);
-		var values2 = pullChannelAllValues(channel2, index2);
+		var elems1 = pullChannelAllValues(channel1, index1);
+		var elems2 = pullChannelAllValues(channel2, index2);
 
 		// 両小節データをチャンネルを入れ替えて追加する
-		values1.forEach((m, v) -> { putMeasureValue(channel2, index2, m.get(), v); });
-		values2.forEach((m, v) -> { putMeasureValue(channel1, index1, m.get(), v); });
+		elems1.forEach((m, e) -> { putMeasureValue(channel2, index2, m.get(), e.getValueAsObject()); });
+		elems2.forEach((m, e) -> { putMeasureValue(channel1, index1, m.get(), e.getValueAsObject()); });
 	}
 
 	/**
@@ -405,7 +593,7 @@ class ChannelDataCollection<E extends MeasureData> {
 	 */
 	final void enumNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd, BmsNote.Tester tester) {
 		var begin = note1(BmsSpec.CHANNEL_MIN, BmsSpec.CHINDEX_MIN, mBeg, tBeg);
-		var end = note2(BmsSpec.CHANNEL_MAX + 1, BmsSpec.CHINDEX_MAX + 1, mEnd, tEnd);
+		var end = note2(BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MIN, mEnd, tEnd);
 		for (var note : mNotes.subSet(begin, true, end, false)) {
 			var ch = note.getChannel();
 			if ((ch >= chBeg) && (ch < chEnd)) { if (!tester.testNote(note)) { return; } }
@@ -439,7 +627,7 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @return パラメータで指定したリストインスタンス
 	 */
 	final List<BmsNote> listNotes(int channel, int index, int measure, List<BmsNote> outList) {
-		mMeasureDataMap.get(measure).listNotes(channel, index, outList);
+		mMeasureList.get(measure).listNotes(channel, index, outList);
 		return outList;
 	}
 
@@ -472,10 +660,10 @@ class ChannelDataCollection<E extends MeasureData> {
 		mNotes.add(note);
 
 		// チャンネルごとのノートリストへ追加する
-		var notesCh = mNotesChMap.get(ChannelDataKey.make(mChKey, note));
+		var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(note)));
 		if (notesCh == null) {
-			notesCh = new TreeSet<>(BmsNote.COMPARATOR);
-			mNotesChMap.put(new MutableInt(ChannelDataKey.make(note)), notesCh);
+			notesCh = new TreeSet<>(BmsAddress::compare);
+			mNotesChMap.put(new MutableInt(BmsChx.toInt(note)), notesCh);
 		}
 		notesCh.add(note);
 
@@ -503,16 +691,16 @@ class ChannelDataCollection<E extends MeasureData> {
 		// チャンネルごとのノートリストから消去する
 		if (result) {
 			// ノートリストからの消去
-			var notesCh = mNotesChMap.get(ChannelDataKey.make(mChKey, channel, index));
+			var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel, index)));
 			notesCh.remove(note1(channel, index, measure, tick));
 
 			// 消去した結果リストが空になった場合はリスト自体を消去する
 			if (notesCh.size() == 0) {
-				mNotesChMap.remove(ChannelDataKey.make(mChKey, channel, index));
+				mNotesChMap.remove(mChKey.set(BmsChx.toInt(channel, index)));
 			}
 
 			// 小節データリストから消去する
-			mMeasureDataMap.get(measure).removeNote(channel, index, tick);
+			mMeasureList.get(measure).removeNote(channel, index, tick);
 
 			// 小節データをクリーンアップする
 			cleanupMeasureDataIfNeeded();
@@ -534,7 +722,7 @@ class ChannelDataCollection<E extends MeasureData> {
 
 		// 挿入位置以降の全ノートと全小節データを消去する
 		for (var n : noteList) { removeNote(n.getChannel(), n.getIndex(), n.getMeasure(), n.getTick()); }
-		mMeasureDataMap.removeIf(m -> m.getMeasure() >= where);
+		mMeasureList.removeIf(m -> m.getMeasure() >= where);
 
 		// 移動対象の全ノートと小節データを復元する
 		restoreMeasureValues(valuesList, where + count);
@@ -559,7 +747,7 @@ class ChannelDataCollection<E extends MeasureData> {
 		for (var n : removeNoteList) { removeNote(n.getChannel(), n.getIndex(), n.getMeasure(), n.getTick()); }
 
 		// 消去対象小節以降の小節データを消去する
-		mMeasureDataMap.removeIf(m -> m.getMeasure() >= where);
+		mMeasureList.removeIf(m -> m.getMeasure() >= where);
 
 		// 移動対象全ノートと小節データを再追加する
 		restoreMeasureValues(moveValuesList, where);
@@ -599,7 +787,7 @@ class ChannelDataCollection<E extends MeasureData> {
 		removeNotesOnShrinkedMeasureIfNeeded(channel, index, measure, null);
 
 		// 小節データを消去する
-		mMeasureDataMap.get(measure).removeValue(channel, index);
+		mMeasureList.get(measure).removeValue(channel, index);
 
 		// 小節データをクリーンアップする
 		cleanupMeasureDataIfNeeded();
@@ -649,20 +837,20 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @param measure 小節番号
 	 * @return 小節データ
 	 */
-	private MeasureData getOrCreateMeasureData(int measure) {
+	private MeasureElement getOrCreateMeasureData(int measure) {
 		// 指定小節番号の小節データがまだ生成されていない場合は指定小節番号までの小節データを生成する
-		var measureCount = mMeasureDataMap.size();
+		var measureCount = mMeasureList.size();
 		if (measure >= measureCount) {
 			var createCount = measure - measureCount + 1;
 			for (var i = 0; i < createCount; i++) {
-				var measureData = mMeasureDataCreator.apply(measureCount + i);
+				var measureData = mMeasureElementCreator.apply(measureCount + i);
 				measureData.setSpec(mSpec);
-				mMeasureDataMap.add(measureData);
+				mMeasureList.add(measureData);
 			}
 		}
 
 		// 指定小節番号の小節データを取得する(前処理により範囲内保証される)
-		return mMeasureDataMap.get(measure);
+		return mMeasureList.get(measure);
 	}
 
 	/**
@@ -671,14 +859,14 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @param index チャンネルインデックス
 	 * @return チャンネルに該当する全小節データマップ
 	 */
-	private Map<MutableInt, Object> pullChannelAllValues(int channel, int index) {
-		var allValues = new TreeMap<MutableInt, Object>();
+	private Map<MutableInt, BmsElement> pullChannelAllValues(int channel, int index) {
+		var allValues = new TreeMap<MutableInt, BmsElement>();
 		var measureCount = getMeasureCount();
 		for (var m = BmsSpec.MEASURE_MIN; m < measureCount; m++) {
-			var measureData = mMeasureDataMap.get(m);
-			var value = (measureData == null) ? null : measureData.getValue(channel, index);
-			if (value != null) {
-				allValues.put(new MutableInt(m), value);
+			var measureData = mMeasureList.get(m);
+			var elem = (measureData == null) ? null : measureData.getValue(channel, index);
+			if (elem != null) {
+				allValues.put(new MutableInt(m), elem);
 				measureData.removeValue(channel, index);
 			}
 		}
@@ -691,14 +879,14 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @param count 抜き出す小節数
 	 * @return 全小節データリスト
 	 */
-	private ArrayList<Map<MutableInt, Object>> pullMeasureValues(int measureFrom, int count) {
-		var valuesList = new ArrayList<Map<MutableInt, Object>>(count);
+	private ArrayList<Map<MutableInt, BmsElement>> pullMeasureValues(int measureFrom, int count) {
+		var valuesList = new ArrayList<Map<MutableInt, BmsElement>>(count);
 		for (var i = measureFrom; i < (measureFrom + count); i++) {
-			var measureData = mMeasureDataMap.get(i);
-			var values = (measureData == null) ? Collections.<MutableInt, Object>emptyMap() : measureData.mapValues();
+			var measureData = mMeasureList.get(i);
+			var values = (measureData == null) ? Collections.<MutableInt, BmsElement>emptyMap() : measureData.mapValues();
 			for (var key : values.keySet()) {
-				int channel = ChannelDataKey.getNumber(key.get());
-				int index = ChannelDataKey.getIndex(key.get());
+				int channel = BmsChx.toChannel(key.get());
+				int index = BmsChx.toIndex(key.get());
 				measureData.removeValue(channel, index);
 			}
 			valuesList.add(values);
@@ -711,14 +899,14 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @param valuesList 全小節データリスト
 	 * @param measureFrom 復元開始位置の小節番号
 	 */
-	private void restoreMeasureValues(ArrayList<Map<MutableInt, Object>> valuesList, int measureFrom) {
+	private void restoreMeasureValues(ArrayList<Map<MutableInt, BmsElement>> valuesList, int measureFrom) {
 		for (var i = 0; i < valuesList.size(); i++) {
 			var values = valuesList.get(i);
 			for (var entry : values.entrySet()) {
 				var key = entry.getKey();
-				var channel = ChannelDataKey.getNumber(key.get());
-				var index = ChannelDataKey.getIndex(key.get());
-				putMeasureValue(channel, index, measureFrom + i, entry.getValue());
+				var channel = BmsChx.toChannel(key.get());
+				var index = BmsChx.toChannel(key.get());
+				putMeasureValue(channel, index, measureFrom + i, entry.getValue().getValueAsObject());
 			}
 		}
 	}
@@ -731,7 +919,7 @@ class ChannelDataCollection<E extends MeasureData> {
 		var measureCount = getMeasureCount();
 		var emptyFrom = BmsSpec.MEASURE_MIN;
 		for (var m = measureCount - 1; m >= BmsSpec.MEASURE_MIN; m--) {
-			var measureData = mMeasureDataMap.get(m);
+			var measureData = mMeasureList.get(m);
 			if (!measureData.isEmpty()) {
 				emptyFrom = m + 1;
 				break;
@@ -741,7 +929,7 @@ class ChannelDataCollection<E extends MeasureData> {
 		// 消去対象小節データが存在する場合は消去を行う
 		if (emptyFrom < measureCount) {
 			var removeFrom = emptyFrom;
-			mMeasureDataMap.removeIf(m -> m.getMeasure() >= removeFrom);
+			mMeasureList.removeIf(m -> m.getMeasure() >= removeFrom);
 		}
 	}
 
@@ -766,7 +954,7 @@ class ChannelDataCollection<E extends MeasureData> {
 			}
 
 			// 小節データをテストする
-			if (mMeasureDataMap.get(m).testValueChannels(chTester)) {
+			if (mMeasureList.get(m).testValueChannels(chTester)) {
 				return m;
 			}
 		}
@@ -791,7 +979,7 @@ class ChannelDataCollection<E extends MeasureData> {
 
 		// 小節長が拡張する場合は処理不要
 		var newLength = (double)((newValue == null) ? lengthChannel.getDefaultValue() : newValue);
-		var oldLength = mMeasureDataMap.get(measure).getLengthRatio();
+		var oldLength = mMeasureList.get(measure).getLengthRatio();
 		if (newLength >= oldLength) {
 			return;
 		}
@@ -860,8 +1048,7 @@ class ChannelDataCollection<E extends MeasureData> {
 	 * @return 対象ノートのインスタンス
 	 */
 	private BmsNote note(BmsNote target, int channel, int index, int measure, double tick) {
-		target.setChannel(channel);
-		target.setIndex(index);
+		target.setChx(channel, index);
 		target.setMeasure(measure);
 		target.setTick(tick);
 		return target;

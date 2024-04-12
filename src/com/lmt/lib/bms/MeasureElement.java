@@ -1,5 +1,7 @@
 package com.lmt.lib.bms;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -8,9 +10,63 @@ import java.util.TreeSet;
 /**
  * 小節データクラス。
  */
-abstract class MeasureData {
-	/** 小節番号 */
-	private int mMeasure;
+abstract class MeasureElement extends BmsElement {
+	/**
+	 * タイムライン要素の小節データ
+	 */
+	private static class ValueElement extends BmsElement {
+		/** 値 */
+		private Object mValue;
+
+		/**
+		 * コンストラクタ
+		 * @param measure 小節番号
+		 * @param channel チャンネル番号
+		 * @param index チャンネルインデックス
+		 * @param value 値
+		 */
+		ValueElement(int measure, int channel, int index, Object value) {
+			super(measure, BmsSpec.TICK_MIN, channel, index);
+			mValue = value;
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public long getValueAsLong() {
+			return ((Number)mValue).longValue();
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public double getValueAsDouble() {
+			return ((Number)mValue).doubleValue();
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String getValueAsString() {
+			return mValue.toString();
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public BmsArray getValueAsArray() {
+			return (BmsArray)mValue;
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public Object getValueAsObject() {
+			return mValue;
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public boolean isMeasureValueElement() {
+			return true;
+		}
+	}
+
 	/** BMS仕様 */
 	private BmsSpec mSpec;
 	/** 小節の刻み数 */
@@ -30,7 +86,7 @@ abstract class MeasureData {
 	/** チャンネルキーごとのノートリスト */
 	private TreeMap<MutableInt, TreeSet<BmsNote>> mNotesChMap = null;
 	/** チャンネルキーごとの小節データ */
-	private TreeMap<MutableInt, Object> mValuesChMap = null;
+	private TreeMap<MutableInt, BmsElement> mValuesChMap = null;
 	/** チャンネルキー用可変整数 */
 	private MutableInt mChKey = new MutableInt();
 
@@ -38,17 +94,39 @@ abstract class MeasureData {
 	 * コンストラクタ
 	 * @param measure 小節番号
 	 */
-	MeasureData(int measure) {
-		mMeasure = measure;
+	MeasureElement(int measure) {
+		super(measure, BmsSpec.TICK_MIN, BmsSpec.CHANNEL_MEASURE, BmsSpec.CHINDEX_MIN);
 		setLengthRatio(1.0);
 	}
 
-	/**
-	 * 小節番号取得
-	 * @return 小節番号
-	 */
-	final int getMeasure() {
-		return mMeasure;
+	/** {@inheritDoc} */
+	@Override
+	public long getValueAsLong() {
+		return getMeasure();
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public double getValueAsDouble() {
+		return getMeasure();
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public String getValueAsString() {
+		return String.valueOf(getMeasure());
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public Object getValueAsObject() {
+		return getMeasure();
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public final boolean isMeasureLineElement() {
+		return true;
 	}
 
 	/**
@@ -144,10 +222,10 @@ abstract class MeasureData {
 		}
 
 		// チャンネルキーに対応するノートリストを取得・生成する
-		var notesCh = mNotesChMap.get(ChannelDataKey.make(mChKey, note));
+		var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(note)));
 		if (notesCh == null) {
-			notesCh = new TreeSet<>(BmsNote.COMPARATOR);
-			mNotesChMap.put(new MutableInt(ChannelDataKey.make(note)), notesCh);
+			notesCh = new TreeSet<>(BmsAddress::compare);
+			mNotesChMap.put(new MutableInt(BmsChx.toInt(note)), notesCh);
 		}
 
 		// ノートリストにノートを追加する
@@ -167,20 +245,19 @@ abstract class MeasureData {
 		}
 
 		// チャンネルキーごとのノートリストを取得、存在しない場合は何もしない
-		var notesCh = mNotesChMap.get(ChannelDataKey.make(mChKey, channel, index));
+		var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel, index)));
 		if (notesCh == null) {
 			return;
 		}
 
 		// ノートリストから該当するノートを消去、ノートリストが0件ならリストごと消去する
 		BmsNote note = new BmsNote();
-		note.setChannel(channel);
-		note.setIndex(index);
-		note.setMeasure(mMeasure);
+		note.setChx(channel, index);
+		note.setMeasure(getMeasure());
 		note.setTick(tick);
 		notesCh.remove(note);
 		if (notesCh.size() == 0) {
-			mNotesChMap.remove(ChannelDataKey.make(mChKey, channel, index));
+			mNotesChMap.remove(mChKey.set(BmsChx.toInt(channel, index)));
 		}
 
 		// ノートリストマップが空になった場合はマップを解放する
@@ -202,7 +279,9 @@ abstract class MeasureData {
 		}
 
 		// マップに値を追加する
-		mValuesChMap.put(new MutableInt(ChannelDataKey.make(channel, index)), value);
+		mValuesChMap.put(
+				new MutableInt(BmsChx.toInt(channel, index)),
+				new ValueElement(getMeasure(), channel, index, value));
 
 		// 小節長を更新する
 		var lengthChannel = mSpec.getLengthChannel();
@@ -224,7 +303,7 @@ abstract class MeasureData {
 		}
 
 		// マップから値を削除、マップが空になったら解放する
-		mValuesChMap.remove(ChannelDataKey.make(mChKey, channel, index));
+		mValuesChMap.remove(mChKey.set(BmsChx.toInt(channel, index)));
 		if (mValuesChMap.size() == 0) {
 			mValuesChMap = null;
 		}
@@ -252,7 +331,7 @@ abstract class MeasureData {
 		}
 
 		// チャンネルキーごとのノートリストを取得、存在しない場合は何もしない
-		var notesCh = mNotesChMap.get(ChannelDataKey.make(mChKey, channel, index));
+		var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel, index)));
 		if (notesCh == null) {
 			return outList;
 		}
@@ -266,9 +345,9 @@ abstract class MeasureData {
 	 * この小節が持つ全ての小節データ取得
 	 * @return チャンネルキーごとの小節データマップ
 	 */
-	final Map<MutableInt, Object> mapValues() {
+	final Map<MutableInt, BmsElement> mapValues() {
 		// チャンネルキーごとの小節の値が存在しない場合は何もしない
-		var result = new TreeMap<MutableInt, Object>();
+		var result = new TreeMap<MutableInt, BmsElement>();
 		if (mValuesChMap == null) {
 			return result;
 		}
@@ -291,7 +370,7 @@ abstract class MeasureData {
 
 		// 全小節データのチャンネルを検査する
 		for (var key : mValuesChMap.keySet()) {
-			if (tester.testChannel(ChannelDataKey.getNumber(key.get()))) {
+			if (tester.testChannel(BmsChx.toChannel(key.get()))) {
 				return true;
 			}
 		}
@@ -306,8 +385,16 @@ abstract class MeasureData {
 	 * @param index チャンネルインデックス
 	 * @return 小節データ
 	 */
-	final Object getValue(int channel, int index) {
-		return (mValuesChMap == null) ? null : mValuesChMap.get(ChannelDataKey.make(mChKey, channel, index));
+	final BmsElement getValue(int channel, int index) {
+		return (mValuesChMap == null) ? null : mValuesChMap.get(mChKey.set(BmsChx.toInt(channel, index)));
+	}
+
+	/**
+	 * 小節データのイテレータ取得
+	 * @return 小節データのイテレータ
+	 */
+	final Iterator<? extends BmsElement> valueIterator() {
+		return (mValuesChMap == null) ? Collections.emptyIterator() : mValuesChMap.values().iterator();
 	}
 
 	/**
@@ -316,7 +403,7 @@ abstract class MeasureData {
 	 * @return 配列型チャンネルのデータ数
 	 */
 	final int getNoteChannelDataCount(int channel) {
-		var cdk = ChannelDataKey.make(mChKey, channel, BmsSpec.CHINDEX_MAX);
+		var cdk = mChKey.set(BmsChx.toInt(channel, BmsSpec.CHINDEX_MAX));
 		var key = (mNotesChMap == null) ? null : mNotesChMap.floorKey(cdk);
 		return getChannelDataCount(channel, key);
 	}
@@ -327,7 +414,7 @@ abstract class MeasureData {
 	 * @return 値型チャンネルのデータ数
 	 */
 	final int getValueChannelDataCount(int channel) {
-		var cdk = ChannelDataKey.make(mChKey, channel, BmsSpec.CHINDEX_MAX);
+		var cdk = mChKey.set(BmsChx.toInt(channel, BmsSpec.CHINDEX_MAX));
 		var key = (mValuesChMap == null) ? null : mValuesChMap.floorKey(cdk);
 		return getChannelDataCount(channel, key);
 	}
@@ -384,8 +471,8 @@ abstract class MeasureData {
 		if (channelDataKey == null) {
 			return 0;
 		} else {
-			var number = ChannelDataKey.getNumber(channelDataKey.get());
-			var index = ChannelDataKey.getIndex(channelDataKey.get());
+			var number = BmsChx.toChannel(channelDataKey.get());
+			var index = BmsChx.toIndex(channelDataKey.get());
 			return (number != channel) ? 0 : (index + 1);
 		}
 	}

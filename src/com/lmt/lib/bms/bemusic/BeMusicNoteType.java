@@ -87,6 +87,14 @@ public enum BeMusicNoteType {
 	}
 
 	/**
+	 * このノート種別が視覚効果を持つノートであるかどうかを判定します。
+	 * @return 視覚効果を持つノートである場合はtrue、そうでない場合はfalse
+	 */
+	public final boolean hasVisualEffect() {
+		return this != NONE;
+	}
+
+	/**
 	 * ノート種別のIDから列挙値を取得します。
 	 * @param id ノート種別のID
 	 * @return IDに該当するノート種別。IDに該当する列挙値が存在しない場合は{@link #NONE}

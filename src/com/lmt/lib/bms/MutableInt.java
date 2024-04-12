@@ -59,9 +59,11 @@ public final class MutableInt extends MutableNumber {
 	/**
 	 * 値設定
 	 * @param value 値
+	 * @return このオブジェクトのインスタンス
 	 */
-	public final void set(int value) {
+	public final MutableInt set(int value) {
 		mValue = value;
+		return this;
 	}
 
 	/** {@inheritDoc} */

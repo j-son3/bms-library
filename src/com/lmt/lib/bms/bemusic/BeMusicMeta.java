@@ -1,15 +1,11 @@
 package com.lmt.lib.bms.bemusic;
 
-import static com.lmt.lib.bms.bemusic.BeMusic.*;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.lmt.lib.bms.BmsContent;
 import com.lmt.lib.bms.BmsMeta;
-import com.lmt.lib.bms.BmsMetaKey;
 import com.lmt.lib.bms.BmsSpec;
 import com.lmt.lib.bms.BmsType;
 import com.lmt.lib.bms.BmsUnit;
@@ -1412,93 +1408,5 @@ public class BeMusicMeta {
 	 */
 	public static Map<Integer, String> getBmps(BmsContent content) {
 		return content.getIndexedMetas(BeMusicMeta.BMP.getName());
-	}
-
-	/** 各メタ情報のフラグ定義マップ */
-	private static final HashMap<BmsMetaKey, Integer> sFlagMap = new HashMap<>();
-
-	/** 静的処理 */
-	static {
-		sFlagMap.put(PLAYER, FLAG_NONE);
-		sFlagMap.put(GENRE, FLAG_NONE);
-		sFlagMap.put(TITLE, FLAG_NONE);
-		sFlagMap.put(SUBTITLE, FLAG_NONE);
-		sFlagMap.put(ARTIST, FLAG_NONE);
-		sFlagMap.put(SUBARTIST, FLAG_NONE);
-		sFlagMap.put(INITIAL_BPM, FLAG_NONE);
-		sFlagMap.put(BASEBPM, FLAG_MINOR);
-		sFlagMap.put(CDDA, FLAG_MINOR | FLAG_LEGACY);
-		sFlagMap.put(MIDIFILE, FLAG_LEGACY | FLAG_UNRECOMMEND);
-		sFlagMap.put(DIFFICULTY, FLAG_NONE);
-		sFlagMap.put(PLAYLEVEL, FLAG_NONE);
-		sFlagMap.put(RANK, FLAG_NONE);
-		sFlagMap.put(DEFEXRANK, FLAG_NONE);
-		sFlagMap.put(TOTAL, FLAG_NONE);
-		sFlagMap.put(VOLWAV, FLAG_LEGACY | FLAG_UNRECOMMEND);
-		sFlagMap.put(CHARFILE, FLAG_MINOR);
-		sFlagMap.put(COMMENT, FLAG_NONE);
-		sFlagMap.put(BANNER, FLAG_NONE);
-		sFlagMap.put(STAGEFILE, FLAG_NONE);
-		sFlagMap.put(BACKBMP, FLAG_NONE);
-		sFlagMap.put(POORBGA, FLAG_NONE);
-		sFlagMap.put(MOVIE, FLAG_MINOR | FLAG_LEGACY);
-		sFlagMap.put(VIDEOFILE, FLAG_LEGACY);
-		sFlagMap.put(VIDEOFPS, FLAG_LEGACY);
-		sFlagMap.put(VIDEOCOLORS, FLAG_LEGACY);
-		sFlagMap.put(VIDEODLY, FLAG_LEGACY);
-		sFlagMap.put(PATH_WAV, FLAG_UNRECOMMEND);
-		sFlagMap.put(MATERIALSWAV, FLAG_MINOR | FLAG_UNRECOMMEND);
-		sFlagMap.put(MATERIALSBMP, FLAG_MINOR | FLAG_UNRECOMMEND);
-		sFlagMap.put(DIVIDEPROP, FLAG_MINOR | FLAG_LEGACY | FLAG_UNRECOMMEND);
-		sFlagMap.put(CHARSET, FLAG_MINOR | FLAG_LEGACY | FLAG_UNRECOMMEND);
-		sFlagMap.put(OCT_FP, FLAG_MINOR | FLAG_LEGACY);
-		sFlagMap.put(LNTYPE, FLAG_LEGACY);
-		sFlagMap.put(LNOBJ, FLAG_NONE);
-		sFlagMap.put(MAKER, FLAG_UNRECOMMEND);
-		sFlagMap.put(URL, FLAG_NONE);
-		sFlagMap.put(EMAIL, FLAG_NONE);
-		sFlagMap.put(WAV, FLAG_NONE);
-		sFlagMap.put(EXWAV, FLAG_MINOR);
-		sFlagMap.put(WAVCMD, FLAG_MINOR);
-		sFlagMap.put(BMP, FLAG_NONE);
-		sFlagMap.put(EXBMP, FLAG_MINOR);
-		sFlagMap.put(BGA, FLAG_UNRECOMMEND);
-		sFlagMap.put(SWBGA, FLAG_MINOR | FLAG_UNRECOMMEND);
-		sFlagMap.put(ARGB, FLAG_MINOR);
-		sFlagMap.put(EXTCHR, FLAG_MINOR | FLAG_LEGACY | FLAG_UNRECOMMEND);
-		sFlagMap.put(BPM, FLAG_NONE);
-		sFlagMap.put(EXBPM, FLAG_LEGACY | FLAG_UNRECOMMEND);
-		sFlagMap.put(STOP, FLAG_NONE);
-		sFlagMap.put(STP, FLAG_MINOR | FLAG_LEGACY);
-		sFlagMap.put(EXRANK, FLAG_MINOR);
-		sFlagMap.put(OPTION, FLAG_MINOR);
-		sFlagMap.put(CHANGEOPTION, FLAG_MINOR);
-		sFlagMap.put(SEEK, FLAG_MINOR | FLAG_UNRECOMMEND);
-		sFlagMap.put(TEXT, FLAG_MINOR);
-		sFlagMap.put(SONG, FLAG_MINOR | FLAG_LEGACY | FLAG_UNRECOMMEND);
-		// TODO CONTROL FLOW対応を行う場合は有効化する
-//		sFlagMap.put(RANDOM, FLAG_LEGACY | FLAG_UNRECOMMEND);
-//		sFlagMap.put(IF, FLAG_LEGACY | FLAG_UNRECOMMEND);
-//		sFlagMap.put(ELSEIF, FLAG_LEGACY | FLAG_UNRECOMMEND);
-//		sFlagMap.put(ELSE, FLAG_LEGACY | FLAG_UNRECOMMEND);
-//		sFlagMap.put(ENDIF, FLAG_LEGACY | FLAG_UNRECOMMEND);
-//		sFlagMap.put(SETRANDOM, FLAG_LEGACY | FLAG_UNRECOMMEND);
-//		sFlagMap.put(ENDRANDOM, FLAG_LEGACY | FLAG_UNRECOMMEND);
-//		sFlagMap.put(SWITCH, FLAG_LEGACY | FLAG_UNRECOMMEND);
-//		sFlagMap.put(CASE, FLAG_LEGACY | FLAG_UNRECOMMEND);
-//		sFlagMap.put(SKIP, FLAG_LEGACY | FLAG_UNRECOMMEND);
-//		sFlagMap.put(DEF, FLAG_LEGACY | FLAG_UNRECOMMEND);
-//		sFlagMap.put(SETSWITCH, FLAG_LEGACY | FLAG_UNRECOMMEND);
-//		sFlagMap.put(ENDSW, FLAG_LEGACY | FLAG_UNRECOMMEND);
-	}
-
-	/**
-	 * メタ情報のフラグを取得する。
-	 * @param meta メタ情報
-	 * @return フラグ
-	 */
-	static final int getFlag(BmsMetaKey meta) {
-		var flag = sFlagMap.get(meta);
-		return (flag != null) ? flag : FLAG_NONE;
 	}
 }

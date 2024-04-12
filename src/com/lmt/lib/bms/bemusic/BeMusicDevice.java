@@ -1,16 +1,22 @@
 package com.lmt.lib.bms.bemusic;
 
+import java.util.List;
+
 import com.lmt.lib.bms.BmsChannel;
 
 /**
  * 入力デバイスを表します。
  *
- * <p>BeMusicでは、1つのレーンは最大で7個のON/OFFを表すスイッチと、1個の2方向に操作可能な機器で構成されます。
+ * <p>Be-Musicでは、1つのレーンは最大で7個のON/OFFを表すスイッチと、
+ * 1個の2方向に操作可能な機器(操作内容の特性上「スクラッチ」と呼称します)で構成されます。
  * そのようなレーンが最大で2つ存在し、プレースタイルによって1つのレーンのみ使用する場合と、2つのレーンを
- * 使用する場合に分かれます。</p>
+ * 使用する場合に分かれます。レーンについては{@link BeMusicLane}を参照してください。</p>
  *
  * <p>当列挙型は機器の最小単位である「入力デバイス」1個分を表し、必要な属性・情報を保有しています。
  * チャンネル、レーン、プログラム上のインデックス値を解決するために当列挙型を使用することとなります。</p>
+ *
+ * @see BeMusicLane
+ * @see BeMusicChannel
  */
 public enum BeMusicDevice {
 	/** スイッチ1-1 */
@@ -113,6 +119,21 @@ public enum BeMusicDevice {
 	/** Be Musicにおける入力デバイス数 */
 	public static final int COUNT = 16;
 
+	/** スクラッチがスイッチの左側にある場合のシングルプレー用入力デバイスリスト */
+	private static List<BeMusicDevice> DEVICES_SPLS = List.of(
+			BeMusicDevice.SCRATCH1, BeMusicDevice.SWITCH11, BeMusicDevice.SWITCH12, BeMusicDevice.SWITCH13,
+			BeMusicDevice.SWITCH14, BeMusicDevice.SWITCH15, BeMusicDevice.SWITCH16, BeMusicDevice.SWITCH17);
+	/** スクラッチがスイッチの右側にある場合のシングルプレー用入力デバイスリスト */
+	private static List<BeMusicDevice> DEVICES_SPRS = List.of(
+			BeMusicDevice.SWITCH11, BeMusicDevice.SWITCH12, BeMusicDevice.SWITCH13, BeMusicDevice.SWITCH14,
+			BeMusicDevice.SWITCH15, BeMusicDevice.SWITCH16, BeMusicDevice.SWITCH17, BeMusicDevice.SCRATCH1);
+	/** ダブルプレー用入力デバイスリスト */
+	private static List<BeMusicDevice> DEVICES_DP = List.of(
+			BeMusicDevice.SCRATCH1, BeMusicDevice.SWITCH11, BeMusicDevice.SWITCH12, BeMusicDevice.SWITCH13,
+			BeMusicDevice.SWITCH14, BeMusicDevice.SWITCH15, BeMusicDevice.SWITCH16, BeMusicDevice.SWITCH17,
+			BeMusicDevice.SWITCH21, BeMusicDevice.SWITCH22, BeMusicDevice.SWITCH23, BeMusicDevice.SWITCH24,
+			BeMusicDevice.SWITCH25, BeMusicDevice.SWITCH26, BeMusicDevice.SWITCH27, BeMusicDevice.SCRATCH2);
+
 	/** インデックスによる入力デバイスの解決用配列 */
 	private static final BeMusicDevice[] DEVICES = new BeMusicDevice[] {
 			SWITCH11, SWITCH12, SWITCH13, SWITCH14, SWITCH15, SWITCH16, SWITCH17, SCRATCH1,
@@ -196,5 +217,39 @@ public enum BeMusicDevice {
 	 */
 	public static BeMusicDevice fromIndex(int index) {
 		return DEVICES[index];
+	}
+
+	/**
+	 * スクラッチがスイッチの左側にある場合のシングルプレー用入力デバイスリストを取得します。
+	 * <p>返されるリストは先頭にスクラッチ、それに続いてスイッチが7個並んだ状態になっています。
+	 * これらの入力デバイスは全てプライマリレーン({@link BeMusicLane#PRIMARY})に配置されます。
+	 * 返されるリストは読み取り専用のため変更することはできません。</p>
+	 * @return 入力デバイスリスト
+	 */
+	public static List<BeMusicDevice> orderedBySpLeftScratchList() {
+		return DEVICES_SPLS;
+	}
+
+	/**
+	 * スクラッチがスイッチの右側にある場合のシングルプレー用入力デバイスリストを取得します。
+	 * <p>返されるリストはスイッチが7個、それに続いてスクラッチが配置された状態になっています。
+	 * これらの入力デバイスは全てプライマリレーン({@link BeMusicLane#PRIMARY})に配置されます。
+	 * 返されるリストは読み取り専用のため変更することはできません。</p>
+	 * @return 入力デバイスリスト
+	 */
+	public static List<BeMusicDevice> orderedBySpRightScratchList() {
+		return DEVICES_SPRS;
+	}
+
+	/**
+	 * ダブルプレー用入力デバイスリストを取得します。
+	 * <p>返されるリストは先頭にスクラッチ、次にスイッチが7個並んだ状態になっています。
+	 * それに続いてスイッチが7個、次にスクラッチが配置されています。
+	 * 最初の8個はプライマリレーン({@link BeMusicLane#PRIMARY})、残り8個がセカンダリレーン({@link BeMusicLane#SECONDARY})
+	 * の構成になっています。返されるリストは読み取り専用のため変更することはできません。</p>
+	 * @return 入力デバイスリスト
+	 */
+	public static List<BeMusicDevice> orderedByDpList() {
+		return DEVICES_DP;
 	}
 }

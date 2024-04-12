@@ -4,14 +4,18 @@ import java.util.Random;
 
 import com.lmt.lib.bms.BmsChannel;
 import com.lmt.lib.bms.BmsContent;
-import com.lmt.lib.bms.BmsLoadError;
 import com.lmt.lib.bms.BmsLoadHandler;
+import com.lmt.lib.bms.BmsLoaderSettings;
 import com.lmt.lib.bms.BmsMeta;
 import com.lmt.lib.bms.BmsMetaKey;
-import com.lmt.lib.bms.BmsSpec;
 
 /**
- * BMS読み込み時のハンドラ
+ * Be-Music用BMSコンテンツ読み込み時のハンドラです。
+ *
+ * <p>当ハンドラでは、Be-Music特有の仕様をBMSコンテンツのローダーに付与します。
+ * 具体的には「CONTROL FLOW機能」を提供します。これは「#RANDOM」による乱数の生成と「#IF」等によるコンテンツ読み込みの
+ * ランダム化を実現するものとなっており、CONTROL FLOWを記述したBe-Music用BMSコンテンツでは読み込み毎に異なるデータを
+ * 読み込むことが可能となるものです。</p>
  */
 public class BeMusicLoadHandler implements BmsLoadHandler {
 	/** CONTROL FLOWのコマンド */
@@ -118,13 +122,6 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 		FALSE;
 	}
 
-	/** 不明メタ情報を無視するかどうか */
-	private boolean mIsIgnoreUnknownMeta = true;
-	/** 不明チャンネルを無視するかどうか */
-	private boolean mIsIgnoreUnknownChannel = true;
-	/** 不正データを無視するかどうか */
-	private boolean mIsIgnoreWrongData = true;
-
 	/** CONTROL FLOW有効状態 */
 	private boolean mRandomEnable = false;
 	/** 乱数指定値 */
@@ -139,40 +136,6 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 	private Random mRandom = new Random();
 	/** 検査結果 */
 	private TestResult mCurrentTestResult = TestResult.OK;
-
-	/**
-	 * 不明なメタ情報を無視するかどうかを設定します。
-	 * <p>無視すると、BMS解析はエラーにならず不明メタ情報を読み飛ばして解析を続行するようになります。</p>
-	 * @param isIgnore 不明メタ情報を無視するかどうか
-	 * @return このオブジェクトのインスタンス
-	 */
-	public final BeMusicLoadHandler setIgnoreUnkonwnMeta(boolean isIgnore) {
-		mIsIgnoreUnknownMeta = isIgnore;
-		return this;
-	}
-
-	/**
-	 * 不明なチャンネルを無視するかどうかを設定します。
-	 * <p>無視すると、BMS解析はエラーにならず不明チャンネルを読み飛ばして解析を続行するようになります。</p>
-	 * @param isIgnore 不明チャンネルを無視するかどうか
-	 * @return このオブジェクトのインスタンス
-	 */
-	public final BeMusicLoadHandler setIgnoreUnknownChannel(boolean isIgnore) {
-		mIsIgnoreUnknownChannel = isIgnore;
-		return this;
-	}
-
-	/**
-	 * 不正なデータを無視するかどうかを設定します。
-	 * <p>無視すると、BMS解析はエラーにならず不正データ定義のあったメタ情報・チャンネルを読み飛ばして解析を
-	 * 続行するようになります。</p>
-	 * @param isIgnore 不正データを無視するかどうか
-	 * @return このオブジェクトのインスタンス
-	 */
-	public final BeMusicLoadHandler setIgnoreWrongData(boolean isIgnore) {
-		mIsIgnoreWrongData = isIgnore;
-		return this;
-	}
 
 	/**
 	 * CONTROL FLOWの有効状態を設定します。
@@ -204,61 +167,12 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 
 	/** {@inheritDoc} */
 	@Override
-	public BmsContent createContent(BmsSpec spec) {
-		return new BeMusicContent(spec);
-	}
-
-//	@Override
-//	public BmsNote createNote() {
-//		return new BmsNote();
-//	}
-
-	/** {@inheritDoc} */
-	@Override
-	public void startLoad(BmsSpec spec) {
+	public void startLoad(BmsLoaderSettings spec) {
 		initializeControlFlow(0L, new Random());
 		return;
 	}
 
-	/** {@inheritDoc} */
-	@Override
-	public boolean finishLoad(BmsContent content) {
-		// 読み込まれたコンテンツの受け入れ可否を決定する
-		// CONTROL FLOWの定義が不完全な場合にはコンテンツを破棄するように指示する
-		if (mRandomDefineStatus != RandomDefineStatus.NEUTRAL) {
-			return false;
-		}
-
-		// CONTROL FLOWのメタ情報はコンテンツから取り除く
-		content.beginEdit();
-		content.setSingleMeta(BeMusicMeta.RANDOM.getName(), null);
-		content.setSingleMeta(BeMusicMeta.IF.getName(), null);
-		content.setSingleMeta(BeMusicMeta.ELSEIF.getName(), null);
-		content.setSingleMeta(BeMusicMeta.ELSE.getName(), null);
-		content.setSingleMeta(BeMusicMeta.ENDIF.getName(), null);
-		content.endEdit();
-
-		// CONTROL FLOWで使用したデータを初期値に戻す
-		initializeControlFlow(mRandomValue, null);
-
-		return true;
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public boolean parseError(BmsLoadError error) {
-		switch (error.getKind()) {
-		case UNKNOWN_META:      // 不明メタ情報
-			return mIsIgnoreUnknownMeta;
-		case UNKNOWN_CHANNEL:  // 不明チャンネル
-			return mIsIgnoreUnknownChannel;
-		case WRONG_DATA:        // 不正データ
-			return mIsIgnoreWrongData;
-		default:                 // それ以外のエラーは解析エラーとする
-			return false;
-		}
-	}
-
+	// Be-MusicではBMS宣言をサポートしない
 //	@Override
 //	public TestResult testDeclaration(String key, String value) {
 //		return TestResult.OK;
@@ -275,6 +189,31 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 	@Override
 	public TestResult testChannel(BmsChannel channel, int index, int measure, Object value) {
 		return mCurrentTestResult;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public TestResult testContent(BmsContent content) {
+		// 読み込まれたコンテンツの受け入れ可否を決定する
+		// CONTROL FLOWの定義が不完全な場合にはコンテンツを破棄するように指示する
+		if ((mRandomDefineStatus != RandomDefineStatus.NEUTRAL) && (mRandomDefineStatus != RandomDefineStatus.RANDOM)) {
+			var msg = "#IF block is NOT finished";
+			return TestResult.fail(msg);
+		}
+
+		// CONTROL FLOWのメタ情報はコンテンツから取り除く
+		content.beginEdit();
+		content.setSingleMeta(BeMusicMeta.RANDOM.getName(), null);
+		content.setSingleMeta(BeMusicMeta.IF.getName(), null);
+		content.setSingleMeta(BeMusicMeta.ELSEIF.getName(), null);
+		content.setSingleMeta(BeMusicMeta.ELSE.getName(), null);
+		content.setSingleMeta(BeMusicMeta.ENDIF.getName(), null);
+		content.endEdit();
+
+		// CONTROL FLOWで使用したデータを初期値に戻す
+		initializeControlFlow(mRandomValue, null);
+
+		return TestResult.OK;
 	}
 
 	/**
@@ -308,7 +247,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 
 		// 現在の定義状態で定義可能なCONTROL FLOWかをチェックする
 		if (!mRandomDefineStatus.isEnableControlFlow(ctrlFlow)) {
-			mCurrentTestResult = TestResult.FAIL;
+			mCurrentTestResult = TestResult.fail("Wrong control flow");
 			return;
 		}
 

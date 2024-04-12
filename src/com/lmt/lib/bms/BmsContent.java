@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * 1個のBMSデータを表すBMSライブラリのメインオブジェクトです。
@@ -186,17 +187,14 @@ public class BmsContent {
 	}
 
 	/**
-	 * この小節データは、ノートが1件も存在しない小節に対して適用する。
-	 * <p>小節データが保有するのは1小節分に関する基本情報のみであり、ノートオブジェクトのリストはデータとして
-	 * 持っていない。これは、ノートが存在しない小節においてメモリを節約するための配慮である。
-	 * データを持つ小節のデータ構造については{@link ScoredMeasureData}を参照のこと。</p>
+	 * 小節全体データの実装
 	 */
-	private static class BmsMeasureData extends MeasureData {
+	private static class BmsMeasureElement extends MeasureElement {
 		/**
-		 * BasicMeasureDataオブジェクトを構築する。
+		 * コンストラクタ
 		 * @param measure 小節番号
 		 */
-		BmsMeasureData(int measure) {
+		BmsMeasureElement(int measure) {
 			super(measure);
 		}
 
@@ -205,20 +203,20 @@ public class BmsContent {
 		protected void recalculateTimeInfo(Object userParam,
 				MutableDouble outBaseTime, MutableDouble outLengthSec, MutableDouble outBeginBpm, MutableDouble outEndBpm) {
 			// 小節に対して時間・BPMの情報を反映する
-			var chs = (ChannelAccessor)userParam;
-			chs.calculateMeasureTimeInfo(getMeasure(), getTickCount(), outBaseTime, outLengthSec, outBeginBpm, outEndBpm);
+			var tla = (TimelineAccessor)userParam;
+			tla.calculateMeasureTimeInfo(getMeasure(), getTickCount(), outBaseTime, outLengthSec, outBeginBpm, outEndBpm);
 		}
 	}
 
 	/**
-	 * BMSコンテンツの楽曲情報本体を示す小節データのリスト
-	 * <p>小節データの実態は配列であるが、外部に公開するAPIのメソッドから直接アクセスするのではなく、
-	 * このクラスを介して楽曲情報にアクセスするように設計されている。</p>
+	 * BMSコンテンツを構成するタイムラインのアクセッサ。
+	 * <p>外部に公開するAPIのメソッドから直接アクセスするのではなく、
+	 * このクラスを介してタイムラインにアクセスするように設計されている。</p>
 	 * <p>上記の事情により、このクラスではメソッド単位で引数やデータ整合性のアサーションを行っている。
-	 * このクラスよりも下層のメソッドには原則としてアサーションが存在しない。全ての楽曲情報の操作は
+	 * このクラスよりも下層のメソッドには原則としてアサーションが存在しない。全てのタイムラインの操作は
 	 * このクラスを介して行うこと。</p>
 	 */
-	private class ChannelAccessor {
+	private class TimelineAccessor {
 		/** calculateMeasureTimeInfo()用：小節の基準時間(sec) */
 		MutableDouble mTempBaseTime = new MutableDouble();
 		/** calculateMeasureTimeInfo()用：小節の先頭からtickCalcToまでの時間(sec) */
@@ -243,15 +241,15 @@ public class BmsContent {
 
 			// チャンネルに登録されているデータの件数を返す
 			var channelSpec = mSpec.getChannel(channel);
-			if (measure >= mChs.getMeasureCount()) {
+			if (measure >= mTl.getMeasureCount()) {
 				// データのない小節アクセス時は0とする
 				return 0;
 			} else if (channelSpec.isArrayType()) {
 				// ノートの件数を返す
-				return mChs.getNoteChannelDataCount(channel, measure);
+				return mTl.getNoteChannelDataCount(channel, measure);
 			} else if (channelSpec.isValueType()) {
 				// 小節データの件数を返す
-				return mChs.getValueChannelDataCount(channel, measure);
+				return mTl.getValueChannelDataCount(channel, measure);
 			} else {
 				// Don't care
 				return 0;
@@ -272,9 +270,9 @@ public class BmsContent {
 		final void insert(int measureWhere, int count) {
 			// アサーション
 			assertIsEditMode();
-			assertArgMeasureWithinRange(measureWhere, mChs.getMeasureCount());
+			assertArgMeasureWithinRange(measureWhere, mTl.getMeasureCount());
 			assertArg(count >= 0, "Argument 'count' is minus value. count=%d", count);
-			var beforeMeasureCount = mChs.getMeasureCount();
+			var beforeMeasureCount = mTl.getMeasureCount();
 			assertArgRange(beforeMeasureCount + count, 0, BmsSpec.MEASURE_MAX_COUNT, "beforeMeasureCount + count");
 
 			// 挿入件数が0の場合は何もしない(ていうか呼ぶなや)
@@ -288,7 +286,7 @@ public class BmsContent {
 			}
 
 			// 小節を挿入する
-			mChs.insertMeasure(measureWhere, count);
+			mTl.insertMeasure(measureWhere, count);
 		}
 
 		/**
@@ -303,9 +301,9 @@ public class BmsContent {
 		final void remove(int measureWhere, int count) {
 			// アサーション
 			assertIsEditMode();
-			assertArgMeasureWithinRange(measureWhere, mChs.getMeasureCount() - 1);
+			assertArgMeasureWithinRange(measureWhere, mTl.getMeasureCount() - 1);
 			assertArg(count >= 0, "Argument 'count' is minus value. count=%d", count);
-			assertArgRange(measureWhere + count, 0, mChs.getMeasureCount() - 1, "measureWhere + count");
+			assertArgRange(measureWhere + count, 0, mTl.getMeasureCount() - 1, "measureWhere + count");
 
 			// 削除件数が0の場合は何もしない(ていうか呼ぶなや)
 			if (count == 0) {
@@ -313,7 +311,7 @@ public class BmsContent {
 			}
 
 			// 小節を消去する
-			mChs.removeMeasure(measureWhere, count);
+			mTl.removeMeasure(measureWhere, count);
 		}
 
 		/**
@@ -356,7 +354,7 @@ public class BmsContent {
 
 			// ノートを追加する
 			note.setup(channel, index, measure, tick, value);
-			mChs.putNote(note);
+			mTl.putNote(note);
 
 			return (T)note;
 		}
@@ -383,7 +381,7 @@ public class BmsContent {
 			assertPointAllowOverMeasureCount(measure, tick);
 			assertChannelArrayType(channel);
 
-			return mChs.removeNote(channel, index, measure, tick);
+			return mTl.removeNote(channel, index, measure, tick);
 		}
 
 		/**
@@ -395,7 +393,7 @@ public class BmsContent {
 		 * @param isRemoveTarget ノート消去の是非を判定する述語
 		 * @return 消去されたノートの個数
 		 * @exception IllegalStateException 動作モードが編集モードではない
-		 * @exception IllegalArgumentException {@link ChannelAccessor#enumNotes}
+		 * @exception IllegalArgumentException {@link TimelineAccessor#enumNotes}
 		 * @exception NullPointerException isRemoveTargetがnull
 		 */
 		final int removeNote(int channelBegin, int channelEnd, int measureBegin, int measureEnd,
@@ -445,7 +443,7 @@ public class BmsContent {
 			// 値の設定か破棄かで処理を分岐
 			if (value == null) {
 				// 破棄の場合
-				mChs.removeMeasureValue(channel, index, measure);
+				mTl.removeMeasureValue(channel, index, measure);
 			} else {
 				// 設定の場合
 				var ch = mSpec.getChannel(channel);
@@ -460,7 +458,7 @@ public class BmsContent {
 						throw new IllegalArgumentException(msg);
 					}
 				}
-				mChs.putMeasureValue(channel, index, measure, convertedValue);
+				mTl.putMeasureValue(channel, index, measure, convertedValue);
 			}
 		}
 
@@ -486,16 +484,16 @@ public class BmsContent {
 			assertArgMeasureWithinRange(measure);
 
 			// 取得元のチャンネルデータを参照する
-			var value = (measure >= mChs.getMeasureCount()) ? null : mChs.getMeasureValue(channel, index, measure);
-			if (value == null) {
+			var elem = (measure >= mTl.getMeasureCount()) ? null : mTl.getMeasureValue(channel, index, measure);
+			if (elem == null) {
 				// チャンネルデータ無しまたは値未設定の場合は当該チャンネルの初期値を返す
 				return nullIfNotExist ? null : mSpec.getChannel(channel).getDefaultValue();
 			} else if (requiredType == null) {
 				// チャンネルデータ有りで型変換無し
-				return value;
+				return elem.getValueAsObject();
 			} else {
 				// チャンネルデータ有りで型変換有りの場合は要求型への変換を行い返す
-				return requiredType.cast(value);
+				return requiredType.cast(elem.getValueAsObject());
 			}
 		}
 
@@ -505,7 +503,7 @@ public class BmsContent {
 		 * @param last 対象の最大小節番号
 		 */
 		final void updateRecalcRange(int first, int last) {
-			mChs.updateRecalcRange(first, last);
+			mTl.updateRecalcRange(first, last);
 		}
 
 		/**
@@ -513,7 +511,7 @@ public class BmsContent {
 		 * @return 小節データの再計算を行った場合true
 		 */
 		final boolean recalculateTime() {
-			return mChs.recalculateTime(this);
+			return mTl.recalculateTime(this);
 		}
 
 		/**
@@ -548,10 +546,10 @@ public class BmsContent {
 			// 全小節のチャンネルを入れ替える
 			if (ch1.isArrayType()) {
 				// 配列型チャンネル同士の入れ替え
-				mChs.swapNoteChannel(channel1, index1, channel2, index2);
+				mTl.swapNoteChannel(channel1, index1, channel2, index2);
 			} else if (ch2.isValueType()) {
 				// 値型チャンネル同士の入れ替え
-				mChs.swapValueChannel(channel1, index1, channel2, index2);
+				mTl.swapValueChannel(channel1, index1, channel2, index2);
 			} else {
 				// Don't care
 			}
@@ -578,7 +576,7 @@ public class BmsContent {
 			assertChannelArrayType(channel);
 
 			// ノートを取得する
-			return mChs.getNote(channel, index, measure, tick);
+			return mTl.getNote(channel, index, measure, tick);
 		}
 
 		/**
@@ -591,7 +589,7 @@ public class BmsContent {
 		 * @param tickEnd 取得終了刻み位置(この位置を含まない)
 		 * @param isCollect 当該ノートの取得是非を判定する述語
 		 * @return 取得したノートオブジェクトのリスト。取得結果が0件でもnullにはならない。
-		 * @exception IllegalArgumentException {@link ChannelAccessor#enumNotes}
+		 * @exception IllegalArgumentException {@link TimelineAccessor#enumNotes}
 		 * @exception NullPointerException isCollectがnull
 		 */
 		final List<BmsNote> listNotes(int channelBegin, int channelEnd,
@@ -604,7 +602,7 @@ public class BmsContent {
 			assertArgNotNull(isCollect, "isCollect");
 
 			// 指定範囲のノートリストを取得する
-			return mChs.listNotes(channelBegin, channelEnd, measureBegin, tickBegin, measureEnd, tickEnd, isCollect);
+			return mTl.listNotes(channelBegin, channelEnd, measureBegin, tickBegin, measureEnd, tickEnd, isCollect);
 		}
 
 		/**
@@ -626,7 +624,7 @@ public class BmsContent {
 			var tEnd = point.getTick();
 
 			// 指定位置のノートリストを取得する
-			return mChs.listNotes(BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX + 1, measure, tick, mEnd, tEnd, isCollect);
+			return mTl.listNotes(BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX + 1, measure, tick, mEnd, tEnd, isCollect);
 		}
 
 		/**
@@ -653,9 +651,9 @@ public class BmsContent {
 
 			// 近隣を検索する処理
 			if (direction > 0) {
-				return mChs.getNextNote(channel, index, measure, tick, inclusive);
+				return mTl.getNextNote(channel, index, measure, tick, inclusive);
 			} else {
-				return mChs.getPreviousNote(channel, index, measure, tick, inclusive);
+				return mTl.getPreviousNote(channel, index, measure, tick, inclusive);
 			}
 		}
 
@@ -669,7 +667,7 @@ public class BmsContent {
 		 * @param tickEnd カウント対象の終了刻み位置(この位置を含まない)
 		 * @param isCounting ノートをテストする述語
 		 * @return テストを通過したノートの数
-		 * @exception IllegalArgumentException {@link ChannelAccessor#enumNotes}
+		 * @exception IllegalArgumentException {@link TimelineAccessor#enumNotes}
 		 */
 		final int countNotes(int channelBegin, int channelEnd, int measureBegin,
 				double tickBegin, int measureEnd, double tickEnd, BmsNote.Tester isCounting) {
@@ -680,7 +678,7 @@ public class BmsContent {
 			assertPointAllowTerm(measureEnd, tickEnd);
 			assertArgNotNull(isCounting, "isCounting");
 
-			return mChs.countNotes(channelBegin, channelEnd, measureBegin, tickBegin, measureEnd, tickEnd, isCounting);
+			return mTl.countNotes(channelBegin, channelEnd, measureBegin, tickBegin, measureEnd, tickEnd, isCounting);
 		}
 
 		/**
@@ -702,7 +700,7 @@ public class BmsContent {
 			var tEnd = point.getTick();
 
 			// ノートの数を取得する
-			return mChs.countNotes(BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX + 1, measure, tick, mEnd, tEnd, isCounting);
+			return mTl.countNotes(BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX + 1, measure, tick, mEnd, tEnd, isCounting);
 		}
 
 		/**
@@ -727,14 +725,14 @@ public class BmsContent {
 			// アサーション
 			assertChannelRange(channelBegin);
 			assertEndChannelRange(channelEnd);
-			if (mChs.getMeasureCount() > 0) {
+			if (mTl.getMeasureCount() > 0) {
 				assertPoint(measureBegin, tickBegin);
 				assertPointAllowTerm(measureEnd, tickEnd);
 			}
 			assertArgNotNull(enumNote, "enumNote");
 
 			// 列挙範囲を決定する
-			mChs.enumNotes(channelBegin, channelEnd, measureBegin, tickBegin, measureEnd, tickEnd, enumNote);
+			mTl.enumNotes(channelBegin, channelEnd, measureBegin, tickBegin, measureEnd, tickEnd, enumNote);
 		}
 
 		/**
@@ -801,7 +799,7 @@ public class BmsContent {
 				BmsPoint outPoint) {
 			assertArgNotNull(chTester, "chTester");
 			assertArgNotNull(outPoint, "outPoint");
-			if (mChs.getMeasureCount() > 0) {
+			if (mTl.getMeasureCount() > 0) {
 				assertPoint(measure, tick);
 			} else {
 				outPoint.setMeasure(0);
@@ -810,7 +808,63 @@ public class BmsContent {
 			}
 
 			// 指定小節から進行方向へ全ての小節を走査する
-			return mChs.seekNextPoint(measure, tick, inclusiveFrom, chTester, outPoint);
+			return mTl.seekNextPoint(measure, tick, inclusiveFrom, chTester, outPoint);
+		}
+
+		/**
+		 * タイムラインの指定楽曲位置を走査するストリームを返す
+		 * @param measure 走査楽曲位置の小節番号
+		 * @param tick 走査楽曲位置の小節の刻み位置
+		 * @return タイムラインの指定楽曲位置を走査するストリーム
+		 * @exception IllegalArgumentException 楽曲位置の小節番号がマイナス値
+		 * @exception IllegalArgumentException 楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
+		 * @exception IllegalArgumentException 楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+		 */
+		final Stream<BmsElement> timeline(int measure, double tick) {
+			if ((mTl.getMeasureCount() == 0) && (measure == BmsSpec.MEASURE_MIN) && (tick == BmsSpec.TICK_MIN)) {
+				// 空タイムラインでタイムライン先頭指定時は空ストリームを返す
+				return Stream.empty();
+			} else {
+				// 楽曲位置のピンポイント指定でストリームを返す
+				assertPoint(measure, tick);
+				return mTl.timeline(measure, tick, measure, Math.nextUp(tick));
+			}
+		}
+
+		/**
+		 * タイムラインの指定楽曲位置の範囲を走査するストリームを返す
+		 * @param measureBegin 走査開始楽曲位置の小節番号
+		 * @param tickBegin 走査開始楽曲位置の小節の刻み位置
+		 * @param measureEnd 走査終了楽曲位置の小節番号
+		 * @param tickEnd 走査終了楽曲位置の小節の刻み位置(この位置を含まない)
+		 * @return タイムラインの指定楽曲位置の範囲を走査するストリーム
+		 * @exception IllegalArgumentException 走査開始/終了楽曲位置の小節番号がマイナス値
+		 * @exception IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
+		 * @exception IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
+		 * @exception IllegalArgumentException 走査開始/終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+		 * @exception IllegalArgumentException 走査終了楽曲位置が走査開始楽曲位置と同じまたは手前の楽曲位置を示している
+		 */
+		final Stream<BmsElement> timeline(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
+			// 空タイムラインで走査開始/終了楽曲位置がタイムライン先頭を指している場合は空ストリームを返す
+			if (mTl.getMeasureCount() == 0) {
+				if ((measureBegin == BmsSpec.MEASURE_MIN) && (tickBegin == BmsSpec.TICK_MIN) &&
+						(measureEnd == BmsSpec.MEASURE_MIN) && (tickEnd == BmsSpec.TICK_MIN)) {
+					return Stream.empty();
+				}
+			}
+
+			// アサーション
+			assertPoint(measureBegin, tickBegin);
+			assertPointAllowTerm(measureEnd, tickEnd);
+			if (BmsAt.compare2(measureBegin, tickBegin, measureEnd, tickEnd) >= 0) {
+				var msg = String.format(
+						"Wrong point range. beginAt=%s, endAt=%s",
+						BmsPoint.of(measureBegin, tickBegin), BmsPoint.of(measureEnd, tickEnd));
+				throw new IllegalArgumentException(msg);
+			}
+
+			// タイムライン走査ストリームを返す
+			return mTl.timeline(measureBegin, tickBegin, measureEnd, tickEnd);
 		}
 
 		/**
@@ -825,9 +879,9 @@ public class BmsContent {
 			var curMeasure = measure;
 			var curTick = tick;
 			var remain = offset;
-			while ((remain > 0) && (curMeasure < mChs.getMeasureCount())) {
+			while ((remain > 0) && (curMeasure < mTl.getMeasureCount())) {
 				// 刻み位置の前進処理
-				var measureData = mChs.getMeasureData(curMeasure);
+				var measureData = mTl.getMeasureData(curMeasure);
 				var tickCount = measureData.getTickCount();
 				var forward = Math.min(tickCount - curTick, remain);
 				remain -= forward;
@@ -840,7 +894,8 @@ public class BmsContent {
 				}
 			}
 
-			return outPoint.assignFrom(curMeasure, curTick);
+			outPoint.set(curMeasure, curTick);
+			return outPoint;
 		}
 
 		/**
@@ -864,7 +919,7 @@ public class BmsContent {
 					} else {
 						// 前の小節へ移動する
 						curMeasure--;
-						curTick = mChs.getMeasureTickCount(curMeasure);
+						curTick = mTl.getMeasureTickCount(curMeasure);
 					}
 				}
 
@@ -874,7 +929,8 @@ public class BmsContent {
 				curTick -= backward;
 			}
 
-			return outPoint.assignFrom(curMeasure, curTick);
+			outPoint.set(curMeasure, curTick);
+			return outPoint;
 		}
 
 		/**
@@ -892,7 +948,7 @@ public class BmsContent {
 			assertArgNotNull(judge, "judge");
 
 			// 判定処理がOKを返すNoteを探す処理
-			return mChs.pointOf(measureFrom, tickFrom, judge);
+			return mTl.pointOf(measureFrom, tickFrom, judge);
 		}
 
 		/**
@@ -900,7 +956,7 @@ public class BmsContent {
 		 * @return 小節データ数
 		 */
 		final int getCount() {
-			return mChs.getMeasureCount();
+			return mTl.getMeasureCount();
 		}
 
 		/**
@@ -911,7 +967,7 @@ public class BmsContent {
 		 */
 		final int getTickCount(int measure) {
 			assertArgMeasureWithinRange(measure);
-			return mChs.getMeasureTickCount(measure);
+			return mTl.getMeasureTickCount(measure);
 		}
 
 		/**
@@ -929,24 +985,25 @@ public class BmsContent {
 			assertArg(timeSec >= 0.0, "Argument 'timeSec' is minus value. actual=%f", timeSec);
 
 			// 当該時間が何小節目の範囲にあるかを検出する
-			var measureCount = mChs.getMeasureCount();
-			MeasureData measureData = null;
+			var measureCount = mTl.getMeasureCount();
+			MeasureElement measureElem = null;
 			for (int i = 0; i < measureCount; i++) {
-				var m = mChs.getMeasureData(i);
+				var m = mTl.getMeasureData(i);
 				var baseTime = m.getBaseTime();
 				if ((timeSec >= baseTime) && (timeSec < (baseTime + m.getLength()))) {
 					// 当該時間の収まる小節を発見した
-					measureData = m;
+					measureElem = m;
 					break;
 				}
 			}
-			if (measureData == null) {
+			if (measureElem == null) {
 				// 範囲外の時間を入力した場合は最終小節+1, tikc=0の位置を返す
-				return outPoint.assignFrom(measureCount, 0);
+				outPoint.set(measureCount, 0);
+				return outPoint;
 			}
 
 			// 小節長の倍率を計算する
-			var measure = measureData.getMeasure();
+			var measure = measureElem.getMeasure();
 			var lengthRatio = 1.0;
 			var lengthChannel = mSpec.getLengthChannel();
 			if (lengthChannel != null) {
@@ -954,18 +1011,20 @@ public class BmsContent {
 			}
 
 			// データ無し小節の場合の処理
-			var tickCount = (double)measureData.getTickCount();
+			var tickCount = (double)measureElem.getTickCount();
 			var actualTickCount = BmsSpec.computeTickCount(lengthRatio, false);
-			var pointTime = timeSec - measureData.getBaseTime();
-			if (mChs.isMeasureEmptyNotes(measure)) {
+			var pointTime = timeSec - measureElem.getBaseTime();
+			if (mTl.isMeasureEmptyNotes(measure)) {
 				if (actualTickCount >= 1.0) {
 					// 通常の長さの小節の場合
-					var tick = calculateTick(pointTime, measureData.getBeginBpm());
-					return outPoint.assignFrom(measure, tick);
+					var tick = calculateTick(pointTime, measureElem.getBeginBpm());
+					outPoint.set(measure, tick);
+					return outPoint;
 				} else {
 					// 計算上の刻み数が1を下回る極小小節の場合
-					var tick = pointTime / measureData.getLength();
-					return outPoint.assignFrom(measure, tick);
+					var tick = pointTime / measureElem.getLength();
+					outPoint.set(measure, tick);
+					return outPoint;
 				}
 			}
 
@@ -973,7 +1032,7 @@ public class BmsContent {
 			var tickFindStart = 0.0;
 			var currentTick = 0.0;
 			var tickCur2Pt = 0.0;
-			var currentBpm = measureData.getBeginBpm();
+			var currentBpm = measureElem.getBeginBpm();
 			var currentTime = 0.0;
 			var areaTime = 0.0;
 
@@ -1049,7 +1108,7 @@ public class BmsContent {
 							tickCur2Pt = calculateTick(pointTime - currentTime, currentBpm);
 						} else {
 							// 計算上の刻み数が1を下回る極小小節の場合
-							tickCur2Pt = pointTime / measureData.getLength();
+							tickCur2Pt = pointTime / measureElem.getLength();
 						}
 						break;
 					} else {
@@ -1064,7 +1123,8 @@ public class BmsContent {
 				tickFindStart = Math.nextUp(currentTick);
 			}
 
-			return outPoint.assignFrom(measure, (double)currentTick + tickCur2Pt);
+			outPoint.set(measure, (double)currentTick + tickCur2Pt);
+			return outPoint;
 		}
 
 		/**
@@ -1083,14 +1143,14 @@ public class BmsContent {
 			assertPointAllowTerm(point.getMeasure(), point.getTick());
 
 			// 小節の末端の場合は総時間を返す
-			var measureCount = mChs.getMeasureCount();
+			var measureCount = mTl.getMeasureCount();
 			if (point.getMeasure() == measureCount) {
 				if (measureCount == 0) {
 					// データ無し
 					return 0.0;
 				} else {
 					// 最終小節の開始時間＋長さを返す
-					var lastMeasure = mChs.getMeasureData(measureCount - 1);
+					var lastMeasure = mTl.getMeasureData(measureCount - 1);
 					return lastMeasure.getBaseTime() + lastMeasure.getLength();
 				}
 			}
@@ -1153,7 +1213,7 @@ public class BmsContent {
 			// 指定小節における基準時間、初期BPMを決定する
 			var baseTimeSec = 0.0;
 			var currentBpm = 0.0;
-			var prevMeasureData = (measure == 0) ? null : mChs.getMeasureData(measure - 1);
+			var prevMeasureData = (measure == 0) ? null : mTl.getMeasureData(measure - 1);
 			if (prevMeasureData == null) {
 				// 先頭小節の場合
 				baseTimeSec = 0.0;
@@ -1174,7 +1234,7 @@ public class BmsContent {
 			// データの無い小節では単純に小節の長さと小節開始時のBPMから時間を算出する
 			var tickCount = BmsSpec.computeTickCount(lengthRatio, true);
 			var actualTickCount = BmsSpec.computeTickCount(lengthRatio, false);
-			if (mChs.isMeasureEmptyNotes(measure)) {
+			if (mTl.isMeasureEmptyNotes(measure)) {
 				outBaseTime.set(baseTimeSec);
 				outLengthSec.set(calculateTime(Math.min(tickCalcTo, actualTickCount), currentBpm));
 				outBeginBpm.set(currentBpm);
@@ -1287,7 +1347,7 @@ public class BmsContent {
 			var channelCount = mSpec.getBpmChannelCount();
 			for (var i = 0; i < channelCount; i++) {
 				var bpmChannel = mSpec.getBpmChannel(i, true);
-				var nextNote = mChs.getNextNote(bpmChannel.getNumber(), 0, measure, tickFrom, true);
+				var nextNote = mTl.getNextNote(bpmChannel.getNumber(), 0, measure, tickFrom, true);
 				if ((nextNote != null) && (nextNote.getMeasure() == measure)) {
 					// 同一小節内のBPM変更ノートを発見した
 					if (bpmNote == null) {
@@ -1315,7 +1375,7 @@ public class BmsContent {
 			var channelCount = mSpec.getStopChannelCount();
 			for (var i = 0; i < channelCount; i++) {
 				var stopChannel = mSpec.getStopChannel(i, true);
-				var nextNote = mChs.getNextNote(stopChannel.getNumber(), 0, measure, tickFrom, true);
+				var nextNote = mTl.getNextNote(stopChannel.getNumber(), 0, measure, tickFrom, true);
 				if ((nextNote != null) && (nextNote.getMeasure() == measure)) {
 					// 同一小節内の譜面停止ノートを発見した
 					if (stopNote == null) {
@@ -1411,8 +1471,8 @@ public class BmsContent {
 		 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
 		 */
 		private void assertPoint(int measure, double tick) {
-			assertArgMeasureWithinRange(measure, mChs.getMeasureCount() - 1, tick);
-			assertArgTickWithinRange(tick, mChs.getMeasureTickMax(measure), measure);
+			assertArgMeasureWithinRange(measure, mTl.getMeasureCount() - 1, tick);
+			assertArgTickWithinRange(tick, mTl.getMeasureTickMax(measure), measure);
 		}
 
 		/**
@@ -1425,9 +1485,9 @@ public class BmsContent {
 		 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
 		 */
 		private void assertPointAllowTerm(int measure, double tick) {
-			var measureMax = mChs.getMeasureCount();
+			var measureMax = mTl.getMeasureCount();
 			assertArgMeasureWithinRange(measure, measureMax, tick);
-			var tickMax = (measure == measureMax) ? BmsSpec.TICK_MIN : mChs.getMeasureTickMax(measure);
+			var tickMax = (measure == measureMax) ? BmsSpec.TICK_MIN : mTl.getMeasureTickMax(measure);
 			assertArgTickWithinRange(tick, tickMax, measure);
 		}
 
@@ -1440,7 +1500,7 @@ public class BmsContent {
 		 */
 		private void assertPointAllowOverMeasureCount(int measure, double tick) {
 			assertArgMeasureWithinRange(measure, BmsSpec.MEASURE_MAX, tick);
-			assertArgTickWithinRange(tick, mChs.getMeasureTickMax(measure), measure);
+			assertArgTickWithinRange(tick, mTl.getMeasureTickMax(measure), measure);
 		}
 	}
 
@@ -1551,7 +1611,7 @@ public class BmsContent {
 
 			// 初期BPMを更新した場合は譜面全体を時間再計算対象とする
 			if (meta.isInitialBpm()) {
-				mChAccessor.updateRecalcRange(0, BmsSpec.MEASURE_MAX);
+				mTlAccessor.updateRecalcRange(0, BmsSpec.MEASURE_MAX);
 			}
 		}
 
@@ -1633,7 +1693,7 @@ public class BmsContent {
 			// BPMまたはSTOPのデータ更新を行った場合は譜面全体を時間再計算対象とする
 			if (meta.isReferenceBpm() || meta.isReferenceStop()) {
 				// BPM変更または譜面停止のデータ更新を行ったので譜面全体を時間再計算対象とする
-				mChAccessor.updateRecalcRange(0, BmsSpec.MEASURE_MAX);
+				mTlAccessor.updateRecalcRange(0, BmsSpec.MEASURE_MAX);
 			}
 		}
 
@@ -2180,17 +2240,15 @@ public class BmsContent {
 	/** このBMSコンテンツで扱うBMS仕様 */
 	private BmsSpec mSpec;
 	/** BMS宣言一覧 */
-	//private TreeMap<String, String> mBmsDecls = new TreeMap<>();
 	private ArrayList<String> mBmsDeclKeys = new ArrayList<>();
 	private ArrayList<String> mBmsDeclValues = new ArrayList<>();
 
 	/** メタ情報コンテナ */
 	private MetaContainer mMetas = new MetaContainer();
-	/** チャンネルデータコレクション */
-	private ChannelDataCollection<MeasureData> mChs = null;
-
-	/** 小節データ配列 */
-	private ChannelAccessor mChAccessor = new ChannelAccessor();
+	/** タイムライン */
+	private Timeline<MeasureElement> mTl = null;
+	/** タイムラインアクセッサ */
+	private TimelineAccessor mTlAccessor = new TimelineAccessor();
 
 	/** 現在のモードが編集モードかどうか */
 	private boolean mIsEditMode = false;
@@ -2217,7 +2275,7 @@ public class BmsContent {
 	public BmsContent(BmsSpec spec) {
 		assertArgNotNull(spec, "spec");
 		mSpec = spec;
-		mChs = new ChannelDataCollection<>(spec, m -> new BmsMeasureData(m));
+		mTl = new Timeline<>(spec, m -> new BmsMeasureElement(m));
 		mMetas.setup();
 
 		// BPM変更と譜面停止の統計情報を収集する
@@ -2929,7 +2987,7 @@ public class BmsContent {
 
 		// 時間とBPMに関する情報の再計算を行い、参照モードへ遷移する
 		assertIsEditMode();
-		var recalculate = mChAccessor.recalculateTime();
+		var recalculate = mTlAccessor.recalculateTime();
 		mIsEditMode = false;
 
 		// 編集終了を通知する
@@ -2995,7 +3053,7 @@ public class BmsContent {
 	 */
 	@SuppressWarnings("unchecked")
 	public final <T> T getMeasureValue(int channel, int measure) {
-		return (T)mChAccessor.getValue(channel, 0, measure, null, false);
+		return (T)mTlAccessor.getValue(channel, 0, measure, null, false);
 	}
 
 	/**
@@ -3017,7 +3075,7 @@ public class BmsContent {
 	 */
 	@SuppressWarnings("unchecked")
 	public final <T> T getMeasureValue(int channel, int index, int measure) {
-		return (T)mChAccessor.getValue(channel, index, measure, null, false);
+		return (T)mTlAccessor.getValue(channel, index, measure, null, false);
 	}
 
 	/**
@@ -3029,7 +3087,7 @@ public class BmsContent {
 	 * @param value 設定値
 	 */
 	public final void setMeasureValue(int channel, int measure, Object value) {
-		mChAccessor.setValue(channel, 0, measure, value);
+		mTlAccessor.setValue(channel, 0, measure, value);
 	}
 
 	/**
@@ -3055,7 +3113,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 小節長に{@link BmsSpec#LENGTH_MIN}未満または{@link BmsSpec#LENGTH_MAX}超過の値を設定しようとした
 	 */
 	public final void setMeasureValue(int channel, int index, int measure, Object value) {
-		mChAccessor.setValue(channel, index, measure, value);
+		mTlAccessor.setValue(channel, index, measure, value);
 	}
 
 	/**
@@ -3067,7 +3125,7 @@ public class BmsContent {
 	 * @return 指定小節に小節データが存在する場合true
 	 */
 	public final boolean containsMeasureValue(int channel, int measure) {
-		return mChAccessor.getValue(channel, 0, measure, null, true) != null;
+		return mTlAccessor.getValue(channel, 0, measure, null, true) != null;
 	}
 
 	/**
@@ -3084,7 +3142,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
 	 */
 	public final boolean containsMeasureValue(int channel, int index, int measure) {
-		return mChAccessor.getValue(channel, index, measure, null, true) != null;
+		return mTlAccessor.getValue(channel, index, measure, null, true) != null;
 	}
 
 	/**
@@ -3098,7 +3156,7 @@ public class BmsContent {
 	 * @exception NullPointerException atがnull
 	 */
 	public final BmsNote getNote(int channel, BmsAt at) {
-		return mChAccessor.getNote(channel, 0, at.getMeasure(), at.getTick());
+		return mTlAccessor.getNote(channel, 0, at.getMeasure(), at.getTick());
 	}
 
 	/**
@@ -3112,7 +3170,7 @@ public class BmsContent {
 	 * @exception NullPointerException atがnull
 	 */
 	public final BmsNote getNote(int channel, int index, BmsAt at) {
-		return mChAccessor.getNote(channel, index, at.getMeasure(), at.getTick());
+		return mTlAccessor.getNote(channel, index, at.getMeasure(), at.getTick());
 	}
 
 	/**
@@ -3125,7 +3183,7 @@ public class BmsContent {
 	 * @return ノート
 	 */
 	public final BmsNote getNote(int channel, int measure, double tick) {
-		return mChAccessor.getNote(channel, 0, measure, tick);
+		return mTlAccessor.getNote(channel, 0, measure, tick);
 	}
 
 	/**
@@ -3143,7 +3201,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
 	public final BmsNote getNote(int channel, int index, int measure, double tick) {
-		return mChAccessor.getNote(channel, index, measure, tick);
+		return mTlAccessor.getNote(channel, index, measure, tick);
 	}
 
 	/**
@@ -3158,7 +3216,7 @@ public class BmsContent {
 	 * @exception NullPointerException atがnull
 	 */
 	public final BmsNote getPreviousNote(int channel, BmsAt at, boolean inclusiveFrom) {
-		return mChAccessor.getNearerNote(channel, 0, at.getMeasure(), at.getTick(), -1, inclusiveFrom);
+		return mTlAccessor.getNearerNote(channel, 0, at.getMeasure(), at.getTick(), -1, inclusiveFrom);
 	}
 
 	/**
@@ -3173,7 +3231,7 @@ public class BmsContent {
 	 * @exception NullPointerException atがnull
 	 */
 	public final BmsNote getPreviousNote(int channel, int index, BmsAt at, boolean inclusiveFrom) {
-		return mChAccessor.getNearerNote(channel, index, at.getMeasure(), at.getTick(), -1, inclusiveFrom);
+		return mTlAccessor.getNearerNote(channel, index, at.getMeasure(), at.getTick(), -1, inclusiveFrom);
 	}
 
 	/**
@@ -3187,7 +3245,7 @@ public class BmsContent {
 	 * @return 見つかったノート
 	 */
 	public final BmsNote getPreviousNote(int channel, int measure, double tick, boolean inclusiveFrom) {
-		return mChAccessor.getNearerNote(channel, 0, measure, tick, -1, inclusiveFrom);
+		return mTlAccessor.getNearerNote(channel, 0, measure, tick, -1, inclusiveFrom);
 	}
 
 	/**
@@ -3206,7 +3264,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
 	public final BmsNote getPreviousNote(int channel, int index, int measure, double tick, boolean inclusiveFrom) {
-		return mChAccessor.getNearerNote(channel, index, measure, tick, -1, inclusiveFrom);
+		return mTlAccessor.getNearerNote(channel, index, measure, tick, -1, inclusiveFrom);
 	}
 
 	/**
@@ -3221,7 +3279,7 @@ public class BmsContent {
 	 * @exception NullPointerException atがnull
 	 */
 	public final BmsNote getNextNote(int channel, BmsAt at, boolean inclusiveFrom) {
-		return mChAccessor.getNearerNote(channel, 0, at.getMeasure(), at.getTick(), 1, inclusiveFrom);
+		return mTlAccessor.getNearerNote(channel, 0, at.getMeasure(), at.getTick(), 1, inclusiveFrom);
 	}
 
 	/**
@@ -3236,7 +3294,7 @@ public class BmsContent {
 	 * @exception NullPointerException atがnull
 	 */
 	public final BmsNote getNextNote(int channel, int index, BmsAt at, boolean inclusiveFrom) {
-		return mChAccessor.getNearerNote(channel, index, at.getMeasure(), at.getTick(), 1, inclusiveFrom);
+		return mTlAccessor.getNearerNote(channel, index, at.getMeasure(), at.getTick(), 1, inclusiveFrom);
 	}
 
 	/**
@@ -3250,7 +3308,7 @@ public class BmsContent {
 	 * @return 見つかったノート
 	 */
 	public final BmsNote getNextNote(int channel, int measure, double tick, boolean inclusiveFrom) {
-		return mChAccessor.getNearerNote(channel, 0, measure, tick, 1, inclusiveFrom);
+		return mTlAccessor.getNearerNote(channel, 0, measure, tick, 1, inclusiveFrom);
 	}
 
 	/**
@@ -3269,7 +3327,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
 	public final BmsNote getNextNote(int channel, int index, int measure, double tick, boolean inclusiveFrom) {
-		return mChAccessor.getNearerNote(channel, index, measure, tick, 1, inclusiveFrom);
+		return mTlAccessor.getNearerNote(channel, index, measure, tick, 1, inclusiveFrom);
 	}
 
 	/**
@@ -3281,7 +3339,7 @@ public class BmsContent {
 	 * @exception NullPointerException noteがnull
 	 */
 	public final Object getResolvedNoteValue(BmsNote note) {
-		return mChAccessor.getResolvedNoteValue(note);
+		return mTlAccessor.getResolvedNoteValue(note);
 	}
 
 	/**
@@ -3296,7 +3354,7 @@ public class BmsContent {
 	 */
 	public final Object getResolvedNoteValue(int channel, BmsAt at) {
 		assertArgNotNull(at, "at");
-		return mChAccessor.getResolvedNoteValue(channel, 0, at.getMeasure(), at.getTick());
+		return mTlAccessor.getResolvedNoteValue(channel, 0, at.getMeasure(), at.getTick());
 	}
 
 	/**
@@ -3311,7 +3369,7 @@ public class BmsContent {
 	 */
 	public final Object getResolvedNoteValue(int channel, int index, BmsAt at) {
 		assertArgNotNull(at, "at");
-		return mChAccessor.getResolvedNoteValue(channel, index, at.getMeasure(), at.getTick());
+		return mTlAccessor.getResolvedNoteValue(channel, index, at.getMeasure(), at.getTick());
 	}
 
 	/**
@@ -3324,7 +3382,7 @@ public class BmsContent {
 	 * @return 参照先メタ情報から取り出したデータ
 	 */
 	public final Object getResolvedNoteValue(int channel, int measure, double tick) {
-		return mChAccessor.getResolvedNoteValue(channel, 0, measure, tick);
+		return mTlAccessor.getResolvedNoteValue(channel, 0, measure, tick);
 	}
 
 	/**
@@ -3345,7 +3403,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
 	public final Object getResolvedNoteValue(int channel, int index, int measure, double tick) {
-		return mChAccessor.getResolvedNoteValue(channel, index, measure, tick);
+		return mTlAccessor.getResolvedNoteValue(channel, index, measure, tick);
 	}
 
 	/**
@@ -3358,7 +3416,7 @@ public class BmsContent {
 	 * @exception NullPointerException atFromがnull
 	 */
 	public final BmsNote pointOf(BmsAt atFrom, BmsNote.Tester judge) {
-		return mChAccessor.pointOf(atFrom.getMeasure(), atFrom.getTick(), judge);
+		return mTlAccessor.pointOf(atFrom.getMeasure(), atFrom.getTick(), judge);
 	}
 
 	/**
@@ -3373,7 +3431,7 @@ public class BmsContent {
 	 * @exception NullPointerException judgeがnull
 	 */
 	public final BmsNote pointOf(int measureFrom, double tickFrom, BmsNote.Tester judge) {
-		return mChAccessor.pointOf(measureFrom, tickFrom, judge);
+		return mTlAccessor.pointOf(measureFrom, tickFrom, judge);
 	}
 
 	/**
@@ -3384,10 +3442,10 @@ public class BmsContent {
 	 * @exception NullPointerException enumNoteがnull
 	 */
 	public final void enumNotes(BmsNote.Tester enumNote) {
-		mChAccessor.enumNotes(
+		mTlAccessor.enumNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX + 1,
 				0, 0,
-				mChAccessor.getCount(), 0,
+				mTlAccessor.getCount(), 0,
 				enumNote);
 	}
 
@@ -3401,7 +3459,7 @@ public class BmsContent {
 	 */
 	public final void enumNotes(BmsAt at, BmsNote.Tester enumNote) {
 		assertArgNotNull(at, "at");
-		mChAccessor.enumNotes(at.getMeasure(), at.getTick(), enumNote);
+		mTlAccessor.enumNotes(at.getMeasure(), at.getTick(), enumNote);
 	}
 
 	/**
@@ -3417,7 +3475,7 @@ public class BmsContent {
 	 * @exception NullPointerException enumNoteがnull
 	 */
 	public final void enumNotes(int measure, double tick, BmsNote.Tester enumNote) {
-		mChAccessor.enumNotes(measure, tick, enumNote);
+		mTlAccessor.enumNotes(measure, tick, enumNote);
 	}
 
 	/**
@@ -3432,7 +3490,7 @@ public class BmsContent {
 	 */
 	public final void enumNotes(int measureBegin, double tickBegin, int measureEnd, double tickEnd,
 			BmsNote.Tester enumNote) {
-		mChAccessor.enumNotes(
+		mTlAccessor.enumNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
 				measureBegin, tickBegin,
 				measureEnd, tickEnd,
@@ -3453,7 +3511,7 @@ public class BmsContent {
 	public final void enumNotes(BmsAt atBegin, BmsAt atEnd, BmsNote.Tester enumNote) {
 		assertArgNotNull(atBegin, "atBegin");
 		assertArgNotNull(atEnd, "atEnd");
-		mChAccessor.enumNotes(
+		mTlAccessor.enumNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
 				atBegin.getMeasure(), atBegin.getTick(),
 				atEnd.getMeasure(), atEnd.getTick(),
@@ -3476,7 +3534,7 @@ public class BmsContent {
 			BmsNote.Tester enumNote) {
 		assertArgNotNull(atBegin, "atBegin");
 		assertArgNotNull(atEnd, "atEnd");
-		mChAccessor.enumNotes(
+		mTlAccessor.enumNotes(
 				channelBegin, channelEnd,
 				atBegin.getMeasure(), atBegin.getTick(),
 				atEnd.getMeasure(), atEnd.getTick(),
@@ -3504,7 +3562,7 @@ public class BmsContent {
 	 */
 	public final void enumNotes(int channelBegin, int channelEnd,
 			int measureBegin, double tickBegin, int measureEnd, double tickEnd, BmsNote.Tester enumNote) {
-		mChAccessor.enumNotes(
+		mTlAccessor.enumNotes(
 				channelBegin, channelEnd,
 				measureBegin, tickBegin,
 				measureEnd, tickEnd,
@@ -3519,10 +3577,10 @@ public class BmsContent {
 	 * @return ノートのリスト
 	 */
 	public final List<BmsNote> listNotes(BmsNote.Tester isCollect) {
-		return mChAccessor.listNotes(
+		return mTlAccessor.listNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX + 1,
 				0, 0,
-				mChAccessor.getCount(), 0,
+				mTlAccessor.getCount(), 0,
 				isCollect);
 	}
 
@@ -3537,7 +3595,7 @@ public class BmsContent {
 	 */
 	public final List<BmsNote> listNotes(BmsAt at, BmsNote.Tester isCollect) {
 		assertArgNotNull(at, "at");
-		return mChAccessor.listNotes(at.getMeasure(), at.getTick(), isCollect);
+		return mTlAccessor.listNotes(at.getMeasure(), at.getTick(), isCollect);
 	}
 
 	/**
@@ -3554,7 +3612,7 @@ public class BmsContent {
 	 * @exception NullPointerException isCollectがnull
 	 */
 	public final List<BmsNote> listNotes(int measure, double tick, BmsNote.Tester isCollect) {
-		return mChAccessor.listNotes(measure, tick, isCollect);
+		return mTlAccessor.listNotes(measure, tick, isCollect);
 	}
 
 	/**
@@ -3570,7 +3628,7 @@ public class BmsContent {
 	 * @exception NullPointerException atEndがnull
 	 */
 	public final List<BmsNote> listNotes(BmsAt atBegin, BmsAt atEnd, BmsNote.Tester isCollect) {
-		return mChAccessor.listNotes(
+		return mTlAccessor.listNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
 				atBegin.getMeasure(), atBegin.getTick(),
 				atEnd.getMeasure(), atEnd.getTick(),
@@ -3592,7 +3650,7 @@ public class BmsContent {
 	 */
 	public final List<BmsNote> listNotes(int channelBegin, int channelEnd, BmsAt atBegin, BmsAt atEnd,
 			BmsNote.Tester isCollect) {
-		return mChAccessor.listNotes(
+		return mTlAccessor.listNotes(
 				channelBegin, channelEnd,
 				atBegin.getMeasure(), atBegin.getTick(),
 				atEnd.getMeasure(), atEnd.getTick(),
@@ -3612,7 +3670,7 @@ public class BmsContent {
 	 */
 	public final List<BmsNote> listNotes(int measureBegin, double tickBegin, int measureEnd, double tickEnd,
 			BmsNote.Tester isCollect) {
-		return mChAccessor.listNotes(
+		return mTlAccessor.listNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
 				measureBegin, tickBegin,
 				measureEnd, tickEnd,
@@ -3640,7 +3698,7 @@ public class BmsContent {
 	 */
 	public final List<BmsNote> listNotes(int channelBegin, int channelEnd,
 			int measureBegin, double tickBegin, int measureEnd, double tickEnd, BmsNote.Tester isCollect) {
-		return mChAccessor.listNotes(
+		return mTlAccessor.listNotes(
 				channelBegin, channelEnd,
 				measureBegin, tickBegin,
 				measureEnd, tickEnd,
@@ -3655,10 +3713,10 @@ public class BmsContent {
 	 * @return 条件に一致したノートの数
 	 */
 	public final int countNotes(BmsNote.Tester isCounting) {
-		return mChAccessor.countNotes(
+		return mTlAccessor.countNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
 				0, 0,
-				mChAccessor.getCount(), 0,
+				mTlAccessor.getCount(), 0,
 				isCounting);
 	}
 
@@ -3673,7 +3731,7 @@ public class BmsContent {
 	 */
 	public final int countNotes(BmsAt at, BmsNote.Tester isCounting) {
 		assertArgNotNull(at, "at");
-		return mChAccessor.countNotes(at.getMeasure(), at.getTick(), isCounting);
+		return mTlAccessor.countNotes(at.getMeasure(), at.getTick(), isCounting);
 	}
 
 	/**
@@ -3688,7 +3746,7 @@ public class BmsContent {
 	 * @exception NullPointerException isCountingがnull
 	 */
 	public final int countNotes(int measure, double tick, BmsNote.Tester isCounting) {
-		return mChAccessor.countNotes(measure, tick, isCounting);
+		return mTlAccessor.countNotes(measure, tick, isCounting);
 	}
 
 	/**
@@ -3704,7 +3762,7 @@ public class BmsContent {
 	 * @exception NullPointerException atEndがnull
 	 */
 	public final int countNotes(BmsAt atBegin, BmsAt atEnd, BmsNote.Tester isCounting) {
-		return mChAccessor.countNotes(
+		return mTlAccessor.countNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
 				atBegin.getMeasure(), atBegin.getTick(),
 				atEnd.getMeasure(), atEnd.getTick(),
@@ -3726,7 +3784,7 @@ public class BmsContent {
 	 */
 	public final int countNotes(int channelBegin, int channelEnd, BmsAt atBegin, BmsAt atEnd,
 			BmsNote.Tester isCounting) {
-		return mChAccessor.countNotes(
+		return mTlAccessor.countNotes(
 				channelBegin, channelEnd,
 				atBegin.getMeasure(), atBegin.getTick(),
 				atEnd.getMeasure(), atEnd.getTick(),
@@ -3746,7 +3804,7 @@ public class BmsContent {
 	 */
 	public final int countNotes(int measureBegin, double tickBegin, int measureEnd, double tickEnd,
 			BmsNote.Tester isCounting) {
-		return mChAccessor.countNotes(
+		return mTlAccessor.countNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
 				measureBegin, tickBegin,
 				measureEnd, tickEnd,
@@ -3774,7 +3832,7 @@ public class BmsContent {
 	 */
 	public final int countNotes(int channelBegin, int channelEnd,
 			int measureBegin, double tickBegin, int measureEnd, double tickEnd, BmsNote.Tester isCounting) {
-		return mChAccessor.countNotes(
+		return mTlAccessor.countNotes(
 				channelBegin, channelEnd,
 				measureBegin, tickBegin,
 				measureEnd, tickEnd,
@@ -3793,7 +3851,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 */
 	public final BmsNote putNote(int channel, int measure, double tick, int value) {
-		return mChAccessor.putNote(channel, 0, measure, tick, value, BmsNote.DEFAULT_CREATOR);
+		return mTlAccessor.putNote(channel, 0, measure, tick, value, BmsNote.DEFAULT_CREATOR);
 	}
 
 	/**
@@ -3808,7 +3866,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 */
 	public final BmsNote putNote(int channel, BmsAt at, int value) {
-		return mChAccessor.putNote(channel, 0, at.getMeasure(), at.getTick(), value, BmsNote.DEFAULT_CREATOR);
+		return mTlAccessor.putNote(channel, 0, at.getMeasure(), at.getTick(), value, BmsNote.DEFAULT_CREATOR);
 	}
 
 	/**
@@ -3823,7 +3881,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 */
 	public final BmsNote putNote(int channel, int index, int measure, double tick, int value) {
-		return mChAccessor.putNote(channel, index, measure, tick, value, BmsNote.DEFAULT_CREATOR);
+		return mTlAccessor.putNote(channel, index, measure, tick, value, BmsNote.DEFAULT_CREATOR);
 	}
 
 	/**
@@ -3838,7 +3896,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 */
 	public final BmsNote putNote(int channel, int index, BmsAt at, int value) {
-		return mChAccessor.putNote(channel, index, at.getMeasure(), at.getTick(), value, BmsNote.DEFAULT_CREATOR);
+		return mTlAccessor.putNote(channel, index, at.getMeasure(), at.getTick(), value, BmsNote.DEFAULT_CREATOR);
 	}
 
 	/**
@@ -3854,7 +3912,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 */
 	public final <T extends BmsNote> T putNote(int channel, int measure, double tick, int value, BmsNote.Creator createNote) {
-		return mChAccessor.putNote(channel, 0, measure, tick, value, createNote);
+		return mTlAccessor.putNote(channel, 0, measure, tick, value, createNote);
 	}
 
 	/**
@@ -3870,7 +3928,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 */
 	public final <T extends BmsNote> T putNote(int channel, BmsAt at, int value, BmsNote.Creator createNote) {
-		return mChAccessor.putNote(channel, 0, at.getMeasure(), at.getTick(), value, createNote);
+		return mTlAccessor.putNote(channel, 0, at.getMeasure(), at.getTick(), value, createNote);
 	}
 
 	/**
@@ -3886,7 +3944,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 */
 	public final <T extends BmsNote> T putNote(int channel, int index, BmsAt at, int value, BmsNote.Creator createNote) {
-		return mChAccessor.putNote(channel, index, at.getMeasure(), at.getTick(), value, createNote);
+		return mTlAccessor.putNote(channel, index, at.getMeasure(), at.getTick(), value, createNote);
 	}
 
 	/**
@@ -3923,7 +3981,7 @@ public class BmsContent {
 	 */
 	public final <T extends BmsNote> T putNote(int channel, int index, int measure, double tick, int value,
 			BmsNote.Creator createNote) {
-		return mChAccessor.putNote(channel, index, measure, tick, value, createNote);
+		return mTlAccessor.putNote(channel, index, measure, tick, value, createNote);
 	}
 
 	/**
@@ -3936,7 +3994,7 @@ public class BmsContent {
 	 * @return 指定位置にノートが存在し消去した場合はtrue、それ以外はfalse。
 	 */
 	public final boolean removeNote(int channel, int measure, double tick) {
-		return mChAccessor.removeNote(channel, 0, measure, tick);
+		return mTlAccessor.removeNote(channel, 0, measure, tick);
 	}
 
 	/**
@@ -3950,7 +4008,7 @@ public class BmsContent {
 	 * @exception NullPointerException atがnull
 	 */
 	public final boolean removeNote(int channel, BmsAt at) {
-		return mChAccessor.removeNote(channel, 0, at.getMeasure(), at.getTick());
+		return mTlAccessor.removeNote(channel, 0, at.getMeasure(), at.getTick());
 	}
 
 	/**
@@ -3964,7 +4022,7 @@ public class BmsContent {
 	 * @exception NullPointerException atがnull
 	 */
 	public final boolean removeNote(int channel, int index, BmsAt at) {
-		return mChAccessor.removeNote(channel, index, at.getMeasure(), at.getTick());
+		return mTlAccessor.removeNote(channel, index, at.getMeasure(), at.getTick());
 	}
 
 	/**
@@ -3986,7 +4044,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
 	public final boolean removeNote(int channel, int index, int measure, double tick) {
-		return mChAccessor.removeNote(channel, index, measure, tick);
+		return mTlAccessor.removeNote(channel, index, measure, tick);
 	}
 
 	/**
@@ -3997,7 +4055,7 @@ public class BmsContent {
 	 * @exception NullPointerException isRemoveTargetがnull
 	 */
 	public final int removeNote(BmsNote.Tester isRemoveTarget) {
-		return mChAccessor.removeNote(1, BmsSpec.CHANNEL_MAX + 1, 0, mChAccessor.getCount(), isRemoveTarget);
+		return mTlAccessor.removeNote(1, BmsSpec.CHANNEL_MAX + 1, 0, mTlAccessor.getCount(), isRemoveTarget);
 	}
 
 	/**
@@ -4010,7 +4068,7 @@ public class BmsContent {
 	 * @return 消去されたノートの個数
 	 */
 	public final int removeNote(int measureBegin, int measureEnd, BmsNote.Tester isRemoveTarget) {
-		return mChAccessor.removeNote(BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX, measureBegin, measureEnd, isRemoveTarget);
+		return mTlAccessor.removeNote(BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX, measureBegin, measureEnd, isRemoveTarget);
 	}
 
 	/**
@@ -4030,7 +4088,7 @@ public class BmsContent {
 	 */
 	public final int removeNote(int channelBegin, int channelEnd, int measureBegin, int measureEnd,
 			BmsNote.Tester isRemoveTarget) {
-		return mChAccessor.removeNote(channelBegin, channelEnd, measureBegin, measureEnd, isRemoveTarget);
+		return mTlAccessor.removeNote(channelBegin, channelEnd, measureBegin, measureEnd, isRemoveTarget);
 	}
 
 	/**
@@ -4038,7 +4096,7 @@ public class BmsContent {
 	 * @return 小節数
 	 */
 	public final int getMeasureCount() {
-		return mChAccessor.getCount();
+		return mTlAccessor.getCount();
 	}
 
 	/**
@@ -4052,7 +4110,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
 	 */
 	public final int getMeasureTickCount(int measure) {
-		return mChAccessor.getTickCount(measure);
+		return mTlAccessor.getTickCount(measure);
 	}
 
 	/**
@@ -4067,7 +4125,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
 	 */
 	public final int getChannelDataCount(int channel, int measure) {
-		return mChAccessor.getChannelDataCount(channel, measure);
+		return mTlAccessor.getChannelDataCount(channel, measure);
 	}
 
 	/**
@@ -4077,7 +4135,7 @@ public class BmsContent {
 	 * @param measureWhere 挿入位置の小節番号
 	 */
 	public final void insertMeasure(int measureWhere) {
-		mChAccessor.insert(measureWhere, 1);
+		mTlAccessor.insert(measureWhere, 1);
 	}
 
 	/**
@@ -4093,7 +4151,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 挿入により小節数が{@link BmsSpec#MEASURE_MAX_COUNT}を超える
 	 */
 	public final void insertMeasure(int measureWhere, int count) {
-		mChAccessor.insert(measureWhere, count);
+		mTlAccessor.insert(measureWhere, count);
 	}
 
 	/**
@@ -4103,7 +4161,7 @@ public class BmsContent {
 	 * @param measureWhere 消去位置の小節番号
 	 */
 	public final void removeMeasure(int measureWhere) {
-		mChAccessor.remove(measureWhere, 1);
+		mTlAccessor.remove(measureWhere, 1);
 	}
 
 	/**
@@ -4118,7 +4176,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 存在しない小節を消去しようとした
 	 */
 	public final void removeMeasure(int measureWhere, int count) {
-		mChAccessor.remove(measureWhere, count);
+		mTlAccessor.remove(measureWhere, count);
 	}
 
 	/**
@@ -4129,7 +4187,7 @@ public class BmsContent {
 	 * @param channel2 入れ替え対象チャンネル2の番号
 	 */
 	public final void swapChannel(int channel1, int channel2) {
-		mChAccessor.swapChannel(channel1, 0, channel2, 0);
+		mTlAccessor.swapChannel(channel1, 0, channel2, 0);
 	}
 
 	/**
@@ -4148,7 +4206,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException チャンネル1,2のデータ型が一致しない
 	 */
 	public final void swapChannel(int channel1, int index1, int channel2, int index2) {
-		mChAccessor.swapChannel(channel1, index1, channel2, index2);
+		mTlAccessor.swapChannel(channel1, index1, channel2, index2);
 	}
 
 
@@ -4164,7 +4222,7 @@ public class BmsContent {
 	 */
 	public final BmsPoint seekPoint(BmsAt atFrom, double offsetTick, BmsPoint outPoint) {
 		assertArgNotNull(outPoint, "outPoint");
-		return mChAccessor.seekPoint(atFrom.getMeasure(), atFrom.getTick(), offsetTick, outPoint);
+		return mTlAccessor.seekPoint(atFrom.getMeasure(), atFrom.getTick(), offsetTick, outPoint);
 	}
 
 	/**
@@ -4185,7 +4243,7 @@ public class BmsContent {
 	 */
 	public final BmsPoint seekPoint(int measureFrom, double tickFrom, double offsetTick, BmsPoint outPoint) {
 		assertArgNotNull(outPoint, "outPoint");
-		return mChAccessor.seekPoint(measureFrom, tickFrom, offsetTick, outPoint);
+		return mTlAccessor.seekPoint(measureFrom, tickFrom, offsetTick, outPoint);
 	}
 
 	/**
@@ -4201,7 +4259,7 @@ public class BmsContent {
 	 */
 	public final BmsPoint seekNextPoint(BmsAt at, boolean inclusiveFrom, BmsPoint outPoint) {
 		assertArgNotNull(at, "at");
-		return mChAccessor.seekNextPoint(at.getMeasure(), at.getTick(), inclusiveFrom, c -> true, outPoint);
+		return mTlAccessor.seekNextPoint(at.getMeasure(), at.getTick(), inclusiveFrom, c -> true, outPoint);
 	}
 
 	/**
@@ -4215,7 +4273,7 @@ public class BmsContent {
 	 * @return 引数outPointが示すBmsPointオブジェクトの参照
 	 */
 	public final BmsPoint seekNextPoint(int measure, double tick, boolean inclusiveFrom, BmsPoint outPoint) {
-		return mChAccessor.seekNextPoint(measure, tick, inclusiveFrom, c -> true, outPoint);
+		return mTlAccessor.seekNextPoint(measure, tick, inclusiveFrom, c -> true, outPoint);
 	}
 
 	/**
@@ -4231,7 +4289,7 @@ public class BmsContent {
 	 */
 	public final BmsPoint seekNextPoint(BmsAt at, boolean inclusiveFrom, BmsChannel.Tester chTester, BmsPoint outPoint) {
 		assertArgNotNull(at, "at");
-		return mChAccessor.seekNextPoint(at.getMeasure(), at.getTick(), inclusiveFrom, chTester, outPoint);
+		return mTlAccessor.seekNextPoint(at.getMeasure(), at.getTick(), inclusiveFrom, chTester, outPoint);
 	}
 
 	/**
@@ -4259,7 +4317,104 @@ public class BmsContent {
 	 */
 	public final BmsPoint seekNextPoint(int measure, double tick, boolean inclusiveFrom, BmsChannel.Tester chTester,
 			BmsPoint outPoint) {
-		return mChAccessor.seekNextPoint(measure, tick, inclusiveFrom, chTester, outPoint);
+		return mTlAccessor.seekNextPoint(measure, tick, inclusiveFrom, chTester, outPoint);
+	}
+
+	/**
+	 * タイムラインの指定楽曲位置のみを走査するストリームを返します。
+	 * <p>返されたタイムラインストリームは楽曲位置の前方から後方に向かってタイムラインを走査し、タイムライン要素を
+	 * 小節線・小節データ・ノートの順で列挙します。列挙されたタイムライン要素はJava標準のストリームAPIによって
+	 * 様々な処理を行うことができるようになっています。当メソッドでは指定された楽曲位置のみを走査します。</p>
+	 * <p>ストリームの利用方法についてはJavaリファレンスのストリームAPI(java.util.stream)を参照してください。</p>
+	 * @param at 楽曲位置
+	 * @return 指定楽曲位置のみを走査するストリーム
+	 * @exception NullPointerException atがnull
+	 * @exception IllegalArgumentException 小節番号がマイナス値
+	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
+	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
+	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 */
+	public final Stream<BmsElement> timeline(BmsAt at) {
+		assertArgNotNull(at, "at");
+		return mTlAccessor.timeline(at.getMeasure(), at.getTick());
+	}
+
+	/**
+	 * タイムラインの指定楽曲位置のみを走査するストリームを返します。
+	 * <p>返されたタイムラインストリームは楽曲位置の前方から後方に向かってタイムラインを走査し、タイムライン要素を
+	 * 小節線・小節データ・ノートの順で列挙します。列挙されたタイムライン要素はJava標準のストリームAPIによって
+	 * 様々な処理を行うことができるようになっています。当メソッドでは指定された楽曲位置のみを走査します。</p>
+	 * <p>ストリームの利用方法についてはJavaリファレンスのストリームAPI(java.util.stream)を参照してください。</p>
+	 * @param measure 小節番号
+	 * @param tick 小節の刻み位置
+	 * @return 指定楽曲位置のみを走査するストリーム
+	 * @exception IllegalArgumentException 小節番号がマイナス値
+	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
+	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
+	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 */
+	public final Stream<BmsElement> timeline(int measure, double tick) {
+		return mTlAccessor.timeline(measure, tick);
+	}
+
+	/**
+	 * タイムライン全体を操作するストリームを返します。
+	 * <p>返されたタイムラインストリームは楽曲位置の前方から後方に向かってタイムラインを走査し、タイムライン要素を
+	 * 小節線・小節データ・ノートの順で列挙します。列挙されたタイムライン要素はJava標準のストリームAPIによって
+	 * 様々な処理を行うことができるようになっています。</p>
+	 * <p>当メソッドが返すストリームは、タイムライン全体から全チャンネルのタイムライン要素を列挙します。
+	 * ストリームの利用方法についてはJavaリファレンスのストリームAPI(java.util.stream)を参照してください。</p>
+	 * @return タイムライン全体を操作するストリーム
+	 */
+	public final Stream<BmsElement> timeline() {
+		return mTlAccessor.timeline(BmsSpec.MEASURE_MIN, BmsSpec.TICK_MIN, mTlAccessor.getCount(), BmsSpec.TICK_MIN);
+	}
+
+	/**
+	 * タイムラインの指定楽曲位置の範囲を走査するストリームを返します。
+	 * <p>返されたタイムラインストリームは楽曲位置の前方から後方に向かってタイムラインを走査し、タイムライン要素を
+	 * 小節線・小節データ・ノートの順で列挙します。列挙されたタイムライン要素はJava標準のストリームAPIによって
+	 * 様々な処理を行うことができるようになっています。</p>
+	 * <p>ストリームの利用方法についてはJavaリファレンスのストリームAPI(java.util.stream)を参照してください。</p>
+	 * @param atBegin 走査開始楽曲位置
+	 * @param atEnd 走査終了楽曲位置(この楽曲位置の小節の刻み位置を含まない)
+	 * @return タイムラインの指定楽曲位置の範囲を走査するストリーム
+	 * @exception NullPointerException atBeginまたはatEndがnull
+	 * @exception IllegalArgumentException 走査開始/終了楽曲位置の小節番号がマイナス値
+	 * @exception IllegalArgumentException 走査終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
+	 * @exception IllegalArgumentException 走査終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
+	 * @exception IllegalArgumentException 走査開始/終了楽曲位置の楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 * @exception IllegalArgumentException atEndがatBeginと同じまたは手前の楽曲位置を示している
+	 */
+	public final Stream<BmsElement> timeline(BmsAt atBegin, BmsAt atEnd) {
+		assertArgNotNull(atBegin, "atBegin");
+		assertArgNotNull(atEnd, "atEnd");
+		var measureBegin = atBegin.getMeasure();
+		var tickBegin = atBegin.getTick();
+		var measureEnd = atEnd.getMeasure();
+		var tickEnd = atEnd.getTick();
+		return mTlAccessor.timeline(measureBegin, tickBegin, measureEnd, tickEnd);
+	}
+
+	/**
+	 * タイムラインの指定楽曲位置の範囲を走査するストリームを返します。
+	 * <p>返されたタイムラインストリームは楽曲位置の前方から後方に向かってタイムラインを走査し、タイムライン要素を
+	 * 小節線・小節データ・ノートの順で列挙します。列挙されたタイムライン要素はJava標準のストリームAPIによって
+	 * 様々な処理を行うことができるようになっています。</p>
+	 * <p>ストリームの利用方法についてはJavaリファレンスのストリームAPI(java.util.stream)を参照してください。</p>
+	 * @param measureBegin 走査開始楽曲位置の小節番号
+	 * @param tickBegin 走査開始楽曲位置の小節の刻み位置
+	 * @param measureEnd 走査終了楽曲位置の小節番号
+	 * @param tickEnd 走査終了楽曲位置の小節の刻み位置(この位置を含まない)
+	 * @return タイムラインの指定楽曲位置の範囲を走査するストリーム
+	 * @exception IllegalArgumentException 走査開始/終了楽曲位置の小節番号がマイナス値
+	 * @exception IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
+	 * @exception IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
+	 * @exception IllegalArgumentException 走査開始/終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 * @exception IllegalArgumentException 走査終了楽曲位置が走査開始楽曲位置と同じまたは手前の楽曲位置を示している
+	 */
+	public final Stream<BmsElement> timeline(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
+		return mTlAccessor.timeline(measureBegin, tickBegin, measureEnd, tickEnd);
 	}
 
 	/**
@@ -4271,7 +4426,7 @@ public class BmsContent {
 	 * @exception NullPointerException atがnull
 	 */
 	public final double pointToTime(BmsAt at) {
-		return mChAccessor.pointToTime(at);
+		return mTlAccessor.pointToTime(at);
 	}
 
 	/**
@@ -4288,8 +4443,8 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 小節の刻み位置にマイナス値または当該小節の刻み数以上の値を指定した
 	 */
 	public final double pointToTime(int measure, double tick) {
-		mTempAt1.assignFromWithoutException(measure, tick);
-		return mChAccessor.pointToTime(mTempAt1);
+		mTempAt1.set(measure, tick);
+		return mTlAccessor.pointToTime(mTempAt1);
 	}
 
 	/**
@@ -4305,7 +4460,7 @@ public class BmsContent {
 	 */
 	public final BmsPoint timeToPoint(double timeSec, BmsPoint outPoint) {
 		assertArgNotNull(outPoint, "outPoint");
-		return mChAccessor.timeToPoint(timeSec, outPoint);
+		return mTlAccessor.timeToPoint(timeSec, outPoint);
 	}
 
 	/**
@@ -4416,7 +4571,7 @@ public class BmsContent {
 		// 同一性チェック対象のチャンネルからハッシュ値計算用データを収集する
 		data.append("CHANNEL");
 		var notes = new ArrayList<BmsNote>();
-		var measureCount = mChAccessor.getCount();
+		var measureCount = mTlAccessor.getCount();
 		for (var channel : channels) {
 			// データ型による分岐
 			var chNum = channel.getNumber();
@@ -4424,7 +4579,7 @@ public class BmsContent {
 			if (channel.isValueType()) {
 				// 値型の場合
 				for (var measure = 0; measure < measureCount; measure++) {
-					var dataCount = mChAccessor.getChannelDataCount(chNum, measure);
+					var dataCount = mTlAccessor.getChannelDataCount(chNum, measure);
 					if (dataCount > 0) {
 						// 追記するのは、その小節にチャンネルデータが存在する場合のみ
 						if (!outChno) {
@@ -4438,14 +4593,14 @@ public class BmsContent {
 							data.append("I");
 							data.append(String.valueOf(index));
 							data.append("V");
-							data.append(mChAccessor.getValue(chNum, index, measure, null, false).toString());
+							data.append(mTlAccessor.getValue(chNum, index, measure, null, false).toString());
 						}
 					}
 				}
 			} else if (channel.isArrayType()) {
 				// 配列型の場合
 				for (var measure = 0; measure < measureCount; measure++) {
-					var dataCount = mChAccessor.getChannelDataCount(chNum, measure);
+					var dataCount = mTlAccessor.getChannelDataCount(chNum, measure);
 					if (dataCount > 0) {
 						// 追記するのは、その小節にチャンネルデータが存在する場合のみ
 						if (!outChno) {
@@ -4459,7 +4614,7 @@ public class BmsContent {
 							data.append("I");
 							data.append(String.valueOf(index));
 							data.append("V");
-							mChs.listNotes(chNum, index, measure, notes);
+							mTl.listNotes(chNum, index, measure, notes);
 							for (var note : notes) {
 								data.append("N");
 								data.append("T");
@@ -4484,7 +4639,7 @@ public class BmsContent {
 	private void collectBpmStopStatistics() {
 		// BPM変更と譜面停止の統計情報を収集する
 		var bpmStopStat = new BpmStopStatistics(mMetas.getInitialBpm());
-		var measureCount = mChAccessor.getCount();
+		var measureCount = mTlAccessor.getCount();
 		if ((measureCount > 0) && (mSpec.hasBpmChannel() || mSpec.hasStopChannel())) {
 			// 列挙するチャンネルの範囲を求める
 			var channelBegin = BmsSpec.CHANNEL_MAX;
@@ -4504,7 +4659,7 @@ public class BmsContent {
 			}
 
 			// BPM変更と譜面停止の統計収集開始
-			mChAccessor.enumNotes(channelBegin, channelEnd, BmsSpec.MEASURE_MIN, 0, measureCount, 0, bpmStopStat);
+			mTlAccessor.enumNotes(channelBegin, channelEnd, BmsSpec.MEASURE_MIN, 0, measureCount, 0, bpmStopStat);
 		}
 
 		// 収集したBPM変更と統計情報を反映する

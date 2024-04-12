@@ -6,10 +6,11 @@ import static com.lmt.lib.bms.BmsAssertion.*;
  * BMSコンテンツの読み込み中に発生したエラーの情報を表します。
  *
  * <p>{@link BmsLoader}でBMSコンテンツを外部データから読み込む工程において、エラーを検出した場合に通知される
- * 一連の情報を表します。アプリケーションは{@link BmsLoader#setHandler}で指定したハンドラの
- * {@link BmsLoadHandler#parseError}によりこの情報の通知を受け、BMSコンテンツの読み込み続行有無を決定することができます。</p>
+ * 一連の情報を表します。アプリケーションは{@link BmsLoader#setHandler(BmsLoadHandler)}で指定したハンドラの
+ * {@link BmsLoadHandler#parseError(BmsLoadError)}によりこの情報の通知を受け、BMSコンテンツの読み込み続行有無を
+ * 決定することができます。</p>
  *
- * <p><b>エラー情報について</b><br>
+ * <p><strong>エラー情報について</strong><br>
  * 当クラスで通知するエラー情報には次のようなものがあります。</p>
  *
  * <ul>
@@ -19,10 +20,13 @@ import static com.lmt.lib.bms.BmsAssertion.*;
  * 分析し、読み込み中止有無を判断すべきです。</li>
  * <li>行番号<br>
  * 解析エラーが発生した外部データ上の行の番号を示します。この値はアプリケーションのユーザーに対して、外部データの
- * どこでエラーが発生したかを示す目的で使用することが出来ます。</li>
+ * どこでエラーが発生したかを示す目的で使用することができます。</li>
  * <li>行の内容<br>
  * 解析エラーとなった外部データ上の行の記述内容そのものを示します。行番号と同様、ユーザーに対してどのような内容の記述が
- * エラーになったかを示す目的で使用出来ます。</li>
+ * エラーになったかを示す目的で使用できます。</li>
+ * <li>メッセージ<br>
+ * 発生したエラーの詳細情報が含まれるメッセージです。エラーの内容によっては具体的なエラー原因を示す文字列が
+ * 設定されることがありますが、未設定の場合もあります。</li>
  * </ul>
  */
 public class BmsLoadError {
@@ -66,11 +70,8 @@ public class BmsLoadError {
 
 		/**
 		 * BMSコンテンツの検査に失敗した場合を表します。
-		 * <p>{@link BmsLoadHandler#finishLoad(BmsContent)}がfalseを返した場合に発生します。
+		 * <p>このエラーは{@link BmsLoadHandler#testContent(BmsContent)}が{@link BmsLoadHandler.TestResult#FAIL}を返した場合に発生します。
 		 * 検査に失敗した場合、当該BMSコンテンツは破棄されます。</p>
-		 * <p>このエラーは{@link BmsLoadHandler#parseError}では通知されません。エラー発生時にスローされる
-		 * {@link BmsAbortException}の{@link BmsAbortException#getError getError}メソッドで取得出来る
-		 * エラー情報を参照することで確認出来ます。 </p>
 		 */
 		FAILED_TEST_CONTENT,
 
@@ -123,6 +124,8 @@ public class BmsLoadError {
 	private int mLineNumber;
 	/** エラーになった行の定義 */
 	private String mLine;
+	/** エラーメッセージ */
+	private String mMessage;
 	/** 発生した例外(無い場合はnull) */
 	private Throwable mThrowable;
 
@@ -138,13 +141,7 @@ public class BmsLoadError {
 	 * @exception IllegalArgumentException lineNumberがマイナス値
 	 */
 	public BmsLoadError(Kind kind, int lineNumber, String line) {
-		assertArgNotNull(kind, "kind");
-		assertArg(lineNumber >= 0, "Wrong lineNumber: %d", lineNumber);
-		assertArgNotNull(line, "line");
-		mKind = kind;
-		mLineNumber = lineNumber;
-		mLine = line;
-		mThrowable = null;
+		this(kind, lineNumber, line, null, null);
 	}
 
 	/**
@@ -154,18 +151,20 @@ public class BmsLoadError {
 	 * @param kind エラー種別
 	 * @param lineNumber 行番号
 	 * @param line 行の記述内容
+	 * @param message エラーメッセージ
 	 * @param throwable 発生した例外
 	 * @exception NullPointerException kindがnull
 	 * @exception NullPointerException lineがnull
 	 * @exception IllegalArgumentException lineNumberがマイナス値
 	 */
-	BmsLoadError(Kind kind, int lineNumber, String line, Throwable throwable) {
+	BmsLoadError(Kind kind, int lineNumber, String line, String message, Throwable throwable) {
 		assertArgNotNull(kind, "kind");
 		assertArg(lineNumber >= 0, "Wrong lineNumber: %d", lineNumber);
 		assertArgNotNull(line, "line");
 		mKind = kind;
 		mLineNumber = lineNumber;
 		mLine = line;
+		mMessage = message;
 		mThrowable = throwable;
 	}
 
@@ -175,7 +174,19 @@ public class BmsLoadError {
 	 */
 	@Override
 	public String toString() {
-		return String.format("L%d: %s: %s", mLineNumber, mKind.toString(), mLine);
+		var sb = new StringBuilder(1024);
+		sb.append("L");
+		sb.append(mLineNumber);
+		sb.append(": ");
+		sb.append(mKind.name());
+		if (mMessage != null) {
+			sb.append("(");
+			sb.append(mMessage);
+			sb.append(")");
+		}
+		sb.append(": ");
+		sb.append(mLine);
+		return sb.toString();
 	}
 
 	/**
@@ -200,6 +211,15 @@ public class BmsLoadError {
 	 */
 	public String getLine() {
 		return mLine;
+	}
+
+	/**
+	 * エラーメッセージを取得します。
+	 * <p>エラーメッセージは任意項目です。エラー発生元でメッセージを設定しなかった場合、nullが返ります。</p>
+	 * @return エラーメッセージ
+	 */
+	public String getMessage() {
+		return mMessage;
 	}
 
 	/**

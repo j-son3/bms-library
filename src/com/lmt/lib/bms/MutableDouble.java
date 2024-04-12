@@ -59,9 +59,11 @@ class MutableDouble extends MutableNumber {
 	/**
 	 * 値設定
 	 * @param value 値
+	 * @return このオブジェクトのインスタンス
 	 */
-	public final void set(double value) {
+	public final MutableDouble set(double value) {
 		mValue = value;
+		return this;
 	}
 
 	/** {@inheritDoc} */

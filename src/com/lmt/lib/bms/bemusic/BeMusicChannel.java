@@ -1,9 +1,5 @@
 package com.lmt.lib.bms.bemusic;
 
-import static com.lmt.lib.bms.bemusic.BeMusic.*;
-
-import java.util.HashMap;
-
 import com.lmt.lib.bms.BmsChannel;
 import com.lmt.lib.bms.BmsType;
 
@@ -2103,52 +2099,6 @@ public class BeMusicChannel {
 			LANDMINE_2P_01, LANDMINE_2P_02, LANDMINE_2P_03, LANDMINE_2P_04, LANDMINE_2P_05,
 			LANDMINE_2P_06, LANDMINE_2P_07, LANDMINE_2P_08, LANDMINE_2P_09,
 	};
-
-	/** 各チャンネルのフラグ定義マップ */
-	private static final HashMap<Integer, Integer> sFlagMap = new HashMap<>();
-
-	/** 静的処理 */
-	static {
-		sFlagMap.put(BGM.getNumber(), FLAG_NONE);
-		sFlagMap.put(LENGTH.getNumber(), FLAG_NONE);
-		sFlagMap.put(BPM_LEGACY.getNumber(), FLAG_LEGACY | FLAG_UNRECOMMEND);
-		sFlagMap.put(BGA.getNumber(), FLAG_BGA);
-		sFlagMap.put(EXT_OBJ.getNumber(), FLAG_MINOR | FLAG_LEGACY | FLAG_UNRECOMMEND);
-		sFlagMap.put(BGA_MISS.getNumber(), FLAG_BGA);
-		sFlagMap.put(BGA_LAYER.getNumber(), FLAG_LEGACY | FLAG_BGA);
-		sFlagMap.put(BPM.getNumber(), FLAG_NONE);
-		sFlagMap.put(STOP.getNumber(), FLAG_NONE);
-		sFlagMap.put(BGA_LAYER2.getNumber(), FLAG_MINOR | FLAG_LEGACY | FLAG_BGA);
-		sFlagMap.put(BGA_BASE_OPACITY.getNumber(), FLAG_MINOR);
-		sFlagMap.put(BGA_LAYER_OPACITY.getNumber(), FLAG_MINOR);
-		sFlagMap.put(BGA_LAYER2_OPACITY.getNumber(), FLAG_MINOR);
-		sFlagMap.put(BGA_MISS_OPACITY.getNumber(), FLAG_MINOR);
-		sFlagMap.put(BGM_VOLUME.getNumber(), FLAG_MINOR);
-		sFlagMap.put(KEY_VOLUME.getNumber(), FLAG_MINOR);
-		sFlagMap.put(TEXT.getNumber(), FLAG_MINOR);
-		sFlagMap.put(JUDGE.getNumber(), FLAG_MINOR);
-		sFlagMap.put(BGA_BASE_ARGB.getNumber(), FLAG_MINOR);
-		sFlagMap.put(BGA_LAYER_ARGB.getNumber(), FLAG_MINOR);
-		sFlagMap.put(BGA_LAYER2_ARGB.getNumber(), FLAG_MINOR);
-		sFlagMap.put(BGA_MISS_ARGB.getNumber(), FLAG_MINOR);
-		sFlagMap.put(BGA_KEYBOUND.getNumber(), FLAG_MINOR | FLAG_BGA);
-		sFlagMap.put(OPTION.getNumber(), FLAG_MINOR);
-		for (var c : VISIBLE_1P_CHANNELS) { sFlagMap.put(c.getNumber(), FLAG_NONE); }
-		for (var c : VISIBLE_2P_CHANNELS) { sFlagMap.put(c.getNumber(), FLAG_DOUBLE); }
-		for (var c : INVISIBLE_CHANNELS) { sFlagMap.put(c.getNumber(), FLAG_NONE); }
-		for (var c : LONG_CHANNELS) { sFlagMap.put(c.getNumber(), FLAG_MINOR | FLAG_LEGACY | FLAG_UNRECOMMEND); }
-		for (var c : LANDMINE_CHANNELS) { sFlagMap.put(c.getNumber(), FLAG_MINOR); }
-	}
-
-	/**
-	 * チャンネルのフラグを取得する。
-	 * @param number チャンネル番号
-	 * @return チャンネルのフラグ
-	 */
-	static final int getFlag(int number) {
-		var flag = sFlagMap.get(number);
-		return (flag == null) ? FLAG_NONE : flag;
-	}
 
 	/**
 	 * チャンネル番号生成用の内部メソッド。

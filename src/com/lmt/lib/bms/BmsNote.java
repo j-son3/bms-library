@@ -1,30 +1,14 @@
 package com.lmt.lib.bms;
 
-import java.util.Comparator;
-
 /**
- * BMSコンテンツの時間軸に配置されたノートの情報を表します。
+ * タイムライン要素の一つであるノートの情報を表します。
  *
- * <p>情報には、時間軸上の位置・チャンネル・ノートが示す値が存在します。当クラスの情報は参照専用であり、
- * BMSコンテンツの外部から情報の変更が加えられることを想定していません。</p>
+ * <p>情報には、アドレス、およびノートが示す値の2つが存在します。当クラスの情報は変更不可であり、
+ * BMSライブラリの外部から情報の変更が加えられることを想定していません。</p>
  *
- * @see BmsAt [BmsAt] 当クラスが実装する、時間軸を参照するインターフェイス
+ * @see BmsElement
  */
-public class BmsNote implements BmsAt {
-	/** ノート比較用コンパレータ */
-	static Comparator<BmsNote> COMPARATOR = new Comparator<>() {
-		@Override
-		public int compare(BmsNote o1, BmsNote o2) {
-			var c1 = Integer.compare(o1.getMeasure(), o2.getMeasure());
-			if (c1 != 0) { return c1; }
-			var c2 = Double.compare(o1.getTick(), o2.getTick());
-			if (c2 != 0) { return c2; }
-			var c3 = Integer.compare(o1.getChannel(), o2.getChannel());
-			if (c3 != 0) { return c3; }
-			return Integer.compare(o1.getIndex(), o2.getIndex());
-		}
-	};
-
+public class BmsNote extends BmsElement {
 	/**
 	 * ノートオブジェクトを生成するI/Fを提供します。
 	 * <p>当インターフェイスは主に{@link BmsContent}のメソッドにパラメータとして渡されます。1個のノートオブジェクトの
@@ -34,9 +18,10 @@ public class BmsNote implements BmsAt {
 	public interface Creator {
 		/**
 		 * ノートオブジェクトを生成します。
-		 * <p>配列型チャンネルのデータ要素は全てノートオブジェクトとしてBMSコンテンツ内で管理されます。当メソッドで返されたノートオブジェクトは
-		 * BMSコンテンツ内に格納されることになります。アプリケーションが個々のノートオブジェクトに何らかの情報を付加してBMSコンテンツ内で
-		 * 管理させたい場合、当メソッドで{@link BmsNote}を継承したノートオブジェクトを返します。</p>
+		 * <p>配列型チャンネルのデータ要素は全てノートオブジェクトとしてBMSコンテンツ内で管理されます。
+		 * 当メソッドで返されたノートオブジェクトはBMSコンテンツ内のタイムライン要素として格納されることになります。
+		 * アプリケーションが個々のノートオブジェクトに何らかの情報を付加してBMSコンテンツ内で管理させたい場合、
+		 * 当メソッドで{@link BmsNote}を継承したノートオブジェクトを返します。</p>
 		 * <p>付加情報の更新は{@link #onCreate()}を使用して行ってください。
 		 * これらのメソッドは{@link BmsContent}内部から呼び出されるよう設計されています。</p>
 		 * @return ノートオブジェクト
@@ -71,14 +56,6 @@ public class BmsNote implements BmsAt {
 
 	/** ノートが持つ値 */
 	private short mValue = 0;
-	/** チャンネル番号 */
-	private short mChannel = 0;
-	/** チャンネル内インデックス */
-	private short mIndex = 0;
-	/** 小節番号 */
-	private short mMeasure = 0;
-	/** 小節内の刻み位置 */
-	private double mTick = 0;
 
 	/**
 	 * ノートオブジェクトを新しく構築します。
@@ -98,74 +75,8 @@ public class BmsNote implements BmsAt {
 	 */
 	@Override
 	public String toString() {
-		var chZ = Integer.toString(mChannel, 36);
-		var valZ = Integer.toString(mValue, 36);
-		return String.format("{Ch=%s(%d)[%d], M=%d, T=%d, V(d/h/z)=%d/%02X/%s}",
-				chZ, mChannel, mIndex, mMeasure, mTick, mValue, mValue, valZ);
-	}
-
-	/**
-	 * チャンネル番号を取得します。
-	 * @return チャンネル番号
-	 */
-	public final int getChannel() {
-		return mChannel;
-	}
-
-	/**
-	 * チャンネル番号を設定する。
-	 * @param channel チャンネル番号
-	 */
-	final void setChannel(int channel) {
-		mChannel = (short)channel;
-	}
-
-	/**
-	 * チャンネルインデックスを取得します。
-	 * @return チャンネルインデックス
-	 */
-	public final int getIndex() {
-		return mIndex;
-	}
-
-	/**
-	 * チャンネルインデックスを設定する。
-	 * @param index チャンネルインデックス
-	 */
-	final void setIndex(int index) {
-		mIndex = (short)index;
-	}
-
-	/**
-	 * @see BmsAt#getMeasure()
-	 */
-	@Override
-	public final int getMeasure() {
-		return mMeasure;
-	}
-
-	/**
-	 * 小節番号を設定する。
-	 * @param measure 小節番号
-	 */
-	final void setMeasure(int measure) {
-		mMeasure = (short)measure;
-	}
-
-	/**
-	 * @see BmsAt#getTick()
-	 */
-	@Override
-	public final double getTick() {
-		return mTick;
-	}
-
-	/**
-	 * 小節の刻み位置を設定する。
-	 * @param tick 小節の刻み位置
-	 */
-	final void setTick(double tick) {
-		mTick = tick;
+		return String.format("{Adr=%s, Value(d/h/z)=%d/%02X/%s}",
+				super.toString(), mValue, mValue, BmsInt.to36s(mValue));
 	}
 
 	/**
@@ -184,6 +95,52 @@ public class BmsNote implements BmsAt {
 	 */
 	final void setValue(int value) {
 		mValue = (short)value;
+	}
+
+	/**
+	 * ノートに割り当てられた値をlong型にキャストして取得します。
+	 * <p>ノートに割り当てられた値を参照する際は可能であれば{@link #getValue()}を使用することを推奨します。</p>
+	 * @return ノートに割り当てられた値
+	 */
+	@Override
+	public long getValueAsLong() {
+		return mValue;
+	}
+
+	/**
+	 * ノートに割り当てられた値をdouble型にキャストして取得します。
+	 * <p>ノートに割り当てられた値を参照する際は可能であれば{@link #getValue()}を使用することを推奨します。</p>
+	 * @return ノートに割り当てられた値
+	 */
+	@Override
+	public double getValueAsDouble() {
+		return mValue;
+	}
+
+	/**
+	 * ノートに割り当てられた値の文字列表現を取得します。
+	 * @return ノートに割り当てられた値の文字列表現
+	 */
+	@Override
+	public String getValueAsString() {
+		return String.valueOf(mValue);
+	}
+
+	/**
+	 * ノートに割り当てられた値をObject型にキャストして取得します。
+	 * <p>返されるオブジェクトの実体はInteger型のノートに割り当てられた値です。ノートに割り当てられた値を参照する際は
+	 * 可能であれば{@link #getValue()}を使用することを推奨します。</p>
+	 * @return ノートに割り当てられた値
+	 */
+	@Override
+	public Object getValueAsObject() {
+		return (int)mValue;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public boolean isNoteElement() {
+		return true;
 	}
 
 	/**
@@ -220,10 +177,9 @@ public class BmsNote implements BmsAt {
 	 * @param value ノートが持つ値
 	 */
 	void setup(int channel, int index, int measure, double tick, int value) {
-		mChannel = (short)channel;
-		mIndex = (short)index;
-		mMeasure = (short)measure;
-		mTick = tick;
+		setMeasure(measure);
+		setTick(tick);
+		setChx(channel, index);
 		mValue = (short)value;
 		onCreate();
 	}
@@ -235,7 +191,7 @@ public class BmsNote implements BmsAt {
 	 */
 	BmsNote shiftMeasure(int shift) {
 		var cloned = onNewInstance();
-		cloned.setup(mChannel, mIndex, mMeasure + shift, mTick, mValue);
+		cloned.setup(getChannel(), getIndex(), getMeasure() + shift, getTick(), mValue);
 		return cloned;
 	}
 
@@ -247,7 +203,7 @@ public class BmsNote implements BmsAt {
 	 */
 	BmsNote changeChannel(int channel, int index) {
 		var cloned = onNewInstance();
-		cloned.setup(channel, index, mMeasure, mTick, mValue);
+		cloned.setup(channel, index, getMeasure(), getTick(), mValue);
 		return cloned;
 	}
 }
