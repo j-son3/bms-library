@@ -277,16 +277,14 @@ class Timeline<E extends MeasureElement> {
 	private IntFunction<E> mMeasureElementCreator;
 	/** 全ノート */
 	private TreeSet<BmsNote> mNotes = new TreeSet<>(BmsAddress::compare);
-	/** チャンネルデータキーごとのノートリスト */
-	private TreeMap<MutableInt, TreeSet<BmsNote>> mNotesChMap = new TreeMap<>();
+	/** CHXごとのノートリスト */
+	private TreeMap<Integer, TreeSet<BmsNote>> mNotesChMap = new TreeMap<>();
 	/** 小節ごとの小節全体データリスト */
 	private ArrayList<E> mMeasureList = new ArrayList<>();
 	/** 検索キー用ノート1 */
 	private BmsNote mNoteTemp1 = new BmsNote();
 	/** 検索キー用ノート2 */
 	private BmsNote mNoteTemp2 = new BmsNote();
-	/** 検索キー用チャンネルキー */
-	private MutableInt mChKey = new MutableInt(0);
 	/** ノートリスト生成クラス */
 	private NoteLister mNoteLister = new NoteLister();
 	/** ノートカウンタクラス */
@@ -324,16 +322,16 @@ class Timeline<E extends MeasureElement> {
 	}
 
 	/**
-	 * 指定チャンネルキーに該当する次のノート取得
+	 * 指定CHXに該当する次のノート取得
 	 * @param channel チャンネル番号
-	 * @param index チャンネルキー
+	 * @param index チャンネルインデックス
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
 	 * @param inclusive 指定楽曲位置のノートも検索対象とするかどうか
 	 * @return 次のノート。そのようなノートが存在しない場合null
 	 */
 	final BmsNote getNextNote(int channel, int index, int measure, double tick, boolean inclusive) {
-		var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel, index)));
+		var notesCh = mNotesChMap.get(BmsInt.box(BmsChx.toInt(channel, index)));
 		if (notesCh == null) {
 			// 当該チャンネルにノートがない場合はnull
 			return null;
@@ -345,7 +343,7 @@ class Timeline<E extends MeasureElement> {
 	}
 
 	/**
-	 * 指定チャンネルキーに該当する前のノート取得
+	 * 指定CHXに該当する前のノート取得
 	 * @param channel チャンネル番号
 	 * @param index チャンネルインデックス
 	 * @param measure 小節番号
@@ -355,7 +353,7 @@ class Timeline<E extends MeasureElement> {
 	 */
 	final BmsNote getPreviousNote(int channel, int index, int measure, double tick, boolean inclusive) {
 		// チャンネルごとのノートリストから指定位置より前にある最初のノートを取得する
-		var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel, index)));
+		var notesCh = mNotesChMap.get(BmsInt.box(BmsChx.toInt(channel, index)));
 		if (notesCh == null) {
 			// 当該チャンネルにノートがない場合はnull
 			return null;
@@ -548,8 +546,8 @@ class Timeline<E extends MeasureElement> {
 	 */
 	final void swapNoteChannel(int channel1, int index1, int channel2, int index2) {
 		// 入れ替え対象チャンネルのデータを全件取り出す
-		var set1 = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel1, index1)));
-		var set2 = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel2, index2)));
+		var set1 = mNotesChMap.get(BmsInt.box(BmsChx.toInt(channel1, index1)));
+		var set2 = mNotesChMap.get(BmsInt.box(BmsChx.toInt(channel2, index2)));
 
 		// 両ノートリストを一旦退避する
 		var notes1 = new ArrayList<>((set1 == null) ? Collections.emptyList() : set1);
@@ -660,10 +658,11 @@ class Timeline<E extends MeasureElement> {
 		mNotes.add(note);
 
 		// チャンネルごとのノートリストへ追加する
-		var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(note)));
+		var chx = BmsInt.box(BmsChx.toInt(note));
+		var notesCh = mNotesChMap.get(chx);
 		if (notesCh == null) {
 			notesCh = new TreeSet<>(BmsAddress::compare);
-			mNotesChMap.put(new MutableInt(BmsChx.toInt(note)), notesCh);
+			mNotesChMap.put(chx, notesCh);
 		}
 		notesCh.add(note);
 
@@ -691,12 +690,13 @@ class Timeline<E extends MeasureElement> {
 		// チャンネルごとのノートリストから消去する
 		if (result) {
 			// ノートリストからの消去
-			var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel, index)));
+			var chx = BmsInt.box(BmsChx.toInt(channel, index));
+			var notesCh = mNotesChMap.get(chx);
 			notesCh.remove(note1(channel, index, measure, tick));
 
 			// 消去した結果リストが空になった場合はリスト自体を消去する
 			if (notesCh.size() == 0) {
-				mNotesChMap.remove(mChKey.set(BmsChx.toInt(channel, index)));
+				mNotesChMap.remove(chx);
 			}
 
 			// 小節データリストから消去する
@@ -879,14 +879,15 @@ class Timeline<E extends MeasureElement> {
 	 * @param count 抜き出す小節数
 	 * @return 全小節データリスト
 	 */
-	private ArrayList<Map<MutableInt, BmsElement>> pullMeasureValues(int measureFrom, int count) {
-		var valuesList = new ArrayList<Map<MutableInt, BmsElement>>(count);
+	private ArrayList<Map<Integer, BmsElement>> pullMeasureValues(int measureFrom, int count) {
+		var valuesList = new ArrayList<Map<Integer, BmsElement>>(count);
 		for (var i = measureFrom; i < (measureFrom + count); i++) {
 			var measureData = mMeasureList.get(i);
-			var values = (measureData == null) ? Collections.<MutableInt, BmsElement>emptyMap() : measureData.mapValues();
+			var values = (measureData == null) ? Collections.<Integer, BmsElement>emptyMap() : measureData.mapValues();
 			for (var key : values.keySet()) {
-				int channel = BmsChx.toChannel(key.get());
-				int index = BmsChx.toIndex(key.get());
+				var chx = key.intValue();
+				var channel = BmsChx.toChannel(chx);
+				var index = BmsChx.toIndex(chx);
 				measureData.removeValue(channel, index);
 			}
 			valuesList.add(values);
@@ -899,13 +900,13 @@ class Timeline<E extends MeasureElement> {
 	 * @param valuesList 全小節データリスト
 	 * @param measureFrom 復元開始位置の小節番号
 	 */
-	private void restoreMeasureValues(ArrayList<Map<MutableInt, BmsElement>> valuesList, int measureFrom) {
+	private void restoreMeasureValues(ArrayList<Map<Integer, BmsElement>> valuesList, int measureFrom) {
 		for (var i = 0; i < valuesList.size(); i++) {
 			var values = valuesList.get(i);
 			for (var entry : values.entrySet()) {
-				var key = entry.getKey();
-				var channel = BmsChx.toChannel(key.get());
-				var index = BmsChx.toChannel(key.get());
+				var chx = entry.getKey().intValue();
+				var channel = BmsChx.toChannel(chx);
+				var index = BmsChx.toChannel(chx);
 				putMeasureValue(channel, index, measureFrom + i, entry.getValue().getValueAsObject());
 			}
 		}

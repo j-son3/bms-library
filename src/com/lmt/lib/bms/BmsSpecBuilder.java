@@ -118,7 +118,7 @@ public final class BmsSpecBuilder {
 		assertArg(!containsChannel(channel.getNumber()), "Channel is already exists. channel=", channel);
 
 		// チャンネルを追加する
-		mChannels.put(channel.getNumber(), channel);
+		mChannels.put(BmsInt.box(channel.getNumber()), channel);
 
 		return this;
 	}
@@ -147,7 +147,7 @@ public final class BmsSpecBuilder {
 	 */
 	public final BmsChannel getChannel(int number) {
 		assertIsNotCreated();
-		return mChannels.get(number);
+		return mChannels.get(BmsInt.box(number));
 	}
 
 	/**

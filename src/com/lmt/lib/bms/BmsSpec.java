@@ -314,7 +314,7 @@ public final class BmsSpec {
 	 * @return チャンネル番号に該当するチャンネル。存在しない場合はnull。
 	 */
 	public final BmsChannel getChannel(int number) {
-		return mChannels.get(number);
+		return mChannels.get(BmsInt.box(number));
 	}
 
 	/**
@@ -323,7 +323,7 @@ public final class BmsSpec {
 	 * @return チャンネル番号に該当するチャンネルが存在する場合はtrue
 	 */
 	public final boolean containsChannel(int number) {
-		return mChannels.get(number) != null;
+		return mChannels.get(BmsInt.box(number)) != null;
 	}
 
 	/**

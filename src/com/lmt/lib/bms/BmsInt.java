@@ -2,7 +2,11 @@ package com.lmt.lib.bms;
 
 import static com.lmt.lib.bms.BmsAssertion.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.IntConsumer;
+import java.util.stream.IntStream;
 
 /**
  * BMS向けの整数値処理を定義したクラスです。
@@ -54,6 +58,209 @@ public class BmsInt {
 		TABLE_C2N36 = c2n36;
 		TABLE_N2S16 = n2s16;
 		TABLE_N2S36 = n2s36;
+	}
+
+	/** 整数値キャッシュ */
+	private static class Cache {
+		/** インデックス用キャッシュの最大値 */
+		private static final int MX = 1296;
+		/** CHX用キャッシュのチャンネル番号最大値 */
+		private static final int CMX = 1296;
+		/** CHX用キャッシュのチャンネルインデックス最大値 */
+		private static final int IMX = 4;
+
+		/** 統計フラグ：キャッシュ未使用 */
+		private static final int UNUSE = 0x00;
+		/** 統計フラグ：インデックス用キャッシュヒット */
+		private static final int HIT_IDX = 0x01;
+		/** 統計フラグ：CHX用キャッシュヒット */
+		private static final int HIT_CHX = 0x02;
+		/** 統計フラグ：いずれかのキャッシュヒット */
+		private static final int HIT_ANY = HIT_IDX | HIT_CHX;
+		/** 統計フラグ：インデックス用キャッシュ要求 */
+		private static final int REQ_IDX = 0x10;
+		/** 統計フラグ：CHX用キャッシュ要求 */
+		private static final int REQ_CHX = 0x20;
+
+		/** 整数値要求回数 */
+		private long mReqTotal = 0L;
+		/** 整数値キャッシュヒット回数 */
+		private long mHitTotal = 0L;
+		/** インデックス用キャッシュ要求回数 */
+		private long mReqIndex = 0L;
+		/** インデックス用キャッシュヒット回数 */
+		private long mHitIndex = 0L;
+		/** CHX用キャッシュ要求回数 */
+		private long mReqChx = 0L;
+		/** CHX用キャッシュヒット回数 */
+		private long mHitChx = 0L;
+
+		/** 統計処理用関数 */
+		private IntConsumer mStat;
+		/** インデックス用キャッシュ */
+		private Integer[] mCache4Index;
+		/** CHX用キャッシュ */
+		private List<Integer[]> mCache4Chx;
+		/** 統計処理排他制御用オブジェクト */
+		private Object mLockForDiag = new Object();
+
+		/**
+		 * コンストラクタ
+		 */
+		Cache() {
+			// 整数値のキャッシュを生成する
+			mCache4Index = IntStream.range(0, MX).mapToObj(n -> n).toArray(Integer[]::new);
+			mCache4Chx = new ArrayList<>(IMX);
+			IntStream.range(0, IMX).forEach(i -> {
+				mCache4Chx.add(IntStream.range(0, CMX).mapToObj(n -> (n << 16) | i).toArray(Integer[]::new));
+			});
+
+			// デフォルトでは統計は無効
+			statistics(false);
+		}
+
+		/**
+		 * 統計処理設定
+		 * @param diag 統計実行有無
+		 */
+		void statistics(boolean diag) {
+			// 統計データを初期化する
+			synchronized (mLockForDiag) {
+				mReqTotal = 0L;
+				mHitTotal = 0L;
+				mReqIndex = 0L;
+				mHitIndex = 0L;
+				mReqChx = 0L;
+				mHitChx = 0L;
+				mStat = diag ? this::diagExecute : this::diagNothing;
+			}
+		}
+
+		/**
+		 * 統計情報集計結果スナップショット
+		 * @return 統計情報集計結果スナップショット
+		 */
+		long[] snapshot() {
+			synchronized (mLockForDiag) {
+				return new long[] { mReqTotal, mHitTotal, mReqIndex, mHitIndex, mReqChx, mHitChx };
+			}
+		}
+
+		/**
+		 * 整数値取得
+		 * @param n 値型整数値
+		 * @return 整数値オブジェクト
+		 */
+		Integer get(int n) {
+			var stat = mStat;
+			var low = (n & 0xffff);
+			var high = (n >> 16) & 0xffff;
+			if (high == 0) {
+				// 下位16ビット(0～65535)の場合は通常インデックスのキャッシュ
+				if (low < MX) {
+					// キャッシュあり
+					stat.accept(REQ_IDX | HIT_IDX);
+					return mCache4Index[low];
+				} else {
+					// キャッシュなし
+					stat.accept(REQ_IDX);
+					return Integer.valueOf(n);
+				}
+			} else if (high < CMX) {
+				// 上位16ビットありの場合はCHXのキャッシュ
+				if (low < IMX) {
+					// キャッシュあり
+					stat.accept(REQ_CHX | HIT_CHX);
+					return mCache4Chx.get(low)[high];
+				} else {
+					// キャッシュなし
+					stat.accept(REQ_CHX);
+					return Integer.valueOf(n);
+				}
+			} else {
+				// キャッシュを使用しない
+				stat.accept(UNUSE);
+				return Integer.valueOf(n);
+			}
+		}
+
+		/**
+		 * 統計処理なし
+		 * @param flags 統計フラグ
+		 */
+		private void diagNothing(int flags) {
+			// Do nothing
+		}
+
+		/**
+		 * 統計処理あり
+		 * @param flags 統計フラグ
+		 */
+		private void diagExecute(int flags) {
+			synchronized (mLockForDiag) {
+				mReqTotal++;
+				mHitTotal += ((flags & HIT_ANY) != 0) ? 1L : 0L;
+				mReqIndex += ((flags & REQ_IDX) != 0) ? 1L : 0L;
+				mHitIndex += ((flags & HIT_IDX) != 0) ? 1L : 0L;
+				mReqChx += ((flags & REQ_CHX) != 0) ? 1L : 0L;
+				mHitChx += ((flags & HIT_CHX) != 0) ? 1L : 0L;
+			}
+		}
+	}
+
+	/** 整数値キャッシュ */
+	private static Cache sCache = new Cache();
+
+	/**
+	 * 整数値キャッシュヒットの統計有無を設定します。
+	 * <p>当メソッドを呼び出して統計有無を設定すると、呼び出し前の統計有無設定の内容に関わらず統計情報はリセットされ、
+	 * 全てのカウンタが0になります。</p>
+	 * <p>引数にtrueを指定すると統計が有効になり、{@link #box(int)}が実行される度にキャッシュヒットの統計情報が
+	 * 更新されるようになります。この更新処理はスレッドセーフになっている関係上、統計を有効にすると整数値キャッシュの
+	 * 取得処理({@link #box(int)})のパフォーマンスが低下します。そのため統計機能は基本的にはデバッグ用であると
+	 * 認識してください。</p>
+	 * <p>引数にfalseを指定すると統計が無効になり、統計情報がリセットされた後は統計情報の更新は行われません。</p>
+	 * @param diag 統計有無
+	 */
+	public static void cacheStatistics(boolean diag) {
+		sCache.statistics(diag);
+	}
+
+	/**
+	 * 整数値キャッシュヒットの統計情報集計結果スナップショットを取得します。
+	 * <p>当メソッドは{@link #box(int)}による整数値キャッシュの要求内容から生成した統計情報集計結果のスナップショットを取り、
+	 * それらの値を配列にして返します。返された配列は以下のような構成になっています。</p>
+	 * <ul>
+	 * <li>[0] 整数値要求回数({@link #box(int)}が呼ばれた回数)</li>
+	 * <li>[1] 整数値キャッシュヒット回数</li>
+	 * <li>[2] 通常インデックス用キャッシュ(上位16ビットが全て0の整数値)要求回数</li>
+	 * <li>[3] 通常インデックス用キャッシュヒット回数</li>
+	 * <li>[4] CHX用キャッシュ(上位16ビットのいずれかが1の整数値)要求回数</li>
+	 * <li>[5] CHX用キャッシュヒット回数</li>
+	 * </ul>
+	 * <p>整数値キャッシュの統計が無効になっている場合、上記配列の各要素は全て0を示します。</p>
+	 * @return 整数値キャッシュヒットの統計情報集計結果スナップショット
+	 */
+	public static long[] cacheSnapshotResult() {
+		return sCache.snapshot();
+	}
+
+	/**
+	 * 指定された値型の整数値をBOX化した整数値オブジェクトをキャッシュから取得します。
+	 * <p>Javaでは標準で-127～127のIntegerがキャッシュされていますが、BMSではそれよりも大きい値を扱うことがほとんどであり
+	 * 標準のキャッシュが利用できない場合が大半を占めます。そのままではJavaヒープの確保・解放が頻繁に実行されることとなり
+	 * パフォーマンスに影響が出ることが懸念されるため、BMSライブラリでは独自の整数値キャッシュを保持しています。</p>
+	 * <p>索引付きメタ情報やBMS仕様のチャンネルはそれぞれ0～1295までの値を扱うことが多いことから、それらをキャッシュし
+	 * 保持しています。また、CHX値は上位16ビットがチャンネル番号、下位16ビットがチャンネルインデックスとなっていますが、
+	 * 頻出するCHX値もキャッシュし保持しています。</p>
+	 * <p>当メソッドで整数値をBOX化しようとする時、上記に示したキャッシュを最初に参照しその整数値オブジェクトを
+	 * 返そうとします。キャッシュにない整数値は{@link Integer#valueOf(int)}に処理を委譲します。</p>
+	 * <p>当メソッドはどのような値を指定してもnullを返したり例外をスローすることはありません。</p>
+	 * @param n BOX化対象の値型整数値
+	 * @return BOX化された整数値オブジェクト
+	 */
+	public static Integer box(int n) {
+		return sCache.get(n);
 	}
 
 	/**

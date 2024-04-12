@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +116,7 @@ public final class BmsLoader {
 			"^[ \\t]*((#|%)[^ \\t]*)(([ \\t]+)(.*?))?([ \\t]*)$");
 	/** チャンネル定義の正規表現パターン */
 	private static final Pattern SYNTAX_DEFINE_CHANNEL = Pattern.compile(
-			"^[ \\t]*#([0-9]{3})([a-zA-Z0-9]{2}):(.*)$");
+			"^[ \\t]*#(([0-9]{3})([a-zA-Z0-9]{2})):(.*)$");
 
 	/** BMSローダのデフォルトハンドラです。具体的な振る舞いは{@link BmsLoadHandler}を参照してください。 */
 	public static final BmsLoadHandler DEFAULT_HANDLER = new BmsLoadHandler() {};
@@ -140,6 +141,12 @@ public final class BmsLoader {
 		@Override
 		public boolean isFixSpecViolation() {
 			return mIsFixSpecViolation;
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public boolean isAllowRedefine() {
+			return mIsAllowRedefine;
 		}
 
 		/** {@inheritDoc} */
@@ -177,6 +184,14 @@ public final class BmsLoader {
 		BmsArray array;
 	}
 
+	/** 解析済みチャンネル定義データ */
+	private static class ParsedChannels {
+		/** チャンネル定義リスト */
+		List<ChannelArrayData> dataList = new ArrayList<>(1295);
+		/** 検出済みチャンネル定義("XXXYY"形式の文字列)とリスト要素 */
+		Map<String, Integer> foundDefs = new HashMap<>();
+	}
+
 	/** フィールドにセットしたノートオブジェクトをノート生成器で返す橋渡し用クラス */
 	private static class NoteBridge implements BmsNote.Creator {
 		/** createNoteで橋渡しするノートオブジェクト */
@@ -200,6 +215,8 @@ public final class BmsLoader {
 	private boolean mIsEnableSyntaxError = false;
 	/** BMS仕様違反の値修正フラグ */
 	private boolean mIsFixSpecViolation = true;
+	/** 単体メタ情報・重複不可チャンネルの再定義を許可するかどうか */
+	private boolean mIsAllowRedefine = true;
 	/** 不明メタ情報を無視するかどうか */
 	private boolean mIsIgnoreUnknownMeta = true;
 	/** 不明チャンネルを無視するかどうか */
@@ -221,6 +238,7 @@ public final class BmsLoader {
 				Map.entry(BmsLoadError.Kind.UNKNOWN_META, () -> !mIsIgnoreUnknownMeta),
 				Map.entry(BmsLoadError.Kind.UNKNOWN_CHANNEL, () -> !mIsIgnoreUnknownChannel),
 				Map.entry(BmsLoadError.Kind.WRONG_DATA, () -> !mIsIgnoreWrongData),
+				Map.entry(BmsLoadError.Kind.REDEFINE, () -> !mIsAllowRedefine),
 				Map.entry(BmsLoadError.Kind.COMMENT_NOT_CLOSED, () -> mIsEnableSyntaxError),
 				Map.entry(BmsLoadError.Kind.FAILED_TEST_CONTENT, () -> mIsEnableSyntaxError));
 	}
@@ -284,6 +302,28 @@ public final class BmsLoader {
 	 */
 	public final BmsLoader setFixSpecViolation(boolean isFix) {
 		mIsFixSpecViolation = isFix;
+		return this;
+	}
+
+	/**
+	 * メタ情報・重複不可チャンネルの再定義を検出した場合のデータ上書きを許可するかどうかを設定します。
+	 * <p>データ上書きを許可すると、先に定義されたメタ情報、または同じ小節の重複不可チャンネルデータを上書きするようになります。
+	 * メタ情報は単体メタ情報({@link BmsUnit#SINGLE})と定義済みの索引付きメタ情報({@link BmsUnit#INDEXED})が対象です。
+	 * 重複不可チャンネルでは、例えば以下のような定義を行った場合に上の行の定義は完全に上書きされ、
+	 * 存在しなかったものとして処理されます。</p>
+	 * <pre>
+	 * #003XY:11001100  ;上書きされ、無かったことになる
+	 * #003XY:22002222  ;上書きされ、無かったことになる
+	 * #003XY:00330033  ;この行のみが有効になる</pre>
+	 * <p>この設定は値型・配列型チャンネルの両方に適用されます。</p>
+	 * <p>再定義が不許可の状態でメタ情報・重複不可チャンネルの再定義が検出された場合、再定義された行はエラーとして処理され、
+	 * BMSコンテンツ読み込みハンドラの{@link BmsLoadHandler#parseError(BmsLoadError)}が呼び出されます。
+	 * エラーは{@link BmsLoadError.Kind#REDEFINE}として通知されます。</p>
+	 * @param isAllow 再定義の許可有無
+	 * @return このオブジェクトのインスタンス
+	 */
+	public final BmsLoader setAllowRedefine(boolean isAllow) {
+		mIsAllowRedefine = isAllow;
 		return this;
 	}
 
@@ -426,108 +466,129 @@ public final class BmsLoader {
 			throw new BmsException(e);
 		}
 
-		// BOMチェックを行う(UTF-8かどうかに関わらずBOMは無視する)
+		// BOMチェックを行う
+		var isUtf8 = false;
 		var skipCount = 0L;
-		if ((bms.length >= 3) && (bms[0] == 0xef) && (bms[1] == 0xbb) && (bms[2] == 0xbf)) {
+		if ((bms.length >= 3) && (bms[0] == (byte)0xef) && (bms[1] == (byte)0xbb) && (bms[2] == (byte)0xbf)) {
 			// データ先頭にUTF-8におけるBOMを検出した
+			isUtf8 = true;
 			skipCount = 3;
 		} else {
 			// TODO: UTF-16のBOMチェックは不要？
 		}
 
-		// BMS解析に使用する文字セットを、BMS宣言のencodingから決定しようとする
+		// 読み込みに使用する文字セットを解決する
 		Charset charset = null;
-		try {
-			// 1行目のみをASCIIコード限定で読み取るReaderを生成する
-			var bais = new ByteArrayInputStream(bms);
-			bais.skip(skipCount);
-			var isr = new InputStreamReader(bais, StandardCharsets.US_ASCII);
-			var reader = new BufferedReader(isr);
+		if (isUtf8) {
+			// UTF-8 BOMを検出したため、文字セットはUTF-8とする
+			charset = StandardCharsets.UTF_8;
+		} else {
+			// BMS解析に使用する文字セットを、BMS宣言のencodingから決定しようとする
+			try {
+				// 1行目のみをASCIIコード限定で読み取るReaderを生成する
+				var bais = new ByteArrayInputStream(bms);
+				bais.skip(skipCount);
+				var isr = new InputStreamReader(bais, StandardCharsets.US_ASCII);
+				var reader = new BufferedReader(isr);
 
-			// バイト配列をASCII文字列として1行目を読み取る
-			var declaration = reader.readLine();
-			if (declaration != null) {
-				// BMS宣言を解析してencodingの値から文字セットを決定しようとする
-				var decls = parseDeclaration(declaration);
-				if ((decls != null) && (decls.containsKey("encoding"))) {
-					try {
-						// encodingに記述されている文字セットを使用しようとする
-						charset = Charset.forName(decls.get("encoding"));
-					} catch (Exception e) {
-						// 指定文字セットが使えない場合はエラー
-						error(BmsLoadError.Kind.ENCODING, 1, declaration, null, e);
+				// バイト配列をASCII文字列として1行目を読み取る
+				var declaration = reader.readLine();
+				if (declaration != null) {
+					// BMS宣言を解析してencodingの値から文字セットを決定しようとする
+					var decls = parseDeclaration(declaration);
+					if ((decls != null) && (decls.containsKey("encoding"))) {
+						try {
+							// encodingに記述されている文字セットを使用しようとする
+							charset = Charset.forName(decls.get("encoding"));
+						} catch (Exception e) {
+							// 指定文字セットが使えない場合はエラー
+							error(BmsLoadError.Kind.ENCODING, 1, declaration, null, e);
+							charset = BmsSpec.getStandardCharset();
+						}
+					} else {
+						// BMS宣言無し、BMS宣言有りでencoding指定無しの場合はBMS標準文字セットを使用する
 						charset = BmsSpec.getStandardCharset();
 					}
 				} else {
-					// BMS宣言無し、BMS宣言有りでencoding指定無しの場合はBMS標準文字セットを使用する
+					// 文字列が読み取れなかった場合はBMS標準文字セットを使用する
+					// このケースではおそらく空のBMSファイルが投げられている
 					charset = BmsSpec.getStandardCharset();
 				}
-			} else {
-				// 文字列が読み取れなかった場合はBMS標準文字セットを使用する
-				// このケースではおそらく空のBMSファイルが投げられている
-				charset = BmsSpec.getStandardCharset();
+			} catch (BmsException e) {
+				throw e;
+			} catch (Exception e) {
+				// 例外発生時はBmsExceptionにラップして投げる
+				throw new BmsException(e);
 			}
-		} catch (BmsException e) {
-			throw e;
-		} catch (Exception e) {
-			// 例外発生時はBmsExceptionにラップして投げる
-			throw new BmsException(e);
 		}
 
 		// BMS読み込み用のReaderを生成し、そのReaderで読み込みを実行する
 		var bais = new ByteArrayInputStream(bms);
 		bais.skip(skipCount);
 		var reader = new InputStreamReader(bais, charset);
+		var content = load(reader);
 
-		return load(reader);
+		// 文字セットを強制した場合は当該文字セットをencodingに設定する
+		if (isUtf8) {
+			content.beginEdit();
+			content.addDeclaration("encoding", charset.name());
+			content.endEdit();
+		}
+
+		return content;
 	}
 
 	/**
 	 * BMSコンテンツを読み込みます。
 	 *
 	 * <p>{@link java.io.File} / {@link java.nio.file.Path} / {@link java.io.InputStream} / byte[]が入力となる場合、
-	 * BmsLoaderでは最初に先頭行のBMS宣言を解析します。BMS宣言が存在し、encoding要素が存在する場合はその設定値から
-	 * 使用する文字セットを解決します。以後の読み込みは当該文字セットを用いて文字列をデコードし、BMS解析を行います。</p>
+	 * {@link BmsLoader}では最初に先頭行のBMS宣言を解析します。BMS宣言が存在し、encoding要素が存在する場合はその設定値から
+	 * 使用する文字セットを解決します。以後の読み込みは当該文字セットを用いて文字列をデコードし、BMS解析を行います。
+	 * ただし、入力にBOM(Byte Order Mark)が付いている場合はUTF-8で入力をデコードし、encoding要素は &quot;UTF-8&quot;
+	 * に設定・上書きします。</p>
 	 *
-	 * <p>BMS宣言が無い、またはencoding要素が指定されていない場合は{@link BmsSpec#getStandardCharset}で取得できる
-	 * 文字セットを用いてBMS解析を行います。</p>
+	 * <p>上記の条件に該当しない場合は全て{@link BmsSpec#getStandardCharset}で取得できる文字セットを用いて
+	 * BMSをデコードし、解析を行います。</p>
 	 *
-	 * <p>BMS宣言は左から順に解析し、その順番でBMSコンテンツにセットされます。</p>
+	 * <p>BMS宣言は左から順に解析し、その順番でBMSコンテンツにセットされます。また、BMS解析の動作仕様は概ね以下の通りです。</p>
 	 *
-	 * <p>BMS解析の動作仕様は概ね以下の通りです。<br>
-	 * - 行頭の半角スペースおよびタブは無視されます。<br>
-	 * - 半角スペースおよびタブのみの行は空行として読み飛ばします。<br>
-	 * - 改行コードは&lt;CR&gt;, &lt;LF&gt;, &lt;CR&gt;&lt;LF&gt;を自動認識します。<br>
-	 * - 先頭行において、&quot;;bms? &quot;で始まる場合はBMS宣言として認識されます。<br>
-	 * - &quot;;&quot;または&quot;//&quot;で始まる行はコメント行として認識されます。(単一行コメント)<br>
-	 * - &quot;/*&quot;で始まる行は複数行コメントの開始行として認識されます。以降、行末に&quot;* /&quot;が出現するまでの
-	 * 行は全てコメントとして認識されます。<br>
-	 * - 複数行コメントが閉じられずにBMS解析が終了した場合、エラーハンドラにて{@link BmsLoadError.Kind#COMMENT_NOT_CLOSED}
-	 * が通知されます。<br>
-	 * - &quot;#&quot;または&quot;%&quot;で始まり、1文字目がアルファベットで始まる行をメタ情報の定義と見なします。<br>
-	 * - 3文字の半角数字で始まり、次に2文字の半角英数字、更にその次が&quot;:&quot;で始まる行をチャンネルデータの定義と見なします。<br>
-	 * - 以上のパターンに該当しない行は構文エラーとし、エラーハンドラにて{@link BmsLoadError.Kind#SYNTAX}が通知されます。
-	 * </p>
+	 * <ul>
+	 * <li>行頭の半角スペースおよびタブは無視されます。</li>
+	 * <li>半角スペースおよびタブのみの行は空行として読み飛ばします。</li>
+	 * <li>改行コードは&lt;CR&gt;, &lt;LF&gt;, &lt;CR&gt;&lt;LF&gt;を自動認識します。</li>
+	 * <li>先頭行において、&quot;;bms? &quot;で始まる場合はBMS宣言として認識されます。</li>
+	 * <li>&quot;;&quot;、&quot;*&quot;、または&quot;//&quot;で始まる行はコメント行として認識されます。(単一行コメント)</li>
+	 * <li>&quot;/*&quot;で始まる行は複数行コメントの開始行として認識されます。以降、行末に&quot;* /&quot;が出現するまでの
+	 * 行は全てコメントとして認識されます。</li>
+	 * <li>複数行コメントが閉じられずにBMS解析が終了した場合、エラーハンドラにて{@link BmsLoadError.Kind#COMMENT_NOT_CLOSED}
+	 * が通知されます。</li>
+	 * <li>&quot;#&quot;または&quot;%&quot;で始まり、1文字目がアルファベットで始まる行をメタ情報の定義と見なします。</li>
+	 * <li>&quot;#&quot;に続き3文字の半角数字で始まり、次に2文字の半角英数字、更にその次が&quot;:&quot;で始まる行をチャンネルデータの定義と見なします。</li>
+	 * <li>以上のパターンに該当しない行は構文エラーとし、エラーハンドラにて{@link BmsLoadError.Kind#SYNTAX}が通知されます。</li>
+	 * </ul>
 	 *
-	 * <p>
-	 * メタ情報解析について<br>
-	 * - メタ情報の値は、文字列の右側の半角空白文字は消去されます。<br>
-	 * - 索引付きメタ情報は、名称の末端文字2文字を36進数値と見なしてその値をインデックス値とし、残りの文字を名称として扱います。<br>
-	 * - 索引付きメタ情報のインデックス値が36進数値でない場合、エラーハンドラにて{@link BmsLoadError.Kind#UNKNOWN_META}が通知されます。<br>
-	 * - BMS仕様に規定されていない名称を検出した場合、エラーハンドラにて{@link BmsLoadError.Kind#UNKNOWN_META}が通知されます。<br>
-	 * - メタ情報の値がBMS仕様に規定されたデータ型の記述書式に適合しない場合、エラーハンドラにて{@link BmsLoadError.Kind#WRONG_DATA}が通知されます。<br>
-	 * </p>
+	 * <p>メタ情報解析について</p>
 	 *
-	 * <p>
-	 * チャンネル解析について<br>
-	 * - チャンネル番号がBMS仕様に未定義の場合、エラーハンドラにて{@link BmsLoadError.Kind#UNKNOWN_CHANNEL}が通知されます。<br>
-	 * - 以下のケースを検出した場合、エラーハンドラにて{@link BmsLoadError.Kind#WRONG_DATA}が通知されます。<br>
-	 * &nbsp;&nbsp;- チャンネルに定義されたデータの記述書式がBMS仕様に違反している場合。<br>
-	 * &nbsp;&nbsp;- データ重複不許可チャンネルの同小節番号にて複数のデータ定義を検出した場合。<br>
-	 * &nbsp;&nbsp;- データ重複許可チャンネルの同小節番号内にて{@link BmsSpec#CHINDEX_MAX}+1個を超えるデータ定義を検出した場合。<br>
-	 * &nbsp;&nbsp;- 配列型チャンネルデータの配列要素数が当該小節の刻み総数より多い場合。<br>
-	 * &nbsp;&nbsp;- 配列型チャンネルデータの配列要素数が0。<br>
-	 * </p>
+	 * <ul>
+	 * <li>メタ情報の値は、文字列の右側の半角空白文字は消去されます。</li>
+	 * <li>索引付きメタ情報は、名称の末端文字2文字を36進数値と見なしてその値をインデックス値とし、残りの文字を名称として扱います。</li>
+	 * <li>索引付きメタ情報のインデックス値が36進数値でない場合、エラーハンドラにて{@link BmsLoadError.Kind#UNKNOWN_META}が通知されます。</li>
+	 * <li>BMS仕様に規定されていない名称を検出した場合、エラーハンドラにて{@link BmsLoadError.Kind#UNKNOWN_META}が通知されます。</li>
+	 * <li>メタ情報の値がBMS仕様に規定されたデータ型の記述書式に適合しない場合、エラーハンドラにて{@link BmsLoadError.Kind#WRONG_DATA}が通知されます。</li>
+	 * </ul>
+	 *
+	 * <p>チャンネル解析について</p>
+	 *
+	 * <ul>
+	 * <li>チャンネル番号がBMS仕様に未定義の場合、エラーハンドラにて{@link BmsLoadError.Kind#UNKNOWN_CHANNEL}が通知されます。</li>
+	 * <li>以下のケースを検出した場合、エラーハンドラにて{@link BmsLoadError.Kind#WRONG_DATA}が通知されます。
+	 * <ul>
+	 * <li>チャンネルに定義されたデータの記述書式がBMS仕様に違反している場合。</li>
+	 * <li>データ重複許可チャンネルの同小節番号内にて{@link BmsSpec#CHINDEX_MAX}+1個を超えるデータ定義を検出した場合。</li>
+	 * <li>配列型チャンネルデータの配列要素数が当該小節の刻み総数より多い場合。</li>
+	 * <li>配列型チャンネルデータの配列要素数が0。</li>
+	 * </ul></li>
+	 * </ul>
 	 *
 	 * @param bms BMSのReader
 	 * @return BMSコンテンツ
@@ -724,14 +785,14 @@ public final class BmsLoader {
 			}
 
 			// 全行を読み取り、BMSを解析する
-			var chArrays = new ArrayList<ChannelArrayData>();
+			var parsedCh = new ParsedChannels();
 			var isNormalMode = true;
 			while (line != null) {
 				// 読み取りモードによる処理の分岐
 				String nextLine = null;
 				if (isNormalMode) {
 					// 通常解析モード
-					if (parseChannel(lineNumber, line, chArrays, content)) {
+					if (parseChannel(lineNumber, line, parsedCh, content)) {
 						// チャンネル
 					} else if (parseMeta(lineNumber, line, content)) {
 						// ヘッダ(メタ情報)
@@ -779,7 +840,7 @@ public final class BmsLoader {
 			// 配列型のチャンネルデータをコンテンツに登録する
 			// (配列型の要素登録先(tick)が小節の長さの影響を受けるため、一旦BMS全体を解析し切った後で登録する必要あり)
 			content.beginEdit();
-			for (ChannelArrayData data : chArrays) {
+			for (ChannelArrayData data : parsedCh.dataList) {
 				var chNumber = data.channel.getNumber();
 				var chIndex = content.getChannelDataCount(chNumber, data.measure);
 				var tickCount = content.getMeasureTickCount(data.measure);
@@ -965,15 +1026,18 @@ public final class BmsLoader {
 			}
 
 			// 索引付きメタ情報取得を試行する
-			name = name.substring(0, nameLength - 2);
-			meta = mSpec.getMeta(name, BmsUnit.INDEXED);
-			index = Integer.parseInt(indexStr, 36);
-		}
-		if (meta == null) {
-			// メタ情報不明
-			var msg = String.format("'%s' No such meta in spec", name);
-			error(BmsLoadError.Kind.UNKNOWN_META, lineNumber, line, msg, null);
-			return true;  // メタ情報として解析済みとする
+			var nameIdx = name.substring(0, nameLength - 2);
+			meta = mSpec.getMeta(nameIdx, BmsUnit.INDEXED);
+			index = BmsInt.to36i(indexStr);
+			if (meta == null) {
+				// メタ情報不明
+				var msg = String.format("'%s' No such meta in spec", name);
+				error(BmsLoadError.Kind.UNKNOWN_META, lineNumber, line, msg, null);
+				return true;  // メタ情報として解析済みとする
+			} else {
+				// 索引付きメタ情報で見つかった場合は索引を抜いた名前を控えておく
+				name = nameIdx;
+			}
 		}
 
 		// 定義値が当該メタ情報の規定データ型に適合するか
@@ -1018,10 +1082,35 @@ public final class BmsLoader {
 		var unit = meta.getUnit();
 		var result = BmsLoadHandler.TestResult.FAIL;
 		switch (unit) {
-		case SINGLE: result = mHandler.testMeta(meta, 0, obj); break;
-		case MULTIPLE: result = mHandler.testMeta(meta, content.getMultipleMetaCount(name), obj); break;
-		case INDEXED: result = mHandler.testMeta(meta, index, obj); break;
-		default: break;
+		case SINGLE: {
+			// 再定義不許可の状態で再定義を検出した場合はエラーとする
+			if (!mIsAllowRedefine && content.containsSingleMeta(meta.getName())) {
+				error(BmsLoadError.Kind.REDEFINE, lineNumber, line, "Re-defined single meta", null);
+				return true;
+			}
+
+			// ユーザーによる検査処理
+			result = mHandler.testMeta(meta, 0, obj);
+			break;
+		}
+		case MULTIPLE: {
+			// ユーザーによる検査処理
+			result = mHandler.testMeta(meta, content.getMultipleMetaCount(name), obj);
+			break;
+		}
+		case INDEXED: {
+			// 再定義不許可の状態で同じ同一インデックスへの再定義を検出した場合はエラーとする
+			if (!mIsAllowRedefine && content.containsIndexedMeta(meta.getName(), index)) {
+				error(BmsLoadError.Kind.REDEFINE, lineNumber, line, "Re-defined indexed meta", null);
+				return true;
+			}
+
+			// ユーザーによる検査処理
+			result = mHandler.testMeta(meta, index, obj);
+			break;
+		}
+		default:
+			break;
 		}
 		if (result == null) {
 			var msg = "Meta test result was returned null by handler";
@@ -1062,13 +1151,13 @@ public final class BmsLoader {
 	 *
 	 * @param lineNumber 解析対象行の行番号
 	 * @param line 解析対象行
-	 * @param channelArray 配列型のチャンネルデータを格納するリスト
+	 * @param parsed 解析済みチャンネル定義データ
 	 * @param content チャンネルデータを格納するBMSコンテンツ
 	 * @return 解析対象行をチャンネルとして認識した場合はtrue、そうでなければfalse
 	 * @exception BmsParseException エラーハンドラがfalseを返した時
 	 */
-	private boolean parseChannel(int lineNumber, String line, List<ChannelArrayData> chArrays,
-			BmsContent content) throws BmsException {
+	private boolean parseChannel(int lineNumber, String line, ParsedChannels parsed, BmsContent content)
+			throws BmsException {
 		// チャンネル定義かどうか確認する
 		var matcher = SYNTAX_DEFINE_CHANNEL.matcher(line);
 		if (!matcher.matches()) {
@@ -1077,9 +1166,9 @@ public final class BmsLoader {
 		}
 
 		// 小節番号、チャンネル、値を取り出す
-		var measure = Integer.parseInt(matcher.group(1));
-		var channelNum = BmsInt.to36i(matcher.group(2));
-		var value = matcher.group(3).trim();
+		var measure = Integer.parseInt(matcher.group(2));
+		var channelNum = BmsInt.to36i(matcher.group(3));
+		var value = matcher.group(4).trim();
 
 		// チャンネルの取得とデータ型の適合チェック
 		var channel = mSpec.getChannel(channelNum);
@@ -1118,8 +1207,20 @@ public final class BmsLoader {
 				}
 			}
 
-			// チャンネルデータの検査を行う
+			// 重複不可チャンネルの重複チェックを行う
 			var chIndex = content.getChannelDataCount(channelNum, measure);
+			if ((chIndex > 0) && !channel.isMultiple()) {
+				if (mIsAllowRedefine) {
+					// 再定義が許可されている場合は上書きするようにする
+					chIndex = 0;
+				} else {
+					// 上書き不許可・重複不可・再定義検出の条件が揃った場合はエラーとする
+					error(BmsLoadError.Kind.REDEFINE, lineNumber, line, "Re-defined value type channel", null);
+					return true;
+				}
+			}
+
+			// チャンネルデータの検査を行う
 			var result = mHandler.testChannel(channel, chIndex, measure, object);
 			if (result == null) {
 				var msg = "Channel test result was returned null by handler";
@@ -1149,9 +1250,20 @@ public final class BmsLoader {
 			}
 		} else if (channelType.isArrayType()) {
 			// 配列型の場合
+			// 重複不可チャンネル上書き不許可・重複不可・再定義検出の条件が揃った場合はエラーとする
+			var defStr = matcher.group(1);
+			var owPos = (Integer)null;
+			if (!channel.isMultiple()) {
+				owPos = parsed.foundDefs.get(defStr);
+				if (!mIsAllowRedefine && (owPos != null)) {
+					error(BmsLoadError.Kind.REDEFINE, lineNumber, line, "Re-defined array type channel", null);
+					return true;
+				}
+			}
+
+			// 配列データを解析する
 			var array = (BmsArray)null;
 			try {
-				// 配列データを解析する
 				array = new BmsArray(value, channelType.getRadix());
 			} catch (IllegalArgumentException e) {
 				// 配列の書式が不正
@@ -1168,14 +1280,26 @@ public final class BmsLoader {
 				error(BmsLoadError.Kind.PANIC, lineNumber, line, msg, null);
 			} else switch (result.getResult()) {
 			case BmsLoadHandler.TestResult.RESULT_OK: {
-				// 解析済みデータをストックしておく
+				// 解析済みデータを生成する
 				ChannelArrayData data = new ChannelArrayData();
 				data.lineNumber = lineNumber;
 				data.line = line;
 				data.channel = channel;
 				data.measure = measure;
 				data.array = array;
-				chArrays.add(data);
+
+				// 解析済みデータをストックし、重複不可チャンネルの小節番号・チャンネルとそのデータの格納場所を覚えておく
+				if (channel.isMultiple()) {
+					// 重複可能であれば格納場所は記憶しない
+					parsed.dataList.add(data);
+				} else if (owPos != null) {
+					// 再定義許可時は既存定義を上書きする
+					parsed.dataList.set(owPos, data);
+				} else {
+					// 重複なし
+					parsed.foundDefs.put(defStr, BmsInt.box(parsed.dataList.size()));
+					parsed.dataList.add(data);
+				}
 				break;
 			}
 			case BmsLoadHandler.TestResult.RESULT_FAIL:

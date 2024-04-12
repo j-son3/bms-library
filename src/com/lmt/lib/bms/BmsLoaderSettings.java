@@ -30,6 +30,12 @@ public interface BmsLoaderSettings {
 	boolean isFixSpecViolation();
 
 	/**
+	 * メタ情報・重複不可チャンネルの再定義を検出した場合のデータ上書きを許可するかどうかを取得します。
+	 * @return データ上書きを許可する場合true、許可しない場合false
+	 */
+	boolean isAllowRedefine();
+
+	/**
 	 * BMS仕様に存在しない未知のメタ情報検出エラーを無視するかどうかを取得します。
 	 * @return 未知のメタ情報検出エラーを無視する場合はtrue、無視しない場合はfalse
 	 */

@@ -89,6 +89,7 @@ public class BeMusicSpec {
 				.addMeta(BeMusicMeta.BANNER)
 				.addMeta(BeMusicMeta.STAGEFILE)
 				.addMeta(BeMusicMeta.BACKBMP)
+				.addMeta(BeMusicMeta.PREVIEW)
 				.addMeta(BeMusicMeta.POORBGA)
 				.addMeta(BeMusicMeta.MOVIE)
 				.addMeta(BeMusicMeta.VIDEOFILE)
@@ -103,6 +104,7 @@ public class BeMusicSpec {
 				.addMeta(BeMusicMeta.OCT_FP)
 				.addMeta(BeMusicMeta.LNTYPE)
 				.addMeta(BeMusicMeta.LNOBJ)
+				.addMeta(BeMusicMeta.LNMODE)
 				.addMeta(BeMusicMeta.MAKER)
 				.addMeta(BeMusicMeta.URL)
 				.addMeta(BeMusicMeta.EMAIL)
@@ -119,6 +121,7 @@ public class BeMusicSpec {
 				.addMeta(BeMusicMeta.EXBPM)
 				.addMeta(BeMusicMeta.STOP)
 				.addMeta(BeMusicMeta.STP)
+				.addMeta(BeMusicMeta.SCROLL)
 				.addMeta(BeMusicMeta.EXRANK)
 				.addMeta(BeMusicMeta.OPTION)
 				.addMeta(BeMusicMeta.CHANGEOPTION)
@@ -156,7 +159,8 @@ public class BeMusicSpec {
 				.addChannel(BeMusicChannel.BGA_LAYER2_ARGB)
 				.addChannel(BeMusicChannel.BGA_MISS_ARGB)
 				.addChannel(BeMusicChannel.BGA_KEYBOUND)
-				.addChannel(BeMusicChannel.OPTION);
+				.addChannel(BeMusicChannel.OPTION)
+				.addChannel(BeMusicChannel.SCROLL);
 		for (var c : BeMusicChannel.VISIBLE_1P_CHANNELS) { builder.addChannel(c); }
 		for (var c : BeMusicChannel.VISIBLE_2P_CHANNELS) { builder.addChannel(c); }
 		for (var c : BeMusicChannel.INVISIBLE_CHANNELS) { builder.addChannel(c); }
@@ -197,6 +201,7 @@ public class BeMusicSpec {
 	 * <li>メタ情報の値が想定する形式の値になっていない時(例えば数値を設定する箇所に数値以外を記述する等)</li>
 	 * <li>未知のチャンネル(番号)が定義されている時</li>
 	 * <li>チャンネルに設定した値の形式が不正な時</li>
+	 * <li>同じ小節・チャンネルのデータが再定義された時</li>
 	 * <li>乱数(#RANDOM/#IF/#ELSE/#ENDIF等)の定義階層が不正な時</li>
 	 * </ul>
 	 * <p>上記以外にもファイルの読み込み中にエラーが発生する等、複数の要因で例外がスローされる可能性があります。
@@ -225,6 +230,7 @@ public class BeMusicSpec {
 				.setHandler(handler)
 				.setSyntaxErrorEnable(strictly)
 				.setFixSpecViolation(!strictly)
+				.setAllowRedefine(!strictly)
 				.setIgnoreUnknownMeta(!strictly)
 				.setIgnoreUnknownChannel(!strictly)
 				.setIgnoreWrongData(!strictly);

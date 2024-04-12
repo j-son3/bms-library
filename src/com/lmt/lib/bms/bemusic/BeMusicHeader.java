@@ -3,17 +3,15 @@ package com.lmt.lib.bms.bemusic;
 import static com.lmt.lib.bms.bemusic.Assertion.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
 
 import com.lmt.lib.bms.BmsContent;
-import com.lmt.lib.bms.BmsMeta;
+import com.lmt.lib.bms.BmsInt;
 import com.lmt.lib.bms.BmsSpec;
-import com.lmt.lib.bms.MutableInt;
 
 /**
  * Be Musicデータフォーマットのヘッダ定義を表します。
@@ -88,6 +86,11 @@ public class BeMusicHeader {
 	 */
 	public static final int FLAG_USER_AREA = 0xffff0000;
 
+	/** 文字列データの空マップ */
+	private static final Map<Integer, String> EMPTY_STRING_IMAP = Collections.emptyMap();
+	/** 数値データの空マップ */
+	private static final Map<Integer, Double> EMPTY_NUMERIC_IMAP = Collections.emptyMap();
+
 	/** #PLAYER */
 	private BeMusicPlayer mPlayer;
 	/** #GENRE */
@@ -118,6 +121,8 @@ public class BeMusicHeader {
 	private String mStageFile;
 	/** #BACKBMP */
 	private String mBackBmp;
+	/** #PREVIEW */
+	private String mPreview;
 	/** #LNOBJ */
 	private List<Long> mLnObjs;
 	/** %URL */
@@ -126,18 +131,15 @@ public class BeMusicHeader {
 	private String mEmail;
 
 	/** #WAV */
-	private Map<MutableInt, String> mWavs;
+	private Map<Integer, String> mWavs;
 	/** #BMP */
-	private Map<MutableInt, String> mBmps;
+	private Map<Integer, String> mBmps;
 	/** #BPM */
-	private Map<MutableInt, Double> mBpms;
+	private Map<Integer, Double> mBpms;
 	/** #STOP */
-	private Map<MutableInt, Double> mStops;
+	private Map<Integer, Double> mStops;
 	/** #TEXT */
-	private Map<MutableInt, String> mTexts;
-
-	/** インデックス検索用整数値 */
-	private MutableInt mIndexTemp = new MutableInt();
+	private Map<Integer, String> mTexts;
 
 	/**
 	 * ヘッダ定義オブジェクトを構築します。
@@ -310,6 +312,14 @@ public class BeMusicHeader {
 	}
 
 	/**
+	 * #PREVIEWを取得します。
+	 * @return #PREVIEWの値
+	 */
+	public final String getPreview() {
+		return mPreview;
+	}
+
+	/**
 	 * #LNOBJを全て取得します。
 	 * @return #LNOBJのリスト
 	 */
@@ -339,8 +349,7 @@ public class BeMusicHeader {
 	 * @return #WAVの値。インデックスに該当する値がない場合空文字。
 	 */
 	public final String getWav(int metaIndex) {
-		var wav = (mWavs == null) ? null : mWavs.get(index(metaIndex));
-		return Objects.requireNonNullElse(wav, "");
+		return Objects.requireNonNullElse(mWavs.get(BmsInt.box(metaIndex)), "");
 	}
 
 	/**
@@ -348,7 +357,7 @@ public class BeMusicHeader {
 	 * @return メタ情報インデックスでマップされた#WAVの値
 	 */
 	public final Map<Integer, String> getWavs() {
-		return mWavs.keySet().stream().collect(Collectors.toMap(k -> k.get(), k -> mWavs.get(k)));
+		return mWavs;
 	}
 
 	/**
@@ -357,8 +366,7 @@ public class BeMusicHeader {
 	 * @return #BMPの値。インデックスに該当する値がない場合空文字。
 	 */
 	public final String getBmp(int metaIndex) {
-		var bmp = (mBmps == null) ? null : mBmps.get(index(metaIndex));
-		return Objects.requireNonNullElse(bmp, "");
+		return Objects.requireNonNullElse(mBmps.get(BmsInt.box(metaIndex)), "");
 	}
 
 	/**
@@ -366,7 +374,7 @@ public class BeMusicHeader {
 	 * @return メタ情報インデックスでマップされた#BMPの値
 	 */
 	public final Map<Integer, String> getBmps() {
-		return mBmps.keySet().stream().collect(Collectors.toMap(k -> k.get(), k -> mBmps.get(k)));
+		return mBmps;
 	}
 
 	/**
@@ -375,7 +383,7 @@ public class BeMusicHeader {
 	 * @return #BPMの値。インデックスに該当する値がない場合{@link BmsSpec#BPM_DEFAULT}。
 	 */
 	public final double getBpm(int metaIndex) {
-		var bpm = (mBpms == null) ? null : mBpms.get(index(metaIndex));
+		var bpm = (mBpms == null) ? null : mBpms.get(BmsInt.box(metaIndex));
 		return (bpm == null) ? BmsSpec.BPM_DEFAULT : bpm;
 	}
 
@@ -384,7 +392,7 @@ public class BeMusicHeader {
 	 * @return メタ情報インデックスでマップされた#BPMの値
 	 */
 	public final Map<Integer, Double> getBpms() {
-		return mBpms.keySet().stream().collect(Collectors.toMap(k -> k.get(), k -> mBpms.get(k)));
+		return mBpms;
 	}
 
 	/**
@@ -392,17 +400,17 @@ public class BeMusicHeader {
 	 * @param metaIndex メタ情報インデックス
 	 * @return #STOPの値。インデックスに該当する値がない場合0。
 	 */
-	public final long getStop(int metaIndex) {
-		var stop = (mStops == null) ? null : mStops.get(index(metaIndex));
-		return (stop == null) ? 0 : stop.longValue();
+	public final double getStop(int metaIndex) {
+		var stop = (mStops == null) ? null : mStops.get(BmsInt.box(metaIndex));
+		return (stop == null) ? 0 : stop.doubleValue();
 	}
 
 	/**
 	 * #STOPを全て取得します。
 	 * @return メタ情報インデックスでマップされた#STOPの値
 	 */
-	public final Map<Integer, Long> getStops() {
-		return mStops.keySet().stream().collect(Collectors.toMap(k -> k.get(), k -> mStops.get(k).longValue()));
+	public final Map<Integer, Double> getStops() {
+		return mStops;
 	}
 
 	/**
@@ -411,8 +419,7 @@ public class BeMusicHeader {
 	 * @return #TEXTの値。インデックスに該当する値がない場合空文字。
 	 */
 	public final String getText(int metaIndex) {
-		var text = (mTexts == null) ? null : mTexts.get(index(metaIndex));
-		return Objects.requireNonNullElse(text, "");
+		return Objects.requireNonNullElse(mTexts.get(BmsInt.box(metaIndex)), "");
 	}
 
 	/**
@@ -420,7 +427,7 @@ public class BeMusicHeader {
 	 * @return メタ情報インデックスでマップされた#TEXTの値
 	 */
 	public final Map<Integer, String> getTexts() {
-		return mTexts.keySet().stream().collect(Collectors.toMap(k -> k.get(), k -> mTexts.get(k)));
+		return mTexts;
 	}
 
 	/**
@@ -445,16 +452,17 @@ public class BeMusicHeader {
 		mBanner = BeMusicMeta.getBanner(content);
 		mStageFile = BeMusicMeta.getStageFile(content);
 		mBackBmp = BeMusicMeta.getBackBmp(content);
+		mPreview = BeMusicMeta.getPreview(content);
 		mLnObjs = BeMusicMeta.getLnObjs(content);
 		mUrl = BeMusicMeta.getUrl(content);
 		mEmail = BeMusicMeta.getEmail(content);
 
 		// 取得フラグによって取得有無を決定するメタ情報
-		mWavs = ((flags & WAV) == 0) ? null : mapIndexedMetas(content, BeMusicMeta.WAV);
-		mBmps = ((flags & BMP) == 0) ? null : mapIndexedMetas(content, BeMusicMeta.BMP);
-		mBpms = ((flags & BPM) == 0) ? null : mapIndexedMetas(content, BeMusicMeta.BPM);
-		mStops = ((flags & STOP) == 0) ? null : mapIndexedMetas(content, BeMusicMeta.STOP);
-		mTexts = ((flags & TEXT) == 0) ? null : mapIndexedMetas(content, BeMusicMeta.TEXT);
+		mWavs = ((flags & WAV) == 0) ? EMPTY_STRING_IMAP : BeMusicMeta.getWavs(content);
+		mBmps = ((flags & BMP) == 0) ? EMPTY_STRING_IMAP : BeMusicMeta.getBmps(content);
+		mBpms = ((flags & BPM) == 0) ? EMPTY_NUMERIC_IMAP : BeMusicMeta.getBpms(content);
+		mStops = ((flags & STOP) == 0) ? EMPTY_NUMERIC_IMAP : BeMusicMeta.getStops(content);
+		mTexts = ((flags & TEXT) == 0) ? EMPTY_STRING_IMAP : BeMusicMeta.getTexts(content);
 
 		// 拡張情報取得用処理を実行する
 		onCreate(content, flags);
@@ -472,30 +480,5 @@ public class BeMusicHeader {
 	 */
 	protected void onCreate(BmsContent content, int flags) {
 		// Do nothing
-	}
-
-	/**
-	 * BMSコンテンツから索引付きメタ情報マップを構築する
-	 * @param <T> 値の方
-	 * @param content BMSコンテンツ
-	 * @param targetMeta 生成対象のメタ情報
-	 * @return 生成された索引付きメタ情報マップ
-	 */
-	@SuppressWarnings("unchecked")
-	private <T> Map<MutableInt, T> mapIndexedMetas(BmsContent content, BmsMeta targetMeta) {
-		var metas = new HashMap<MutableInt, T>();
-		var metaMap = content.getIndexedMetas(targetMeta.getName());
-		for (var entry : metaMap.entrySet()) { metas.put(new MutableInt(entry.getKey()), (T)entry.getValue()); }
-		return metas;
-	}
-
-	/**
-	 * メタ情報インデックス構築
-	 * @param metaIndex メタ情報インデックス
-	 * @return メタ情報インデックス
-	 */
-	private MutableInt index(int metaIndex) {
-		mIndexTemp.set(metaIndex);
-		return mIndexTemp;
 	}
 }

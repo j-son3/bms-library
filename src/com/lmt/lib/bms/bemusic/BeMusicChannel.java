@@ -58,6 +58,8 @@ public class BeMusicChannel {
 	public static final int NUM_BGA_KEYBOUND = ch("A5");
 	/** チャンネル番号：レイオプション変更 */
 	public static final int NUM_OPTION = ch("A6");
+	/** チャンネル番号：スクロール速度変更 */
+	public static final int NUM_SCROLL = ch("SC");
 	/** チャンネル番号：1P可視オブジェ1 */
 	public static final int NUM_VISIBLE_1P_01 = ch("11");
 	/** チャンネル番号：1P可視オブジェ2 */
@@ -852,6 +854,20 @@ public class BeMusicChannel {
 	 * </table>
 	 */
 	public static final BmsChannel OPTION = new BmsChannel(NUM_OPTION, BmsType.ARRAY36, "#changeoption", "", false, true);
+	/**
+	 * スクロール速度変更
+	 * <table><caption>&nbsp;</caption>
+	 * <tr><th style="text-align:left;">番号</th><td>SC</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#SCROLL}</td></tr>
+	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
+	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
+	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
+	 * <tr><th style="text-align:left;">説明</th>
+	 * <td>譜面のスクロール速度変更を指定します。</td></tr>
+	 * </table>
+	 */
+	public static final BmsChannel SCROLL = new BmsChannel(NUM_SCROLL, BmsType.ARRAY36, "#scroll", "", false, true);
 
 	/**
 	 * 1P可視オブジェ

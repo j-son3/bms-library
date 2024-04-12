@@ -1400,13 +1400,14 @@ public class BmsContent {
 		 */
 		private Object getResolvedNoteValueCore(int channel, int value) {
 			// 参照先メタ情報が存在しないチャンネルの場合は当該ノートの値をINTEGER形式で返す
+			var valObj = BmsInt.box(value);
 			var info = mMetas.getReferenceMeta(channel);
 			if (info == null) {
-				return BmsType.INTEGER.cast(value);
+				return BmsType.INTEGER.cast(valObj);
 			}
 
 			// 参照先メタ情報に当該データが存在する場合はその値を、無い場合はメタ情報の初期値を返す
-			var resolvedValue = info.valueList.get(value);
+			var resolvedValue = info.valueList.get(valObj);
 			if (resolvedValue == null) {
 				resolvedValue = info.meta.getDefaultValue();
 			}
@@ -1561,22 +1562,22 @@ public class BmsContent {
 					var info = new ReferenceMetaInfo();
 					info.meta = mSpec.getIndexedMeta(ref);
 					info.valueList = mIndexedMetas.get(ref);
-					mReferenceMetas.put(channel.getNumber(), info);
+					mReferenceMetas.put(BmsInt.box(channel.getNumber()), info);
 				}
 			});
 
 			// BPM変更用メタ情報の参照を取り出しておく
 			for (var i = 0; i < mSpec.getBpmChannelCount(); i++) {
 				var bpmChannel = mSpec.getBpmChannel(i, true);
-				var refMeta = mReferenceMetas.get(bpmChannel.getNumber());
-				if (refMeta != null) { mBpmMetas.put(bpmChannel.getNumber(), refMeta.valueList); }
+				var refMeta = mReferenceMetas.get(BmsInt.box(bpmChannel.getNumber()));
+				if (refMeta != null) { mBpmMetas.put(BmsInt.box(bpmChannel.getNumber()), refMeta.valueList); }
 			}
 
 			// 譜面停止用メタ情報の参照を取り出しておく
 			for (var i = 0; i < mSpec.getStopChannelCount(); i++) {
 				var stopChannel = mSpec.getStopChannel(i, true);
-				var refMeta = mReferenceMetas.get(stopChannel.getNumber());
-				if (refMeta != null) { mStopMetas.put(stopChannel.getNumber(), refMeta.valueList); }
+				var refMeta = mReferenceMetas.get(BmsInt.box(stopChannel.getNumber()));
+				if (refMeta != null) { mStopMetas.put(BmsInt.box(stopChannel.getNumber()), refMeta.valueList); }
 			}
 		}
 
@@ -1800,14 +1801,14 @@ public class BmsContent {
 				// BPM変更チャンネル非対応
 				return bpmIfNotExist;
 			}
-			var bpmMetas = mBpmMetas.get(note.getChannel());
+			var bpmMetas = mBpmMetas.get(BmsInt.box(note.getChannel()));
 			if (bpmMetas == null) {
 				// 参照先メタ情報無しの場合はノートの値をBPMとする
 				return note.getValue();
 			}
 
 			// 参照先メタ情報から値を取得する
-			var value = bpmMetas.get(note.getValue());
+			var value = bpmMetas.get(BmsInt.box(note.getValue()));
 			if (value == null) {
 				// 参照先メタ情報に定義が無い
 				return bpmIfNotExist;
@@ -1828,14 +1829,14 @@ public class BmsContent {
 				// 譜面停止チャンネル非対応
 				return stopIfNotExist;
 			}
-			var stopMetas = mStopMetas.get(note.getChannel());
+			var stopMetas = mStopMetas.get(BmsInt.box(note.getChannel()));
 			if (stopMetas == null) {
 				// 参照先メタ情報無しの場合はNoteの値を停止時間とする
 				return note.getValue();
 			}
 
 			// 参照先メタ情報から値を取得する
-			var value = stopMetas.get(note.getValue());
+			var value = stopMetas.get(BmsInt.box(note.getValue()));
 			if (value == null) {
 				// 参照先メタ情報に定義が無い
 				return stopIfNotExist;
@@ -2099,7 +2100,7 @@ public class BmsContent {
 		 * @return 参照先メタ情報の情報。該当チャンネルに参照先メタ情報が無い場合はnull。
 		 */
 		final ReferenceMetaInfo getReferenceMeta(int channel) {
-			return mReferenceMetas.get(channel);
+			return mReferenceMetas.get(BmsInt.box(channel));
 		}
 
 		/**

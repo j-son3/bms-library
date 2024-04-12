@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.lmt.lib.bms.BmsContent;
+import com.lmt.lib.bms.BmsInt;
 import com.lmt.lib.bms.BmsNote;
 import com.lmt.lib.bms.BmsPoint;
 import com.lmt.lib.bms.BmsSpec;
-import com.lmt.lib.bms.MutableInt;
 
 /**
  * BMSコンテンツからBe Music仕様のBMS譜面オブジェクトを構築するためのビルダーです。
@@ -82,9 +82,7 @@ public class BeMusicScoreBuilder {
 	/** シーク中かどうか */
 	private boolean mSeeking = false;
 	/** シーク対象のチャンネル一式 */
-	private Set<MutableInt> mTargetChannels = new HashSet<>();
-	/** 検索用のチャンネル番号 */
-	private MutableInt mChannelTemp = new MutableInt();
+	private Set<Integer> mTargetChannels = new HashSet<>();
 
 	/**
 	 * BMS譜面ビルダーオブジェクトを構築します。
@@ -267,47 +265,47 @@ public class BeMusicScoreBuilder {
 		mTargetChannels.clear();
 
 		// 必須チャンネル
-		mTargetChannels.add(new MutableInt(BeMusicChannel.LENGTH.getNumber()));
-		mTargetChannels.add(new MutableInt(BeMusicChannel.BPM_LEGACY.getNumber()));
-		mTargetChannels.add(new MutableInt(BeMusicChannel.BPM.getNumber()));
-		mTargetChannels.add(new MutableInt(BeMusicChannel.STOP.getNumber()));
+		mTargetChannels.add(BmsInt.box(BeMusicChannel.LENGTH.getNumber()));
+		mTargetChannels.add(BmsInt.box(BeMusicChannel.BPM_LEGACY.getNumber()));
+		mTargetChannels.add(BmsInt.box(BeMusicChannel.BPM.getNumber()));
+		mTargetChannels.add(BmsInt.box(BeMusicChannel.STOP.getNumber()));
 
 		// 小節線
 		if (mSeekMeasureLine) {
-			mTargetChannels.add(new MutableInt(BmsSpec.CHANNEL_MEASURE));
+			mTargetChannels.add(BmsInt.box(BmsSpec.CHANNEL_MEASURE));
 		}
 
 		// 可視・不可視・地雷オブジェ
 		for (var l : BeMusicDevice.values()) {
 			// 可視オブジェ
 			if (mSeekVisible) {
-				mTargetChannels.add(new MutableInt(l.getVisibleChannel().getNumber()));
+				mTargetChannels.add(BmsInt.box(l.getVisibleChannel().getNumber()));
 			}
 			// 不可視オブジェ
 			if (mSeekInvisible) {
-				mTargetChannels.add(new MutableInt(l.getInvisibleChannel().getNumber()));
+				mTargetChannels.add(BmsInt.box(l.getInvisibleChannel().getNumber()));
 			}
 			// 地雷オブジェ
 			if (mSeekLandmine) {
-				mTargetChannels.add(new MutableInt(l.getLandmineChannel().getNumber()));
+				mTargetChannels.add(BmsInt.box(l.getLandmineChannel().getNumber()));
 			}
 		}
 
 		// BGM
 		if (mSeekBgm) {
-			mTargetChannels.add(new MutableInt(BeMusicChannel.BGM.getNumber()));
+			mTargetChannels.add(BmsInt.box(BeMusicChannel.BGM.getNumber()));
 		}
 
 		// BGA関連
 		if (mSeekBga) {
-			mTargetChannels.add(new MutableInt(BeMusicChannel.BGA.getNumber()));
-			mTargetChannels.add(new MutableInt(BeMusicChannel.BGA_LAYER.getNumber()));
-			mTargetChannels.add(new MutableInt(BeMusicChannel.BGA_MISS.getNumber()));
+			mTargetChannels.add(BmsInt.box(BeMusicChannel.BGA.getNumber()));
+			mTargetChannels.add(BmsInt.box(BeMusicChannel.BGA_LAYER.getNumber()));
+			mTargetChannels.add(BmsInt.box(BeMusicChannel.BGA_MISS.getNumber()));
 		}
 
 		// テキスト
 		if (mSeekText) {
-			mTargetChannels.add(new MutableInt(BeMusicChannel.TEXT.getNumber()));
+			mTargetChannels.add(BmsInt.box(BeMusicChannel.TEXT.getNumber()));
 		}
 
 		// その他のセットアップ
@@ -333,7 +331,7 @@ public class BeMusicScoreBuilder {
 				mCurAt.getMeasure(),
 				mCurAt.getTick(),
 				inclusiveFrom,
-				ch -> mTargetChannels.contains(channel(ch)),
+				ch -> mTargetChannels.contains(BmsInt.box(ch)),
 				mCurAt);
 		if (mCurAt.getMeasure() == mContent.getMeasureCount()) {
 			// 楽曲の最後まで検索し終わった場合はシークを終了してnullを返す
@@ -484,16 +482,6 @@ public class BeMusicScoreBuilder {
 		pt.computeSummary();
 
 		return pt;
-	}
-
-	/**
-	 * チャンネル番号用整数値取得
-	 * @param number チャンネル番号
-	 * @return チャンネル番号用整数値
-	 */
-	private MutableInt channel(int number) {
-		mChannelTemp.set(number);
-		return mChannelTemp;
 	}
 
 	/**

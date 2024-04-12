@@ -98,6 +98,13 @@ public class BmsLoadError {
 		WRONG_DATA,
 
 		/**
+		 * 単体メタ情報、または重複不可チャンネルの再定義を検出したことを表します。
+		 * <p>BMS仕様で重複が許可されていないデータでは同一のBMS内に複数の定義を記述することは認められません。
+		 * このエラーは{@link BmsLoader#setAllowRedefine(boolean)}を用いることで回避することができます。</p>
+		 */
+		REDEFINE,
+
+		/**
 		 * メタ情報・チャンネルにおいて、データの記述がBMSライブラリの定める範囲外であることを検出した場合を表します。
 		 * <p>{@link #WRONG_DATA}と似ていますが、こちらはBMSライブラリとしての仕様違反を示しています。
 		 * {@link BmsLoader#setFixSpecViolation}を用いることで当エラーを検出した際にエラー発出するか、自動的に

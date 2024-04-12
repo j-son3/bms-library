@@ -83,12 +83,10 @@ abstract class MeasureElement extends BmsElement {
 	private double mBeginBpm = 0.0;
 	/** 小節終了時のBPM */
 	private double mEndBpm = 0.0;
-	/** チャンネルキーごとのノートリスト */
-	private TreeMap<MutableInt, TreeSet<BmsNote>> mNotesChMap = null;
-	/** チャンネルキーごとの小節データ */
-	private TreeMap<MutableInt, BmsElement> mValuesChMap = null;
-	/** チャンネルキー用可変整数 */
-	private MutableInt mChKey = new MutableInt();
+	/** CHXごとのノートリスト */
+	private TreeMap<Integer, TreeSet<BmsNote>> mNotesChMap = null;
+	/** CHXごとの小節データ */
+	private TreeMap<Integer, BmsElement> mValuesChMap = null;
 
 	/**
 	 * コンストラクタ
@@ -216,16 +214,17 @@ abstract class MeasureElement extends BmsElement {
 	 * @param note ノート
 	 */
 	final void putNote(BmsNote note) {
-		// チャンネルキーごとのノートリストマップを生成する
+		// CHXごとのノートリストマップを生成する
 		if (mNotesChMap == null) {
 			mNotesChMap = new TreeMap<>();
 		}
 
-		// チャンネルキーに対応するノートリストを取得・生成する
-		var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(note)));
+		// CHXに対応するノートリストを取得・生成する
+		var chx = BmsInt.box(BmsChx.toInt(note));
+		var notesCh = mNotesChMap.get(chx);
 		if (notesCh == null) {
 			notesCh = new TreeSet<>(BmsAddress::compare);
-			mNotesChMap.put(new MutableInt(BmsChx.toInt(note)), notesCh);
+			mNotesChMap.put(chx, notesCh);
 		}
 
 		// ノートリストにノートを追加する
@@ -239,13 +238,14 @@ abstract class MeasureElement extends BmsElement {
 	 * @param tick 小節の刻み位置
 	 */
 	final void removeNote(int channel, int index, double tick) {
-		// チャンネルキーごとのノートリストが存在しない場合は何もしない
+		// CHXごとのノートリストが存在しない場合は何もしない
 		if (mNotesChMap == null) {
 			return;
 		}
 
-		// チャンネルキーごとのノートリストを取得、存在しない場合は何もしない
-		var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel, index)));
+		// CHXごとのノートリストを取得、存在しない場合は何もしない
+		var chx = BmsInt.box(BmsChx.toInt(channel, index));
+		var notesCh = mNotesChMap.get(chx);
 		if (notesCh == null) {
 			return;
 		}
@@ -257,7 +257,7 @@ abstract class MeasureElement extends BmsElement {
 		note.setTick(tick);
 		notesCh.remove(note);
 		if (notesCh.size() == 0) {
-			mNotesChMap.remove(mChKey.set(BmsChx.toInt(channel, index)));
+			mNotesChMap.remove(chx);
 		}
 
 		// ノートリストマップが空になった場合はマップを解放する
@@ -273,14 +273,14 @@ abstract class MeasureElement extends BmsElement {
 	 * @param value 小節データ
 	 */
 	final void putValue(int channel, int index, Object value) {
-		// チャンネルキーごとの値マップを生成する
+		// CHXごとの値マップを生成する
 		if (mValuesChMap == null) {
 			mValuesChMap = new TreeMap<>();
 		}
 
 		// マップに値を追加する
 		mValuesChMap.put(
-				new MutableInt(BmsChx.toInt(channel, index)),
+				BmsInt.box(BmsChx.toInt(channel, index)),
 				new ValueElement(getMeasure(), channel, index, value));
 
 		// 小節長を更新する
@@ -297,13 +297,13 @@ abstract class MeasureElement extends BmsElement {
 	 * @param index チャンネルインデックス
 	 */
 	final void removeValue(int channel, int index) {
-		// チャンネルキーごとの値マップが存在しない場合は何もしない
+		// CHXごとの値マップが存在しない場合は何もしない
 		if (mValuesChMap == null) {
 			return;
 		}
 
 		// マップから値を削除、マップが空になったら解放する
-		mValuesChMap.remove(mChKey.set(BmsChx.toInt(channel, index)));
+		mValuesChMap.remove(BmsInt.box(BmsChx.toInt(channel, index)));
 		if (mValuesChMap.size() == 0) {
 			mValuesChMap = null;
 		}
@@ -324,14 +324,14 @@ abstract class MeasureElement extends BmsElement {
 	 * @return パラメータで指定したノートリスト格納先リスト
 	 */
 	final List<BmsNote> listNotes(int channel, int index, List<BmsNote> outList) {
-		// チャンネルキーごとのノートリストが存在しない場合は何もしない
+		// CHXごとのノートリストが存在しない場合は何もしない
 		outList.clear();
 		if (mNotesChMap == null) {
 			return outList;
 		}
 
-		// チャンネルキーごとのノートリストを取得、存在しない場合は何もしない
-		var notesCh = mNotesChMap.get(mChKey.set(BmsChx.toInt(channel, index)));
+		// CHXごとのノートリストを取得、存在しない場合は何もしない
+		var notesCh = mNotesChMap.get(BmsInt.box(BmsChx.toInt(channel, index)));
 		if (notesCh == null) {
 			return outList;
 		}
@@ -343,11 +343,11 @@ abstract class MeasureElement extends BmsElement {
 
 	/**
 	 * この小節が持つ全ての小節データ取得
-	 * @return チャンネルキーごとの小節データマップ
+	 * @return CHXごとの小節データマップ
 	 */
-	final Map<MutableInt, BmsElement> mapValues() {
-		// チャンネルキーごとの小節の値が存在しない場合は何もしない
-		var result = new TreeMap<MutableInt, BmsElement>();
+	final Map<Integer, BmsElement> mapValues() {
+		// CHXごとの小節の値が存在しない場合は何もしない
+		var result = new TreeMap<Integer, BmsElement>();
 		if (mValuesChMap == null) {
 			return result;
 		}
@@ -363,14 +363,14 @@ abstract class MeasureElement extends BmsElement {
 	 * @return 検査に合格するチャンネルが存在した場合true、そうでなければfalse
 	 */
 	final boolean testValueChannels(BmsChannel.Tester tester) {
-		// チャンネルキーごとの小節の値が存在しない場合はテスト不合格とする
+		// CHXごとの小節の値が存在しない場合はテスト不合格とする
 		if (mValuesChMap == null) {
 			return false;
 		}
 
 		// 全小節データのチャンネルを検査する
 		for (var key : mValuesChMap.keySet()) {
-			if (tester.testChannel(BmsChx.toChannel(key.get()))) {
+			if (tester.testChannel(BmsChx.toChannel(key))) {
 				return true;
 			}
 		}
@@ -386,7 +386,7 @@ abstract class MeasureElement extends BmsElement {
 	 * @return 小節データ
 	 */
 	final BmsElement getValue(int channel, int index) {
-		return (mValuesChMap == null) ? null : mValuesChMap.get(mChKey.set(BmsChx.toInt(channel, index)));
+		return (mValuesChMap == null) ? null : mValuesChMap.get(BmsInt.box(BmsChx.toInt(channel, index)));
 	}
 
 	/**
@@ -403,8 +403,8 @@ abstract class MeasureElement extends BmsElement {
 	 * @return 配列型チャンネルのデータ数
 	 */
 	final int getNoteChannelDataCount(int channel) {
-		var cdk = mChKey.set(BmsChx.toInt(channel, BmsSpec.CHINDEX_MAX));
-		var key = (mNotesChMap == null) ? null : mNotesChMap.floorKey(cdk);
+		var chx = BmsInt.box(BmsChx.toInt(channel, BmsSpec.CHINDEX_MAX));
+		var key = (mNotesChMap == null) ? null : mNotesChMap.floorKey(chx);
 		return getChannelDataCount(channel, key);
 	}
 
@@ -414,8 +414,8 @@ abstract class MeasureElement extends BmsElement {
 	 * @return 値型チャンネルのデータ数
 	 */
 	final int getValueChannelDataCount(int channel) {
-		var cdk = mChKey.set(BmsChx.toInt(channel, BmsSpec.CHINDEX_MAX));
-		var key = (mValuesChMap == null) ? null : mValuesChMap.floorKey(cdk);
+		var chx = BmsInt.box(BmsChx.toInt(channel, BmsSpec.CHINDEX_MAX));
+		var key = (mValuesChMap == null) ? null : mValuesChMap.floorKey(chx);
 		return getChannelDataCount(channel, key);
 	}
 
@@ -464,15 +464,16 @@ abstract class MeasureElement extends BmsElement {
 	/**
 	 * チャンネルデータ数取得
 	 * @param channel チャンネル番号
-	 * @param channelDataKey チャンネルデータキー
+	 * @param chx CHX値
 	 * @return チャンネルデータ数
 	 */
-	private static int getChannelDataCount(int channel, MutableInt channelDataKey) {
-		if (channelDataKey == null) {
+	private static int getChannelDataCount(int channel, Integer chx) {
+		if (chx == null) {
 			return 0;
 		} else {
-			var number = BmsChx.toChannel(channelDataKey.get());
-			var index = BmsChx.toIndex(channelDataKey.get());
+			var value = chx.intValue();
+			var number = BmsChx.toChannel(value);
+			var index = BmsChx.toIndex(value);
 			return (number != channel) ? 0 : (index + 1);
 		}
 	}

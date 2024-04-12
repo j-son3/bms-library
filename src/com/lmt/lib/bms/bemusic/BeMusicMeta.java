@@ -320,6 +320,19 @@ public class BeMusicMeta {
 	 */
 	public static final BmsMeta BACKBMP = BmsMeta.single("#backbmp", BmsType.STRING, "", 0, false);
 	/**
+	 * #PREVIEW
+	 * <table><caption>&nbsp;</caption>
+	 * <tr><th style="text-align:left;">構成単位</th><td>単体</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>STRING</td></tr>
+	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
+	 * <tr><th style="text-align:left;">同一性チェック</th><td>NO</td></tr>
+	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
+	 * <tr><th style="text-align:left;">説明</th>
+	 * <td>楽曲のプレビュー音源のファイルパスを表します。</td></tr>
+	 * </table>
+	 */
+	public static final BmsMeta PREVIEW = BmsMeta.single("#preview", BmsType.STRING, "", 0, false);
+	/**
 	 * #POORBGA
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">構成単位</th><td>単体</td></tr>
@@ -502,6 +515,19 @@ public class BeMusicMeta {
 	 * </table>
 	 */
 	public static final BmsMeta LNOBJ = BmsMeta.multiple("#lnobj", BmsType.BASE36, "00", 0, true);
+	/**
+	 * #LNMODE
+	 * <table><caption>&nbsp;</caption>
+	 * <tr><th style="text-align:left;">構成単位</th><td>単体</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>INTEGER</td></tr>
+	 * <tr><th style="text-align:left;">初期値</th><td>0</td></tr>
+	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
+	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>NO TODO:ライブラリ対応する</td></tr>
+	 * <tr><th style="text-align:left;">説明</th>
+	 * <td>ロングノートの種類を表します。</td></tr>
+	 * </table>
+	 */
+	public static final BmsMeta LNMODE = BmsMeta.single("#lnmode", BmsType.INTEGER, "1", 0, true);
 	/**
 	 * #MAKER
 	 * <table><caption>&nbsp;</caption>
@@ -776,6 +802,19 @@ public class BeMusicMeta {
 	 * </table>
 	 */
 	public static final BmsMeta STP = BmsMeta.multiple("#stp", BmsType.STRING, "", 1, true);
+	/**
+	 * #SCROLL
+	 * <table><caption>&nbsp;</caption>
+	 * <tr><th style="text-align:left;">構成単位</th><td>索引付き</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>NUMERIC</td></tr>
+	 * <tr><th style="text-align:left;">初期値</th><td>1</td></tr>
+	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
+	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>NO TODO:ライブラリ対応する</td></tr>
+	 * <tr><th style="text-align:left;">説明</th>
+	 * <td>譜面のスクロール速度(倍率)を表します。</td></tr>
+	 * </table>
+	 */
+	public static final BmsMeta SCROLL = BmsMeta.indexed("#scroll", BmsType.NUMERIC, "1", 0, true);
 	/**
 	 * #EXRANK
 	 * <table><caption>&nbsp;</caption>
@@ -1127,6 +1166,28 @@ public class BeMusicMeta {
 	}
 
 	/**
+	 * #PREVIEWを設定します。
+	 * @param content BMSコンテンツ
+	 * @param preview #PREVIEWの値
+	 * @exception NullPointerException contentがnull
+	 * @see #PREVIEW
+	 */
+	public static void setPreview(BmsContent content, String preview) {
+		content.setSingleMeta(BeMusicMeta.PREVIEW.getName(), preview);
+	}
+
+	/**
+	 * #PREVIEWを取得します。
+	 * @param content BMSコンテンツ
+	 * @return #PREVIEWの値
+	 * @exception NullPointerException contentがnull
+	 * @see #PREVIEW
+	 */
+	public static String getPreview(BmsContent content) {
+		return content.getSingleMeta(BeMusicMeta.PREVIEW.getName());
+	}
+
+	/**
 	 * #PLAYLEVELを設定します。
 	 * @param content BMSコンテンツ
 	 * @param playLevel #PLAYLEVELの値
@@ -1309,7 +1370,7 @@ public class BeMusicMeta {
 	 * @exception IndexOutOfBoundsException indexが0～BmsSpec.INDEXED_META_INDEX_MAXの範囲外
 	 * @see #STOP
 	 */
-	public static void setStop(BmsContent content, int index, Long stop) {
+	public static void setStop(BmsContent content, int index, Double stop) {
 		content.setIndexedMeta(BeMusicMeta.STOP.getName(), index, stop);
 	}
 
@@ -1322,7 +1383,7 @@ public class BeMusicMeta {
 	 * @exception IndexOutOfBoundsException indexが0～BmsSpec.INDEXED_META_INDEX_MAXの範囲外
 	 * @see #STOP
 	 */
-	public static long getStop(BmsContent content, int index) {
+	public static double getStop(BmsContent content, int index) {
 		return content.getIndexedMeta(BeMusicMeta.STOP.getName(), index);
 	}
 
@@ -1333,7 +1394,7 @@ public class BeMusicMeta {
 	 * @exception NullPointerException contentがnull
 	 * @see #STOP
 	 */
-	public static Map<Integer, Long> getStops(BmsContent content) {
+	public static Map<Integer, Double> getStops(BmsContent content) {
 		return content.getIndexedMetas(BeMusicMeta.STOP.getName());
 	}
 
@@ -1408,5 +1469,41 @@ public class BeMusicMeta {
 	 */
 	public static Map<Integer, String> getBmps(BmsContent content) {
 		return content.getIndexedMetas(BeMusicMeta.BMP.getName());
+	}
+
+	/**
+	 * #TEXTxxを設定します。
+	 * @param content BMSコンテンツ
+	 * @param index インデックス
+	 * @param text #TEXTxxの値
+	 * @exception NullPointerException contentがnull
+	 * @exception IndexOutOfBoundsException indexが0～BmsSpec.INDEXED_META_INDEX_MAXの範囲外
+	 * @see #TEXT
+	 */
+	public static void setText(BmsContent content, int index, String text) {
+		content.setIndexedMeta(BeMusicMeta.TEXT.getName(), index, text);
+	}
+
+	/**
+	 * #TEXTxxを取得します。
+	 * @param content BMSコンテンツ
+	 * @param index インデックス
+	 * @return #TEXTxxの値
+	 * @exception NullPointerException contentがnull
+	 * @see #TEXT
+	 */
+	public static String getText(BmsContent content, int index) {
+		return content.getIndexedMeta(BeMusicMeta.TEXT.getName(), index);
+	}
+
+	/**
+	 * #TEXTxxのリストを取得します。
+	 * @param content BMSコンテンツ
+	 * @return #TEXTxxのリスト
+	 * @exception NullPointerException contentがnull
+	 * @see #TEXT
+	 */
+	public static Map<Integer, String> getTexts(BmsContent content) {
+		return content.getIndexedMetas(BeMusicMeta.TEXT.getName());
 	}
 }
