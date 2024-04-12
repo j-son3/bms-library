@@ -57,8 +57,8 @@ public class BeMusicPoint implements BmsAt {
 	private short mLayer;
 	/** ミス時BGA */
 	private short mMiss;
-	/** 件数情報 */
-	private short mCountInfo;  // 0-4b:NoteCount, 5-9b:LnCount, 10-14b:LmCount, 15b:isLastPlayable
+	/** 各種情報 */
+	private int mInfo;  // 0-4b:NoteCount, 5-9b:LnCount, 10-14b:LmCount, 15-19b:VeCount 20b:isLastPlayable 21b:hasMovement
 	/** 表示テキスト */
 	private String mText = "";
 
@@ -96,7 +96,7 @@ public class BeMusicPoint implements BmsAt {
 		mBga = src.mBga;
 		mLayer = src.mLayer;
 		mMiss = src.mMiss;
-		mCountInfo = src.mCountInfo;
+		mInfo = src.mInfo;
 		mText = src.mText;
 	}
 
@@ -224,7 +224,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return ノート数
 	 */
 	public final int getNoteCount() {
-		return mCountInfo & 0x1f;
+		return mInfo & 0x1f;
 	}
 
 	/**
@@ -233,7 +233,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return ロングノート数
 	 */
 	public final int getLongNoteCount() {
-		return (mCountInfo >> 5) & 0x1f;
+		return (mInfo >> 5) & 0x1f;
 	}
 
 	/**
@@ -241,7 +241,15 @@ public class BeMusicPoint implements BmsAt {
 	 * @return 地雷オブジェの数
 	 */
 	public final int getLandmineCount() {
-		return (mCountInfo >> 10) & 0x1f;
+		return (mInfo >> 10) & 0x1f;
+	}
+
+	/**
+	 * この楽曲位置において視覚効果を持つノートの数を取得します。
+	 * @return 視覚効果を持つノートの数
+	 */
+	public final int getVisualEffectCount() {
+		return (mInfo >> 15) & 0x1f;
 	}
 
 	/**
@@ -265,7 +273,27 @@ public class BeMusicPoint implements BmsAt {
 	 * @return この楽曲位置に操作可能ノートが1つでもある場合にtrue
 	 */
 	public final boolean hasPlayableNote() {
-		return (mCountInfo & 0x8000) != 0;
+		return (mInfo & 0x100000) != 0;
+	}
+
+	/**
+	 * この楽曲位置の何らかの操作を伴うノートの有無を取得します。
+	 * <p>「何らかの操作を伴う」とは、{@link BeMusicNoteType#hasMovement()}がtrueを返すことを表します。
+	 * この楽曲位置のいずれかの入力デバイスに1つでも何らかの操作を伴うノートがあれば「有り」と見なされます。</p>
+	 * @return この楽曲位置何らかの操作を伴うノートが1つでもある場合にtrue
+	 */
+	public final boolean hasMovementNote() {
+		return (mInfo & 0x200000) != 0;
+	}
+
+	/**
+	 * この楽曲位置の視覚効果を持つノートの有無を取得します。
+	 * <p>「視覚効果を持つ」とは、{@link BeMusicNoteType#hasVisualEffect()}がtrueを返すことを表します。
+	 * この楽曲位置のいずれかの入力デバイスに1つでも視覚効果を持つノートがあれば「有り」と見なされます。</p>
+	 * @return この楽曲位置に視覚効果を持つノートが1つでもある場合にtrue
+	 */
+	public final boolean hasVisualEffect() {
+		return getVisualEffectCount() > 0;
 	}
 
 	/**
@@ -548,17 +576,21 @@ public class BeMusicPoint implements BmsAt {
 		var noteCount = 0;
 		var lnCount = 0;
 		var lmCount = 0;
+		var veCount = 0;
 		var playable = 0;
+		var movement = 0;
 		for (var i = 0; i < BeMusicDevice.COUNT; i++) {
 			var dev = BeMusicDevice.fromIndex(i);
 			var ntype = getNoteType(dev);
 			noteCount += (ntype.isCountNotes() ? 1 : 0);
 			lnCount += (((ntype == BeMusicNoteType.LONG_ON) || (ntype.isCountNotes() && ntype.isLongNoteTail())) ? 1 : 0);
 			lmCount += ((ntype == BeMusicNoteType.LANDMINE) ? 1 : 0);
+			veCount += (ntype.hasVisualEffect() ? 1 : 0);
 			playable |= ((ntype.isPlayable()) ? 1 : 0);
+			movement |= ((ntype.hasMovement()) ? 1 : 0);
 		}
 
 		// 汎用データ領域に値を設定する
-		mCountInfo = (short)(noteCount | (lnCount << 5) | (lmCount << 10) | (playable << 15));
+		mInfo = (noteCount | (lnCount << 5) | (lmCount << 10) | (veCount << 15) | (playable << 20) | (movement << 21));
 	}
 }

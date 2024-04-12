@@ -1,5 +1,8 @@
 package com.lmt.lib.bms.bemusic;
 
+import static com.lmt.lib.bms.internal.Assertion.*;
+
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -71,22 +74,20 @@ public class BeMusicStatistics {
 	private double mAvgViewSwingley = 0.0;
 	/** 視野幅変動係数(右スクラッチ */
 	private double mAvgViewSwingleyR = 0.0;
-	// ↓TimeSpanとは関係ない統計情報
-	/*
-	private double mPower; // 地力
-	private double mMaximum; // 最大密度
-	private double mBeatTech;  // 打鍵難易度
-	private double mLongTech;  // 長押し難易度
-	private double mScrTech;  // スクラッチ難易度
-	private double mGimmic;  // ギミック
-	private double mDelta;  // Δ難易度
-	*/
+	/** Delta Systemのアルゴリズムバージョン */
+	private String mDsAlgoVer = null;
+	/** Delta Systemのレーティング値一覧 */
+	private int[] mRatings = new int[BeMusicRatingType.COUNT];
+	/** 譜面主傾向 */
+	private BeMusicRatingType mPrimaryTendency = null;
+	/** 譜面副次傾向 */
+	private BeMusicRatingType mSecondaryTendency = null;
 
 	/**
 	 * コンストラクタ
 	 */
 	BeMusicStatistics() {
-		// Do nothing
+		Arrays.fill(mRatings, -1);
 	}
 
 	/**
@@ -359,5 +360,138 @@ public class BeMusicStatistics {
 	final void setAverageViewSwingley(double swingleyL, double swingleyR) {
 		mAvgViewSwingley = swingleyL;
 		mAvgViewSwingleyR = swingleyR;
+	}
+
+	/**
+	 * Delta Systemのアルゴリズムバージョンを取得します。
+	 * <p>Delta SystemはBMSライブラリ本体とは別のバージョンを保有しています。BMSライブラリのアップデートによって
+	 * Delta Systemが必ずしも更新されるとは限らないためです。</p>
+	 * <p>また、アルゴリズムバージョンはDelta Systemのレーティング値分析アルゴリズムがどのような状態であるかを
+	 * 確認するのに役立ちます。アルゴリズムバージョンの見かたについては以下を参照してください。</p>
+	 * <p><strong>書式</strong><br>
+	 * [メジャーバージョン].[リビジョン番号]-[アルゴリズム状態][パラメータ変更状態]</p>
+	 * <p><strong>メジャーバージョン</strong><br>
+	 * Delta Systemそのもののバージョンを表します。この値が増加すると分析アルゴリズムの内容が1から見直され、
+	 * 分析方法が根本的に変化することを示します。レーティング値は楽曲ごとに大幅に変動する場合があり、
+	 * 今までの基準が全て新しいものに更新されると考えて差し支えありません(基本的には分析結果がより良く改善されます)。</p>
+	 * <p><strong>リビジョン番号</strong><br>
+	 * 同一メジャーバージョンの分析アルゴリズムにおいて、パラメータの調整・不具合の修正・分析内容の僅かな見直しを行い、
+	 * 分析結果の改善を行う度に値が増加します。この値が変わると特定の特徴を有する楽曲のレーティング値のみが大幅に変動するか、
+	 * 全体的に僅かに変動(大抵は1～2%前後)する場合があります。分析アルゴリズムの基本的な処理内容に変更はないため
+	 * レーティング値の全体的な推移が大幅に変動することはありません(リビジョン番号の更新ではそのような変更は行いません)。</p>
+	 * <p><strong>アルゴリズム状態</strong><br>
+	 * 分析アルゴリズムが現在どのような位置付けであるかを端的に表す1文字で、'D','R','F'の3種類があります。<br>
+	 * 'D' (Draft) は分析アルゴリズムのベースは完成しているものの、重大な欠陥が潜んでいる確率が高めであることを表します。
+	 * 「重大な欠陥」とは具体的に、特定の特徴を有する楽曲で想定外に高い、または低いレーティング値を出力したり、
+	 * 低難易度の譜面で恣意的にレーティング値を吊り上げようとする悪意のある楽曲への耐性が欠落していたり等が挙げられます。
+	 * 分析アルゴリズムの品質が担保できていない段階では、開発者の判断により状態 'D' を付与します。<br>
+	 * 'R' (Reviewing) は 'D' で挙げたような重大な欠陥を認知できる限り改善し、レーティング値のユーザーレビューを
+	 * 実施している段階であることを表します。この段階では開発者側としての調整は完了しており、ユーザーからの報告・意見等が
+	 * ある可能性を踏まえ、報告・意見等をレーティング値に反映する余地を残した状態となります。この状態以降はレーティング値の
+	 * 大幅な変動は予定されませんが、一般的な譜面には含まれないような配置が多数使用されるような個性的な譜面ではやや大きめの
+	 * 変動が生じる可能性があります。<br>
+	 * 'F' (Fixed) はユーザーレビューも完了し、当該メジャーバージョンでのレーティング値が確定した状態を表します。
+	 * これ以降のアップデートでは、メジャーバージョンの更新が行われない限りレーティング値が変動することはありません。
+	 * ただし、Delta Systemの不具合修正等で動作改善が行われ、制作者の意図する譜面を正確に読み込めるようになると
+	 * 値が変動する可能性はあります。通常、そのような不具合は状態 'R' の段階までに修正されます。</p>
+	 * <p><strong>パラメータ変更状態</strong><br>
+	 * Delta Systemは、開発者向けにソースコードを変更することなくレーティングパラメータを調整する機能が備わっています
+	 * (その機能は非公開となっています)。開発者はレーティング結果の精度向上のためにレーティングパラメータを調整することがあり、
+	 * 調整を行った状態でレーティングを行うと、その事実が分かるようアルゴリズムの末尾に 'C' の文字を付加します。
+	 * この文字が付加されたアルゴリズムバージョンで得られたレーティング値に信頼性はありません。</p>
+	 * <p><strong>表記例</strong><br>
+	 * 1.15-R<br>
+	 * 上記の例ではアルゴリズムバージョン 1 が 15回更新され、ユーザーレビュー中であることを示します。</p>
+	 * <p>どのレーティング値も算出しなかった場合、当メソッドはnullを返します。譜面統計情報オブジェクトがレーティング値を
+	 * 算出しているかどうかが定かではない場合には必ずnullチェックを行うようにしてください。</p>
+	 * @return Delta Systemのアルゴリズムバージョン
+	 */
+	public final String getRatingAlgorithmVersion() {
+		return mDsAlgoVer;
+	}
+
+	/**
+	 * Delta Systemのアルゴリズムバージョン設定
+	 * @param version Delta Systemのアルゴリズムバージョン
+	 */
+	final void setRatingAlgorithmVersion(String version) {
+		mDsAlgoVer = version;
+	}
+
+	/**
+	 * Delta Systemによって算出されたレーティング値を取得します。
+	 * <p>レーティング値の算出はオプション機能です。レーティング値を算出するには
+	 * {@link BeMusicStatisticsBuilder#addRating(BeMusicRatingType...)}により算出したいレーティング種別を追加して
+	 * 譜面統計情報の集計を行う必要があります。算出対象外のレーティング値を指定すると負の値を返します。</p>
+	 * <p>Delta Systemのレーティング値は整数値で返されますが、実際にユーザーにプレゼンテーションする際には
+	 * 返されたレーティング値を100で除算し小数点第2位までを示すことを想定しています。プレゼンテーション用に
+	 * 文字列を生成する際は{@link BeMusicRatingType#toString(int)}を使用してください。</p>
+	 * @param ratingType レーティング種別
+	 * @return Delta Systemによって算出されたレーティング値
+	 * @exception NullPointerException ratingTypeがnull
+	 */
+	public final int getRating(BeMusicRatingType ratingType) {
+		assertArgNotNull(ratingType, "ratingType");
+		var rating = mRatings[ratingType.getIndex()];
+		if (ratingType.isUnknown(rating)) {
+			return -1;
+		} else {
+			var max = ratingType.getMax();
+			return Math.min(max, Math.max(0, rating));
+		}
+	}
+
+	/**
+	 * レーティング値設定
+	 * @param ratingType レーティング種別
+	 * @param rating レーティング値
+	 */
+	final void setRating(BeMusicRatingType ratingType, int rating) {
+		mRatings[ratingType.getIndex()] = rating;
+	}
+
+	/**
+	 * Delta Systemのレーティング値の中で最も値の大きいレーティング種別を取得します。
+	 * <p>当メソッドが返すレーティング種別は、当該譜面の「主傾向」を表します。</p>
+	 * <p>主傾向は、全てのレーティング値を算出対象として譜面統計情報を集計した場合に最も有効な状態となります。
+	 * 算出対象外となったレーティング種別が最も大きいレーティング値になる可能性があるためです。</p>
+	 * <p>どのレーティング値も算出しなかった場合、当メソッドはnullを返します。譜面統計情報オブジェクトがレーティング値を
+	 * 算出しているかどうかが定かではない場合には必ずnullチェックを行うようにしてください。</p>
+	 * <p>当メソッドが扱うレーティング種別には{@link BeMusicRatingType#DELTA}は含まれないことに注意してください。</p>
+	 * @return レーティング値が最も大きいレーティング種別
+	 */
+	public final BeMusicRatingType getPrimaryTendency() {
+		return mPrimaryTendency;
+	}
+
+	/**
+	 * 譜面主傾向設定
+	 * @param ratingType レーティング種別
+	 */
+	final void setPrimaryTendency(BeMusicRatingType ratingType) {
+		mPrimaryTendency = ratingType;
+	}
+
+	/**
+	 * Delta Systemのレーティング値の中で2番目に値の大きいレーティング種別を取得します。
+	 * <p>当メソッドが返すレーティング種別は、当該譜面の「副次傾向」を表します。</p>
+	 * <p>主傾向と同様に、全てのレーティング値を算出対象として譜面統計情報を集計した場合に最も有効な状態となります。
+	 * また、レーティング値を1つしか算出しなかった場合、そのレーティング値の種別を返します。
+	 * つまり、副次傾向は主傾向と同じ値を示すことになります。</p>
+	 * <p>どのレーティング値も算出しなかった場合、当メソッドはnullを返します。譜面統計情報オブジェクトがレーティング値を
+	 * 算出しているかどうかが定かではない場合には必ずnullチェックを行うようにしてください。</p>
+	 * <p>当メソッドが扱うレーティング種別には{@link BeMusicRatingType#DELTA}は含まれないことに注意してください。</p>
+	 * @return レーティング値が2番目に大きいレーティング種別
+	 */
+	public final BeMusicRatingType getSecondaryTendency() {
+		return mSecondaryTendency;
+	}
+
+	/**
+	 * 譜面副次傾向設定
+	 * @param ratingType レーティング種別
+	 */
+	final void setSecondaryTendency(BeMusicRatingType ratingType) {
+		mSecondaryTendency = ratingType;
 	}
 }

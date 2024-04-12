@@ -24,97 +24,129 @@ public enum BeMusicDevice {
 			BeMusicLane.PRIMARY,
 			BeMusicChannel.VISIBLE_1P_01,
 			BeMusicChannel.INVISIBLE_1P_01,
-			BeMusicChannel.LANDMINE_1P_01),
+			BeMusicChannel.LANDMINE_1P_01,
+			BeMusicChannel.LONG_1P_01,
+			1),
 	/** スイッチ1-2 */
 	SWITCH12(1,
 			BeMusicLane.PRIMARY,
 			BeMusicChannel.VISIBLE_1P_02,
 			BeMusicChannel.INVISIBLE_1P_02,
-			BeMusicChannel.LANDMINE_1P_02),
+			BeMusicChannel.LANDMINE_1P_02,
+			BeMusicChannel.LONG_1P_02,
+			2),
 	/** スイッチ1-3 */
 	SWITCH13(2,
 			BeMusicLane.PRIMARY,
 			BeMusicChannel.VISIBLE_1P_03,
 			BeMusicChannel.INVISIBLE_1P_03,
-			BeMusicChannel.LANDMINE_1P_03),
+			BeMusicChannel.LANDMINE_1P_03,
+			BeMusicChannel.LONG_1P_03,
+			3),
 	/** スイッチ1-4 */
 	SWITCH14(3,
 			BeMusicLane.PRIMARY,
 			BeMusicChannel.VISIBLE_1P_04,
 			BeMusicChannel.INVISIBLE_1P_04,
-			BeMusicChannel.LANDMINE_1P_04),
+			BeMusicChannel.LANDMINE_1P_04,
+			BeMusicChannel.LONG_1P_04,
+			4),
 	/** スイッチ1-5 */
 	SWITCH15(4,
 			BeMusicLane.PRIMARY,
 			BeMusicChannel.VISIBLE_1P_05,
 			BeMusicChannel.INVISIBLE_1P_05,
-			BeMusicChannel.LANDMINE_1P_05),
+			BeMusicChannel.LANDMINE_1P_05,
+			BeMusicChannel.LONG_1P_05,
+			5),
 	/** スイッチ1-6 */
 	SWITCH16(5,
 			BeMusicLane.PRIMARY,
 			BeMusicChannel.VISIBLE_1P_08,
 			BeMusicChannel.INVISIBLE_1P_08,
-			BeMusicChannel.LANDMINE_1P_08),
+			BeMusicChannel.LANDMINE_1P_08,
+			BeMusicChannel.LONG_1P_08,
+			6),
 	/** スイッチ1-7 */
 	SWITCH17(6,
 			BeMusicLane.PRIMARY,
 			BeMusicChannel.VISIBLE_1P_09,
 			BeMusicChannel.INVISIBLE_1P_09,
-			BeMusicChannel.LANDMINE_1P_09),
+			BeMusicChannel.LANDMINE_1P_09,
+			BeMusicChannel.LONG_1P_09,
+			7),
 	/** スクラッチ1 */
 	SCRATCH1(7,
 			BeMusicLane.PRIMARY,
 			BeMusicChannel.VISIBLE_1P_06,
 			BeMusicChannel.INVISIBLE_1P_06,
-			BeMusicChannel.LANDMINE_1P_06),
+			BeMusicChannel.LANDMINE_1P_06,
+			BeMusicChannel.LONG_1P_06,
+			0),
 	/** スイッチ2-1 */
 	SWITCH21(8,
 			BeMusicLane.SECONDARY,
 			BeMusicChannel.VISIBLE_2P_01,
 			BeMusicChannel.INVISIBLE_2P_01,
-			BeMusicChannel.LANDMINE_2P_01),
+			BeMusicChannel.LANDMINE_2P_01,
+			BeMusicChannel.LONG_2P_01,
+			1),
 	/** スイッチ2-2 */
 	SWITCH22(9,
 			BeMusicLane.SECONDARY,
 			BeMusicChannel.VISIBLE_2P_02,
 			BeMusicChannel.INVISIBLE_2P_02,
-			BeMusicChannel.LANDMINE_2P_02),
+			BeMusicChannel.LANDMINE_2P_02,
+			BeMusicChannel.LONG_2P_02,
+			2),
 	/** スイッチ2-3 */
 	SWITCH23(10,
 			BeMusicLane.SECONDARY,
 			BeMusicChannel.VISIBLE_2P_03,
 			BeMusicChannel.INVISIBLE_2P_03,
-			BeMusicChannel.LANDMINE_2P_03),
+			BeMusicChannel.LANDMINE_2P_03,
+			BeMusicChannel.LONG_2P_03,
+			3),
 	/** スイッチ2-4 */
 	SWITCH24(11,
 			BeMusicLane.SECONDARY,
 			BeMusicChannel.VISIBLE_2P_04,
 			BeMusicChannel.INVISIBLE_2P_04,
-			BeMusicChannel.LANDMINE_2P_04),
+			BeMusicChannel.LANDMINE_2P_04,
+			BeMusicChannel.LONG_2P_04,
+			4),
 	/** スイッチ2-5 */
 	SWITCH25(12,
 			BeMusicLane.SECONDARY,
 			BeMusicChannel.VISIBLE_2P_05,
 			BeMusicChannel.INVISIBLE_2P_05,
-			BeMusicChannel.LANDMINE_2P_05),
+			BeMusicChannel.LANDMINE_2P_05,
+			BeMusicChannel.LONG_2P_05,
+			5),
 	/** スイッチ2-6 */
 	SWITCH26(13,
 			BeMusicLane.SECONDARY,
 			BeMusicChannel.VISIBLE_2P_08,
 			BeMusicChannel.INVISIBLE_2P_08,
-			BeMusicChannel.LANDMINE_2P_08),
+			BeMusicChannel.LANDMINE_2P_08,
+			BeMusicChannel.LONG_2P_08,
+			6),
 	/** スイッチ2-7 */
 	SWITCH27(14,
 			BeMusicLane.SECONDARY,
 			BeMusicChannel.VISIBLE_2P_09,
 			BeMusicChannel.INVISIBLE_2P_09,
-			BeMusicChannel.LANDMINE_2P_09),
+			BeMusicChannel.LANDMINE_2P_09,
+			BeMusicChannel.LONG_2P_09,
+			7),
 	/** スクラッチ2 */
 	SCRATCH2(15,
 			BeMusicLane.SECONDARY,
 			BeMusicChannel.VISIBLE_2P_06,
 			BeMusicChannel.INVISIBLE_2P_06,
-			BeMusicChannel.LANDMINE_2P_06);
+			BeMusicChannel.LANDMINE_2P_06,
+			BeMusicChannel.LONG_2P_06,
+			0);
 
 	/** Be Musicにおける入力デバイス数 */
 	public static final int COUNT = 16;
@@ -150,6 +182,10 @@ public enum BeMusicDevice {
 	private BmsChannel mInvisibleChannel;
 	/** 地雷オブジェのチャンネル */
 	private BmsChannel mLandmineChannel;
+	/** MGQ形式のロングノートチャンネル */
+	private BmsChannel mLegacyLongChannel;
+	/** スイッチ番号 */
+	private int mSwitchNumber;
 
 	/**
 	 * コンストラクタ
@@ -158,13 +194,18 @@ public enum BeMusicDevice {
 	 * @param visible 可視オブジェのチャンネル
 	 * @param invisible 不可視オブジェのチャンネル
 	 * @param landmine 地雷オブジェのチャンネル
+	 * @param legacyLong MGQ形式のロングノートチャンネル
+	 * @param switchNumber スイッチ番号(スクラッチは0)
 	 */
-	private BeMusicDevice(int index, BeMusicLane lane, BmsChannel visible, BmsChannel invisible, BmsChannel landmine) {
+	private BeMusicDevice(int index, BeMusicLane lane, BmsChannel visible, BmsChannel invisible, BmsChannel landmine,
+			BmsChannel legacyLong, int switchNumber) {
 		mIndex = index;
 		mLane = lane;
 		mVisibleChannel = visible;
 		mInvisibleChannel = invisible;
 		mLandmineChannel = landmine;
+		mLegacyLongChannel = legacyLong;
+		mSwitchNumber = switchNumber;
 	}
 
 	/**
@@ -207,6 +248,64 @@ public enum BeMusicDevice {
 	 */
 	public final BmsChannel getLandmineChannel() {
 		return mLandmineChannel;
+	}
+
+	/**
+	 * この入力デバイスに対応するMGQ形式のロングノートチャンネルを取得する。
+	 * <p>MGQ形式のロングノートチャンネルは旧式の定義であり、BMSライブラリとしての正式サポートは行わない。
+	 * しかし、この形式を使用したBMSは多数存在するためBe Musicサブセットでの読み込みのみサポートを行う。
+	 * また、関連するメソッドは一般公開しない。</p>
+	 * @return MGQ形式のロングノートチャンネル
+	 */
+	final BmsChannel getLegacyLongChannel() {
+		return mLegacyLongChannel;
+	}
+
+	/**
+	 * この入力デバイスのスイッチ番号を取得します。
+	 * <p>スイッチ番号は0～7の範囲の値となり、0はスクラッチを表します。</p>
+	 * @return スイッチ番号
+	 * @see #isSwitch()
+	 * @see #isScratch()
+	 */
+	public final int getSwitchNumber() {
+		return mSwitchNumber;
+	}
+
+	/**
+	 * この入力デバイスがスイッチであるかを取得します。
+	 * @return この入力デバイスがスイッチであればtrue、それ以外はfalse
+	 */
+	public final boolean isSwitch() {
+		return mSwitchNumber > 0;
+	}
+
+	/**
+	 * この入力デバイスがスクラッチであるかを取得します。
+	 * @return この入力デバイスがスクラッチであればtrue、それ以外はfalse
+	 */
+	public final boolean isScratch() {
+		return mSwitchNumber == 0;
+	}
+
+	/**
+	 * 指定されたスイッチ番号がスイッチを表すかどうかを取得します。
+	 * <p>スイッチ番号として不適切な値(範囲外の値)を指定するとfalseを返します。</p>
+	 * @param switchNumber スイッチ番号
+	 * @return スイッチ番号がスイッチを表す場合true、それ以外はfalse
+	 */
+	public static boolean isSwitch(int switchNumber) {
+		return (switchNumber >= 1) && (switchNumber <= 7);
+	}
+
+	/**
+	 * 指定されたスイッチ番号がスクラッチを表すかどうかを取得します。
+	 * <p>スイッチ番号として不適切な値(範囲外の値)を指定するとfalseを返します。</p>
+	 * @param switchNumber スイッチ番号
+	 * @return スイッチ番号がスクラッチを表す場合true、それ以外はfalse
+	 */
+	public static boolean isScratch(int switchNumber) {
+		return switchNumber == 0;
 	}
 
 	/**

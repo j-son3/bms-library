@@ -19,40 +19,43 @@ public enum BeMusicNoteType {
 	 * ノートがないことを示します。
 	 * <p>ノート種別がこの値を示す場合、そこには何もないことを意味するためアプリケーションは何も行うべきではありません。</p>
 	 */
-	NONE(0, false, false, false),
+	NONE(0, false, false, false, false, false),
 	/**
 	 * 入力デバイスを1回操作するべきノートであることを示します。(短押しノート)
 	 */
-	BEAT(1, true, false, true),
+	BEAT(1, true, false, true, true, true),
 	/**
 	 * 長押しノートの操作が継続中であることを示します。
 	 * <p>このノートが登場する間は、{@link #LONG_ON}で開始した操作を継続することを求めます。</p>
 	 */
-	LONG(2, false, false, false),
+	LONG(2, false, false, false, false, false),
 	/**
 	 * 入力デバイスの操作を行い、その操作の継続を開始するノートであることを示します。(長押しノート)
 	 * <p>この操作は、スイッチであれば押しっぱなし、スクラッチであれば単一方向に動かしっぱなしすることを求めます。</p>
 	 */
-	LONG_ON(3, true, false, true),
+	LONG_ON(3, true, false, true, false, true),
 	/**
 	 * 長押しノートの操作を終了するノートであることを示します。
 	 * <p>この操作は、スイッチであれば押すのをやめ、スクラッチであれば動かすのをやめることを求めます。</p>
 	 * <p>この種別はログノートモードが{@link BeMusicLongNoteMode#LN}の時の終端であることを示します。</p>
 	 */
-	LONG_OFF(4, false, true, true),
+	LONG_OFF(4, false, true, true, true, false),
 	/**
 	 * 長押しノートの操作を終了するノートであることを示します。
 	 * <p>この操作は、スイッチであれば押すのをやめ、スクラッチであれば動かすのをやめることを求めます。</p>
 	 * <p>この種別はロングノートモードが{@link BeMusicLongNoteMode#CN}または{@link BeMusicLongNoteMode#HCN}
 	 * の時の終端であることを示します。</p>
 	 */
-	CHARGE_OFF(5, true, true, true),
+	CHARGE_OFF(5, true, true, true, true, false),
 	/**
 	 * 地雷オブジェであることを示します。
 	 * <p>プレイヤーはこのオブジェ付近で入力デバイスを操作してはなりません。スイッチであれば押すとミス、
 	 * スクラッチであればどちらか単一の方向に動かすとミスと判定されます。</p>
 	 */
-	LANDMINE(6, false, false, true);
+	LANDMINE(6, false, false, true, false, false);
+
+	/** Be Musicにおけるノート種別の数 */
+	public static final int COUNT = 7;
 
 	/** IDとノート種別のマップ */
 	private static final Map<Integer, BeMusicNoteType> ID_MAP = Stream.of(BeMusicNoteType.values())
@@ -66,6 +69,12 @@ public enum BeMusicNoteType {
 	private boolean mIsLongNoteTail;
 	/** 操作可能ノートであるかどうか */
 	private boolean mIsPlayable;
+	/** 解放操作を伴うかどうか */
+	private boolean mHasUpAction;
+	/** 押下操作を伴うかどうか */
+	private boolean mHasDownAction;
+	/** 何らかの操作を伴うかどうか */
+	private boolean mHasMovement;
 
 	/**
 	 * コンストラクタ
@@ -73,12 +82,18 @@ public enum BeMusicNoteType {
 	 * @param isCountNotes ノート数としてカウントされるかどうか
 	 * @param isLongNoteTail ロングノートの終端であるかどうか
 	 * @param isPlayable 操作可能ノートであるかどうか
+	 * @param hasUpAction 解放操作を伴うかどうか
+	 * @param hasDownAction 押下操作を伴うかどうか
 	 */
-	private BeMusicNoteType(int id, boolean isCountNotes, boolean isLongNoteTail, boolean isPlayable) {
+	private BeMusicNoteType(int id, boolean isCountNotes, boolean isLongNoteTail, boolean isPlayable,
+			boolean hasUpAction, boolean hasDownAction) {
 		mId = id;
 		mIsCountNotes = isCountNotes;
 		mIsLongNoteTail = isLongNoteTail;
 		mIsPlayable = isPlayable;
+		mHasUpAction = hasUpAction;
+		mHasDownAction = hasDownAction;
+		mHasMovement = hasUpAction || hasDownAction;
 	}
 
 	/**
@@ -97,6 +112,15 @@ public enum BeMusicNoteType {
 	 */
 	public final boolean isCountNotes() {
 		return mIsCountNotes;
+	}
+
+	/**
+	 * このノート種別が長押し継続中を示すかどうかを判定します。
+	 * <p>当メソッドがtrueを返す時、ノート種別は{@link #LONG}であることを示します。</p>
+	 * @return 長押し継続中の場合はtrue、そうでない場合はfalse
+	 */
+	public final boolean isHolding() {
+		return this == LONG;
 	}
 
 	/**
@@ -123,6 +147,37 @@ public enum BeMusicNoteType {
 	 */
 	public final boolean hasVisualEffect() {
 		return this != NONE;
+	}
+
+	/**
+	 * このノート種別が入力デバイスの解放操作を伴うかどうかを判定します。
+	 * <p>解放操作とは、入力デバイスから手を放すことを示します。従って、長押し終了や短押しを表します。
+	 * 長押し継続中のように操作状態に変化のないノート種別は該当しません。</p>
+	 * @return 解放操作を伴うノートである場合はtrue、そうでない場合はfalse
+	 */
+	public final boolean hasUpAction() {
+		return mHasUpAction;
+	}
+
+	/**
+	 * このノート種別が入力デバイスの押下操作を伴うかどうかを判定します。
+	 * <p>押下操作とは、入力デバイスに触れることを示します。従って、長押し開始や短押しを表します。
+	 * 長押し継続中のように操作状態に変化のないノート種別は該当しません。</p>
+	 * @return 押下操作を伴うノートである場合はtrue、そうでない場合はfalse
+	 */
+	public final boolean hasDownAction() {
+		return mHasDownAction;
+	}
+
+	/**
+	 * このノート種別が何らかの操作を伴うかどうかを判定します。
+	 * <p>具体的には{@link #hasUpAction()}, {@link #hasDownAction()}のいずれかがtrueを返すかを表します。</p>
+	 * @return 何らかの操作を伴うノートである場合はtrue、そうでない場合はfalse
+	 * @see #hasUpAction()
+	 * @see #hasDownAction()
+	 */
+	public final boolean hasMovement() {
+		return mHasMovement;
 	}
 
 	/**

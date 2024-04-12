@@ -115,6 +115,8 @@ public class BeMusicHeader {
 	private BeMusicRank mRank;
 	/** #TOTAL */
 	private double mTotal;
+	/** #COMMENT */
+	private String mComment;
 	/** #BANNER */
 	private String mBanner;
 	/** #STAGEFILE */
@@ -290,6 +292,14 @@ public class BeMusicHeader {
 	}
 
 	/**
+	 * #COMMENTを取得します。
+	 * @return #COMMENTの値
+	 */
+	public final String getComment() {
+		return mComment;
+	}
+
+	/**
 	 * #BANNERを取得します。
 	 * @return #BANNERの値
 	 */
@@ -458,6 +468,7 @@ public class BeMusicHeader {
 		mPlayLevelRaw = BeMusicMeta.getPlayLevelRaw(content);
 		mPlayLevel = BeMusicMeta.getPlayLevel(content);
 		mRank = BeMusicMeta.getRank(content);
+		mComment = BeMusicMeta.getComment(content);
 		mTotal = BeMusicMeta.getTotal(content);
 		mBanner = BeMusicMeta.getBanner(content);
 		mStageFile = BeMusicMeta.getStageFile(content);

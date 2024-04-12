@@ -3,6 +3,7 @@ package com.lmt.lib.bms.bemusic;
 import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -81,6 +82,10 @@ public class BeMusicScoreBuilder {
 	private BeMusicNoteType mLnTail = null;
 	/** 前回シークした楽曲位置情報 */
 	private BeMusicPoint mPrevPoint;
+	/** 長押しノート継続中かを示すフラグのリスト(MGQ形式用) */
+	private int[] mHoldingsMgq = new int[BeMusicDevice.COUNT];
+	/** 長押しノート継続中かを示すフラグのリスト(RDM形式用) */
+	private boolean[] mHoldingsRdm = new boolean[BeMusicDevice.COUNT];
 	/** シーク中かどうか */
 	private boolean mSeeking = false;
 	/** シーク対象のチャンネル一式 */
@@ -282,6 +287,7 @@ public class BeMusicScoreBuilder {
 			// 可視オブジェ
 			if (mSeekVisible) {
 				mTargetChannels.add(BmsInt.box(l.getVisibleChannel().getNumber()));
+				mTargetChannels.add(BmsInt.box(l.getLegacyLongChannel().getNumber()));
 			}
 			// 不可視オブジェ
 			if (mSeekInvisible) {
@@ -316,6 +322,8 @@ public class BeMusicScoreBuilder {
 		mLnObjs = mContent.getMultipleMetas(BeMusicMeta.LNOBJ.getName());
 		mLnTail = BeMusicMeta.getLnMode(mContent).getTailType();
 		mPrevPoint = null;
+		Arrays.fill(mHoldingsMgq, 0);
+		Arrays.fill(mHoldingsRdm, false);
 		mSeeking = true;
 	}
 
@@ -412,29 +420,59 @@ public class BeMusicScoreBuilder {
 
 			// 可視オブジェ
 			if (mSeekVisible) {
-				chNum = BeMusicDevice.fromIndex(i).getVisibleChannel().getNumber();
+				chNum = dev.getLegacyLongChannel().getNumber();
 				if ((note = mContent.getNote(chNum, mCurAt)) != null) {
-					// ノートの種別を判定する
-					if (mLnObjs.contains((long)note.getValue())) {
-						// ロングノート終了オブジェ
-						note2 = mContent.getPreviousNote(chNum, mCurAt, false);
-						if ((note2 != null) && !mLnObjs.contains((long)note2.getValue())) {
-							// 前のノートが通常オブジェの場合はロングノート終了として扱う
-							pt.setNote(dev, mLnTail, note.getValue());
-						} else {
-							// 前のノートなし、または続けてロングノート終了オブジェ検出時は通常オブジェとして扱う
-							pt.setNote(dev, BeMusicNoteType.BEAT, note.getValue());
-						}
+					// MGQ形式のロングノートチャンネルを解析する
+					var lnValue = note.getValue();
+					var curHolding = mHoldingsMgq[i];
+					if (curHolding == 0) {
+						// 長押しが開始されていなかった場合は長押しを開始する
+						var lnRdm = mHoldingsRdm[i];
+						pt.setNote(dev, lnRdm ? BeMusicNoteType.LONG : BeMusicNoteType.LONG_ON, lnValue);
+						mHoldingsMgq[i] = lnValue;
+						mHoldingsRdm[i] = false;  // RDM形式のLNは強制OFF
 					} else {
-						// 通常オブジェ
-						note2 = mContent.getNextNote(chNum, mCurAt, false);
-						if ((note2 != null) && mLnObjs.contains((long)note2.getValue())) {
-							// 次のノートがロングノート終了オブジェの場合はロングノート開始として扱う
-							pt.setNote(dev, BeMusicNoteType.LONG_ON, note.getValue());
+						// 長押し継続中の場合は長押しを終了とする
+						// 開始と終了の値が異なる場合でも強制的に終了とする。
+						// (世に出回っているBMSには、稀に開始と終了の値が異なるものがある)
+						pt.setNote(dev, mLnTail, lnValue);
+						mHoldingsMgq[i] = 0;
+					}
+				} else if (mHoldingsMgq[i] != 0) {
+					// 当該入力デバイスが長押しノート継続中の場合は「長押しノート継続中」を設定する
+					// MGQ形式のLNがONの場合は通常オブジェとRDM形式のLNは解析しない(MGQ形式LNを上に被せるイメージ)
+					pt.setNote(dev, BeMusicNoteType.LONG, 0);
+				} else {
+					// 通常オブジェ、RDM形式のLNを解析する
+					chNum = dev.getVisibleChannel().getNumber();
+					if ((note = mContent.getNote(chNum, mCurAt)) != null) {
+						// ノートの種別を判定する
+						if (mLnObjs.contains((long)note.getValue())) {
+							// ロングノート終了オブジェ
+							note2 = mContent.getPreviousNote(chNum, mCurAt, false);
+							if ((note2 != null) && !mLnObjs.contains((long)note2.getValue())) {
+								// 前のノートが通常オブジェの場合はロングノート終了として扱う
+								pt.setNote(dev, mLnTail, note.getValue());
+								mHoldingsRdm[i] = false;
+							} else {
+								// 前のノートなし、または続けてロングノート終了オブジェ検出時は通常オブジェとして扱う
+								pt.setNote(dev, BeMusicNoteType.BEAT, note.getValue());
+							}
 						} else {
-							// 次のノートがロングノート終了オブジェではない場合は通常オブジェとして扱う
-							pt.setNote(dev, BeMusicNoteType.BEAT, note.getValue());
+							// 通常オブジェ
+							note2 = mContent.getNextNote(chNum, mCurAt, false);
+							if ((note2 != null) && mLnObjs.contains((long)note2.getValue())) {
+								// 次のノートがロングノート終了オブジェの場合はロングノート開始として扱う
+								pt.setNote(dev, BeMusicNoteType.LONG_ON, note.getValue());
+								mHoldingsRdm[i] = true;
+							} else {
+								// 次のノートがロングノート終了オブジェではない場合は通常オブジェとして扱う
+								pt.setNote(dev, BeMusicNoteType.BEAT, note.getValue());
+							}
 						}
+					} else if (mHoldingsRdm[i]) {
+						// 当該入力デバイスが長押しノート継続中の場合は「長押しノート継続中」を設定する
+						pt.setNote(dev, BeMusicNoteType.LONG, 0);
 					}
 				}
 			}

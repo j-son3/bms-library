@@ -263,7 +263,7 @@ public class BeMusicMeta {
 	 * <tr><th style="text-align:left;">データ型</th><td>STRING</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>NO</td></tr>
-	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>NO</td></tr>
+	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">説明</th>
 	 * <td>選曲中に表示される楽曲のコメント内容を表します。</td></tr>
 	 * </table>
@@ -1100,6 +1100,28 @@ public class BeMusicMeta {
 	 */
 	public static double getTotal(BmsContent content) {
 		return (double)content.getSingleMeta(BeMusicMeta.TOTAL.getName());
+	}
+
+	/**
+	 * #COMMENTを設定します。
+	 * @param content BMSコンテンツ
+	 * @param comment #COMMENTの値
+	 * @exception NullPointerException contentがnull
+	 * @see #COMMENT
+	 */
+	public static void setComment(BmsContent content, String comment) {
+		content.setSingleMeta(BeMusicMeta.COMMENT.getName(), comment);
+	}
+
+	/**
+	 * #COMMENTを取得します。
+	 * @param content BMSコンテンツ
+	 * @return #COMMENTの値
+	 * @exception NullPointerException contentがnull
+	 * @see #COMMENT
+	 */
+	public static String getComment(BmsContent content) {
+		return (String)content.getSingleMeta(BeMusicMeta.COMMENT.getName());
 	}
 
 	/**

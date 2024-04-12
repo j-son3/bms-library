@@ -5,6 +5,12 @@ import static com.lmt.lib.bms.internal.Assertion.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+
+import com.lmt.lib.bms.internal.deltasystem.Ds;
+import com.lmt.lib.bms.internal.deltasystem.DsContext;
+import com.lmt.lib.bms.internal.deltasystem.StatisticsAccessor;
 
 /**
  * 譜面統計情報を集計するためのビルダーです。
@@ -26,9 +32,31 @@ public class BeMusicStatisticsBuilder {
 	private double mLength;
 	/** ノートレイアウト */
 	private BeMusicNoteLayout mLayout;
+	/** レーティング値算出対象のレーティング種別一覧 */
+	private List<BeMusicRatingType> mRatings = new ArrayList<>();
 
 	/** 集計済みフラグ */
 	private boolean mUsed = false;
+
+	/** Delta Systemが参照する譜面統計情報へのアクセッサ */
+	private static class DsStatisticsAccessor implements StatisticsAccessor {
+		/** 譜面統計情報 */
+		BeMusicStatistics mStat;
+
+		/**
+		 * コンストラクタ
+		 * @param stat 譜面統計情報
+		 */
+		DsStatisticsAccessor(BeMusicStatistics stat) {
+			mStat = stat;
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public void setRating(BeMusicRatingType ratingType, int rating) {
+			mStat.setRating(ratingType, rating);
+		}
+	}
 
 	/**
 	 * 譜面統計情報ビルダーオブジェクトを構築します。
@@ -79,6 +107,25 @@ public class BeMusicStatisticsBuilder {
 	}
 
 	/**
+	 * Delta Systemによる譜面のレーティングを行うレーティングの種別を追加します。
+	 * <p>レーティングの種別一覧は{@link BeMusicRatingType}列挙型を参照してください。</p>
+	 * <p>当メソッドで追加されたレーティング種別は、{@link #setNoteLayout(BeMusicNoteLayout)}で指定したノートレイアウトで
+	 * 譜面の分析が行われ、種別に応じたレーティング値の算出が行われます。</p>
+	 * <p>Delta Systemはその他の譜面統計情報とは別のアルゴリズムによって算出が行われます。よって、最終的なレーティング値は
+	 * 期間統計情報の長さの影響を受けず、同じ譜面では常に同じ値を返します。</p>
+	 * <p>レーティング種別を追加する順番に決まりはありません。また、同じレーティング種別を追加しても作用はなく、
+	 * 重複したレーティング種別は内部処理で破棄されます。</p>
+	 * <p>レーティング種別にnullを指定しても作用はありません。</p>
+	 * @param ratingTypes レーティング種別一覧(一度に複数の種別を指定可能)
+	 * @return このオブジェクトのインスタンス
+	 * @see BeMusicRatingType
+	 */
+	public final BeMusicStatisticsBuilder addRating(BeMusicRatingType...ratingTypes) {
+		Stream.of(ratingTypes).filter(r -> !Objects.isNull(r) && !mRatings.contains(r)).forEach(r -> mRatings.add(r));
+		return this;
+	}
+
+	/**
 	 * 指定された楽曲とオプションで譜面統計情報の集計を行います。
 	 * <p>各種Setterメソッドで指定した集計オプションに誤りがある場合、集計は行われずに例外がスローされます。</p>
 	 * <p>一度集計を行ったビルダーで再度集計を行うことはできません。異なるオプションで集計したい場合は
@@ -98,7 +145,12 @@ public class BeMusicStatisticsBuilder {
 		assertField(mLayout != null, "Parameter 'Layout' is null");
 
 		// 統計情報集計開始
-		var statistics = doStat();
+		var statistics = new BeMusicStatistics();
+		doStat(statistics);
+
+		// Delta Systemによる集計
+		// 期間統計情報へのデータ展開も行うため、一般の統計情報集計後に実施する
+		doDeltaSystem(statistics);
 
 		// ビルダー使用終了のため保有オブジェクトを全て解放する
 		mUsed = true;
@@ -111,9 +163,9 @@ public class BeMusicStatisticsBuilder {
 
 	/**
 	 * 譜面統計情報の集計メイン処理
-	 * @return 譜面統計情報
+	 * @param 譜面統計情報
 	 */
-	private BeMusicStatistics doStat() {
+	private void doStat(BeMusicStatistics stat) {
 		var curTime = 0.0;
 		var termTime = mScore.getPlayTime();
 		var advTime = mLength / 2.0;
@@ -226,7 +278,59 @@ public class BeMusicStatisticsBuilder {
 		}
 
 		// 総合統計情報を計算する
-		return computeSummary(timeSpans);
+		computeSummary(timeSpans, stat);
+	}
+
+	/**
+	 * Delta Systemによるレーティング値算出処理
+	 * @param stat 譜面統計情報
+	 */
+	private void doDeltaSystem(BeMusicStatistics stat) {
+		// Delta Systemを使用しない場合は何もしない
+		if (mRatings.isEmpty()) {
+			return;
+		}
+
+		// ビルダーに要求のあった全てのレーティング値を計算し、統計情報に設定する
+		var cxt = new DsContext(mHeader, mScore, mLayout, new DsStatisticsAccessor(stat));
+		for (var ratingType : mRatings) {
+			// TODO ダブルプレーの分析に対応したら以下のif文を削除する。
+			if (cxt.dpMode) {
+				stat.setRating(ratingType, -1);
+				continue;
+			}
+			var analyzer = ratingType.createAnalyzer();
+			analyzer.rating(cxt);
+		}
+
+		// 譜面の主傾向、副次傾向を設定する
+		// 要求のあったレーティング値が1つの場合は主傾向＝副次傾向とする
+		var tendencies = BeMusicRatingType.tendencies();
+		var values = tendencies.stream()
+				.filter(t -> t.isValid(stat.getRating(t)))
+				.mapToInt(t -> (stat.getRating(t) << 4) | t.getIndex())
+				.sorted()
+				.toArray();
+		if (values.length == 0) {
+			// 有効なレーティング値が1個もなく、主傾向・副次傾向を設定不可
+			stat.setPrimaryTendency(null);
+			stat.setSecondaryTendency(null);
+		} else {
+			// 主傾向・副次傾向を設定する
+			var last = values.length - 1;
+			var primary = BeMusicRatingType.fromIndex(values[last] & 0x0f);
+			var secondary = (last < 1) ? primary : BeMusicRatingType.fromIndex(values[last - 1] & 0x0f);
+			stat.setPrimaryTendency(primary);
+			stat.setSecondaryTendency(secondary);
+		}
+
+		// Delta Systemのアルゴリズムバージョン文字列を生成する
+		var ver = String.format("%d.%d-%c%s",
+				Ds.ALGORITHM_MAJOR_VERSION,
+				Ds.ALGORITHM_REVISION_NUMBER,
+				Ds.ALGORITHM_STATUS_CHAR,
+				Ds.isConfigChanged() ? Character.toString(Ds.ALGORITHM_CONFIG_CHANGED) : "");
+		stat.setRatingAlgorithmVersion(ver);
 	}
 
 	/**
@@ -282,9 +386,9 @@ public class BeMusicStatisticsBuilder {
 	/**
 	 * 譜面統計情報のサマリ計算
 	 * @param timeSpans 期間統計情報リスト
-	 * @return 譜面統計情報
+	 * @param stat 譜面統計情報
 	 */
-	private BeMusicStatistics computeSummary(List<BeMusicTimeSpan> timeSpans) {
+	private void computeSummary(List<BeMusicTimeSpan> timeSpans, BeMusicStatistics stat) {
 		// 収集された時間統計情報のサマリを行う
 		var spanCount = (double)timeSpans.size();
 		var playableCount = 0.0;
@@ -311,7 +415,6 @@ public class BeMusicStatisticsBuilder {
 		}
 
 		// サマリから総合統計情報を生成する
-		var stat = new BeMusicStatistics();
 		stat.setTimeSpanList(timeSpans);
 		stat.setSpanLength(mLength);
 		stat.setNoteLayout(mLayout);
@@ -339,7 +442,5 @@ public class BeMusicStatisticsBuilder {
 			stat.setAverageGazeSwingley(gazeSwingleySum[0] / veCount, gazeSwingleySum[1] / veCount);
 			stat.setAverageViewSwingley(viewSwingleySum[0] / veCount, viewSwingleySum[1] / veCount);
 		}
-
-		return stat;
 	}
 }

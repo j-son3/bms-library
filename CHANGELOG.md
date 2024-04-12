@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.0] - 2023-05-14
+### Added
+- Delta Systemによる譜面のレーティング機能(※)を追加しました。具体的には以下の機能追加を行っています。
+    - レーティングの種別を表す BeMusicRatingType を追加しました。
+    - レーティングに関する機能・定義を有する BeMusicRatings を追加しました。
+    - 譜面統計情報生成時にレーティングを行う種別を設定する BeMusicStatisticsBuilder#addRating を追加しました。
+    - BeMusicStatisticsに、Delta Systemのバージョンを取得する getRatingAlgorithmVersion を追加しました。
+    - BeMusicStatisticsに、レーティング値を取得する getRating を追加しました。
+    - BeMusicStatisticsに、譜面主傾向を取得する getPrimaryTendency を追加しました。
+    - BeMusicStatisticsに、譜面副次傾向を取得する getSecondaryTendency を追加しました。
+- BeMusicPointに、楽曲位置の属性を取得する getVisualEffectCount, hasVisualEffect, hasMovementNote を追加しました。
+- BeMusicNoteTypeに、ノートの属性を取得する isHolding, hasUpAction, hasDownAction, hasMovement を追加しました。
+- BeMusicMetaに、#COMMENTの取得・設定を行う getComment, setComment を追加しました。
+- BeMusicHeaderに、#COMMENTの定義内容を取得する getComment を追加しました。
+- BeMusicDeviceに、入力デバイスのスイッチ番号・種類を取得する getSwitchNumber, isSwitch, isScratch を追加しました。
+
+※Delta Systemの詳細については[こちら](https://www.lm-t.com/content/bmslibrary/doc/deltasystem/)を参照してください。Delta Systemは本バージョンリリース時点では開発中となっています。現在対応しているレーティング種別は COMPLEX, POWER, RHYTHMの3種類となっており、シングルプレー譜面のみレーティング値を出力できます。非対応のレーティング種別、またはダブルプレー譜面を入力してもレーティング値は出力されません。また、本バージョンに搭載のDelta Systemはドラフト版となっており、レーティング値の精度はあまり高くありません。今後のアップデートにより同じ譜面で大きく異なるレーティング値を出力するようになる可能性があることに留意してください。
+
+### Changed
+- MGQ形式(#LNTYPE 2)のロングノート定義の読み込みに対応しました。
+
+### Fixed
+- BeMusicScoreにて、長押し継続中(BeMusicNoteType#LONG)が正しく設定されない不具合を修正しました。
+
 ## [0.4.0] - 2022-12-11
 ### Added
 - タイムライン読み込みをスキップする機能を実装しました。 BmsLoader#setSkipReadTimeline() で機能のON/OFFを切り替えられます。
