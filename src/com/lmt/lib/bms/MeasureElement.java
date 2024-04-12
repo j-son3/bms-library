@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.lmt.lib.bms.internal.MutableDouble;
+
 /**
  * 小節データクラス。
  */

@@ -1,4 +1,7 @@
-package com.lmt.lib.bms;
+package com.lmt.lib.bms.internal;
+
+import com.lmt.lib.bms.BmsSpec;
+import com.lmt.lib.bms.BmsType;
 
 /**
  * Assertionクラスでは、BMSライブラリにおけるアサーションの処理をとりまとめる。
@@ -7,7 +10,7 @@ package com.lmt.lib.bms;
  * アサーションに失敗した場合、メソッドごとに定められた例外をスローする。これらの例外は基本的には
  * RuntimeExceptionを継承した例外となっている。
  */
-public final class BmsAssertion {
+public final class Assertion {
 	/**
 	 * 引数の汎用アサーション
 	 * @param success 評価式の結果
@@ -155,7 +158,7 @@ public final class BmsAssertion {
 	 * @exception IllegalArgumentException 小節データ・ノートを登録できないチャンネル番号
 	 */
 	public static void assertChannelRange(int channel) {
-		if (!BmsSpec.isChannelWithinRange(channel)) {
+		if ((channel < BmsSpec.CHANNEL_MIN) || (channel > BmsSpec.CHANNEL_MAX)) {
 			var msg = String.format("Channel number is out of range. expect=(%d-%d), actual=%d",
 					BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX, channel);
 			throw new IllegalArgumentException(msg);
@@ -168,7 +171,7 @@ public final class BmsAssertion {
 	 * @exception IllegalArgumentException チャンネル番号が仕様チャンネルではない
 	 */
 	public static void assertSpecChannelRange(int channel) {
-		if (!BmsSpec.isSpecChannelWithinRange(channel)) {
+		if ((channel < BmsSpec.SPEC_CHANNEL_MIN) || (channel > BmsSpec.SPEC_CHANNEL_MAX)) {
 			var msg = String.format("Channel number is NOT range of spec channel. expect=(%d-%d), actual=%d",
 					BmsSpec.SPEC_CHANNEL_MIN, BmsSpec.SPEC_CHANNEL_MAX, channel);
 			throw new IllegalArgumentException(msg);
@@ -181,7 +184,7 @@ public final class BmsAssertion {
 	 * @exception IllegalArgumentException チャンネル番号がユーザーチャンネルではない
 	 */
 	public static void assertUserChannelRange(int channel) {
-		if (!BmsSpec.isUserChannelWithinRange(channel)) {
+		if ((channel < BmsSpec.USER_CHANNEL_MIN) || (channel > BmsSpec.USER_CHANNEL_MAX)) {
 			var msg = String.format("Channel number is NOT range of user channel. expect=(%d-%d), actual=%d",
 					BmsSpec.USER_CHANNEL_MIN, BmsSpec.USER_CHANNEL_MAX, channel);
 			throw new IllegalArgumentException(msg);
@@ -230,7 +233,7 @@ public final class BmsAssertion {
 	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満、または小節番号最大値超過
 	 */
 	public static void assertArgMeasureWithinRange(int measure, int measureMax, double tick) {
-		if (!BmsSpec.isMeasureWithinRange(measure, measureMax)) {
+		if ((measure < BmsSpec.MEASURE_MIN) || (measure > measureMax)) {
 			var fmt = "";
 			if (tick == Double.MIN_VALUE) {
 				fmt = "Argument 'measure' is out of range. expect=(%d-%d), actual=%d";
@@ -259,7 +262,7 @@ public final class BmsAssertion {
 	 * @exception IllegalArgumentException 刻み位置が{@link BmsSpec#TICK_MIN}未満、または刻み位置最大値超過
 	 */
 	public static void assertArgTickWithinRange(double tick, double tickMax, int measure) {
-		if (!BmsSpec.isTickWithinRange(tick, tickMax)) {
+		if ((tick < BmsSpec.TICK_MIN) || (tick > tickMax)) {
 			var msg = String.format(
 					"Argument 'tick' is out of range. measure=%d, expect-tick=(%.16g-%.16g), actual-tick=%.16g",
 					measure, BmsSpec.TICK_MIN, tickMax, tick);

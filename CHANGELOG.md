@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.0] - 2022-08-22
+### Added
+- #LNMODE ヘッダの読み込みに正式対応しました。
+- 譜面の総ノート数から推奨するTOTAL値を取得する BeMusicScore#getRecommendTotal1/2 を追加しました。
+- #ENDRANDOM の読み込みに対応しました。
+
+### Removed
+- BMSライブラリとして正式公開する予定のないクラスを Javadoc ドキュメントから削除しました。
+
+### Fixed
+- #RANDOM によるフロー制御が一部正常に動作しないケースがあったのを修正しました。
+
 ## [0.2.0] - 2022-08-17
 ### Added
 - #SCROLL ヘッダとチャンネル &nbsp;SC&nbsp; の読み込みに対応しました。(※)

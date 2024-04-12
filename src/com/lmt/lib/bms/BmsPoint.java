@@ -1,6 +1,6 @@
 package com.lmt.lib.bms;
 
-import static com.lmt.lib.bms.BmsAssertion.*;
+import static com.lmt.lib.bms.internal.Assertion.*;
 
 /**
  * タイムラインの時間軸の位置を表す「楽曲位置({@link BmsAt})」の単純実装です。

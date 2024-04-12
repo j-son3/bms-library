@@ -1,6 +1,6 @@
 package com.lmt.lib.bms.bemusic;
 
-import static com.lmt.lib.bms.bemusic.Assertion.*;
+import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -77,6 +77,8 @@ public class BeMusicScoreBuilder {
 	private double mCurBpm;
 	/** #LNOBJリスト */
 	private List<Long> mLnObjs;
+	/** ロングノート終端の種別 */
+	private BeMusicNoteType mLnTail = null;
 	/** 前回シークした楽曲位置情報 */
 	private BeMusicPoint mPrevPoint;
 	/** シーク中かどうか */
@@ -312,6 +314,7 @@ public class BeMusicScoreBuilder {
 		mCurAt = new BmsPoint(0, 0);
 		mCurBpm = mContent.getInitialBpm();
 		mLnObjs = mContent.getMultipleMetas(BeMusicMeta.LNOBJ.getName());
+		mLnTail = BeMusicMeta.getLnMode(mContent).getTailType();
 		mPrevPoint = null;
 		mSeeking = true;
 	}
@@ -417,7 +420,7 @@ public class BeMusicScoreBuilder {
 						note2 = mContent.getPreviousNote(chNum, mCurAt, false);
 						if ((note2 != null) && !mLnObjs.contains((long)note2.getValue())) {
 							// 前のノートが通常オブジェの場合はロングノート終了として扱う
-							pt.setNote(dev, BeMusicNoteType.LONG_OFF, note.getValue());
+							pt.setNote(dev, mLnTail, note.getValue());
 						} else {
 							// 前のノートなし、または続けてロングノート終了オブジェ検出時は通常オブジェとして扱う
 							pt.setNote(dev, BeMusicNoteType.BEAT, note.getValue());
@@ -489,7 +492,7 @@ public class BeMusicScoreBuilder {
 	 * @exception IllegalStateException シーク中ではない
 	 */
 	private void assertSeeking() {
-		assertState(mSeeking, "This operation can't be performed while NOT seeking.");
+		assertField(mSeeking, "This operation can't be performed while NOT seeking.");
 	}
 
 	/**
@@ -497,7 +500,7 @@ public class BeMusicScoreBuilder {
 	 * @exception IllegalStateException シーク中
 	 */
 	private void assertNotSeeking() {
-		assertState(!mSeeking, "This operation can't be performed while seeking.");
+		assertField(!mSeeking, "This operation can't be performed while seeking.");
 	}
 
 	/**
@@ -505,6 +508,6 @@ public class BeMusicScoreBuilder {
 	 * @exception IllegalStateException 対象コンテンツが参照モードではない
 	 */
 	private void assertIsReferenceMode() {
-		assertState(mContent.isReferenceMode(), "Content is NOT reference mode.");
+		assertField(mContent.isReferenceMode(), "Content is NOT reference mode.");
 	}
 }

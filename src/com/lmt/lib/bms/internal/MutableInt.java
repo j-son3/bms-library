@@ -1,4 +1,4 @@
-package com.lmt.lib.bms;
+package com.lmt.lib.bms.internal;
 
 /**
  * 変更可能な参照型の32ビット整数値。

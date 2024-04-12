@@ -1,6 +1,6 @@
 package com.lmt.lib.bms;
 
-import static com.lmt.lib.bms.BmsAssertion.*;
+import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import com.lmt.lib.bms.internal.MutableDouble;
 
 /**
  * 1個のBMSデータを表すBMSライブラリのメインオブジェクトです。

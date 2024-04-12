@@ -29,7 +29,9 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 		/** #ELSE */
 		ELSE(BeMusicMeta.ELSE),
 		/** #ENDIF */
-		ENDIF(BeMusicMeta.ENDIF);
+		ENDIF(BeMusicMeta.ENDIF),
+		/** #ENDRANDOM */
+		ENDRANDOM(BeMusicMeta.ENDRANDOM);
 
 		/** メタ情報名称 */
 		private BmsMetaKey mMetaKey;
@@ -56,15 +58,15 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 	/** CONTROL FLOW定義状態 */
 	private enum RandomDefineStatus {
 		/** 初期状態 */
-		NEUTRAL(true, true, false, false, false),
+		NEUTRAL(true, true, false, false, false, true),
 		/** #RANDOM宣言 */
-		RANDOM(true, true, false, false, false),
+		RANDOM(true, true, false, false, false, true),
 		/** #IFブロック */
-		IF(false, false, true, true, true),
+		IF(false, false, true, true, true, false),
 		/** #ELSEIFブロック */
-		ELSEIF(false, false, true, true, true),
+		ELSEIF(false, false, true, true, true, false),
 		/** #ELSEブロック */
-		ELSE(false, false, false, false, true);
+		ELSE(false, false, false, false, true, false);
 
 		/** #RANDOM有効状態 */
 		private boolean mEnableRandom;
@@ -76,6 +78,8 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 		private boolean mEnableElse;
 		/** #ENDIF有効状態 */
 		private boolean mEnableEndIf;
+		/** #ENDRANDOM有効状態 */
+		private boolean mEnableEndRandom;
 
 		/**
 		 * コンストラクタ
@@ -84,13 +88,16 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 		 * @param enElif #ELSEIF有効状態
 		 * @param enElse #ELSE有効状態
 		 * @param enEnd #ENDIF有効状態
+		 * @param enEndRan #ENDRANDOM有効状態
 		 */
-		private RandomDefineStatus(boolean enRan, boolean enIf, boolean enElif, boolean enElse, boolean enEnd) {
+		private RandomDefineStatus(
+				boolean enRan, boolean enIf, boolean enElif, boolean enElse, boolean enEnd, boolean enEndRan) {
 			mEnableRandom = enRan;
 			mEnableIf = enIf;
 			mEnableElseIf = enElif;
 			mEnableElse = enElse;
 			mEnableEndIf = enEnd;
+			mEnableEndRandom = enEndRan;
 		}
 
 		/**
@@ -105,6 +112,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 			case ELSEIF: return mEnableElseIf;
 			case ELSE: return mEnableElse;
 			case ENDIF: return mEnableEndIf;
+			case ENDRANDOM: return mEnableEndRandom;
 			default: return false;
 			}
 		}
@@ -181,8 +189,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 	/** {@inheritDoc} */
 	@Override
 	public TestResult testMeta(BmsMeta meta, int index, Object value) {
-		processControlFlow(meta, value);
-		return mCurrentTestResult;
+		return processControlFlow(meta, value);
 	}
 
 	/** {@inheritDoc} */
@@ -208,6 +215,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 		content.setSingleMeta(BeMusicMeta.ELSEIF.getName(), null);
 		content.setSingleMeta(BeMusicMeta.ELSE.getName(), null);
 		content.setSingleMeta(BeMusicMeta.ENDIF.getName(), null);
+		content.setSingleMeta(BeMusicMeta.ENDRANDOM.getName(), null);
 		content.endEdit();
 
 		// CONTROL FLOWで使用したデータを初期値に戻す
@@ -232,23 +240,24 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 	 * CONTROL FLOW制御を行う
 	 * @param meta メタ情報
 	 * @param value 解析後の値
+	 * @return 検査結果
 	 */
-	private void processControlFlow(BmsMeta meta, Object value) {
+	private TestResult processControlFlow(BmsMeta meta, Object value) {
 		// RANDOMが無効にされている場合は無視する
 		if (!mRandomEnable) {
-			return;
+			return TestResult.OK;
 		}
 
 		// CONTROL FLOWの種類を特定する
 		var ctrlFlow = ControlFlow.fromMeta(meta);
 		if (ctrlFlow == null) {
-			return;
+			return mCurrentTestResult;
 		}
 
 		// 現在の定義状態で定義可能なCONTROL FLOWかをチェックする
 		if (!mRandomDefineStatus.isEnableControlFlow(ctrlFlow)) {
-			mCurrentTestResult = TestResult.fail("Wrong control flow");
-			return;
+			//mCurrentTestResult = 現状維持
+			return TestResult.fail("Wrong control flow");
 		}
 
 		// 定義状態と真偽状態の遷移を行う
@@ -281,7 +290,9 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 			mCurrentTestResult = isTrue ? TestResult.OK : TestResult.THROUGH;
 			break;
 		}
-		case ENDIF: {   // #ENDIF
+		case ENDIF:       // #ENDIF
+		case ENDRANDOM: { // #ENDRANDOM
+			mRandomValue = 0L;
 			mRandomDefineStatus = RandomDefineStatus.NEUTRAL;
 			mRandomBooleanStatus = RandomBooleanStatus.NEUTRAL;
 			mCurrentTestResult = TestResult.OK;
@@ -290,6 +301,9 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 		default:        // Don't care
 			break;
 		}
+
+		// CONTROL FLOWのメタ情報はコンテンツに含めない
+		return TestResult.THROUGH;
 	}
 
 	/**

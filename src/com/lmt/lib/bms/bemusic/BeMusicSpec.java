@@ -1,6 +1,6 @@
 package com.lmt.lib.bms.bemusic;
 
-import static com.lmt.lib.bms.bemusic.Assertion.*;
+import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.nio.file.Path;
 
@@ -132,7 +132,8 @@ public class BeMusicSpec {
 				.addMeta(BeMusicMeta.IF)
 				.addMeta(BeMusicMeta.ELSEIF)
 				.addMeta(BeMusicMeta.ELSE)
-				.addMeta(BeMusicMeta.ENDIF);
+				.addMeta(BeMusicMeta.ENDIF)
+				.addMeta(BeMusicMeta.ENDRANDOM);
 
 		// チャンネルを登録する
 		builder

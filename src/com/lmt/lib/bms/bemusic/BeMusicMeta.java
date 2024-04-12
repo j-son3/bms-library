@@ -11,37 +11,26 @@ import com.lmt.lib.bms.BmsType;
 import com.lmt.lib.bms.BmsUnit;
 
 /**
- * BeMusicのBMS仕様に含まれるメタ情報を表します。
+ * Be-MusicのBMS仕様に含まれるメタ情報を表します。
  *
- * <p>当クラスは、BeMusicのBMS仕様に含まれるメタ情報に関する定義のプレースホルダの役割を果たします。
+ * <p>当クラスは、Be-MusicのBMS仕様に含まれるメタ情報に関する定義のプレースホルダの役割を果たします。
  * そのため、インスタンスを生成することを想定していません。</p>
  *
- * <p>■メタ情報の説明について<br>
+ * <p><strong>メタ情報の説明について</strong><br>
  * 当クラスで定義するメタ情報の説明の各項目については以下を参照してください。</p>
  *
  * <ul>
  * <li>構成単位：メタ情報の定義構造を示します。詳細は{@link BmsUnit}を参照してください。</li>
- * <li>データ型：メタ情報の値のデータ型を示します。詳細はBmsTypeを参照してください。</li>
+ * <li>データ型：メタ情報の値のデータ型を示します。詳細は{@link BmsType}を参照してください。</li>
  * <li>初期値：メタ情報が定義されなかった場合の値を示します。</li>
  * <li>同一性チェック：BMSコンテンツからハッシュ値を生成する際、当該メタ情報を参考値として使用するかどうかを示します。</li>
- * <li>ライブラリ対応：BeMusicライブラリが当該メタ情報を正式に対応するかどうかを示します。(※)</li>
+ * <li>ライブラリ対応：Be-Musicサブセットが当該メタ情報を正式に対応するかどうかを示します。(※)</li>
  * <li>説明：メタ情報の概要を示します。</li>
  * </ul>
  *
- * <p>※BeMusicが正式に対応していなくても、BeMusicコンテンツ内に定義値は格納されています。但し、それらの定義値に
+ * <p>※Be-Musicが正式に対応していなくても、BMSコンテンツ内に定義値は格納されています。ただし、それらの定義値に
  * アクセスするには{@link BmsContent}が提供する低レベルAPIを使用する必要があります。「ライブラリが対応している」
- * というのは、当該メタ情報にアクセスするためのAPIをBeMusicライブラリが用意していることを示します。</p>
- *
- * <p>■ライブラリ対応のメタ情報一覧</p>
- *
- * <table>
- * <caption>ライブラリ対応のメタ情報</caption>
- * <tr><td>#PLAYER&nbsp;</td><td>#GENRE&nbsp;</td><td>#TITLE&nbsp;</td><td>#SUBTITLE&nbsp;</td><td>#ARTIST&nbsp;</td></tr>
- * <tr><td>#SUBARTIST</td><td>#BPM(初期BPM)&nbsp;</td><td>#DIFFICULTY&nbsp;</td><td>#PLAYLEVEL&nbsp;</td><td>#RANK&nbsp;</td></tr>
- * <tr><td>#TOTAL</td><td>#BANNER&nbsp;</td><td>#STAGEFILE&nbsp;</td><td>#BACKBMP&nbsp;</td><td>#LNOBJ&nbsp;</td></tr>
- * <tr><td>%URL</td><td>%EMAIL&nbsp;</td><td>#WAV&nbsp;</td><td>#BMP&nbsp;</td><td>#BPM&nbsp;</td></tr>
- * <tr><td>#STOP</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
- * </table>
+ * というのは、当該メタ情報にアクセスするためのAPIをBe-Musicサブセットが用意していることを示します。</p>
  */
 public class BeMusicMeta {
 	/**
@@ -520,9 +509,9 @@ public class BeMusicMeta {
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">構成単位</th><td>単体</td></tr>
 	 * <tr><th style="text-align:left;">データ型</th><td>INTEGER</td></tr>
-	 * <tr><th style="text-align:left;">初期値</th><td>0</td></tr>
+	 * <tr><th style="text-align:left;">初期値</th><td>1</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
-	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>NO TODO:ライブラリ対応する</td></tr>
+	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">説明</th>
 	 * <td>ロングノートの種類を表します。</td></tr>
 	 * </table>
@@ -633,6 +622,20 @@ public class BeMusicMeta {
 	 * </table>
 	 */
 	public static final BmsMeta ENDIF = BmsMeta.single("#endif", BmsType.STRING, "", 1, false);
+	/**
+	 * #ENDRANDOM
+	 * <table><caption>&nbsp;</caption>
+	 * <tr><th style="text-align:left;">構成単位</th><td>単体</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>STRING</td></tr>
+	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
+	 * <tr><th style="text-align:left;">同一性チェック</th><td>NO</td></tr>
+	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
+	 * <tr><th style="text-align:left;">説明</th>
+	 * <td>直前の乱数終了を表します。この定義はBMSライブラリではBMSコンテンツ読み込みエラー回避のためだけに存在し、
+	 * 定義しても何の作用もありません。ただし、#IFブロック内で使用するとエラーになります。</td></tr>
+	 * </table>
+	 */
+	public static final BmsMeta ENDRANDOM = BmsMeta.single("#endrandom", BmsType.STRING, "", 1, false);
 	/**
 	 * #WAV
 	 * <table><caption>&nbsp;</caption>
@@ -1278,6 +1281,28 @@ public class BeMusicMeta {
 	 */
 	public static long getLnObj(BmsContent content, int index) {
 		return (long)content.getMultipleMeta(BeMusicMeta.LNOBJ.getName(), index);
+	}
+
+	/**
+	 * #LNMODEを設定します。
+	 * @param content BMSコンテンツ
+	 * @param lnMode #LNMODEの値
+	 * @exception NullPointerException contentがnull
+	 * @see #LNMODE
+	 */
+	public static void setLnMode(BmsContent content, BeMusicLongNoteMode lnMode) {
+		content.setSingleMeta(BeMusicMeta.LNMODE.getName(), (lnMode == null) ? null : lnMode.getNativeValue());
+	}
+
+	/**
+	 * #LNMODEを取得します。
+	 * @param content BMSコンテンツ
+	 * @return #LNMODEの値
+	 * @exception NullPointerException contentがnull
+	 * @see #LNMODE
+	 */
+	public static BeMusicLongNoteMode getLnMode(BmsContent content) {
+		return BeMusicLongNoteMode.fromNative((long)content.getSingleMeta(BeMusicMeta.LNMODE.getName()));
 	}
 
 	/**

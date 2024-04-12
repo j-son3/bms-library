@@ -1,6 +1,6 @@
 package com.lmt.lib.bms;
 
-import static com.lmt.lib.bms.BmsAssertion.*;
+import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -1082,31 +1082,23 @@ public final class BmsLoader {
 		var unit = meta.getUnit();
 		var result = BmsLoadHandler.TestResult.FAIL;
 		switch (unit) {
-		case SINGLE: {
+		case SINGLE:
+		case INDEXED: {
+			// ユーザーによる検査処理
+			result = mHandler.testMeta(meta, index, obj);
+
 			// 再定義不許可の状態で再定義を検出した場合はエラーとする
-			if (!mIsAllowRedefine && content.containsSingleMeta(meta.getName())) {
-				error(BmsLoadError.Kind.REDEFINE, lineNumber, line, "Re-defined single meta", null);
+			if ((result != null) && (result.getResult() == BmsLoadHandler.TestResult.RESULT_OK) &&
+					!mIsAllowRedefine && content.containsMeta(meta, index)) {
+				error(BmsLoadError.Kind.REDEFINE, lineNumber, line, "Re-defined meta", null);
 				return true;
 			}
 
-			// ユーザーによる検査処理
-			result = mHandler.testMeta(meta, 0, obj);
 			break;
 		}
 		case MULTIPLE: {
 			// ユーザーによる検査処理
 			result = mHandler.testMeta(meta, content.getMultipleMetaCount(name), obj);
-			break;
-		}
-		case INDEXED: {
-			// 再定義不許可の状態で同じ同一インデックスへの再定義を検出した場合はエラーとする
-			if (!mIsAllowRedefine && content.containsIndexedMeta(meta.getName(), index)) {
-				error(BmsLoadError.Kind.REDEFINE, lineNumber, line, "Re-defined indexed meta", null);
-				return true;
-			}
-
-			// ユーザーによる検査処理
-			result = mHandler.testMeta(meta, index, obj);
 			break;
 		}
 		default:
@@ -1207,9 +1199,17 @@ public final class BmsLoader {
 				}
 			}
 
-			// 重複不可チャンネルの重複チェックを行う
+			// チャンネルデータの検査を行う
 			var chIndex = content.getChannelDataCount(channelNum, measure);
-			if ((chIndex > 0) && !channel.isMultiple()) {
+			var result = mHandler.testChannel(channel, chIndex, measure, object);
+			if (result == null) {
+				var msg = "Channel test result was returned null by handler";
+				error(BmsLoadError.Kind.PANIC, lineNumber, line, msg, null);
+				return true;
+			}
+
+			// 重複不可チャンネルの重複チェックを行う
+			if ((result == BmsLoadHandler.TestResult.OK) && (chIndex > 0) && !channel.isMultiple()) {
 				if (mIsAllowRedefine) {
 					// 再定義が許可されている場合は上書きするようにする
 					chIndex = 0;
@@ -1220,12 +1220,8 @@ public final class BmsLoader {
 				}
 			}
 
-			// チャンネルデータの検査を行う
-			var result = mHandler.testChannel(channel, chIndex, measure, object);
-			if (result == null) {
-				var msg = "Channel test result was returned null by handler";
-				error(BmsLoadError.Kind.PANIC, lineNumber, line, msg, null);
-			} else switch (result.getResult()) {
+			// チャンネルデータの検査結果を判定する
+			switch (result.getResult()) {
 			case BmsLoadHandler.TestResult.RESULT_OK:
 				try {
 					// 小節データの空き領域にチャンネルデータを登録する
@@ -1250,17 +1246,6 @@ public final class BmsLoader {
 			}
 		} else if (channelType.isArrayType()) {
 			// 配列型の場合
-			// 重複不可チャンネル上書き不許可・重複不可・再定義検出の条件が揃った場合はエラーとする
-			var defStr = matcher.group(1);
-			var owPos = (Integer)null;
-			if (!channel.isMultiple()) {
-				owPos = parsed.foundDefs.get(defStr);
-				if (!mIsAllowRedefine && (owPos != null)) {
-					error(BmsLoadError.Kind.REDEFINE, lineNumber, line, "Re-defined array type channel", null);
-					return true;
-				}
-			}
-
 			// 配列データを解析する
 			var array = (BmsArray)null;
 			try {
@@ -1278,7 +1263,22 @@ public final class BmsLoader {
 			if (result == null) {
 				var msg = "Channel test result was returned null by handler";
 				error(BmsLoadError.Kind.PANIC, lineNumber, line, msg, null);
-			} else switch (result.getResult()) {
+				return true;
+			}
+
+			// 重複不可チャンネル上書き不許可・重複不可・再定義検出の条件が揃った場合はエラーとする
+			var defStr = matcher.group(1);
+			var owPos = (Integer)null;
+			if ((result == BmsLoadHandler.TestResult.OK) && !channel.isMultiple()) {
+				owPos = parsed.foundDefs.get(defStr);
+				if (!mIsAllowRedefine && (owPos != null)) {
+					error(BmsLoadError.Kind.REDEFINE, lineNumber, line, "Re-defined array type channel", null);
+					return true;
+				}
+			}
+
+			// チャンネルデータの検査結果を判定する
+			switch (result.getResult()) {
 			case BmsLoadHandler.TestResult.RESULT_OK: {
 				// 解析済みデータを生成する
 				ChannelArrayData data = new ChannelArrayData();

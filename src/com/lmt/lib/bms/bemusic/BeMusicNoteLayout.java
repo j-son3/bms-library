@@ -1,6 +1,6 @@
 package com.lmt.lib.bms.bemusic;
 
-import static com.lmt.lib.bms.bemusic.Assertion.*;
+import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.util.ArrayList;
 import java.util.Collections;

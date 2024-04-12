@@ -14,6 +14,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.lmt.lib.bms.internal.MutableInt;
+
 /**
  * タイムラインのデータを管理するコレクション。
  * <p>当クラスで管理するのは、配列型チャンネルのノート、および値型チャンネルの小節データである。</p>

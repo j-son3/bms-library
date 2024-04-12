@@ -1,6 +1,6 @@
 package com.lmt.lib.bms.bemusic;
 
-import static com.lmt.lib.bms.bemusic.Assertion.*;
+import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +19,7 @@ import com.lmt.lib.bms.BmsAt;
  *
  * <p>BMS譜面全体とは、楽曲位置情報である{@link BeMusicPoint}の集合(リスト)を示します。
  * 当クラスが保有する楽曲位置情報は時間軸で昇順ソートされています。アプリケーションは当クラスが持つイテレータや
- * 楽曲位置情報を取得するためのGetterを用いて楽曲位置情報を参照することができます。</p>
+ * 楽曲位置情報を取得するためのGetter、およびストリームを用いて楽曲位置情報を参照することができます。</p>
  *
  * <p>楽曲位置情報の集合からは様々な分析を行うことができ、代表的な統計情報の収集は当クラスの構築時に行われます。
  * 統計情報にはGetterからアクセスすることが可能で、アプリケーションの要求に応じてそれらの情報を活用することが
@@ -124,6 +124,10 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	private boolean mHasBgm;
 	/** BGA有無 */
 	private boolean mHasBga;
+	/** 推奨TOTAL値1 */
+	private double mRecommendTotal1;
+	/** 推奨TOTAL値2 */
+	private double mRecommendTotal2;
 
 	/** 小節番号・刻み位置によるコンパレータ */
 	private PointComparator mPointCmp = new PointComparator();
@@ -305,6 +309,32 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 */
 	public final int getStopCount() {
 		return mStopCount;
+	}
+
+	/**
+	 * 推奨TOTAL値を取得します。
+	 * <p>この値は総ノート数をもとに、以下の計算式で算出されたものです。</p>
+	 * <pre>
+	 * #TOTAL = 7.605 * N / (0.01 * N + 6.5)
+	 * ※N = 総ノート数</pre>
+	 * @return 推奨TOTAL値
+	 */
+	public final double getRecommendTotal1() {
+		return mRecommendTotal1;
+	}
+
+	/**
+	 * 推奨TOTAL値を取得します。
+	 * <p>この値は総ノート数をもとに、以下の計算式で算出されたものです。</p>
+	 * <pre>
+	 * N &lt; 400 : #TOTAL = 200 + N / 5
+	 * N &lt; 600 : #TOTAL = 280 + (N - 400) / 2.5
+	 * N &gt;= 600: #TOTAL = 360 + (N - 600) / 5
+	 * ※N = 総ノート数</pre>
+	 * @return 推奨TOTAL値
+	 */
+	public final double getRecommendTotal2() {
+		return mRecommendTotal2;
 	}
 
 	/**
@@ -582,6 +612,16 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 			lastTime = time;
 			lastDispPos = disp;
 		}
+
+		// 推奨TOTAL値1を計算する
+		var notes = (double)mNoteCount;
+		mRecommendTotal1 = 7.605 * notes / (0.01 * notes + 6.5);
+
+		// 推奨TOTAL値2を計算する
+		mRecommendTotal2 =
+				(notes < 400) ? (200.0 + notes / 5.0) :
+				(notes < 600) ? (280.0 + (notes - 400.0) / 2.5) :
+				                (360.0 + (notes - 600.0) / 5.0);
 
 		// 拡張情報取得用処理を実行する
 		onCreate();

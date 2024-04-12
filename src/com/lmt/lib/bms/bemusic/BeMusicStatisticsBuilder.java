@@ -1,6 +1,6 @@
 package com.lmt.lib.bms.bemusic;
 
-import static com.lmt.lib.bms.bemusic.Assertion.*;
+import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,10 +92,10 @@ public class BeMusicStatisticsBuilder {
 	 */
 	public final BeMusicStatistics statistics() {
 		// アサーション
-		assertState(!mUsed, "This builder is already used");
-		assertState((mLength >= BeMusicTimeSpan.MIN_SPAN) && (mLength <= BeMusicTimeSpan.MAX_SPAN),
+		assertField(!mUsed, "This builder is already used");
+		assertField((mLength >= BeMusicTimeSpan.MIN_SPAN) && (mLength <= BeMusicTimeSpan.MAX_SPAN),
 				"Parameter 'Length' is out of range. length=%.3g", mLength);
-		assertState(mLayout != null, "Parameter 'Layout' is null");
+		assertField(mLayout != null, "Parameter 'Layout' is null");
 
 		// 統計情報集計開始
 		var statistics = doStat();

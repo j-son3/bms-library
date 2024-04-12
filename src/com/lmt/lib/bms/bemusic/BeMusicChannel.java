@@ -4,9 +4,9 @@ import com.lmt.lib.bms.BmsChannel;
 import com.lmt.lib.bms.BmsType;
 
 /**
- * BeMusicのBMS仕様に含まれるチャンネルを表します。
+ * Be-MusicのBMS仕様に含まれるチャンネルを表します。
  *
- * <p>当クラスは、BeMusicのBMS仕様に含まれるチャンネルに関する定義のプレースホルダの役割を果たします。
+ * <p>当クラスは、Be-MusicのBMS仕様に含まれるチャンネルに関する定義のプレースホルダの役割を果たします。
  * そのため、インスタンスを生成することを想定していません。</p>
  */
 public class BeMusicChannel {

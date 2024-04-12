@@ -1,6 +1,6 @@
 package com.lmt.lib.bms.bemusic;
 
-import static com.lmt.lib.bms.bemusic.Assertion.*;
+import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -125,6 +125,8 @@ public class BeMusicHeader {
 	private String mPreview;
 	/** #LNOBJ */
 	private List<Long> mLnObjs;
+	/** #LNMODE */
+	private BeMusicLongNoteMode mLnMode;
 	/** %URL */
 	private String mUrl;
 	/** %EMAIL */
@@ -328,6 +330,14 @@ public class BeMusicHeader {
 	}
 
 	/**
+	 * #LNMODEを取得します。
+	 * @return #LNMODEの値
+	 */
+	public final BeMusicLongNoteMode getLnMode() {
+		return mLnMode;
+	}
+
+	/**
 	 * %URLを取得します。
 	 * @return %URLの値
 	 */
@@ -454,6 +464,7 @@ public class BeMusicHeader {
 		mBackBmp = BeMusicMeta.getBackBmp(content);
 		mPreview = BeMusicMeta.getPreview(content);
 		mLnObjs = BeMusicMeta.getLnObjs(content);
+		mLnMode = BeMusicMeta.getLnMode(content);
 		mUrl = BeMusicMeta.getUrl(content);
 		mEmail = BeMusicMeta.getEmail(content);
 

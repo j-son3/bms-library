@@ -1,9 +1,9 @@
-package com.lmt.lib.bms;
+package com.lmt.lib.bms.internal;
 
 /**
  * 変更可能な参照型の数値。
  */
-abstract class MutableNumber implements Comparable<MutableNumber> {
+public abstract class MutableNumber implements Comparable<MutableNumber> {
 	/**
 	 * 32ビット整数値取得
 	 * @return 32ビット整数値
@@ -46,7 +46,7 @@ abstract class MutableNumber implements Comparable<MutableNumber> {
 	 * 8ビット整数値取得
 	 * @return 8ビット整数値
 	 */
-	final byte byteValue() {
+	public final byte byteValue() {
 		return (byte)intValue();
 	}
 
@@ -54,7 +54,7 @@ abstract class MutableNumber implements Comparable<MutableNumber> {
 	 * 16ビット整数値取得
 	 * @return 16ビット整数値
 	 */
-	final short shortValue() {
+	public final short shortValue() {
 		return (short)intValue();
 	}
 

@@ -1,5 +1,10 @@
 package com.lmt.lib.bms.bemusic;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * 視覚表示されるノートの種別を表す列挙型です。
  *
@@ -14,37 +19,51 @@ public enum BeMusicNoteType {
 	 * ノートがないことを示します。
 	 * <p>ノート種別がこの値を示す場合、そこには何もないことを意味するためアプリケーションは何も行うべきではありません。</p>
 	 */
-	NONE(0, false, false),
+	NONE(0, false, false, false),
 	/**
 	 * 入力デバイスを1回操作するべきノートであることを示します。(短押しノート)
 	 */
-	BEAT(1, true, true),
+	BEAT(1, true, false, true),
 	/**
 	 * 長押しノートの操作が継続中であることを示します。
 	 * <p>このノートが登場する間は、{@link #LONG_ON}で開始した操作を継続することを求めます。</p>
 	 */
-	LONG(2, false, false),
+	LONG(2, false, false, false),
 	/**
 	 * 入力デバイスの操作を行い、その操作の継続を開始するノートであることを示します。(長押しノート)
 	 * <p>この操作は、スイッチであれば押しっぱなし、スクラッチであれば単一方向に動かしっぱなしすることを求めます。</p>
 	 */
-	LONG_ON(3, true, true),
+	LONG_ON(3, true, false, true),
 	/**
 	 * 長押しノートの操作を終了するノートであることを示します。
 	 * <p>この操作は、スイッチであれば押すのをやめ、スクラッチであれば動かすのをやめることを求めます。</p>
+	 * <p>この種別はログノートモードが{@link BeMusicLongNoteMode#LN}の時の終端であることを示します。</p>
 	 */
-	LONG_OFF(4, false, true),
+	LONG_OFF(4, false, true, true),
+	/**
+	 * 長押しノートの操作を終了するノートであることを示します。
+	 * <p>この操作は、スイッチであれば押すのをやめ、スクラッチであれば動かすのをやめることを求めます。</p>
+	 * <p>この種別はロングノートモードが{@link BeMusicLongNoteMode#CN}または{@link BeMusicLongNoteMode#HCN}
+	 * の時の終端であることを示します。</p>
+	 */
+	CHARGE_OFF(5, true, true, true),
 	/**
 	 * 地雷オブジェであることを示します。
 	 * <p>プレイヤーはこのオブジェ付近で入力デバイスを操作してはなりません。スイッチであれば押すとミス、
 	 * スクラッチであればどちらか単一の方向に動かすとミスと判定されます。</p>
 	 */
-	LANDMINE(5, false, true);
+	LANDMINE(6, false, false, true);
+
+	/** IDとノート種別のマップ */
+	private static final Map<Integer, BeMusicNoteType> ID_MAP = Stream.of(BeMusicNoteType.values())
+			.collect(Collectors.toMap(e -> e.getId(), e -> e));
 
 	/** ID */
 	private int mId;
 	/** ノート数としてカウントされるべきかどうか */
 	private boolean mIsCountNotes;
+	/** ロングノートの終端であるかどうか */
+	private boolean mIsLongNoteTail;
 	/** 操作可能ノートであるかどうか */
 	private boolean mIsPlayable;
 
@@ -52,11 +71,13 @@ public enum BeMusicNoteType {
 	 * コンストラクタ
 	 * @param id ID
 	 * @param isCountNotes ノート数としてカウントされるかどうか
+	 * @param isLongNoteTail ロングノートの終端であるかどうか
 	 * @param isPlayable 操作可能ノートであるかどうか
 	 */
-	private BeMusicNoteType(int id, boolean isCountNotes, boolean isPlayable) {
+	private BeMusicNoteType(int id, boolean isCountNotes, boolean isLongNoteTail, boolean isPlayable) {
 		mId = id;
 		mIsCountNotes = isCountNotes;
+		mIsLongNoteTail = isLongNoteTail;
 		mIsPlayable = isPlayable;
 	}
 
@@ -76,6 +97,16 @@ public enum BeMusicNoteType {
 	 */
 	public final boolean isCountNotes() {
 		return mIsCountNotes;
+	}
+
+	/**
+	 * このノート種別がロングノートの終端であるかどうかを判定します。
+	 * <p>この値はロングノートモード({@link BeMusicLongNoteMode})が何であるかは問いません。</p>
+	 * @return ノート種別がロングノートの終端である場合はtrue、そうでない場合はfalse
+	 * @see BeMusicLongNoteMode
+	 */
+	public final boolean isLongNoteTail() {
+		return mIsLongNoteTail;
 	}
 
 	/**
@@ -100,7 +131,7 @@ public enum BeMusicNoteType {
 	 * @return IDに該当するノート種別。IDに該当する列挙値が存在しない場合は{@link #NONE}
 	 */
 	public static BeMusicNoteType fromId(int id) {
-		for (var type : values()) { if (id == type.getId()) { return type; } }
-		return NONE;
+		var noteType = ID_MAP.get(id);
+		return Objects.requireNonNullElse(noteType, NONE);
 	}
 }

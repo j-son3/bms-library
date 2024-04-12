@@ -1,9 +1,9 @@
-package com.lmt.lib.bms;
+package com.lmt.lib.bms.internal;
 
 /**
  * 変更可能な参照型の倍精度浮動小数値。
  */
-class MutableDouble extends MutableNumber {
+public class MutableDouble extends MutableNumber {
 	/** 値 */
 	private double mValue;
 

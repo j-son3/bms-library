@@ -1,6 +1,6 @@
 package com.lmt.lib.bms;
 
-import static com.lmt.lib.bms.BmsAssertion.*;
+import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.util.AbstractList;
 import java.util.Arrays;

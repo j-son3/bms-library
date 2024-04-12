@@ -1,6 +1,6 @@
 package com.lmt.lib.bms;
 
-import static com.lmt.lib.bms.BmsAssertion.*;
+import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -642,87 +642,6 @@ public final class BmsSpec {
 	}
 
 	/**
-	 * チャンネル番号の下限値超過判定
-	 * @param channel チャンネル番号
-	 * @return 下限値を超過していた場合true
-	 */
-	static boolean isChannelUnderflow(int channel) {
-		return channel < CHANNEL_MIN;
-	}
-
-	/**
-	 * チャンネル番号の上限値判定
-	 * @param channel チャンネル番号
-	 * @return 上限値を超過していた場合true
-	 */
-	static boolean isChannelOverflow(int channel) {
-		return channel > CHANNEL_MAX;
-	}
-
-	/**
-	 * チャンネル番号の範囲内判定
-	 * @param channel チャンネル番号
-	 * @return 範囲内の場合true
-	 */
-	static boolean isChannelWithinRange(int channel) {
-		return !isChannelUnderflow(channel) && !isChannelOverflow(channel);
-	}
-
-	/**
-	 * 仕様チャンネル番号の下限値判定
-	 * @param channel チャンネル番号
-	 * @return 下限値を超過していた場合true
-	 */
-	static boolean isSpecChannelUnderflow(int channel) {
-		return channel < SPEC_CHANNEL_MIN;
-	}
-
-	/**
-	 * 仕様チャンネル番号の上限値判定
-	 * @param channel チャンネル番号
-	 * @return 上限値を超過していた場合true
-	 */
-	static boolean isSpecChannelOverflow(int channel) {
-		return channel > SPEC_CHANNEL_MAX;
-	}
-
-	/**
-	 * 仕様チャンネル番号の範囲内判定
-	 * @param channel チャンネル番号
-	 * @return 範囲内の場合true
-	 */
-	static boolean isSpecChannelWithinRange(int channel) {
-		return !isSpecChannelUnderflow(channel) && !isSpecChannelOverflow(channel);
-	}
-
-	/**
-	 * ユーザーチャンネル番号の下限値判定
-	 * @param channel チャンネル番号
-	 * @return 下限値を超過していた場合true
-	 */
-	static boolean isUserChannelUnderflow(int channel) {
-		return channel < USER_CHANNEL_MIN;
-	}
-
-	/**
-	 * ユーザーチャンネル番号の上限値判定
-	 * @param channel チャンネル番号
-	 * @return 上限値を超過していた場合true
-	 */
-	static boolean isUserChannelOverflow(int channel) {
-		return channel > USER_CHANNEL_MAX;
-	}
-
-	/**
-	 * ユーザーチャンネル番号の範囲内判定
-	 * @param channel チャンネル番号
-	 * @return 範囲内の場合true
-	 */
-	static boolean isUserChannelWithinRange(int channel) {
-		return !isUserChannelUnderflow(channel) && !isUserChannelOverflow(channel);
-	}
-
-	/**
 	 * チャンネルインデックスの下限値超過判定
 	 * @param index チャンネルインデックス
 	 * @return 下限値を超過していた場合true
@@ -757,80 +676,6 @@ public final class BmsSpec {
 	 */
 	static boolean isChIndexWithinRange(int index, boolean isMultiple) {
 		return isMultiple ? (!isChIndexUnderflow(index) && !isChIndexOverflow(index)) : (index == BmsSpec.CHINDEX_MIN);
-	}
-
-	/**
-	 * 小節番号の下限値超過判定
-	 * @param measure 小節番号
-	 * @return 下限値を超過していた場合true
-	 */
-	static boolean isMeasureUnderflow(int measure) {
-		return measure < MEASURE_MIN;
-	}
-
-	/**
-	 * 小節番号の上限値超過判定
-	 * @param measure 小節番号
-	 * @return 上限値を超過していた場合true
-	 */
-	static boolean isMeasureOverflow(int measure) {
-		return measure > MEASURE_MAX;
-	}
-
-	/**
-	 * 小節番号の範囲内判定
-	 * @param measure 小節番号
-	 * @return 範囲内の場合true
-	 */
-	static boolean isMeasureWithinRange(int measure) {
-		return !isMeasureUnderflow(measure) && !isMeasureOverflow(measure);
-	}
-
-	/**
-	 * 小節番号の範囲内判定
-	 * @param measure 小節番号
-	 * @param measureMax 小節番号最大値
-	 * @return 範囲内の場合true
-	 */
-	static boolean isMeasureWithinRange(int measure, int measureMax) {
-		return !isMeasureUnderflow(measure) && (measure <= measureMax);
-	}
-
-	/**
-	 * 刻み位置の下限値超過判定
-	 * @param tick 刻み位置
-	 * @return 下限値を超過していた場合true
-	 */
-	static boolean isTickUnderflow(double tick) {
-		return tick < TICK_MIN;
-	}
-
-	/**
-	 * 刻み位置の上限値超過判定
-	 * @param tick 刻み位置
-	 * @return 上限値を超過していた場合true
-	 */
-	static boolean isTickOverflow(double tick) {
-		return tick > TICK_MAX;
-	}
-
-	/**
-	 * 刻み位置の範囲内判定
-	 * @param tick 刻み位置
-	 * @return 範囲内の場合true
-	 */
-	static boolean isTickWithinRange(double tick) {
-		return !isTickUnderflow(tick) && !isTickOverflow(tick);
-	}
-
-	/**
-	 * 刻み位置の範囲内判定
-	 * @param tick 刻み位置
-	 * @param tickMax 刻み位置最大値
-	 * @return 範囲内の場合true
-	 */
-	static boolean isTickWithinRange(double tick, double tickMax) {
-		return !isTickUnderflow(tick) && (tick <= tickMax);
 	}
 
 	/**

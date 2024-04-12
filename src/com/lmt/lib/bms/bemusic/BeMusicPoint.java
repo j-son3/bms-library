@@ -1,6 +1,6 @@
 package com.lmt.lib.bms.bemusic;
 
-import static com.lmt.lib.bms.bemusic.Assertion.*;
+import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -362,7 +362,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicChannel#BGM
 	 */
 	public final int getBgmValue(int index) {
-		assertState(mBgms != null, "BGM is nothing.");
+		assertField(mBgms != null, "BGM is nothing.");
 		assertArgIndexRange(index, mBgms.length, "index");
 		return mBgms[index];
 	}
@@ -553,7 +553,7 @@ public class BeMusicPoint implements BmsAt {
 			var dev = BeMusicDevice.fromIndex(i);
 			var ntype = getNoteType(dev);
 			noteCount += (ntype.isCountNotes() ? 1 : 0);
-			lnCount += ((ntype == BeMusicNoteType.LONG_ON) ? 1 : 0);
+			lnCount += (((ntype == BeMusicNoteType.LONG_ON) || (ntype.isCountNotes() && ntype.isLongNoteTail())) ? 1 : 0);
 			lmCount += ((ntype == BeMusicNoteType.LANDMINE) ? 1 : 0);
 			playable |= ((ntype.isPlayable()) ? 1 : 0);
 		}
