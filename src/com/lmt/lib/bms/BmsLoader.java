@@ -90,7 +90,7 @@ import java.util.regex.Pattern;
  * 読み込めるのはリトルエンディアンの場合のみです。ビッグエンディアンで記録された外部データはサポートしていません。</p>
  *
  * @see BmsLoadHandler
- * @see BmsLoadError
+ * @see BmsScriptError
  */
 public final class BmsLoader {
 	/** BMS宣言1行分 */
@@ -166,6 +166,12 @@ public final class BmsLoader {
 		public boolean isIgnoreWrongData() {
 			return mIsIgnoreWrongData;
 		}
+
+		/** {@inheritDoc} */
+		@Override
+		public boolean isSkipReadTimeline() {
+			return mIsSkipReadTimeline;
+		}
 	}
 
 	/**
@@ -223,24 +229,26 @@ public final class BmsLoader {
 	private boolean mIsIgnoreUnknownChannel = true;
 	/** 不正データを無視するかどうか */
 	private boolean mIsIgnoreWrongData = true;
+	/** タイムライン読み込みスキップするかどうか */
+	private boolean mIsSkipReadTimeline = false;
 	/** ノートオブジェクト橋渡し用クラス */
 	private NoteBridge mNoteBridge = new NoteBridge();
 	/** エラー発生有無マップ */
-	private Map<BmsLoadError.Kind, BooleanSupplier> mOccurErrorMap;
+	private Map<BmsErrorType, BooleanSupplier> mOccurErrorMap;
 
 	/**
 	 * BmsLoaderオブジェクトを構築します。
 	 */
 	public BmsLoader() {
 		mOccurErrorMap = Map.ofEntries(
-				Map.entry(BmsLoadError.Kind.SYNTAX, () -> mIsEnableSyntaxError),
-				Map.entry(BmsLoadError.Kind.LIBRARY_SPEC_VIOLATION, () -> !mIsFixSpecViolation),
-				Map.entry(BmsLoadError.Kind.UNKNOWN_META, () -> !mIsIgnoreUnknownMeta),
-				Map.entry(BmsLoadError.Kind.UNKNOWN_CHANNEL, () -> !mIsIgnoreUnknownChannel),
-				Map.entry(BmsLoadError.Kind.WRONG_DATA, () -> !mIsIgnoreWrongData),
-				Map.entry(BmsLoadError.Kind.REDEFINE, () -> !mIsAllowRedefine),
-				Map.entry(BmsLoadError.Kind.COMMENT_NOT_CLOSED, () -> mIsEnableSyntaxError),
-				Map.entry(BmsLoadError.Kind.FAILED_TEST_CONTENT, () -> mIsEnableSyntaxError));
+				Map.entry(BmsErrorType.SYNTAX, () -> mIsEnableSyntaxError),
+				Map.entry(BmsErrorType.SPEC_VIOLATION, () -> !mIsFixSpecViolation),
+				Map.entry(BmsErrorType.UNKNOWN_META, () -> !mIsIgnoreUnknownMeta),
+				Map.entry(BmsErrorType.UNKNOWN_CHANNEL, () -> !mIsIgnoreUnknownChannel),
+				Map.entry(BmsErrorType.WRONG_DATA, () -> !mIsIgnoreWrongData),
+				Map.entry(BmsErrorType.REDEFINE, () -> !mIsAllowRedefine),
+				Map.entry(BmsErrorType.COMMENT_NOT_CLOSED, () -> mIsEnableSyntaxError),
+				Map.entry(BmsErrorType.TEST_CONTENT, () -> mIsEnableSyntaxError));
 	}
 
 	/**
@@ -273,9 +281,9 @@ public final class BmsLoader {
 	 * 防ぐために、メタ情報・チャンネル定義と認識されない全ての記述を構文エラーとしたい場合に当メソッドを使用します。</p>
 	 * <p>構文エラーを有効にした状態でメタ情報・チャンネル定義以外の記述を検出すると、BMS読み込みハンドラにて解析エラーを
 	 * 通知するようになります。通知メソッドから解析中止が返されるとBMS解析はエラーとなります。</p>
-	 * <p>この設定は、複数行コメントが終了しない状態でBMSの読み込みが終了した場合({@link BmsLoadError.Kind#COMMENT_NOT_CLOSED})、
+	 * <p>この設定は、複数行コメントが終了しない状態でBMSの読み込みが終了した場合({@link BmsErrorType#COMMENT_NOT_CLOSED})、
 	 * および{@link #setHandler(BmsLoadHandler)}で設定したハンドラの{@link BmsLoadHandler#testContent(BmsContent)}
-	 * が検査失敗を返した場合({@link BmsLoadError.Kind#FAILED_TEST_CONTENT})にも適用されます。</p>
+	 * が検査失敗を返した場合({@link BmsErrorType#TEST_CONTENT})にも適用されます。</p>
 	 * <p>デフォルトでは構文エラーは「無効」になっています。</p>
 	 * @param isEnable 構文エラーの有効状態
 	 * @return このオブジェクトのインスタンス
@@ -290,7 +298,7 @@ public final class BmsLoader {
 	 * <p>この設定を有効にすることで訂正される値とは、「初期BPM」「小節長」「BPM変更用のBPM」「譜面停止時間」を指します。
 	 * それぞれの値の許容範囲は{@link BmsSpec}を参照してください。</p>
 	 * <p>この設定のデフォルト値は false です。BMSライブラリ仕様の違反を検出するとローダーに設定された{@link BmsLoadHandler}
-	 * に対してエラー通知を行います。その際のエラー種別は{@link BmsLoadError.Kind#LIBRARY_SPEC_VIOLATION}となります。</p>
+	 * に対してエラー通知を行います。その際のエラー種別は{@link BmsErrorType#SPEC_VIOLATION}となります。</p>
 	 * <p>通常、BMSライブラリの仕様違反となる値は非常に極端な値となっており、値を訂正したとしても当該楽曲の再生には
 	 * 大きな影響がない場合がほとんどですが、値の使い方次第では楽曲の構成を大きく崩してしまう可能性があります。そのような
 	 * ケースが許容されない場合には仕様違反の訂正は行わず、当該楽曲の読み込みはエラーとして扱うべきです。</p>
@@ -317,8 +325,8 @@ public final class BmsLoader {
 	 * #003XY:00330033  ;この行のみが有効になる</pre>
 	 * <p>この設定は値型・配列型チャンネルの両方に適用されます。</p>
 	 * <p>再定義が不許可の状態でメタ情報・重複不可チャンネルの再定義が検出された場合、再定義された行はエラーとして処理され、
-	 * BMSコンテンツ読み込みハンドラの{@link BmsLoadHandler#parseError(BmsLoadError)}が呼び出されます。
-	 * エラーは{@link BmsLoadError.Kind#REDEFINE}として通知されます。</p>
+	 * BMSコンテンツ読み込みハンドラの{@link BmsLoadHandler#parseError(BmsScriptError)}が呼び出されます。
+	 * エラーは{@link BmsErrorType#REDEFINE}として通知されます。</p>
 	 * @param isAllow 再定義の許可有無
 	 * @return このオブジェクトのインスタンス
 	 */
@@ -330,8 +338,8 @@ public final class BmsLoader {
 	/**
 	 * 不明なメタ情報を無視するかどうかを設定します。
 	 * <p>無視すると、BMS解析はエラーにならず不明メタ情報を読み飛ばして解析を続行するようになります。</p>
-	 * <p>具体的には、{@link #setHandler(BmsLoadHandler)}で設定したハンドラの{@link BmsLoadHandler#parseError(BmsLoadError)}
-	 * に{@link BmsLoadError.Kind#UNKNOWN_META}のエラーが一切通知されなくなります。</p>
+	 * <p>具体的には、{@link #setHandler(BmsLoadHandler)}で設定したハンドラの{@link BmsLoadHandler#parseError(BmsScriptError)}
+	 * に{@link BmsErrorType#UNKNOWN_META}のエラーが一切通知されなくなります。</p>
 	 * <p>デフォルトではこの設定は「有効」になっています。</p>
 	 * @param isIgnore 不明メタ情報を無視するかどうか
 	 * @return このオブジェクトのインスタンス
@@ -344,8 +352,8 @@ public final class BmsLoader {
 	/**
 	 * 不明なチャンネルを無視するかどうかを設定します。
 	 * <p>無視すると、BMS解析はエラーにならず不明チャンネルを読み飛ばして解析を続行するようになります。</p>
-	 * <p>具体的には、{@link #setHandler(BmsLoadHandler)}で設定したハンドラの{@link BmsLoadHandler#parseError(BmsLoadError)}
-	 * に{@link BmsLoadError.Kind#UNKNOWN_CHANNEL}のエラーが一切通知されなくなります。</p>
+	 * <p>具体的には、{@link #setHandler(BmsLoadHandler)}で設定したハンドラの{@link BmsLoadHandler#parseError(BmsScriptError)}
+	 * に{@link BmsErrorType#UNKNOWN_CHANNEL}のエラーが一切通知されなくなります。</p>
 	 * <p>デフォルトではこの設定は「有効」になっています。</p>
 	 * @param isIgnore 不明チャンネルを無視するかどうか
 	 * @return このオブジェクトのインスタンス
@@ -359,14 +367,33 @@ public final class BmsLoader {
 	 * 不正なデータを無視するかどうかを設定します。
 	 * <p>無視すると、BMS解析はエラーにならず不正データ定義のあったメタ情報・チャンネルを読み飛ばして解析を
 	 * 続行するようになります。</p>
-	 * <p>具体的には、{@link #setHandler(BmsLoadHandler)}で設定したハンドラの{@link BmsLoadHandler#parseError(BmsLoadError)}
-	 * に{@link BmsLoadError.Kind#WRONG_DATA}のエラーが一切通知されなくなります。</p>
+	 * <p>具体的には、{@link #setHandler(BmsLoadHandler)}で設定したハンドラの{@link BmsLoadHandler#parseError(BmsScriptError)}
+	 * に{@link BmsErrorType#WRONG_DATA}のエラーが一切通知されなくなります。</p>
 	 * <p>デフォルトではこの設定は「有効」になっています。</p>
 	 * @param isIgnore 不正データを無視するかどうか
 	 * @return このオブジェクトのインスタンス
 	 */
 	public final BmsLoader setIgnoreWrongData(boolean isIgnore) {
 		mIsIgnoreWrongData = isIgnore;
+		return this;
+	}
+
+	/**
+	 * タイムラインの読み込みをスキップするかどうかを設定します。
+	 * <p>この設定を有効にするとタイムラインの定義を読み飛ばすようになり、BMSコンテンツに小節データとノートが
+	 * 含まれなくなります。つまり、BMSコンテンツに取り込まれるのはBMS宣言とメタ情報のみなることを意味します。</p>
+	 * <p>読み込み対象のBMSに含まれるメタ情報のみを参照したい場合は、この設定を有効にすることで
+	 * 読み込み処理のパフォーマンス向上が期待できます。</p>
+	 * <p>タイムラインの読み込みをスキップする場合、タイムライン(チャンネル定義)の行の小節番号とチャンネル番号定義の
+	 * 書式が正しければ、誤った値({@link BmsErrorType#WRONG_DATA}になる状態)を定義していたとしてもスキップされます。
+	 * ただし、小節番号、チャンネル番号のいずれかが誤った書式で定義されていた場合、その行はスキップされず
+	 * 構文エラー({@link BmsErrorType#SYNTAX})として扱われます。</p>
+	 * <p>デフォルトではこの設定は「無効」になっています。</p>
+	 * @param isSkip タイムラインの読み込みをスキップするかどうか
+	 * @return このオブジェクトのインスタンス
+	 */
+	public final BmsLoader setSkipReadTimeline(boolean isSkip) {
+		mIsSkipReadTimeline = isSkip;
 		return this;
 	}
 
@@ -502,7 +529,7 @@ public final class BmsLoader {
 							charset = Charset.forName(decls.get("encoding"));
 						} catch (Exception e) {
 							// 指定文字セットが使えない場合はエラー
-							error(BmsLoadError.Kind.ENCODING, 1, declaration, null, e);
+							error(BmsErrorType.ENCODING, 1, declaration, null, e);
 							charset = BmsSpec.getStandardCharset();
 						}
 					} else {
@@ -560,11 +587,11 @@ public final class BmsLoader {
 	 * <li>&quot;;&quot;、&quot;*&quot;、または&quot;//&quot;で始まる行はコメント行として認識されます。(単一行コメント)</li>
 	 * <li>&quot;/*&quot;で始まる行は複数行コメントの開始行として認識されます。以降、行末に&quot;* /&quot;が出現するまでの
 	 * 行は全てコメントとして認識されます。</li>
-	 * <li>複数行コメントが閉じられずにBMS解析が終了した場合、エラーハンドラにて{@link BmsLoadError.Kind#COMMENT_NOT_CLOSED}
+	 * <li>複数行コメントが閉じられずにBMS解析が終了した場合、エラーハンドラにて{@link BmsErrorType#COMMENT_NOT_CLOSED}
 	 * が通知されます。</li>
 	 * <li>&quot;#&quot;または&quot;%&quot;で始まり、1文字目がアルファベットで始まる行をメタ情報の定義と見なします。</li>
 	 * <li>&quot;#&quot;に続き3文字の半角数字で始まり、次に2文字の半角英数字、更にその次が&quot;:&quot;で始まる行をチャンネルデータの定義と見なします。</li>
-	 * <li>以上のパターンに該当しない行は構文エラーとし、エラーハンドラにて{@link BmsLoadError.Kind#SYNTAX}が通知されます。</li>
+	 * <li>以上のパターンに該当しない行は構文エラーとし、エラーハンドラにて{@link BmsErrorType#SYNTAX}が通知されます。</li>
 	 * </ul>
 	 *
 	 * <p>メタ情報解析について</p>
@@ -572,16 +599,16 @@ public final class BmsLoader {
 	 * <ul>
 	 * <li>メタ情報の値は、文字列の右側の半角空白文字は消去されます。</li>
 	 * <li>索引付きメタ情報は、名称の末端文字2文字を36進数値と見なしてその値をインデックス値とし、残りの文字を名称として扱います。</li>
-	 * <li>索引付きメタ情報のインデックス値が36進数値でない場合、エラーハンドラにて{@link BmsLoadError.Kind#UNKNOWN_META}が通知されます。</li>
-	 * <li>BMS仕様に規定されていない名称を検出した場合、エラーハンドラにて{@link BmsLoadError.Kind#UNKNOWN_META}が通知されます。</li>
-	 * <li>メタ情報の値がBMS仕様に規定されたデータ型の記述書式に適合しない場合、エラーハンドラにて{@link BmsLoadError.Kind#WRONG_DATA}が通知されます。</li>
+	 * <li>索引付きメタ情報のインデックス値が36進数値でない場合、エラーハンドラにて{@link BmsErrorType#UNKNOWN_META}が通知されます。</li>
+	 * <li>BMS仕様に規定されていない名称を検出した場合、エラーハンドラにて{@link BmsErrorType#UNKNOWN_META}が通知されます。</li>
+	 * <li>メタ情報の値がBMS仕様に規定されたデータ型の記述書式に適合しない場合、エラーハンドラにて{@link BmsErrorType#WRONG_DATA}が通知されます。</li>
 	 * </ul>
 	 *
 	 * <p>チャンネル解析について</p>
 	 *
 	 * <ul>
-	 * <li>チャンネル番号がBMS仕様に未定義の場合、エラーハンドラにて{@link BmsLoadError.Kind#UNKNOWN_CHANNEL}が通知されます。</li>
-	 * <li>以下のケースを検出した場合、エラーハンドラにて{@link BmsLoadError.Kind#WRONG_DATA}が通知されます。
+	 * <li>チャンネル番号がBMS仕様に未定義の場合、エラーハンドラにて{@link BmsErrorType#UNKNOWN_CHANNEL}が通知されます。</li>
+	 * <li>以下のケースを検出した場合、エラーハンドラにて{@link BmsErrorType#WRONG_DATA}が通知されます。
 	 * <ul>
 	 * <li>チャンネルに定義されたデータの記述書式がBMS仕様に違反している場合。</li>
 	 * <li>データ重複許可チャンネルの同小節番号内にて{@link BmsSpec#CHINDEX_MAX}+1個を超えるデータ定義を検出した場合。</li>
@@ -595,7 +622,7 @@ public final class BmsLoader {
 	 * @exception BmsException bmsがnull: Cause NullPointerException
 	 * @exception BmsException BMS仕様が設定されていない: Cause IllegalStateException
 	 * @exception BmsException ハンドラが設定されていない: Cause IllegalStateException
-	 * @exception BmsAbortException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
+	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
 	 */
 	public final BmsContent load(Reader bms) throws BmsException {
 		try {
@@ -626,7 +653,7 @@ public final class BmsLoader {
 	 * @exception BmsException BMS読み込みハンドラが設定されていない: Cause IllegalStateException
 	 * @exception BmsException ハンドラが設定されていない: Cause IllegalStateException
 	 * @exception BmsException BMS宣言にてencoding指定時、指定の文字セットが未知: Cause Exception
-	 * @exception BmsAbortException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
+	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
 	 */
 	public final BmsContent load(String bms) throws BmsException {
 		return loadMain(bms);
@@ -668,7 +695,7 @@ public final class BmsLoader {
 			var result = mHandler.testContent(content);
 			if (result == null) {
 				var msg = "Content test result was returned null by handler";
-				error(BmsLoadError.Kind.PANIC, 0, "", msg, null);
+				error(BmsErrorType.PANIC, 0, "", msg, null);
 			} else switch (result.getResult()) {
 			case BmsLoadHandler.TestResult.RESULT_OK:
 			case BmsLoadHandler.TestResult.RESULT_THROUGH:
@@ -680,14 +707,14 @@ public final class BmsLoader {
 				break;
 			case BmsLoadHandler.TestResult.RESULT_FAIL: {
 				// BMSコンテンツ検査失敗
-				error(BmsLoadError.Kind.FAILED_TEST_CONTENT, 0, "", result.getMessage(), null);
+				error(BmsErrorType.TEST_CONTENT, 0, "", result.getMessage(), null);
 				break;
 			}
 			default:
 				// 想定外
 				var msg = String.format("Content test result was returned '%d' by handler", result.getResult());
-				var err = new BmsLoadError(BmsLoadError.Kind.PANIC, 0, "", msg, null);
-				throw new BmsAbortException(err);
+				var err = new BmsScriptError(BmsErrorType.PANIC, 0, "", msg, null);
+				throw new BmsLoadException(err);
 			}
 		} catch (BmsException e) {
 			throw e;
@@ -759,7 +786,7 @@ public final class BmsLoader {
 					var result = mHandler.testDeclaration(k, v);
 					if (result == null) {
 						var msg = "BMS declaration test result was returned null by handler";
-						error(BmsLoadError.Kind.PANIC, lineNumber, line, msg, null);
+						error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 					} else switch (result.getResult()) {
 					case BmsLoadHandler.TestResult.RESULT_OK:
 						// BMS宣言の検査合格時はコンテンツに登録する
@@ -767,7 +794,7 @@ public final class BmsLoader {
 						break;
 					case BmsLoadHandler.TestResult.RESULT_FAIL:
 						// BMS宣言の検査失敗時はコンテンツに登録せずにエラー処理に回す
-						error(BmsLoadError.Kind.FAILED_TEST_DECLARATION, 1, line, result.getMessage(), null);
+						error(BmsErrorType.TEST_DECLARATION, 1, line, result.getMessage(), null);
 						break;
 					case BmsLoadHandler.TestResult.RESULT_THROUGH:
 						// BMS宣言を破棄する
@@ -776,7 +803,7 @@ public final class BmsLoader {
 						// 想定外
 						var msg = String.format("BMS declaration test result was returned '%d' by handler",
 								result.getResult());
-						error(BmsLoadError.Kind.PANIC, 1, line, msg, null);
+						error(BmsErrorType.PANIC, 1, line, msg, null);
 						break;
 					}
 				}
@@ -807,7 +834,7 @@ public final class BmsLoader {
 						// 構文エラー無効
 					} else {
 						// 構文エラー
-						error(BmsLoadError.Kind.SYNTAX, lineNumber, line, null, null);
+						error(BmsErrorType.SYNTAX, lineNumber, line, null, null);
 					}
 				} else {
 					// 複数行コメントモード
@@ -834,7 +861,7 @@ public final class BmsLoader {
 			// 複数行コメントモードまま終了した場合はエラー
 			if (!isNormalMode && mIsEnableSyntaxError) {
 				var msg = "Multi-line comment is NOT finished";
-				error(BmsLoadError.Kind.COMMENT_NOT_CLOSED, lineNumber, "", msg, null);
+				error(BmsErrorType.COMMENT_NOT_CLOSED, lineNumber, "", msg, null);
 			}
 
 			// 配列型のチャンネルデータをコンテンツに登録する
@@ -850,7 +877,7 @@ public final class BmsLoader {
 				var result = mHandler.testChannel(data.channel, chIndex, data.measure, data.array);
 				if (result == null) {
 					var msg = "Channel test result was returned null by handler";
-					error(BmsLoadError.Kind.PANIC, data.lineNumber, data.line, msg, null);
+					error(BmsErrorType.PANIC, data.lineNumber, data.line, msg, null);
 				} else switch (result.getResult()) {
 				case BmsLoadHandler.TestResult.RESULT_OK: {
 					// データ配列をNoteとしてコンテンツに登録する
@@ -875,7 +902,7 @@ public final class BmsLoader {
 								throw new Exception(msg);
 							}
 						} catch (Exception e) {
-							error(BmsLoadError.Kind.WRONG_DATA, data.lineNumber, data.line, null, e);
+							error(BmsErrorType.WRONG_DATA, data.lineNumber, data.line, null, e);
 							occurError = true;
 							break;
 						}
@@ -901,7 +928,7 @@ public final class BmsLoader {
 							content.putNote(chNumber, chIndex, data.measure, tick, value, mNoteBridge);
 						} catch (Exception e) {
 							// データ不備により例外発生時はデータ不正とする
-							error(BmsLoadError.Kind.WRONG_DATA, data.lineNumber, data.line, null, e);
+							error(BmsErrorType.WRONG_DATA, data.lineNumber, data.line, null, e);
 							occurError = true;
 							break;
 						}
@@ -922,7 +949,7 @@ public final class BmsLoader {
 				}
 				case BmsLoadHandler.TestResult.RESULT_FAIL:
 					// 検査に失敗した場合はエラーとし、ノートの登録処理は省略しようとする
-					error(BmsLoadError.Kind.FAILED_TEST_CHANNEL, data.lineNumber, data.line, result.getMessage(), null);
+					error(BmsErrorType.TEST_CHANNEL, data.lineNumber, data.line, result.getMessage(), null);
 					break;
 				case BmsLoadHandler.TestResult.RESULT_THROUGH:
 					// 解析したチャンネルデータを破棄する
@@ -930,7 +957,7 @@ public final class BmsLoader {
 				default:
 					// 不明なエラー
 					var msg = String.format("Channel test result was returned '%d' by handler", result.getResult());
-					error(BmsLoadError.Kind.PANIC, data.lineNumber, data.line, msg, null);
+					error(BmsErrorType.PANIC, data.lineNumber, data.line, msg, null);
 					break;
 				}
 			}
@@ -1012,7 +1039,7 @@ public final class BmsLoader {
 			if (nameLength <= 2) {
 				// 2文字以下の場合、名称が無くなるのでエラー
 				var msg = "Wrong indexed meta name";
-				error(BmsLoadError.Kind.UNKNOWN_META, lineNumber, line, msg, null);
+				error(BmsErrorType.UNKNOWN_META, lineNumber, line, msg, null);
 				return true;  // メタ情報として解析済みとする
 			}
 
@@ -1021,7 +1048,7 @@ public final class BmsLoader {
 			if (!BmsType.BASE36.test(indexStr)) {
 				// インデックス値の記述が不正のためエラー
 				var msg = "Wrong indexed meta's index";
-				error(BmsLoadError.Kind.UNKNOWN_META, lineNumber, line, msg, null);
+				error(BmsErrorType.UNKNOWN_META, lineNumber, line, msg, null);
 				return true;  // メタ情報として解析済みとする
 			}
 
@@ -1032,7 +1059,7 @@ public final class BmsLoader {
 			if (meta == null) {
 				// メタ情報不明
 				var msg = String.format("'%s' No such meta in spec", name);
-				error(BmsLoadError.Kind.UNKNOWN_META, lineNumber, line, msg, null);
+				error(BmsErrorType.UNKNOWN_META, lineNumber, line, msg, null);
 				return true;  // メタ情報として解析済みとする
 			} else {
 				// 索引付きメタ情報で見つかった場合は索引を抜いた名前を控えておく
@@ -1045,7 +1072,7 @@ public final class BmsLoader {
 		if (!type.test(value)) {
 			// データの記述内容が適合しない
 			var msg = "Type mismatch meta value";
-			error(BmsLoadError.Kind.WRONG_DATA, lineNumber, line, msg, null);
+			error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
 			return true;  // メタ情報として解析済みとする
 		}
 
@@ -1059,7 +1086,7 @@ public final class BmsLoader {
 					obj = Math.min(BmsSpec.BPM_MAX, Math.max(BmsSpec.BPM_MIN, bpm));
 				} else {
 					var msg = "This BPM is spec violation of BMS library";
-					error(BmsLoadError.Kind.LIBRARY_SPEC_VIOLATION, lineNumber, line, msg, null);
+					error(BmsErrorType.SPEC_VIOLATION, lineNumber, line, msg, null);
 					return true;
 				}
 			}
@@ -1072,7 +1099,7 @@ public final class BmsLoader {
 					obj = Math.min(BmsSpec.STOP_MAX, Math.max(BmsSpec.STOP_MIN, stop));
 				} else {
 					var msg = "This stop time is spec violation of BMS library";
-					error(BmsLoadError.Kind.LIBRARY_SPEC_VIOLATION, lineNumber, line, msg, null);
+					error(BmsErrorType.SPEC_VIOLATION, lineNumber, line, msg, null);
 					return true;
 				}
 			}
@@ -1090,7 +1117,7 @@ public final class BmsLoader {
 			// 再定義不許可の状態で再定義を検出した場合はエラーとする
 			if ((result != null) && (result.getResult() == BmsLoadHandler.TestResult.RESULT_OK) &&
 					!mIsAllowRedefine && content.containsMeta(meta, index)) {
-				error(BmsLoadError.Kind.REDEFINE, lineNumber, line, "Re-defined meta", null);
+				error(BmsErrorType.REDEFINE, lineNumber, line, "Re-defined meta", null);
 				return true;
 			}
 
@@ -1106,7 +1133,7 @@ public final class BmsLoader {
 		}
 		if (result == null) {
 			var msg = "Meta test result was returned null by handler";
-			error(BmsLoadError.Kind.PANIC, lineNumber, line, msg, null);
+			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 		} else switch (result.getResult()) {
 		case BmsLoadHandler.TestResult.RESULT_OK:
 			// メタ情報をBMSコンテンツに登録する
@@ -1119,7 +1146,7 @@ public final class BmsLoader {
 			break;
 		case BmsLoadHandler.TestResult.RESULT_FAIL:
 			// 検査不合格
-			error(BmsLoadError.Kind.FAILED_TEST_META, lineNumber, line, result.getMessage(), null);
+			error(BmsErrorType.TEST_META, lineNumber, line, result.getMessage(), null);
 			break;
 		case BmsLoadHandler.TestResult.RESULT_THROUGH:
 			// メタ情報破棄
@@ -1127,7 +1154,7 @@ public final class BmsLoader {
 		default:
 			// 想定外
 			var msg = String.format("Meta test result was returned '%d' by handler", result.getResult());
-			error(BmsLoadError.Kind.PANIC, lineNumber, line, msg, null);
+			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 			break;
 		}
 
@@ -1157,6 +1184,11 @@ public final class BmsLoader {
 			return false;
 		}
 
+		// タイムライン読み込みをスキップする場合は何もしない
+		if (mIsSkipReadTimeline) {
+			return true;
+		}
+
 		// 小節番号、チャンネル、値を取り出す
 		var measure = Integer.parseInt(matcher.group(2));
 		var channelNum = BmsInt.to36i(matcher.group(3));
@@ -1167,7 +1199,7 @@ public final class BmsLoader {
 		if (channel == null) {
 			// 該当するチャンネルが仕様として規定されていない
 			var msg = String.format("'%s' No such channel in spec", BmsInt.to36s(channelNum));
-			error(BmsLoadError.Kind.UNKNOWN_CHANNEL, lineNumber, line, msg, null);
+			error(BmsErrorType.UNKNOWN_CHANNEL, lineNumber, line, msg, null);
 			return true;
 		}
 
@@ -1180,7 +1212,7 @@ public final class BmsLoader {
 			try {
 				object = channelType.cast(value);
 			} catch (Exception e) {
-				error(BmsLoadError.Kind.WRONG_DATA, lineNumber, line, null, e);
+				error(BmsErrorType.WRONG_DATA, lineNumber, line, null, e);
 				return true;
 			}
 
@@ -1193,7 +1225,7 @@ public final class BmsLoader {
 						object = Math.min(BmsSpec.LENGTH_MAX, Math.max(BmsSpec.LENGTH_MIN, length));
 					} else {
 						var msg = "This length is spec violation of BMS library";
-						error(BmsLoadError.Kind.LIBRARY_SPEC_VIOLATION, lineNumber, line, msg, null);
+						error(BmsErrorType.SPEC_VIOLATION, lineNumber, line, msg, null);
 						return true;
 					}
 				}
@@ -1204,7 +1236,7 @@ public final class BmsLoader {
 			var result = mHandler.testChannel(channel, chIndex, measure, object);
 			if (result == null) {
 				var msg = "Channel test result was returned null by handler";
-				error(BmsLoadError.Kind.PANIC, lineNumber, line, msg, null);
+				error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 				return true;
 			}
 
@@ -1215,7 +1247,7 @@ public final class BmsLoader {
 					chIndex = 0;
 				} else {
 					// 上書き不許可・重複不可・再定義検出の条件が揃った場合はエラーとする
-					error(BmsLoadError.Kind.REDEFINE, lineNumber, line, "Re-defined value type channel", null);
+					error(BmsErrorType.REDEFINE, lineNumber, line, "Re-defined value type channel", null);
 					return true;
 				}
 			}
@@ -1228,12 +1260,12 @@ public final class BmsLoader {
 					content.setMeasureValue(channelNum, chIndex, measure, object);
 				} catch (Exception e) {
 					// 何らかのエラーが発生した場合はデータの不備
-					error(BmsLoadError.Kind.WRONG_DATA, lineNumber, line, null, e);
+					error(BmsErrorType.WRONG_DATA, lineNumber, line, null, e);
 				}
 				break;
 			case BmsLoadHandler.TestResult.RESULT_FAIL:
 				// 検査不合格
-				error(BmsLoadError.Kind.FAILED_TEST_CHANNEL, lineNumber, line, result.getMessage(), null);
+				error(BmsErrorType.TEST_CHANNEL, lineNumber, line, result.getMessage(), null);
 				break;
 			case BmsLoadHandler.TestResult.RESULT_THROUGH:
 				// チャンネルデータを破棄する
@@ -1241,7 +1273,7 @@ public final class BmsLoader {
 			default:
 				// 想定外
 				var msg = String.format("Channel test result was returned '%d' by handler", result.getResult());
-				error(BmsLoadError.Kind.PANIC, lineNumber, line, msg, null);
+				error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 				break;
 			}
 		} else if (channelType.isArrayType()) {
@@ -1253,7 +1285,7 @@ public final class BmsLoader {
 			} catch (IllegalArgumentException e) {
 				// 配列の書式が不正
 				var msg = "Wrong array value";
-				error(BmsLoadError.Kind.WRONG_DATA, lineNumber, line, msg, e);
+				error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, e);
 				return true;
 			}
 
@@ -1262,7 +1294,7 @@ public final class BmsLoader {
 			var result = mHandler.testChannel(channel, chIndex, measure, array);
 			if (result == null) {
 				var msg = "Channel test result was returned null by handler";
-				error(BmsLoadError.Kind.PANIC, lineNumber, line, msg, null);
+				error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 				return true;
 			}
 
@@ -1272,7 +1304,7 @@ public final class BmsLoader {
 			if ((result == BmsLoadHandler.TestResult.OK) && !channel.isMultiple()) {
 				owPos = parsed.foundDefs.get(defStr);
 				if (!mIsAllowRedefine && (owPos != null)) {
-					error(BmsLoadError.Kind.REDEFINE, lineNumber, line, "Re-defined array type channel", null);
+					error(BmsErrorType.REDEFINE, lineNumber, line, "Re-defined array type channel", null);
 					return true;
 				}
 			}
@@ -1304,7 +1336,7 @@ public final class BmsLoader {
 			}
 			case BmsLoadHandler.TestResult.RESULT_FAIL:
 				// 検査不合格
-				error(BmsLoadError.Kind.FAILED_TEST_CHANNEL, lineNumber, line, result.getMessage(), null);
+				error(BmsErrorType.TEST_CHANNEL, lineNumber, line, result.getMessage(), null);
 				break;
 			case BmsLoadHandler.TestResult.RESULT_THROUGH:
 				// チャンネルデータを破棄する
@@ -1312,7 +1344,7 @@ public final class BmsLoader {
 			default:
 				// 想定外
 				var msg = String.format("Channel test result was returned '%d' by handler", result.getResult());
-				error(BmsLoadError.Kind.PANIC, lineNumber, line, msg, null);
+				error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 				break;
 			}
 		} else {
@@ -1325,26 +1357,26 @@ public final class BmsLoader {
 
 	/**
 	 * エラー発生時の処理
-	 * @param kind エラー種別
+	 * @param errType エラー種別
 	 * @param lineNumber 行番号
 	 * @param line 行文字列
 	 * @param message エラーメッセージ
 	 * @param throwable 発生した例外
-	 * @exception BmsAbortException エラーハンドラがfalseを返した時
+	 * @exception BmsLoadException エラーハンドラがfalseを返した時
 	 */
-	private void error(BmsLoadError.Kind kind, int lineNumber, String line, String message, Throwable throwable)
-			throws BmsAbortException {
+	private void error(BmsErrorType errType, int lineNumber, String line, String message, Throwable throwable)
+			throws BmsLoadException {
 		// エラーが無効にされている場合は例外をスローしない
-		var fnIsOccur = mOccurErrorMap.get(kind);
+		var fnIsOccur = mOccurErrorMap.get(errType);
 		if ((fnIsOccur != null) && !fnIsOccur.getAsBoolean()) {
 			return;
 		}
 
 		// エラーハンドラにエラー内容を通知する
-		var error = new BmsLoadError(kind, lineNumber, line, message, throwable);
+		var error = new BmsScriptError(errType, lineNumber, line, message, throwable);
 		if (!mHandler.parseError(error)) {
 			// BMS解析を中断する場合は例外を投げる
-			throw new BmsAbortException(error);
+			throw new BmsLoadException(error);
 		}
 	}
 }

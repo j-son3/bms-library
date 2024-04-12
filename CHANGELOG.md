@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.4.0] - 2022-12-11
+### Added
+- タイムライン読み込みをスキップする機能を実装しました。 BmsLoader#setSkipReadTimeline() で機能のON/OFFを切り替えられます。
+
+### Changed
+- BMS読み込みエラーに関連するクラスを再構成しました。構成内容の詳細は以下を参照してください。
+    - BmsLoadError.Kind を BmsErrorType へ移動しました。
+    - BmsLoadError を BmsError, BmsScriptError に分割しました。
+    - BmsAbortException を BmsLoadException へ名称変更しました。
+    - BmsError を継承し、BMS関連のアプリケーション固有エラーを実装できる仕組みにしました。
+
 ## [0.3.0] - 2022-08-22
 ### Added
 - #LNMODE ヘッダの読み込みに正式対応しました。

@@ -6,8 +6,8 @@ import java.nio.file.Path;
 
 import com.lmt.lib.bms.BmsChannel;
 import com.lmt.lib.bms.BmsContent;
+import com.lmt.lib.bms.BmsError;
 import com.lmt.lib.bms.BmsException;
-import com.lmt.lib.bms.BmsLoadError;
 import com.lmt.lib.bms.BmsLoader;
 import com.lmt.lib.bms.BmsMeta;
 import com.lmt.lib.bms.BmsSpec;
@@ -206,7 +206,7 @@ public class BeMusicSpec {
 	 * <li>乱数(#RANDOM/#IF/#ELSE/#ENDIF等)の定義階層が不正な時</li>
 	 * </ul>
 	 * <p>上記以外にもファイルの読み込み中にエラーが発生する等、複数の要因で例外がスローされる可能性があります。
-	 * 例外およびエラーの詳細については{@link BmsException}、{@link BmsLoadError}を参照してください。</p>
+	 * 例外およびエラーの詳細については{@link BmsException}、{@link BmsError}を参照してください。</p>
 	 * <p>当メソッドでは乱数を使用したCONTROL FLOW読み込みを行います。そのため乱数を使用したBMSコンテンツでは
 	 * 読み込み毎に異なる内容のBMSコンテンツになる場合があることに留意してください。</p>
 	 * <p>詳細な読み込み設定を行ったうえでBMSコンテンツを様々なデータ型から読み込みたい場合には、
@@ -218,7 +218,7 @@ public class BeMusicSpec {
 	 * @throws BmsException BMSファイルの読み込みに失敗した
 	 * @exception NullPointerException pathがnull
 	 * @see BmsLoader
-	 * @see BmsLoadError
+	 * @see BmsError
 	 * @see BeMusicLoadHandler
 	 */
 	public static BmsContent loadContentFrom(Path path, boolean strictly) throws BmsException {

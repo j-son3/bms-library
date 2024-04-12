@@ -52,4 +52,10 @@ public interface BmsLoaderSettings {
 	 * @return メタ情報/チャンネルの値不正検出エラーを無視する場合はtrue、無視しない場合はfalse
 	 */
 	boolean isIgnoreWrongData();
+
+	/**
+	 * タイムラインの読み込みをスキップするかどうかを取得します。
+	 * @return タイムラインの読み込みをスキップする場合はtrue、スキップしない場合はfalse
+	 */
+	boolean isSkipReadTimeline();
 }

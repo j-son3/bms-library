@@ -162,18 +162,18 @@ public interface BmsLoadHandler extends BmsContent.Creator, BmsNote.Creator {
 	 * BMSコンテンツをBMS仕様に従って適正に読み込めないと判断した時に発生させるものであるため、基本的にはエラーを無視することは
 	 * あまり推奨されません。</p>
 	 *
-	 * <p>発生するエラーの種類については{@link BmsLoadError.Kind}を参照してください。</p>
+	 * <p>発生するエラーの種類については{@link BmsErrorType}を参照してください。</p>
 	 *
-	 * <p>当メソッドでfalseを返し、エラーを無視しない場合は{@link BmsLoader#load}は{@link BmsAbortException}例外を
+	 * <p>当メソッドでfalseを返し、エラーを無視しない場合は{@link BmsLoader#load}は{@link BmsLoadException}例外を
 	 * スローし、生成中のBMSコンテンツは破棄します。デフォルトの動作では解析エラーは無視しません。</p>
 	 *
 	 * <p>当メソッドで例外をスローした場合、当該例外を内包した{@link BmsException}がスローされます。</p>
 	 *
 	 * @param error エラー情報
 	 * @return falseを返すと、読み込み続行不可としてBMS読み込みを停止します。
-	 * @see BmsLoadError.Kind
+	 * @see BmsErrorType
 	 */
-	default boolean parseError(BmsLoadError error) {
+	default boolean parseError(BmsScriptError error) {
 		return false;
 	}
 
