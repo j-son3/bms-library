@@ -29,11 +29,15 @@ class ScoreSummarizer {
 	private double mScoreMax = Double.MIN_VALUE;
 	/** 評価点リスト */
 	private TreeSet<Item> mScores = new TreeSet<>();
+	/** 現在のインデックス */
+	private int mCurIndex = 0;
 
 	/** 評価点データ */
 	private static class Item implements Comparable<Item> {
 		/** 時間 */
 		double time;
+		/** インデックス */
+		int index;
 		/** 評価点 */
 		double score;
 		/** この時間時点でのサマリ値 */
@@ -42,7 +46,8 @@ class ScoreSummarizer {
 		/** {@inheritDoc} */
 		@Override
 		public int compareTo(Item o) {
-			return Double.compare(time, o.time);
+			var cmp = Double.compare(time, o.time);
+			return (cmp == 0) ? Integer.compare(index, o.index) : cmp;
 		}
 
 		/**
@@ -90,13 +95,15 @@ class ScoreSummarizer {
 		if (!mScores.isEmpty()) {
 			// 2件目以降の投入ではサマリ値の合計値を前回投入時の値から引き継いで加算する
 			var last = mScores.last();
-			assertArg(time > last.time, "Specified smaller time than previous. time=%f", time);
+			assertArg(time >= last.time, "Specified smaller time than previous. time=%f", time);
 			thisSum += last.summary;
+			mCurIndex = (time == last.time) ? (mCurIndex + 1) : 0;
 		}
 
 		// 評価点データを生成する
 		var item = new Item();
 		item.time = time;
+		item.index = mCurIndex;
 		item.score = thisScore;
 		item.summary = thisSum;
 		mScores.add(item);

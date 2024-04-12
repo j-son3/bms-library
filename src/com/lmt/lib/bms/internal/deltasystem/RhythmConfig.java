@@ -23,10 +23,10 @@ class RhythmConfig extends RatingConfig {
 			50.0, 1.0, 0.0, 0.25, 0.4, 0.52, 0.62, 0.68, 0.74, 0.79, 0.83, 0.86, 0.88, 0.895, 0.905, 0.913, 0.922, 0.93, 0.937, 0.943, 0.95, 0.955);
 	/** リズム変化頻度(回/秒)による評価点補正倍率の計算を行う補間関数 */
 	LinearInterpolateFunction ipfnChangeRate = LinearInterpolateFunction.create(
-			4.1, 1.5, 0.467, 0.55, 0.59, 0.615, 0.635, 0.645, 0.655, 0.665, 0.675, 0.69, 0.72, 0.75, 0.78, 0.82, 0.85, 0.88, 0.91, 0.945, 0.965, 0.975, 0.981, 0.985, 0.988, 0.991, 0.993, 0.995, 0.997, 0.998, 0.999, 1.0);
+			4.1, 1.5, 0.467, 0.55, 0.59, 0.615, 0.64, 0.66, 0.673, 0.686, 0.7, 0.712, 0.727, 0.75, 0.78, 0.82, 0.85, 0.88, 0.91, 0.945, 0.965, 0.975, 0.981, 0.985, 0.988, 0.991, 0.993, 0.995, 0.997, 0.998, 0.999, 1.0);
 	/** 最終的なRHYTHM値を算出するための補間関数 */
 	LinearInterpolateFunction ipfnRhythm = LinearInterpolateFunction.create(
-			1.28, 20000.0, 0.0, 0.011, 0.018, 0.035, 0.055, 0.08, 0.12, 0.18, 0.26, 0.35, 0.45, 0.55, 0.63, 0.71, 0.77, 0.82, 0.87, 0.92, 0.96, 1.0);
+			1.3, 20000.0, 0.0, 0.011, 0.018, 0.035, 0.055, 0.08, 0.12, 0.18, 0.26, 0.35, 0.45, 0.55, 0.63, 0.71, 0.77, 0.82, 0.87, 0.92, 0.96, 1.0);
 
 	/** リズム範囲時間の評価点影響係数：小刻みのリズムに対する影響度を示す */
 	double influenceRangeTime = 0.6;
@@ -56,6 +56,8 @@ class RhythmConfig extends RatingConfig {
 
 	/** 最大刻み時間(刻み時間がこの値より大きいとリズム範囲とならない) */
 	double maxPulseTime = 1.2;
+	/** リズム範囲の最大時間(この値は範囲数のカウント時に長いリズム範囲を分割してカウントする際に用いる) */
+	double maxRangeTime = 2.6;
 	/** 評価点計算時の密度の最大値 */
 	double maxDensity;
 
@@ -93,6 +95,8 @@ class RhythmConfig extends RatingConfig {
 		densityDecayTime = loader.numeric("density_decay_time", densityDecayTime);
 		maxPatternRepeatCount = loader.integer("max_pattern_repeat_count", maxPatternRepeatCount);
 		adjustPatternRepeatRate = loader.numeric("adjust_pattern_repeat_rate", adjustPatternRepeatRate);
+		maxPulseTime = loader.numeric("max_pulse_time", maxPulseTime);
+		maxRangeTime = loader.numeric("max_range_time", maxRangeTime);
 		setup();
 	}
 
@@ -115,6 +119,8 @@ class RhythmConfig extends RatingConfig {
 		Ds.debug("  densityDecayTime: %s", densityDecayTime);
 		Ds.debug("  maxPatternRepeatCount: %s", maxPatternRepeatCount);
 		Ds.debug("  adjustPatternRepeatRate: %s", adjustPatternRepeatRate);
+		Ds.debug("  maxPulseTime: %s", maxPulseTime);
+		Ds.debug("  maxRangeTime: %s", maxRangeTime);
 		Ds.debug("}");
 	}
 

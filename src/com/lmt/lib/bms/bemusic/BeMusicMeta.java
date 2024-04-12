@@ -812,7 +812,7 @@ public class BeMusicMeta {
 	 * <tr><th style="text-align:left;">データ型</th><td>NUMERIC</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>1</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
-	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>NO TODO:ライブラリ対応する</td></tr>
+	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">説明</th>
 	 * <td>譜面のスクロール速度(倍率)を表します。</td></tr>
 	 * </table>

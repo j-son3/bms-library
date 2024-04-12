@@ -4,7 +4,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.5.0] - 2023-05-14
+## [0.6.0 / 1.0-D] - 2023-08-01
+### Added
+- Delta Systemによる譜面のレーティング機能を更新しました。具体的には以下の更新が含まれます。<br>※SP譜面のみ対応、BeMusicRatingType#DELTAは非対応です
+    - BeMusicRatingType#SCRATCH の出力に対応しました。
+    - BeMusicRatingType#HOLDING の出力に対応しました。
+    - BeMusicRatingType#GIMMICK の出力に対応しました。
+- スクロール速度変更(#SCROLL, SCチャンネル)への対応に伴い、以下の機能追加を行いました。
+    - BeMusicPoint に現在のスクロール速度を取得する getCurrentScroll を追加しました。
+    - BeMusicPoint にスクロール速度変更有無を取得する hasScroll を追加しました。
+    - BeMusicScore にスクロール速度変更回数を取得する getChangeScrollCount を追加しました。
+    - BeMusicScore にスクロール速度変化有無を取得する hasChangeScroll を追加しました。
+- その他、以下のAPI追加・修正を行いました。
+    - BeMusicDevice にレーンに対応する入力デバイスを取得する getDevices を追加しました。
+    - BeMusicDevice にレーンに対応するスイッチを取得する getSwitches を追加しました。
+    - BeMusicDevice にレーンに対応するスクラッチを取得する getScratch を追加しました。
+    - BeMusicNoteType に長押し開始かを判定する isLongNoteHead を追加しました。
+    - BeMusicNoteType に長押し関連のノート種別かを判定する isLongNoteType を追加しました。
+    - BeMusicPoint に長押し継続有無を判定する hasHolding を追加しました。
+    - BeMusicPoint に長押し開始有無を判定する hasLongNoteHead を追加しました。
+    - BeMusicPoint に長押し終了有無を判定する hasLongNoteTail を追加しました。
+    - BeMusicPoint に長押し関連ノート有無を判定する hasLongNoteType を追加しました。
+    - BeMusicPoint に速度変更有無を判定する hasChangeSpeed を追加しました。
+    - BeMusicPoint にギミック要素有無を判定する hasGimmick を追加しました。
+    - BeMusicPoint に現在の譜面速度を取得する getCurrentSpeed を追加しました。
+    - BeMusicPoint に地雷オブジェ有無を取得する hasLandmine を追加しました。
+    - BeMusicScore に速度変更有無を取得する hasChangeSpeed を追加しました。
+    - BeMusicScore にギミック要素有無を取得する hasGimmick を追加しました。
+
+### Changed
+- BeMusicRatingType#COMPLEX のレーティング値で以下のバランス調整を行いました。
+    - HOLDING の実装に伴い、ロングノート主体の譜面での出力値を下方修正しました。
+    - 同じ配置が連続して登場する譜面での出力値を下方修正しました。
+    - 上記の下方修正を加味しつつ、全体的に0.5～3%程度の上方修正を行いました。
+- BeMusicRatingType#RHYTHM のレーティング値で以下のバランス調整を行いました。
+    - 総ノート数0の空譜面を入力した時の出力値が1だったものを0に修正しました。
+    - 長い同一間隔のリズムキープがある譜面での出力値を上方修正しました。
+
+## [0.5.0 / 0.0-D] - 2023-05-14
 ### Added
 - Delta Systemによる譜面のレーティング機能(※)を追加しました。具体的には以下の機能追加を行っています。
     - レーティングの種別を表す BeMusicRatingType を追加しました。

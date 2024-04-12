@@ -21,7 +21,7 @@ import java.util.function.Consumer;
  */
 public class Ds {
 	/** アルゴリズムのメジャーバージョン */
-	public static final int ALGORITHM_MAJOR_VERSION = 0;
+	public static final int ALGORITHM_MAJOR_VERSION = 1;
 	/** アルゴリズムのリビジョン番号 */
 	public static final int ALGORITHM_REVISION_NUMBER = 0;
 	/** アルゴリズムのステータス D=Draft / R=Reviewing / F=Fixed */
@@ -34,7 +34,10 @@ public class Ds {
 			CommonConfig.getInstance(),
 			ComplexConfig.getInstance(),
 			PowerConfig.getInstance(),
-			RhythmConfig.getInstance());
+			RhythmConfig.getInstance(),
+			ScratchConfig.getInstance(),
+			HoldingConfig.getInstance(),
+			GimmickConfig.getInstance());
 	/** 空デバッグハンドラ */
 	private static final Consumer<String> EMPTY_DEBUG_HANDLER = o -> {};
 

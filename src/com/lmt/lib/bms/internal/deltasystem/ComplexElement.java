@@ -29,6 +29,8 @@ class ComplexElement extends RatingElement {
 	private float mBackwardScore = 0.0f;
 	/** 後方複雑度評価点の加算回数 */
 	private int mBackwardScoreCount = 0;
+	/** 1つ後方と同じ配置かどうか */
+	private boolean mSameBackwardPattern = false;
 
 	/**
 	 * コンストラクタ
@@ -192,6 +194,22 @@ class ComplexElement extends RatingElement {
 	}
 
 	/**
+	 * 1つ後方と同じ配置かどうか取得
+	 * @return 1つ後方と同じ配置かどうか
+	 */
+	final boolean isSameBackwardPattern() {
+		return mSameBackwardPattern;
+	}
+
+	/**
+	 * 1つ後方と同じ配置かどうか設定
+	 * @param same 1つ後方と同じ配置かどうか
+	 */
+	final void setSameBackwardPattern(boolean same) {
+		mSameBackwardPattern = same;
+	}
+
+	/**
 	 * 楽曲位置総合評価点取得
 	 * @return 楽曲位置総合評価点
 	 */
@@ -201,7 +219,7 @@ class ComplexElement extends RatingElement {
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printData() {
+	protected void printData(int pos) {
 		var s = String.format("   |%.3f|%s|%2d|%2d|%2d|%2d|%2d|%2d|%2d|%-8.3f|%2d:%-5.3f|%-8.3f",
 				getTimeDelta(),
 				makeNotesString(),

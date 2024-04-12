@@ -57,21 +57,66 @@ enum Fingering {
 					Map.entry(Finger.RRING, resists(r(Finger.RTHUMB, 0.3), r(Finger.RINDEX, 0.3), r(Finger.RMIDDLE, 0.8), r(Finger.RLITTLE, 0.4))),
 					Map.entry(Finger.RLITTLE, resists(r(Finger.RTHUMB, 0.1), r(Finger.RINDEX, 0.2), r(Finger.RMIDDLE, 0.7))))),
 
+	/** HOLDING算出用：1048式完全固定として定義する */
+	SP_HOLDING(2, 'H',
+			Map.ofEntries(
+					Map.entry(BeMusicDevice.SCRATCH1, Finger.LLITTLE),
+					Map.entry(BeMusicDevice.SWITCH11, Finger.LTHUMB),
+					Map.entry(BeMusicDevice.SWITCH12, Finger.LMIDDLE),
+					Map.entry(BeMusicDevice.SWITCH13, Finger.LINDEX),
+					Map.entry(BeMusicDevice.SWITCH14, Finger.RINDEX),
+					Map.entry(BeMusicDevice.SWITCH15, Finger.RTHUMB),
+					Map.entry(BeMusicDevice.SWITCH16, Finger.RMIDDLE),
+					Map.entry(BeMusicDevice.SWITCH17, Finger.RLITTLE)),
+			// HOLDINGでの抵抗値は、標準抵抗1.0にプラスする値として定義する
+			// 実際のプレーでBSSが来た時に1048完全固定で捌くのは通常ではあり得ないが、人によってやり方が分かれる点なので
+			// BSS中はスクラッチ以外の指が思いっ切り抵抗を受けるという設定にして評価点を疑似ることにする
+			Map.ofEntries(
+					Map.entry(Finger.LLITTLE, resists(r(Finger.LTHUMB, 0.2), r(Finger.LINDEX, 0.4), r(Finger.LMIDDLE, 0.3))),
+					Map.entry(Finger.LTHUMB, resists(r(Finger.LINDEX, 0.25), r(Finger.LMIDDLE, 0.1), r(Finger.LLITTLE, 0.5))),
+					Map.entry(Finger.LMIDDLE, resists(r(Finger.LTHUMB, 0.1), r(Finger.LINDEX, 0.3), r(Finger.LLITTLE, 0.5))),
+					Map.entry(Finger.LINDEX, resists(r(Finger.LTHUMB, 0.3), r(Finger.LMIDDLE, 0.2), r(Finger.LLITTLE, 0.5))),
+					Map.entry(Finger.RINDEX, resists(r(Finger.RTHUMB, 0.4), r(Finger.RMIDDLE, 0.25), r(Finger.RLITTLE, 0.15))),
+					Map.entry(Finger.RTHUMB, resists(r(Finger.RINDEX, 0.4), r(Finger.RMIDDLE, 0.1), r(Finger.RLITTLE, 0.2))),
+					Map.entry(Finger.RMIDDLE, resists(r(Finger.RINDEX, 0.25), r(Finger.RTHUMB, 0.1), r(Finger.RLITTLE, 0.3))),
+					Map.entry(Finger.RLITTLE, resists(r(Finger.RINDEX, 0.3), r(Finger.RTHUMB, 0.15), r(Finger.RMIDDLE, 0.3))))),
+
+	/** GIMMICKの地雷用 */
+	SP_MINE(3, 'M',
+			Map.ofEntries(
+					Map.entry(BeMusicDevice.SCRATCH1, Finger.LLITTLE),
+					Map.entry(BeMusicDevice.SWITCH11, Finger.LTHUMB),
+					Map.entry(BeMusicDevice.SWITCH12, Finger.LMIDDLE),
+					Map.entry(BeMusicDevice.SWITCH13, Finger.LINDEX),
+					Map.entry(BeMusicDevice.SWITCH14, Finger.RINDEX),
+					Map.entry(BeMusicDevice.SWITCH15, Finger.RTHUMB),
+					Map.entry(BeMusicDevice.SWITCH16, Finger.RMIDDLE),
+					Map.entry(BeMusicDevice.SWITCH17, Finger.RLITTLE)),
+			Map.ofEntries(
+					Map.entry(Finger.LLITTLE, resists(r(Finger.LLITTLE, 1.0))),
+					Map.entry(Finger.LTHUMB, resists(r(Finger.LTHUMB, 1.0), r(Finger.LMIDDLE, 0.1), r(Finger.LINDEX, 0.1))),
+					Map.entry(Finger.LMIDDLE, resists(r(Finger.LMIDDLE, 1.0), r(Finger.LTHUMB, 0.1), r(Finger.LINDEX, 0.1))),
+					Map.entry(Finger.LINDEX, resists(r(Finger.LINDEX, 1.0), r(Finger.LTHUMB, 0.1), r(Finger.LMIDDLE, 0.1))),
+					Map.entry(Finger.RINDEX, resists(r(Finger.RINDEX, 1.0), r(Finger.RTHUMB, 0.1), r(Finger.RMIDDLE, 0.2))),
+					Map.entry(Finger.RTHUMB, resists(r(Finger.RTHUMB, 1.0), r(Finger.RINDEX, 0.1), r(Finger.RMIDDLE, 0.1), r(Finger.RLITTLE, 0.05))),
+					Map.entry(Finger.RMIDDLE, resists(r(Finger.RMIDDLE, 1.0), r(Finger.RINDEX, 0.2), r(Finger.RTHUMB, 0.1), r(Finger.RLITTLE, 0.2))),
+					Map.entry(Finger.RLITTLE, resists(r(Finger.RLITTLE, 1.0), r(Finger.RINDEX, 0.05), r(Finger.RTHUMB, 0.1), r(Finger.RMIDDLE, 0.2))))),
+
 	/** 左片手 */
-	LEFT_HAND(2, 'L', Collections.emptyMap(), Collections.emptyMap()),
+	LEFT_HAND(4, 'L', Collections.emptyMap(), Collections.emptyMap()),
 
 	/** DP左レーンスクラッチ */
-	LEFT_SCRATCH(3, 'R', Collections.emptyMap(), Collections.emptyMap()),
+	LEFT_SCRATCH(5, 'R', Collections.emptyMap(), Collections.emptyMap()),
 
 	/** 右片手 */
-	RIGHT_HAND(4, '<', Collections.emptyMap(), Collections.emptyMap()),
+	RIGHT_HAND(6, '<', Collections.emptyMap(), Collections.emptyMap()),
 
 	/** DP右レーンスクラッチ */
-	RIGHT_SCRATCH(5, '>', Collections.emptyMap(), Collections.emptyMap());
+	RIGHT_SCRATCH(7, '>', Collections.emptyMap(), Collections.emptyMap());
 
 	/** インデックスによる運指のテーブル */
 	private static final Fingering[] TABLE = {
-			SP_DEFAULT, SP_SCRATCH, LEFT_HAND, LEFT_SCRATCH, RIGHT_HAND, RIGHT_SCRATCH
+			SP_DEFAULT, SP_SCRATCH, SP_HOLDING, LEFT_HAND, LEFT_SCRATCH, RIGHT_HAND, RIGHT_SCRATCH,
 	};
 
 	/** インデックス */

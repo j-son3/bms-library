@@ -232,7 +232,7 @@ class PowerElement extends RatingElement {
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printData() {
+	protected void printData(int pos) {
 		Ds.debug("   |%c|%.3f|%s|%.3f|%s|%s|%s|%s|%s|%s|%s|%s|L=%.4f, R=%.4f, S=%.4f",
 				getFingering().getChar(),
 				getTimeDelta(),

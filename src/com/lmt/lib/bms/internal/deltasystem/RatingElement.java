@@ -16,6 +16,11 @@ abstract class RatingElement {
 	/** 楽曲位置間の最大時間差分 */
 	protected static final double MAX_TIME_DELTA = 1.5;
 
+	// TODO Elementで入力デバイスリストを外部から入力できるようにリファクタリングする
+	protected static final List<BeMusicDevice> DEVS = List.of(
+			BeMusicDevice.SCRATCH1, BeMusicDevice.SWITCH11, BeMusicDevice.SWITCH12, BeMusicDevice.SWITCH13,
+			BeMusicDevice.SWITCH14, BeMusicDevice.SWITCH15, BeMusicDevice.SWITCH16, BeMusicDevice.SWITCH17);
+
 	/** このレーティング要素に対応する楽曲位置情報 */
 	private BeMusicPoint mPoint;
 	/** 1つ前の楽曲位置との時間差分 */
@@ -138,6 +143,14 @@ abstract class RatingElement {
 		return elems.isEmpty() ? 0.0 : (elems.get(elems.size() - 1).getTime() - elems.get(0).getTime());
 	}
 
+	static double timeDelta(List<? extends RatingElement> elems, int from, int to) {
+		return elems.get(to).getTime() - elems.get(from).getTime();
+	}
+
+	static <T extends RatingElement> double timeDelta(T from, T to) {
+		return to.getTime() - from.getTime();
+	}
+
 	/**
 	 * レーティング要素リストのデバッグ出力
 	 * <p>当メソッドは、デバッグモードが{@link DsDebugMode#DETAIL}の時に出力されるべき譜面の詳細情報を
@@ -167,7 +180,7 @@ abstract class RatingElement {
 			}
 
 			// データを出力する
-			elem.printData();
+			elem.printData(i);
 		}
 	}
 
@@ -175,8 +188,9 @@ abstract class RatingElement {
 	 * レーティング要素データをデバッグ出力する
 	 * <p>このレーティング要素データが持つ固有のデータを図式化、数値化し、整形して出力する。
 	 * 出力内容は{@link #printHeader()}, {@link #printMeasure()}と整合性の取れた形式の出力を行う。</p>
+	 * @param pos このレーティング要素のリストにおけるインデックス値
 	 */
-	protected abstract void printData();
+	protected abstract void printData(int pos);
 
 	/**
 	 * 小節線をデバッグ出力する

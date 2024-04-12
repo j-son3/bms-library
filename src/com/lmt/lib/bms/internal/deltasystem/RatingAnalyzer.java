@@ -60,8 +60,8 @@ public abstract class RatingAnalyzer {
 	/**
 	 * デバッグ出力
 	 * <p>当メソッドは現在のデバッグモードに応じて、必要となるデバッグ情報を出力する。
-	 * サマリ出力は{@link #dumpSummary(DsContext, double, double, Object...)}、
-	 * 詳細出力は{@link #dumpDetail(DsContext, double, double, List, Object...)}に処理を委譲する。
+	 * サマリ出力は{@link #dumpSummary(DsContext, double, int, Object...)}、
+	 * 詳細出力は{@link #dumpDetail(DsContext, double, int, List, Object...)}に処理を委譲する。
 	 * 出力処理は各レーティング種別で実装すること。</p>
 	 * @param cxt Delta System用コンテキスト
 	 * @param org 算出したレーティング値のオリジナル値

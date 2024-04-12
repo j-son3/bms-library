@@ -23,10 +23,11 @@ import com.lmt.lib.bms.BmsSpec;
  * 良いのであれば音声・アニメーションの情報を除外した状態でBMS譜面オブジェクトを構築しても構いません。</p>
  *
  * <p>但し、どのような用途のBMS譜面オブジェクトであったとしても以下の情報だけは必ず含まれることになります。
- * これらは総じて「時間」に関連する情報となっています。</p>
+ * これらは総じて「時間」「表示位置」に関連する情報となっています。</p>
  *
  * <ul>
  * <li>小節長の明示的な指定</li>
+ * <li>スクロール速度変化に関する情報</li>
  * <li>BPM変化に関する情報</li>
  * <li>譜面停止に関する情報</li>
  * </ul>
@@ -74,6 +75,8 @@ public class BeMusicScoreBuilder {
 
 	/** 現在のシーク位置 */
 	private BmsPoint mCurAt;
+	/** 現在のスクロール速度 */
+	private double mCurScroll;
 	/** 現在のBPM */
 	private double mCurBpm;
 	/** #LNOBJリスト */
@@ -273,6 +276,7 @@ public class BeMusicScoreBuilder {
 
 		// 必須チャンネル
 		mTargetChannels.add(BmsInt.box(BeMusicChannel.LENGTH.getNumber()));
+		mTargetChannels.add(BmsInt.box(BeMusicChannel.SCROLL.getNumber()));
 		mTargetChannels.add(BmsInt.box(BeMusicChannel.BPM_LEGACY.getNumber()));
 		mTargetChannels.add(BmsInt.box(BeMusicChannel.BPM.getNumber()));
 		mTargetChannels.add(BmsInt.box(BeMusicChannel.STOP.getNumber()));
@@ -318,6 +322,7 @@ public class BeMusicScoreBuilder {
 
 		// その他のセットアップ
 		mCurAt = new BmsPoint(0, 0);
+		mCurScroll = 1.0;
 		mCurBpm = mContent.getInitialBpm();
 		mLnObjs = mContent.getMultipleMetas(BeMusicMeta.LNOBJ.getName());
 		mLnTail = BeMusicMeta.getLnMode(mContent).getTailType();
@@ -372,7 +377,7 @@ public class BeMusicScoreBuilder {
 		// 表示位置
 		var timeDiff = curTime - prevTime;
 		var dispPosBase = (mPrevPoint == null) ? 0.0 : mPrevPoint.getDisplayPosition();
-		var dispPosAdd = timeDiff * (mCurBpm / BmsSpec.BPM_MAX);
+		var dispPosAdd = timeDiff * (mCurBpm / BmsSpec.BPM_MAX);  // TODO スクロール速度を適用する
 		var dispPos = dispPosBase + dispPosAdd;
 		if ((dispPos == dispPosBase) && (mPrevPoint != null)) {
 			dispPos = Math.nextUp(dispPos);
@@ -386,6 +391,18 @@ public class BeMusicScoreBuilder {
 		} else {
 			// 小節長変更データが存在しないので等倍とする
 			pt.setMeasureLength(1.0);
+		}
+
+		// スクロール速度変更
+		if ((note = mContent.getNote(BeMusicChannel.SCROLL.getNumber(), mCurAt)) != null) {
+			// スクロール速度変更あり
+			mCurScroll = (Double)mContent.getResolvedNoteValue(BeMusicChannel.SCROLL.getNumber(), mCurAt);
+			pt.setChangeScroll(true);
+			pt.setCurrentScroll(mCurScroll);
+		} else {
+			// スクロール速度変更が存在しない場合は現在のスクロール速度を設定する
+			pt.setChangeScroll(false);
+			pt.setCurrentScroll(mCurScroll);
 		}
 
 		// BPM変更

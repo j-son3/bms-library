@@ -1,6 +1,11 @@
 package com.lmt.lib.bms.bemusic;
 
+import static com.lmt.lib.bms.internal.Assertion.*;
+
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.lmt.lib.bms.BmsChannel;
 
@@ -165,6 +170,31 @@ public enum BeMusicDevice {
 			BeMusicDevice.SWITCH14, BeMusicDevice.SWITCH15, BeMusicDevice.SWITCH16, BeMusicDevice.SWITCH17,
 			BeMusicDevice.SWITCH21, BeMusicDevice.SWITCH22, BeMusicDevice.SWITCH23, BeMusicDevice.SWITCH24,
 			BeMusicDevice.SWITCH25, BeMusicDevice.SWITCH26, BeMusicDevice.SWITCH27, BeMusicDevice.SCRATCH2);
+
+	/** 主レーンの全入力デバイスリスト */
+	private static final List<BeMusicDevice> DEVICES_PRIMARY = Collections.unmodifiableList(Stream.of(values())
+			.filter(dev -> dev.getLane() == BeMusicLane.PRIMARY)
+			.collect(Collectors.toList()));
+	/** 副レーンの全入力デバイスリスト */
+	private static final List<BeMusicDevice> DEVICES_SECONDARY = Collections.unmodifiableList(Stream.of(values())
+			.filter(dev -> dev.getLane() == BeMusicLane.SECONDARY)
+			.collect(Collectors.toList()));
+	/** 主レーンのスイッチデバイスリスト */
+	private static final List<BeMusicDevice> SWITCHES_PRIMARY = Collections.unmodifiableList(Stream.of(values())
+			.filter(dev -> dev.getLane() == BeMusicLane.PRIMARY)
+			.filter(dev -> dev.isSwitch())
+			.collect(Collectors.toList()));
+	/** 副レーンのスイッチデバイスリスト */
+	private static final List<BeMusicDevice> SWITCHES_SECONDARY = Collections.unmodifiableList(Stream.of(values())
+			.filter(dev -> dev.getLane() == BeMusicLane.SECONDARY)
+			.filter(dev -> dev.isSwitch())
+			.collect(Collectors.toList()));
+	/** レーンインデックスによる全入力デバイスリストのテーブル */
+	private static final List<List<BeMusicDevice>> DEVICES_LANE = List.of(DEVICES_PRIMARY, DEVICES_SECONDARY);
+	/** レーンインデックスによる全スイッチデバイスリストのテーブル */
+	private static final List<List<BeMusicDevice>> SWITCHES_LANE = List.of(SWITCHES_PRIMARY, SWITCHES_SECONDARY);
+	/** レーンインデックスによるスクラッチデバイスのテーブル */
+	private static final BeMusicDevice[] SCRATCHES_LANE = { SCRATCH1, SCRATCH2 };
 
 	/** インデックスによる入力デバイスの解決用配列 */
 	private static final BeMusicDevice[] DEVICES = new BeMusicDevice[] {
@@ -350,5 +380,40 @@ public enum BeMusicDevice {
 	 */
 	public static List<BeMusicDevice> orderedByDpList() {
 		return DEVICES_DP;
+	}
+
+	/**
+	 * 指定レーンに配置された全ての入力デバイスのリストを取得します。
+	 * <p>返されるリストは読み取り専用です。リストの内容を変更しようとすると例外がスローされます。</p>
+	 * @param lane レーン
+	 * @return 入力デバイスリスト
+	 * @exception NullPointerException laneがnull
+	 */
+	public static List<BeMusicDevice> getDevices(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return DEVICES_LANE.get(lane.getIndex());
+	}
+
+	/**
+	 * 指定レーンに配置されたスイッチデバイスのリストを取得します。
+	 * <p>返されるリストは読み取り専用です。リストの内容を変更しようとすると例外がスローされます。</p>
+	 * @param lane レーン
+	 * @return スイッチデバイスリスト
+	 * @exception NullPointerException laneがnull
+	 */
+	public static List<BeMusicDevice> getSwitches(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return SWITCHES_LANE.get(lane.getIndex());
+	}
+
+	/**
+	 * 指定レーンに配置されたスクラッチデバイスを取得します。
+	 * @param lane レーン
+	 * @return laneに配置されたスクラッチデバイス
+	 * @exception NullPointerException laneがnull
+	 */
+	public static BeMusicDevice getScratch(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return SCRATCHES_LANE[lane.getIndex()];
 	}
 }

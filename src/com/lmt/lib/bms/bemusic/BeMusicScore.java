@@ -114,10 +114,16 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	private int[] mLnCounts = new int[BeMusicDevice.COUNT];
 	/** 入力デバイスごとの地雷オブジェ数 */
 	private int[] mLmCounts = new int[BeMusicDevice.COUNT];
+	/** スクロール速度変化回数 */
+	private int mChgScrollCount;
 	/** BPM変化回数 */
 	private int mChgBpmCount;
 	/** 譜面停止回数 */
 	private int mStopCount;
+	/** 速度変更有無 */
+	private boolean mChgSpeed;
+	/** ギミック有無 */
+	private boolean mGimmick;
 	/** 操作可能ノートのある楽曲位置情報の最終インデックス */
 	private int mLastPlayableIndex;
 	/** BGM有無 */
@@ -296,6 +302,14 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	}
 
 	/**
+	 * スクロール速度の変化回数を取得します。
+	 * @return スクロール速度の変化回数
+	 */
+	public final int getChangeScrollCount() {
+		return mChgScrollCount;
+	}
+
+	/**
 	 * BPM変化回数を取得します。
 	 * @return BPM変化回数
 	 */
@@ -370,6 +384,14 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	}
 
 	/**
+	 * スクロール速度の変化有無を取得します。
+	 * @return スクロール速度の変化有無
+	 */
+	public final boolean hasChangeScroll() {
+		return (mChgScrollCount > 0);
+	}
+
+	/**
 	 * BPM変化有無を取得します。
 	 * @return BPM変化有無
 	 */
@@ -378,11 +400,37 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	}
 
 	/**
+	 * 速度変更有無を取得します。
+	 * <p>当メソッドは、譜面内にBPMの途中変更、またはスクロール速度変更があった場合にtrueを返します。</p>
+	 * @return 速度変更有無
+	 * @see #hasChangeBpm()
+	 * @see #hasChangeScroll()
+	 */
+	public final boolean hasChangeSpeed() {
+		return mChgSpeed;
+	}
+
+	/**
 	 * 譜面停止有無を取得します。
 	 * @return 譜面停止有無
 	 */
 	public final boolean hasStop() {
 		return (mStopCount > 0);
+	}
+
+	/**
+	 * ギミック有無を取得します。
+	 * <p>当メソッドは、譜面内にBPMの途中変更、スクロール速度変更、譜面停止、地雷オブジェのいずれかが
+	 * 存在した場合にtrueを返します。</p>
+	 * @return ギミック有無
+	 * @see #hasChangeSpeed()
+	 * @see #hasChangeBpm()
+	 * @see #hasChangeScroll()
+	 * @see #hasStop()
+	 * @see #hasLandmine()
+	 */
+	public final boolean hasGimmick() {
+		return mGimmick;
 	}
 
 	/** {@inheritDoc} */
@@ -533,6 +581,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 		mNoteCount = 0;
 		mLnCount = 0;
 		mLmCount = 0;
+		mChgScrollCount = 0;
 		mChgBpmCount = 0;
 		mStopCount = 0;
 		mLastPlayableIndex = 0;
@@ -601,6 +650,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 			mNoteCount += pt.getNoteCount();
 			mLnCount += pt.getLongNoteCount();
 			mLmCount += pt.getLandmineCount();
+			mChgScrollCount += (pt.hasScroll() ? 1 : 0);
 			mChgBpmCount += (pt.hasBpm() ? 1 : 0);
 			mStopCount += (pt.hasStop() ? 1 : 0);
 			if (pt.hasBgm()) { mHasBgm = true; }
@@ -622,6 +672,10 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 				(notes < 400) ? (200.0 + notes / 5.0) :
 				(notes < 600) ? (280.0 + (notes - 400.0) / 2.5) :
 				                (360.0 + (notes - 600.0) / 5.0);
+
+		// 各種要素の有無情報を設定する
+		mChgSpeed = (mChgBpmCount > 0) || (mChgScrollCount > 0);
+		mGimmick = mChgSpeed || (mStopCount > 0) || (mLmCount > 0);
 
 		// 拡張情報取得用処理を実行する
 		onCreate();

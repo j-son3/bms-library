@@ -59,7 +59,7 @@ class RhythmElement extends RatingElement {
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printData() {
+	protected void printData(int pos) {
 		var s = String.format("   |%.3f|%s %s %s %s %s %s %s %s|%s|%s|%s|",
 				getTimeDelta(),
 				getNoteTypeString(BeMusicDevice.SCRATCH1), getNoteTypeString(BeMusicDevice.SWITCH11),

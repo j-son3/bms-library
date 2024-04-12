@@ -23,7 +23,7 @@ class ComplexConfig extends RatingConfig {
 			0.7, 1.0, 1.0, 0.5, 0.25, 0.15, 0.11, 0.09, 0.08, 0.072, 0.063, 0.055, 0.047, 0.041, 0.036, 0.031, 0.027, 0.023, 0.019, 0.015, 0.011, 0.007);
 	/** 最終評価点計算用の補間関数 */
 	LinearInterpolateFunction ipfnComplex = LinearInterpolateFunction.create(
-			0.4, 20000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.003, 0.013, 0.046, 0.147, 0.34, 0.54, 0.66, 0.76, 0.81, 0.86, 0.905, 0.94, 0.955, 0.97, 0.982, 0.99, 0.995, 1.0);
+			0.4, 20000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.003, 0.013, 0.048, 0.157, 0.357, 0.56, 0.677, 0.776, 0.825, 0.87, 0.91, 0.94, 0.955, 0.97, 0.982, 0.99, 0.995, 1.0);
 
 	/** 総合複雑度評価点の飽和点 */
 	double satulateTotalScore = 2.5;
@@ -32,15 +32,17 @@ class ComplexConfig extends RatingConfig {
 	/** スクラッチが絡む色切替の回数の補正値(値を増やすとスクラッチ＋スイッチ同時の複雑度が上昇する) */
 	double adjustScratchColor = 0.15;
 	/** 楽曲位置評価において、ノート種別が長押し継続時の基本点減点率(0～1) */
-	double deductionHold = 0.83;
+	double deductionHold = 0.90;
 	/** 楽曲位置評価において、ノート種別が長押し終了時の基本点減点率(0～1) */
 	double deductionLnTail = 0.95;
 	/** 楽曲位置評価において、ノート種別が地雷の時の基本点減点率(0～1) */
-	double deductionMine = 0.8;
+	double deductionMine = 0.75;
 	/** 楽曲位置評価において、ノート種別数が評価点に影響を及ぼす係数(適正値は0～0.5が目安) */
-	double typeCountRate = 0.05;
+	double typeCountRate = 0.03;
 	/** 楽曲位置評価において、ノート種別切替回数が評価点に影響を及ぼす係数(適正値は0～0.5が目安) */
-	double typeChangeRate = 0.09;
+	double typeChangeRate = 0.03;
+	/** 後方複雑度評価時、配置差分がない場合の最小倍率(0にすると当該楽曲位置の後方複雑度は評価点に加算されない) */
+	double minBwRatioPatternDelta = 0.02;
 
 	/** 後方複雑度評価を行う範囲 */
 	double timeRangeBwRef;
@@ -76,6 +78,7 @@ class ComplexConfig extends RatingConfig {
 		deductionMine = loader.numeric("deduction_mine", deductionMine);
 		typeCountRate = loader.numeric("type_count_rate", typeCountRate);
 		typeChangeRate = loader.numeric("type_change_rate", typeChangeRate);
+		minBwRatioPatternDelta = loader.numeric("min_bw_ratio_pattern_delta", minBwRatioPatternDelta);
 		setup();
 	}
 
@@ -95,6 +98,7 @@ class ComplexConfig extends RatingConfig {
 		Ds.debug("  deductionMine: %s", deductionMine);
 		Ds.debug("  typeCountRate: %s", typeCountRate);
 		Ds.debug("  typeChangeRate: %s", typeChangeRate);
+		Ds.debug("  minBwRatioPatternDelta: %s", minBwRatioPatternDelta);
 		Ds.debug("}");
 	}
 

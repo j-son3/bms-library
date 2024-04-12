@@ -115,7 +115,9 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 
 			// 「後方複雑度評価点」を計算する
 			// 規定範囲の楽曲位置の配置が複雑であるほど、配置が詰まっているほど高評価となるようにする
-			for (var j = i - 1; (j >= 0) && ((curTime - elems.get(j).getTime()) <= config.timeRangeBwRef); j--) {
+			var sameBackward = false;
+			var firstBwIndex = i - 1;
+			for (var j = firstBwIndex; (j >= 0) && ((curTime - elems.get(j).getTime()) <= config.timeRangeBwRef); j--) {
 				var prev = elems.get(j);
 
 				// 現在楽曲位置との差分を出す
@@ -127,12 +129,20 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 					diffCount += ((typeCur == typePrev) ? 0 : 1);
 				}
 
+				// 1つ前の楽曲位置が同じ配置かどうかを記録しておく
+				if ((j == firstBwIndex) && (diffCount == 0)) {
+					sameBackward = true;
+				}
+
 				// 後方複雑度評価点を算出し、設定する
-				var ratioByTime = config.ipfnBwRef.compute(curTime - prev.getTime());
-				var ratioByDiff = Math.max(0.05, ((double)diffCount / countDev));
-				var scoreBw = prev.getPointScore() * ratioByDiff * ratioByTime;
-				elem.putBackwardScore(scoreBw);
+				if (!prev.isSameBackwardPattern()) {
+					var ratioByTime = config.ipfnBwRef.compute(curTime - prev.getTime());
+					var ratioByDiff = Math.max(config.minBwRatioPatternDelta, ((double)diffCount / countDev));
+					var scoreBw = prev.getPointScore() * ratioByDiff * ratioByTime;
+					elem.putBackwardScore(scoreBw);
+				}
 			}
+			elem.setSameBackwardPattern(sameBackward);
 
 			// 集計した各種情報を基にして「総合複雑度評価点」を計算する
 			var scoreTotal = elem.getTotalScore();

@@ -71,11 +71,18 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 		var elemsAll = RatingElement.listElements(cxt, RhythmElement::new, BeMusicPoint::hasMovementNote);
 		var elemsL = elemsAll.stream().filter(filterL).collect(Collectors.toList());
 		var elemsR = elemsAll.stream().filter(filterR).collect(Collectors.toList());
-		if (elemsAll.size() < 2) {
+		if (elemsAll.isEmpty()) {
+			// 操作可能ノートが1個もない空譜面は0点とする
+			Ds.debug("No rhythm because empty score.");
+			cxt.stat.setRating(getRatingType(), 0);
+			return;
+		} else if (elemsAll.size() < 2) {
 			// 楽曲位置が2点未満だとリズムもへったくれもないでしょw
 			Ds.debug("No rhythm in this song.");
 			cxt.stat.setRating(getRatingType(), 1);
 			return;
+		} else {
+			// Do nothing
 		}
 
 		// 譜面全体・左側・右側ごとにリズム分析を行い、それぞれで評価点を算出する
@@ -146,12 +153,12 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 		var prevPr = (PulseRange)null;
 		var nextIndex = new MutableInt();
 		var nextStepCount = new MutableInt();
-		var changeCount = 0;
+		var rangeNumber = 0;
 		var movementTime = 0.0;
 		for (var i = 0; i < countElem; i++) {
 			var elem = elems.get(i);
-			var curPr = new PulseRange(changeCount);
-			changeCount++;
+			var curPr = new PulseRange(rangeNumber);
+			rangeNumber++;
 
 			curPr.previousRange = prevPr;
 			curPr.firstElement = elem;
@@ -281,6 +288,14 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 		var summarizer = new ScoreSummarizer(3.0);
 		for (var pr = firstPr2; pr != null; pr = pr.nextRange) {
 			summarizer.put(pr.firstElement.getTime(), pr.score);
+		}
+
+		// リズム変化回数をカウントする
+		// 単純なリズム範囲数ではなく、長いリズム範囲は範囲を分割してカウントする
+		var changeCount = 0;
+		for (var pr = firstPr2; pr != null; pr = pr.nextRange) {
+			var count = (int)(pr.rangeTime / config.maxRangeTime) + 1;
+			changeCount += count;
 		}
 
 		// 各種評価点を計算する

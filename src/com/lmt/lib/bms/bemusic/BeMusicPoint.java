@@ -21,6 +21,7 @@ import com.lmt.lib.bms.BmsAt;
  * <li>楽曲位置に対応した譜面上の時間</li>
  * <li>楽曲位置に対応する情報を表示するべき表示位置の値</li>
  * <li>楽曲位置が含まれる小節の小節長</li>
+ * <li>楽曲位置における現在のスクロール速度</li>
  * <li>楽曲位置における現在のBPM</li>
  * <li>楽曲位置に到達した時に譜面を停止する時間</li>
  * <li>ノートの情報(可視・不可視・地雷)</li>
@@ -41,6 +42,10 @@ public class BeMusicPoint implements BmsAt {
 	private double mTime;
 	/** この楽曲位置が含まれる小節の小節長 */
 	private float mLength = 1.0f;
+	/** 明示的なスクロール速度変更の有無 */
+	private boolean mChgScroll = false;
+	/** この楽曲位置の現在のスクロール速度 */
+	private float mScroll = 1.0f;
 	/** この楽曲位置の現在BPM */
 	private float mBpm;
 	/** 譜面停止時間 */
@@ -58,7 +63,10 @@ public class BeMusicPoint implements BmsAt {
 	/** ミス時BGA */
 	private short mMiss;
 	/** 各種情報 */
-	private int mInfo;  // 0-4b:NoteCount, 5-9b:LnCount, 10-14b:LmCount, 15-19b:VeCount 20b:isLastPlayable 21b:hasMovement
+	// 0-4b:NoteCount, 5-9b:LnCount, 10-14b:LmCount, 15-19b:VeCount 20b:isLastPlayable 21b:hasMovement
+	// 22b: hasHolding, 23b:hasLongNoteHead, 24b:hasLongNoteTail, 25b:hasLongNoteType, 26b:hasChangeSpeed
+	// 27b: hasGimmick
+	private int mInfo;
 	/** 表示テキスト */
 	private String mText = "";
 
@@ -88,6 +96,8 @@ public class BeMusicPoint implements BmsAt {
 		mDispPos = src.mDispPos;
 		mTime = src.mTime;
 		mLength = src.mLength;
+		mChgScroll = src.mChgScroll;
+		mScroll = src.mScroll;
 		mBpm = src.mBpm;
 		mStop = src.mStop;
 		mNotes = (src.mNotes == null) ? null : Arrays.copyOf(src.mNotes, src.mNotes.length);
@@ -281,9 +291,76 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>「何らかの操作を伴う」とは、{@link BeMusicNoteType#hasMovement()}がtrueを返すことを表します。
 	 * この楽曲位置のいずれかの入力デバイスに1つでも何らかの操作を伴うノートがあれば「有り」と見なされます。</p>
 	 * @return この楽曲位置何らかの操作を伴うノートが1つでもある場合にtrue
+	 * @see BeMusicNoteType#hasMovement()
 	 */
 	public final boolean hasMovementNote() {
 		return (mInfo & 0x200000) != 0;
+	}
+
+	/**
+	 * この楽曲位置での長押し継続ノートの有無を取得します。
+	 * <p>具体的には、{@link BeMusicNoteType#isHolding()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
+	 * @return この楽曲位置に長押し継続ノートが1つでもある場合にtrue
+	 * @see BeMusicNoteType#isHolding()
+	 */
+	public final boolean hasHolding() {
+		return (mInfo & 0x400000) != 0;
+	}
+
+	/**
+	 * この楽曲位置での長押し開始ノートの有無を取得します。
+	 * <p>具体的には、{@link BeMusicNoteType#isLongNoteHead()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
+	 * @return この楽曲位置に長押し開始ノートが1つでもある場合にtrue
+	 * @see BeMusicNoteType#isLongNoteHead()
+	 */
+	public final boolean hasLongNoteHead() {
+		return (mInfo & 0x800000) != 0;
+	}
+
+	/**
+	 * この楽曲位置での長押し終了ノートの有無を取得します。
+	 * <p>具体的には、{@link BeMusicNoteType#isLongNoteTail()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
+	 * @return この楽曲位置に長押し終了ノートが1つでもある場合にtrue
+	 * @see BeMusicNoteType#isLongNoteTail()
+	 */
+	public final boolean hasLongNoteTail() {
+		return (mInfo & 0x1000000) != 0;
+	}
+
+	/**
+	 * この楽曲位置での長押関連ノートの有無を取得します。
+	 * <p>具体的には、{@link BeMusicNoteType#isLongNoteType()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
+	 * @return この楽曲位置に長押し終了ノートが1つでもある場合にtrue
+	 * @see BeMusicNoteType#isLongNoteType()
+	 */
+	public final boolean hasLongNoteType() {
+		return (mInfo & 0x2000000) != 0;
+	}
+
+	/**
+	 * この楽曲位置での速度変更の有無を取得します。
+	 * <p>具体的には、{@link #hasBpm()}, {@link #hasScroll()}のいずれかがtrueを返す場合にtrueを返します。</p>
+	 * @return この楽曲位置に速度変更がある場合にtrue
+	 * @see #hasBpm()
+	 * @see #hasScroll()
+	 */
+	public final boolean hasChangeSpeed() {
+		return (mInfo & 0x4000000) != 0;
+	}
+
+	/**
+	 * この楽曲位置でのギミック要素の有無を取得します。
+	 * <p>「ギミック要素」とは、BPM変更、スクロール速度変更、譜面停止、地雷を指します。
+	 * これらの要素がいずれか1つ以上存在する場合にtrueを返します。</p>
+	 * @return この楽曲位置にギミック要素がある場合にtrue
+	 * @see #hasChangeSpeed()
+	 * @see #hasBpm()
+	 * @see #hasScroll()
+	 * @see #hasStop()
+	 * @see #hasLandmine()
+	 */
+	public final boolean hasGimmick() {
+		return (mInfo & 0x8000000) != 0;
 	}
 
 	/**
@@ -327,6 +404,34 @@ public class BeMusicPoint implements BmsAt {
 	}
 
 	/**
+	 * この楽曲位置での現在のスクロール速度を取得します。
+	 * <p>スクロール速度変化のない譜面では、この値は常に1.0になります。楽曲位置にてスクロール速度の変更が行われた場合、
+	 * 当メソッドは変更後のスクロール速度を返します。</p>
+	 * @return 現在のスクロール速度
+	 * @see BeMusicMeta#SCROLL
+	 * @see BeMusicChannel#SCROLL
+	 */
+	public final double getCurrentScroll() {
+		return mScroll;
+	}
+
+	/**
+	 * 現在のスクロール速度設定
+	 * @param scroll スクロール速度
+	 */
+	final void setCurrentScroll(double scroll) {
+		mScroll = (float)scroll;
+	}
+
+	/**
+	 * 明示的なスクロール速度変更の有無設定
+	 * @param chgScroll スクロール速度変更の有無
+	 */
+	final void setChangeScroll(boolean chgScroll) {
+		mChgScroll = chgScroll;
+	}
+
+	/**
 	 * この楽曲位置での現在のBPMを取得します。
 	 * <p>BPM変化のない譜面では、この値は常に初期BPMと同じ値になります。楽曲位置にてBPM変更が行われた場合、
 	 * 当メソッドは変更後のBPMを返します。</p>
@@ -347,6 +452,17 @@ public class BeMusicPoint implements BmsAt {
 	 */
 	final void setCurrentBpm(double bpm) {
 		mBpm = (float)bpm;
+	}
+
+	/**
+	 * この楽曲位置での現在の譜面速度を取得します。
+	 * <p>返される値は、現在のBPMに現在のスクロール速度を積算した値となります。</p>
+	 * @return 現在の譜面速度
+	 * @see #getCurrentBpm()
+	 * @see #getCurrentScroll()
+	 */
+	public final double getCurrentSpeed() {
+		return getCurrentBpm() * getCurrentScroll();
 	}
 
 	/**
@@ -508,6 +624,16 @@ public class BeMusicPoint implements BmsAt {
 	}
 
 	/**
+	 * この楽曲位置でスクロール速度を変更する指定が存在するかを判定します。
+	 * @return スクロール速度変更の指定がある場合true
+	 * @see BeMusicMeta#SCROLL
+	 * @see BeMusicChannel#SCROLL
+	 */
+	public final boolean hasScroll() {
+		return mChgScroll;
+	}
+
+	/**
 	 * この楽曲位置でBPMを変更する指定が存在するかを判定します。
 	 * @return BPM変更の指定がある場合true
 	 * @see BeMusicMeta#BPM
@@ -526,6 +652,15 @@ public class BeMusicPoint implements BmsAt {
 	 */
 	public final boolean hasStop() {
 		return (mStop != 0.0f);
+	}
+
+	/**
+	 * この楽曲位置に地雷オブジェが存在するかを判定します。
+	 * @return 地雷オブジェが存在する場合true
+	 * @see #getLandmineCount()
+	 */
+	public final boolean hasLandmine() {
+		return (getLandmineCount() != 0);
 	}
 
 	/**
@@ -579,18 +714,32 @@ public class BeMusicPoint implements BmsAt {
 		var veCount = 0;
 		var playable = 0;
 		var movement = 0;
+		var holding = 0;
+		var longNoteHead = 0;
+		var longNoteTail = 0;
+		var longNoteType = 0;
 		for (var i = 0; i < BeMusicDevice.COUNT; i++) {
 			var dev = BeMusicDevice.fromIndex(i);
 			var ntype = getNoteType(dev);
 			noteCount += (ntype.isCountNotes() ? 1 : 0);
-			lnCount += (((ntype == BeMusicNoteType.LONG_ON) || (ntype.isCountNotes() && ntype.isLongNoteTail())) ? 1 : 0);
+			lnCount += (((ntype.isLongNoteHead()) || (ntype.isCountNotes() && ntype.isLongNoteTail())) ? 1 : 0);
 			lmCount += ((ntype == BeMusicNoteType.LANDMINE) ? 1 : 0);
 			veCount += (ntype.hasVisualEffect() ? 1 : 0);
 			playable |= ((ntype.isPlayable()) ? 1 : 0);
 			movement |= ((ntype.hasMovement()) ? 1 : 0);
+			holding |= ((ntype.isHolding()) ? 1 : 0);
+			longNoteHead |= (ntype.isLongNoteHead() ? 1 : 0);
+			longNoteTail |= (ntype.isLongNoteTail() ? 1 : 0);
+			longNoteType |= (ntype.isLongNoteType() ? 1 : 0);
 		}
 
+		// 各種要素の有無を集計する
+		var chgSpeed = (hasBpm() || hasScroll()) ? 1 : 0;
+		var gimmick = (hasBpm() || hasScroll() || hasStop() || (lmCount > 0)) ? 1 : 0;
+
 		// 汎用データ領域に値を設定する
-		mInfo = (noteCount | (lnCount << 5) | (lmCount << 10) | (veCount << 15) | (playable << 20) | (movement << 21));
+		mInfo = (noteCount | (lnCount << 5) | (lmCount << 10) | (veCount << 15) | (playable << 20) | (movement << 21) |
+				(holding << 22) | (longNoteHead << 23) | (longNoteTail << 24) | (longNoteType << 25) | (chgSpeed << 26) |
+				(gimmick << 27));
 	}
 }
