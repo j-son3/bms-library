@@ -7,12 +7,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.lmt.lib.bms.BmsContent;
 import com.lmt.lib.bms.BmsInt;
 import com.lmt.lib.bms.BmsNote;
 import com.lmt.lib.bms.BmsPoint;
 import com.lmt.lib.bms.BmsSpec;
+import com.lmt.lib.bms.internal.Utility;
 
 /**
  * BMSコンテンツからBe Music仕様のBMS譜面オブジェクトを構築するためのビルダーです。
@@ -423,7 +425,7 @@ public class BeMusicScoreBuilder {
 		if ((note = mContent.getNote(BeMusicChannel.STOP.getNumber(), mCurAt)) != null) {
 			// 譜面停止データあり
 			var stopValue = (double)mContent.getResolvedNoteValue(BeMusicChannel.STOP.getNumber(), mCurAt);
-			var stopTime = 1.25 * stopValue / mCurBpm;  // TODO 刻み数から時間への変換を共通化
+			var stopTime = Utility.computeTime(stopValue, mCurBpm);
 			pt.setStop(stopTime);
 		} else {
 			// 譜面停止データなし
@@ -452,7 +454,7 @@ public class BeMusicScoreBuilder {
 						// 長押し継続中の場合は長押しを終了とする
 						// 開始と終了の値が異なる場合でも強制的に終了とする。
 						// (世に出回っているBMSには、稀に開始と終了の値が異なるものがある)
-						pt.setNote(dev, mLnTail, lnValue);
+						pt.setNote(dev, getLnTailType(lnValue), lnValue);
 						mHoldingsMgq[i] = 0;
 					}
 				} else if (mHoldingsMgq[i] != 0) {
@@ -469,7 +471,8 @@ public class BeMusicScoreBuilder {
 							note2 = mContent.getPreviousNote(chNum, mCurAt, false);
 							if ((note2 != null) && !mLnObjs.contains((long)note2.getValue())) {
 								// 前のノートが通常オブジェの場合はロングノート終了として扱う
-								pt.setNote(dev, mLnTail, note.getValue());
+								var noteValue = note.getValue();
+								pt.setNote(dev, getLnTailType(noteValue), noteValue);
 								mHoldingsRdm[i] = false;
 							} else {
 								// 前のノートなし、または続けてロングノート終了オブジェ検出時は通常オブジェとして扱う
@@ -515,9 +518,9 @@ public class BeMusicScoreBuilder {
 
 		// BGM
 		if (mSeekBgm) {
-			var bgmNotes = mContent.listNotes(mCurAt, n -> n.getChannel() == BeMusicChannel.BGM.getNumber());
-			var bgmList = new ArrayList<Short>(bgmNotes.size());
-			bgmNotes.forEach(n -> { bgmList.add((short)n.getValue()); });
+			var bgmList = mContent.listNotes(mCurAt, n -> n.getChannel() == BeMusicChannel.BGM.getNumber()).stream()
+					.map(n -> BmsInt.box(n.getValue()))
+					.collect(Collectors.toList());
 			pt.setBgm(bgmList);
 		}
 
@@ -540,6 +543,18 @@ public class BeMusicScoreBuilder {
 		pt.computeSummary();
 
 		return pt;
+	}
+
+	/**
+	 * ロングノート終端の種別取得
+	 * <p>bmson(beatoraja固有)の、ノート単位でのロングノート種別指定機能に対応する。
+	 * "t"の値により種別指定がある場合、#LNMODEの内容に限らず"t"の値を使用し、種別指定がない場合は#LNMODEの値を返す。</p>
+	 * @param noteValue ノートの値
+	 * @return ロングノート終端の種別
+	 */
+	private BeMusicNoteType getLnTailType(int noteValue) {
+		var lnMode = BeMusicSoundNote.getLongNoteMode(noteValue, null);
+		return (lnMode == null) ? mLnTail : lnMode.getTailType();
 	}
 
 	/**

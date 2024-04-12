@@ -28,6 +28,7 @@ import com.lmt.lib.bms.BmsSpec;
  * <li>{@link BeMusicMeta#BMP}</li>
  * <li>{@link BeMusicMeta#BPM}</li>
  * <li>{@link BeMusicMeta#STOP}</li>
+ * <li>{@link BeMusicMeta#SCROLL}</li>
  * <li>{@link BeMusicMeta#TEXT}</li>
  * </ul>
  *
@@ -65,6 +66,11 @@ public class BeMusicHeader {
 	 */
 	public static final int TEXT = 0x0010;
 	/**
+	 * ヘッダ定義構築時、#SCROLLの情報を収集するフラグです。
+	 * @see BeMusicMeta#SCROLL
+	 */
+	public static final int SCROLL = 0x0020;
+	/**
 	 * ヘッダ定義構築時、フラグで情報収集有無を選択可能なメタ情報を全て収集しないことを示す値です。
 	 */
 	public static final int NONE = 0;
@@ -75,6 +81,7 @@ public class BeMusicHeader {
 	 * @see #BMP
 	 * @see #BPM
 	 * @see #STOP
+	 * @see #SCROLL
 	 * @see #TEXT
 	 */
 	public static final int ALL = -1;
@@ -107,12 +114,16 @@ public class BeMusicHeader {
 	private double mInitialBpm;
 	/** #DIFFICULTY */
 	private BeMusicDifficulty mDifficulty;
+	/** #CHARTNAME */
+	private String mChartName;
 	/** #PLAYLEVEL */
 	private String mPlayLevelRaw;
 	/** #PLAYLEVEL(数値) */
 	private double mPlayLevel;
 	/** #RANK */
 	private BeMusicRank mRank;
+	/** #DEFEXRANK */
+	private Double mDefExRank;
 	/** #TOTAL */
 	private double mTotal;
 	/** #COMMENT */
@@ -123,6 +134,8 @@ public class BeMusicHeader {
 	private String mStageFile;
 	/** #BACKBMP */
 	private String mBackBmp;
+	/** #EYECATCH */
+	private String mEyecatch;
 	/** #PREVIEW */
 	private String mPreview;
 	/** #LNOBJ */
@@ -142,6 +155,8 @@ public class BeMusicHeader {
 	private Map<Integer, Double> mBpms;
 	/** #STOP */
 	private Map<Integer, Double> mStops;
+	/** #SCROLL */
+	private Map<Integer, Double> mScrolls;
 	/** #TEXT */
 	private Map<Integer, String> mTexts;
 
@@ -172,6 +187,7 @@ public class BeMusicHeader {
 	 * @see #BMP
 	 * @see #BPM
 	 * @see #STOP
+	 * @see #SCROLL
 	 * @see #TEXT
 	 * @see #NONE
 	 * @see #ALL
@@ -259,6 +275,14 @@ public class BeMusicHeader {
 	}
 
 	/**
+	 * #CHARTNAMEを取得します。
+	 * @return #CHARTNAMEの値
+	 */
+	public final String getChartName() {
+		return mChartName;
+	}
+
+	/**
 	 * #PLAYLEVELを取得します。
 	 * @return #PLAYLEVELの値
 	 */
@@ -281,6 +305,15 @@ public class BeMusicHeader {
 	 */
 	public final BeMusicRank getRank() {
 		return mRank;
+	}
+
+	/**
+	 * #DEFEXRANKを取得します。
+	 * <p>ヘッダに定義されていなかった場合、nullを返します。</p>
+	 * @return #DEFEXRANKの値、またはnull
+	 */
+	public final Double getDefExRank() {
+		return mDefExRank;
 	}
 
 	/**
@@ -321,6 +354,14 @@ public class BeMusicHeader {
 	 */
 	public final String getBackBmp() {
 		return mBackBmp;
+	}
+
+	/**
+	 * #EYECATCHを取得します。
+	 * @return #EYECATCHの値
+	 */
+	public final String getEyecatch() {
+		return mEyecatch;
 	}
 
 	/**
@@ -434,6 +475,24 @@ public class BeMusicHeader {
 	}
 
 	/**
+	 * #SCROLLを取得します。
+	 * @param metaIndex メタ情報インデックス
+	 * @return #SCROLLの値。インデックスに該当する値がない場合0。
+	 */
+	public final double getScroll(int metaIndex) {
+		var scroll = (mScrolls == null) ? null : mScrolls.get(BmsInt.box(metaIndex));
+		return (scroll == null) ? 0 : scroll.doubleValue();
+	}
+
+	/**
+	 * #SCROLLを全て取得します。
+	 * @return メタ情報インデックスでマップされた#SCROLLの値
+	 */
+	public final Map<Integer, Double> getScrolls() {
+		return mScrolls;
+	}
+
+	/**
 	 * #TEXTを取得します。
 	 * @param metaIndex メタ情報インデックス
 	 * @return #TEXTの値。インデックスに該当する値がない場合空文字。
@@ -465,14 +524,17 @@ public class BeMusicHeader {
 		mSubArtists = BeMusicMeta.getSubArtists(content);
 		mInitialBpm = content.getInitialBpm();
 		mDifficulty = BeMusicMeta.getDifficulty(content);
+		mChartName = BeMusicMeta.getChartName(content);
 		mPlayLevelRaw = BeMusicMeta.getPlayLevelRaw(content);
 		mPlayLevel = BeMusicMeta.getPlayLevel(content);
 		mRank = BeMusicMeta.getRank(content);
+		mDefExRank = content.containsSingleMeta(BeMusicMeta.DEFEXRANK.getName()) ? BeMusicMeta.getDefExRank(content) : null;
 		mComment = BeMusicMeta.getComment(content);
 		mTotal = BeMusicMeta.getTotal(content);
 		mBanner = BeMusicMeta.getBanner(content);
 		mStageFile = BeMusicMeta.getStageFile(content);
 		mBackBmp = BeMusicMeta.getBackBmp(content);
+		mEyecatch = BeMusicMeta.getEyecatch(content);
 		mPreview = BeMusicMeta.getPreview(content);
 		mLnObjs = BeMusicMeta.getLnObjs(content);
 		mLnMode = BeMusicMeta.getLnMode(content);
@@ -484,6 +546,7 @@ public class BeMusicHeader {
 		mBmps = ((flags & BMP) == 0) ? EMPTY_STRING_IMAP : BeMusicMeta.getBmps(content);
 		mBpms = ((flags & BPM) == 0) ? EMPTY_NUMERIC_IMAP : BeMusicMeta.getBpms(content);
 		mStops = ((flags & STOP) == 0) ? EMPTY_NUMERIC_IMAP : BeMusicMeta.getStops(content);
+		mScrolls = ((flags & SCROLL) == 0) ? Collections.emptyMap() : BeMusicMeta.getScrolls(content);
 		mTexts = ((flags & TEXT) == 0) ? EMPTY_STRING_IMAP : BeMusicMeta.getTexts(content);
 
 		// 拡張情報取得用処理を実行する

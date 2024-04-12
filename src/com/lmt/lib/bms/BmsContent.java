@@ -4,11 +4,11 @@ import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import com.lmt.lib.bms.internal.MutableDouble;
+import com.lmt.lib.bms.internal.Utility;
 
 /**
  * 1個のBMSデータを表すBMSライブラリのメインオブジェクトです。
@@ -46,9 +46,6 @@ import com.lmt.lib.bms.internal.MutableDouble;
  * 特定のアプリケーションに対して独自の解釈を指示したりする自由な記述として活用することが出来ます。アプリケーションには
  * BMS宣言を考慮する義務は無いため、BMSコンテンツの制作者は不特定多数のアプリケーションに何らかの振る舞いを期待する目的で
  * BMS宣言を活用するべきではありません。<br>
- * 唯一の例外は&quot;encoding&quot;要素です。この要素はBMSライブラリにおいて当該コンテンツの外部データへの入出力において、
- * 指定した文字セットでBMSコンテンツをエンコード・デコードすることを強制します。この要素はBMSライブラリが提唱する唯一の
- * 共通要素であり、BMSライブラリを利用する全てのアプリケーションに対して利用用途を強制します。</p>
  *
  * <p>BMS宣言の参照・編集には以下のAPIを利用します。</p>
  *
@@ -57,7 +54,6 @@ import com.lmt.lib.bms.internal.MutableDouble;
  * <li>BMS宣言を消去する：{@link #removeDeclaration(String)}</li>
  * <li>BMS宣言の存在確認：{@link #containsDeclaration(String)}</li>
  * <li>BMS宣言を取得する：{@link #getDeclaration(String)}, {@link #getDeclarations()}</li>
- * <li>BMS宣言に記述された文字セットを取得する：{@link #getEncoding()}</li>
  * </ul>
  *
  * <p><b>メタ情報</b><br>
@@ -166,6 +162,13 @@ import com.lmt.lib.bms.internal.MutableDouble;
  * アクセスした場合には、ドキュメントに記載の動作内容およびその後の動作の整合性を保証対象外としています。
  * 複数のスレッドから単一のオブジェクトを操作する予定がある場合には、個々のアプリケーションの責任でマルチスレッド対策を
  * 行うようにしてください。</p>
+ *
+ * <p><strong>データサイズについて</strong><br>
+ * BMSコンテンツは複数の要素から成る多くのデータ同士が複雑にリンクして構成されています。
+ * 楽曲の長さ・構成内容によっては数万～数十万オブジェクトが生成され、BMSコンテンツのサイズが数MBから数十MBになる可能性があります。
+ * また、BMSコンテンツを扱うアプリケーションの特性上、同時に複数の画像や音声データがメモリ上に展開されることが予想されます。
+ * そのため、複数のBMSコンテンツをメモリ上に展開することはアプリケーションの省メモリ設計の観点から推奨されません。
+ * BMSコンテンツから必要な情報を取り出した後は速やかにオブジェクトを破棄してください。</p>
  */
 public class BmsContent {
 	/** BMS宣言のキー名書式の正規表現パターン */
@@ -202,11 +205,10 @@ public class BmsContent {
 
 		/** {@inheritDoc} */
 		@Override
-		protected void recalculateTimeInfo(Object userParam,
-				MutableDouble outBaseTime, MutableDouble outLengthSec, MutableDouble outBeginBpm, MutableDouble outEndBpm) {
+		protected MeasureTimeInfo onRecalculateTimeInfo(Object userParam) {
 			// 小節に対して時間・BPMの情報を反映する
 			var tla = (TimelineAccessor)userParam;
-			tla.calculateMeasureTimeInfo(getMeasure(), getTickCount(), outBaseTime, outLengthSec, outBeginBpm, outEndBpm);
+			return tla.calculateMeasureTimeInfo(getMeasure(), getTickCount());
 		}
 	}
 
@@ -219,15 +221,6 @@ public class BmsContent {
 	 * このクラスを介して行うこと。</p>
 	 */
 	private class TimelineAccessor {
-		/** calculateMeasureTimeInfo()用：小節の基準時間(sec) */
-		MutableDouble mTempBaseTime = new MutableDouble();
-		/** calculateMeasureTimeInfo()用：小節の先頭からtickCalcToまでの時間(sec) */
-		MutableDouble mTempLengthSec = new MutableDouble();
-		/** calculateMeasureTimeInfo()用：小節開始時のBPM */
-		MutableDouble mTempBeginBpm = new MutableDouble();
-		/** calculateMeasureTimeInfo()用：小節終了時のBPM */
-		MutableDouble mTempEndBpm = new MutableDouble();
-
 		/**
 		 * 指定チャンネル番号・小節番号に存在するチャンネルデータの件数を取得する。
 		 * @param channel チャンネル番号
@@ -333,8 +326,7 @@ public class BmsContent {
 		 * @exception IllegalArgumentException 小節番号がBMS仕様の許容範囲外
 		 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
 		 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
-		 * @exception IllegalArgumentException 16進配列チャンネル指定時、ノートの値に{@link BmsSpec#VALUE_16_MIN}未満、{@link BmsSpec#VALUE_16_MAX}超過の値を指定した
-		 * @exception IllegalArgumentException 36進配列チャンネル指定時、ノートの値に{@link BmsSpec#VALUE_MIN}未満、{@link BmsSpec#VALUE_MAX}超過の値を指定した
+		 * @exception IllegalArgumentException ノートの値に0を指定した
 		 * @exception NullPointerException createNoteがnull
 		 * @exception IllegalArgumentException createNoteの結果がnull
 		 */
@@ -345,9 +337,8 @@ public class BmsContent {
 			assertIsEditMode();
 			assertChannelIndex(channel, index);
 			assertPointAllowOverMeasureCount(measure, tick);
-			var ch = mSpec.getChannel(channel);
 			assertChannelArrayType(channel);
-			assertValue(ch.getType(), value);
+			assertValue(value);
 			assertArgNotNull(createNote, "createNote");
 
 			// Creatorを使用して登録対象のNoteオブジェクトを生成する
@@ -1019,7 +1010,7 @@ public class BmsContent {
 			if (mTl.isMeasureEmptyNotes(measure)) {
 				if (actualTickCount >= 1.0) {
 					// 通常の長さの小節の場合
-					var tick = calculateTick(pointTime, measureElem.getBeginBpm());
+					var tick = Utility.computeTick(pointTime, measureElem.getBeginBpm());
 					outPoint.set(measure, tick);
 					return outPoint;
 				} else {
@@ -1050,10 +1041,10 @@ public class BmsContent {
 				// 時間計算処理
 				if ((nextBpmTick <= nextStopTick) && (nextBpmNote != null)) {
 					// BPM変更を検出した場合は、現在位置からBPM変更位置までを現在BPMで時間計算する
-					areaTime = calculateTime(nextBpmTick - currentTick, currentBpm);
+					areaTime = Utility.computeTime(nextBpmTick - currentTick, currentBpm);
 					if ((pointTime >= currentTime) && (pointTime < (currentTime + areaTime))) {
 						// 指定位置までの刻み数を計算する
-						tickCur2Pt = calculateTick(pointTime - currentTime, currentBpm);
+						tickCur2Pt = Utility.computeTick(pointTime - currentTime, currentBpm);
 						break;
 					} else {
 						// BPMの現在値を更新する
@@ -1064,10 +1055,10 @@ public class BmsContent {
 					// 同じ位置に譜面停止が存在する場合は、更新後のBPMで譜面停止分の時間を計算する
 					if ((nextBpmTick == nextStopTick) && (nextStopNote != null)) {
 						var stopTick = mMetas.getIndexedMetaStop(nextStopNote, 0);
-						areaTime = calculateTime(stopTick, currentBpm);
+						areaTime = Utility.computeTime(stopTick, currentBpm);
 						if ((pointTime >= currentTime) && (pointTime < (currentTime + areaTime))) {
 							// 指定位置までの刻み数を計算する
-							tickCur2Pt = calculateTick(pointTime - currentTime, currentBpm);
+							tickCur2Pt = Utility.computeTick(pointTime - currentTime, currentBpm);
 							break;
 						} else {
 							currentTime += areaTime;
@@ -1078,10 +1069,10 @@ public class BmsContent {
 					currentTick = nextBpmTick;
 				} else if (nextStopNote != null) {
 					// 譜面停止を検出した場合は、現在位置から譜面停止位置までを現在BPMで時間計算する
-					areaTime = calculateTime(nextStopTick - currentTick, currentBpm);
+					areaTime = Utility.computeTime(nextStopTick - currentTick, currentBpm);
 					if ((pointTime >= currentTime) && (pointTime < (currentTime + areaTime))) {
 						// 指定位置までの刻み数を計算する
-						tickCur2Pt = calculateTick(pointTime - currentTime, currentBpm);
+						tickCur2Pt = Utility.computeTick(pointTime - currentTime, currentBpm);
 						break;
 					} else {
 						currentTime += areaTime;
@@ -1089,10 +1080,10 @@ public class BmsContent {
 
 					// 譜面停止分の時間を現在BPMで計算する
 					var stopTick = mMetas.getIndexedMetaStop(nextStopNote, 0);
-					areaTime = calculateTime(stopTick, currentBpm);
+					areaTime = Utility.computeTime(stopTick, currentBpm);
 					if ((pointTime >= currentTime) && (pointTime < (currentTime + areaTime))) {
 						// 指定位置までの刻み数を計算する
-						tickCur2Pt = calculateTick(pointTime - currentTime, currentBpm);
+						tickCur2Pt = Utility.computeTick(pointTime - currentTime, currentBpm);
 						break;
 					} else {
 						currentTime += areaTime;
@@ -1102,12 +1093,12 @@ public class BmsContent {
 					currentTick = nextStopTick;
 				} else {
 					// 現在位置からBPM変更・譜面停止のいずれも見つからなかった場合は、現在位置から小節の最後まで時間計算する
-					areaTime = calculateTime(actualTickCount - currentTick, currentBpm);
+					areaTime = Utility.computeTime(actualTickCount - currentTick, currentBpm);
 					if ((pointTime >= currentTime) && (pointTime < (currentTime + areaTime))) {
 						// 指定位置までの刻み数を計算する
 						if (actualTickCount >= 1.0) {
 							// 通常の長さの小節の場合
-							tickCur2Pt = calculateTick(pointTime - currentTime, currentBpm);
+							tickCur2Pt = Utility.computeTick(pointTime - currentTime, currentBpm);
 						} else {
 							// 計算上の刻み数が1を下回る極小小節の場合
 							tickCur2Pt = pointTime / measureElem.getLength();
@@ -1158,8 +1149,7 @@ public class BmsContent {
 			}
 
 			// 小節・刻み位置から時間への変換を行う
-			calculateMeasureTimeInfo(point.getMeasure(), point.getTick(), mTempBaseTime, mTempLengthSec, mTempBeginBpm, mTempEndBpm);
-			return mTempBaseTime.get() + mTempLengthSec.get();
+			return mTl.getMeasureData(point.getMeasure()).computeTime(point.getTick());
 		}
 
 		/**
@@ -1200,18 +1190,14 @@ public class BmsContent {
 		}
 
 		/**
-		 * 指定小節の基準時間(sec)、小節時間(sec)、開始時BPM、終了時BPMを算出する。
+		 * 指定小節の基準時間(sec)、小節時間(sec)、開始時BPM、終了時BPM、楽曲位置ごとの時間関連情報を算出する。
 		 * <p>このメソッドでは当該小節の諸々の情報を計算するにあたり、指定小節の1つ前の小節の情報を参照するため、
 		 * 前の小節の情報は予め計算しておくこと。</p>
 		 * @param measure 小節番号
 		 * @param tickCalcTo どの刻み位置までの時間を計算するか(この位置は含まない)
-		 * @param outBaseTime 小節の基準時間(sec)
-		 * @param outLengthSec 小節の先頭からtickCalcToまでの時間(sec)
-		 * @param outBeginBpm 小節開始時のBPM
-		 * @param outEndBpm 小節終了時のBPM
+		 * @return 小節が保有する時間関連情報
 		 */
-		void calculateMeasureTimeInfo(int measure, double tickCalcTo,
-				MutableDouble outBaseTime, MutableDouble outLengthSec, MutableDouble outBeginBpm, MutableDouble outEndBpm) {
+		MeasureTimeInfo calculateMeasureTimeInfo(int measure, double tickCalcTo) {
 			// 指定小節における基準時間、初期BPMを決定する
 			var baseTimeSec = 0.0;
 			var currentBpm = 0.0;
@@ -1234,14 +1220,15 @@ public class BmsContent {
 			}
 
 			// データの無い小節では単純に小節の長さと小節開始時のBPMから時間を算出する
+			var timeInfo = new MeasureTimeInfo();
 			var tickCount = BmsSpec.computeTickCount(lengthRatio, true);
 			var actualTickCount = BmsSpec.computeTickCount(lengthRatio, false);
 			if (mTl.isMeasureEmptyNotes(measure)) {
-				outBaseTime.set(baseTimeSec);
-				outLengthSec.set(calculateTime(Math.min(tickCalcTo, actualTickCount), currentBpm));
-				outBeginBpm.set(currentBpm);
-				outEndBpm.set(currentBpm);
-				return;
+				timeInfo.baseTime = baseTimeSec;
+				timeInfo.length = Utility.computeTime(Math.min(tickCalcTo, actualTickCount), currentBpm);
+				timeInfo.beginBpm = currentBpm;
+				timeInfo.endBpm = currentBpm;
+				return timeInfo;
 			}
 
 			// 譜面データから具体的な時間を計算する
@@ -1264,31 +1251,44 @@ public class BmsContent {
 				// 時間計算処理
 				if ((nextBpmTick <= nextStopTick) && (nextBpmNote != null) && (nextBpmTick < tickEnd)) {
 					// BPM変更を検出した場合は、現在位置からBPM変更位置までを現在BPMで時間計算する
-					totalTime += calculateTime(nextBpmTick - currentTick, currentBpm);
+					totalTime += Utility.computeTime(nextBpmTick - currentTick, currentBpm);
 					currentBpm = mMetas.getIndexedMetaBpm(nextBpmNote, currentBpm);
+					var nodeActualTime = baseTimeSec + totalTime;
+					var nodeCurrentBpm = currentBpm;
 
 					// 同じ位置に譜面停止が存在する場合は、更新後のBPMで譜面停止分の時間を計算する
+					var nodeStopTime = 0.0;
 					if ((nextBpmTick == nextStopTick) && (nextStopNote != null)) {
 						var stopTick = mMetas.getIndexedMetaStop(nextStopNote, 0);
-						totalTime += calculateTime(stopTick, currentBpm);
+						nodeStopTime = Utility.computeTime(stopTick, currentBpm);
+						totalTime += nodeStopTime;
 					}
+
+					// BPM変更位置の時間情報を登録する
+					timeInfo.addTimeNode(nextBpmTick, nodeActualTime, nodeCurrentBpm, nodeStopTime);
 
 					// 現在位置を更新する
 					currentTick = nextBpmTick;
 				} else if ((nextStopNote != null) && (nextStopTick < tickEnd)) {
 					// 譜面停止を検出した場合は、現在位置から譜面停止位置までを現在BPMで時間計算する
 					// 但し、刻み位置が走査停止位置と同じ以上の場合はこの限りではない
-					totalTime += calculateTime(nextStopTick - currentTick, currentBpm);
+					totalTime += Utility.computeTime(nextStopTick - currentTick, currentBpm);
+					var nodeActualTime = baseTimeSec + totalTime;
+					var nodeCurrentBpm = currentBpm;
 
 					// 譜面停止分の時間を現在BPMで計算する
 					var stopTick = mMetas.getIndexedMetaStop(nextStopNote, 0);
-					totalTime += calculateTime(stopTick, currentBpm);
+					var nodeStopTime = Utility.computeTime(stopTick, currentBpm);
+					totalTime += nodeStopTime;
+
+					// 譜面停止位置の時間情報を登録する
+					timeInfo.addTimeNode(nextStopTick, nodeActualTime, nodeCurrentBpm, nodeStopTime);
 
 					// 現在位置を更新する
 					currentTick = nextStopTick;
 				} else {
 					// 現在位置からBPM変更・譜面停止のいずれも見つからなかった場合は、現在位置から計算位置まで時間計算する
-					totalTime += calculateTime(actualTickEnd - currentTick, currentBpm);
+					totalTime += Utility.computeTime(actualTickEnd - currentTick, currentBpm);
 					currentTick = tickEnd;
 				}
 
@@ -1297,44 +1297,11 @@ public class BmsContent {
 			}
 
 			// 計算結果を出力する
-			outBaseTime.set(baseTimeSec);
-			outLengthSec.set(totalTime);
-			outBeginBpm.set(beginBpm);
-			outEndBpm.set(currentBpm);
-		}
-
-		/**
-		 * 指定BPMの時、指定刻みだけ進行するのに必要になる時間(sec)を計算する。
-		 * @param tick 刻み数
-		 * @param bpm BPM
-		 * @return 計算結果
-		 */
-		private double calculateTime(double tick, double bpm) {
-			return 1.25 * tick / bpm;
-
-			// 計算式の解説
-			// time(sec) = 1.25 * tick / bpm  ※bpm > 0
-			// bpm = (1.25 * tick) / time(sec)
-		}
-
-		/**
-		 * 指定BPMの時、指定時間(sec)進行した際の刻み数を計算する。(無段階の値として返す)
-		 * @param timeSec 時間(sec)
-		 * @param bpm BPM
-		 * @return 計算結果
-		 */
-		private double calculateTick(double timeSec, double bpm) {
-			// 注意！：bpm > 0
-			// 間違い：return timeSec * (1.0 / 48.0) * (60.0 / bpm);  // time(sc), bpmからtickへ変換
-			return 0.8 * timeSec * bpm;
-
-			// 計算式の解説
-			// time = (tick / 48) * (60 / bpm)
-			// time = (60 * tick) / (48 * bpm)
-			// time = (5 * tick) / (4 * bpm)
-			// (5 * tick) = time * (4 * bpm)
-			// tick = (4 * time * bpm) / 5
-			// tick = 0.8 * time * bpm ★
+			timeInfo.baseTime = baseTimeSec;
+			timeInfo.length = totalTime;
+			timeInfo.beginBpm = beginBpm;
+			timeInfo.endBpm = currentBpm;
+			return timeInfo;
 		}
 
 		/**
@@ -1685,12 +1652,12 @@ public class BmsContent {
 			var metaMap = mIndexedMetas.get(name);
 			if (value == null) {
 				// 削除
-				metaMap.remove(index);
+				metaMap.remove(BmsInt.box(index));
 			} else {
 				// 追加
 				var castedValue = meta.getType().cast(value);
 				assertValueWithinSpec(meta, index, castedValue);
-				metaMap.put(index, castedValue);
+				metaMap.put(BmsInt.box(index), castedValue);
 			}
 
 			// BPMまたはSTOPのデータ更新を行った場合は譜面全体を時間再計算対象とする
@@ -1788,7 +1755,7 @@ public class BmsContent {
 			// メタ情報を取得する
 			var meta = assertMetaSpec(name, BmsUnit.INDEXED);
 			var valueMap = mIndexedMetas.get(name);
-			var value = valueMap.get(index);
+			var value = valueMap.get(BmsInt.box(index));
 			return (value == null) ? meta.getDefaultValue() : value;
 		}
 
@@ -2007,7 +1974,7 @@ public class BmsContent {
 			assertArgMetaName(name);
 			assertMetaSpec(name, BmsUnit.INDEXED);
 			assertArgIndexedMetaIndex(index);
-			return mIndexedMetas.get(name).containsKey(index);
+			return mIndexedMetas.get(name).containsKey(BmsInt.box(index));
 		}
 
 		/**
@@ -2376,31 +2343,6 @@ public class BmsContent {
 			decls.put(mBmsDeclKeys.get(i), mBmsDeclValues.get(i));
 		}
 		return decls;
-	}
-
-	/**
-	 * BMSコンテンツをBMSフォーマットとして入出力する際の文字セットを取得します。
-	 * <p>文字セットはBMS宣言の&quot;encoding&quot;に指定します。</p>
-	 * <p>文字セットの指定がない場合は{@link BmsSpec#getStandardCharset}で返される文字セットを返します。</p>
-	 * <p>&quot;encoding&quot;に認識できない文字セット名を指定して本メソッドを呼び出すとIllegalStateExceptionをスローします。</p>
-	 * @return 文字セット
-	 * @exception IllegalStateException BMS宣言の&quot;encoding&quot;に認識できない文字セット名を指定している
-	 */
-	public final Charset getEncoding() {
-		var encoding = getDeclaration("encoding");
-		if (encoding != null) {
-			// encoding有り
-			try {
-				// encodingに指定の文字コードで文字セットを取得しようとする
-				return Charset.forName(encoding);
-			} catch (Exception e) {
-				// 指定文字セットが使えない
-				throw new IllegalStateException(String.format("%s: Unrecognized charset name.", encoding), e);
-			}
-		} else {
-			// encoding無しの場合は標準文字セットを使用する
-			return BmsSpec.getStandardCharset();
-		}
 	}
 
 	/**
@@ -3580,10 +3522,12 @@ public class BmsContent {
 	 * @return ノートのリスト
 	 */
 	public final List<BmsNote> listNotes(BmsNote.Tester isCollect) {
-		return mTlAccessor.listNotes(
+		assertArgNotNull(isCollect, "isCollect");
+		var measureCount = mTlAccessor.getCount();
+		return (measureCount == 0) ? Collections.emptyList() : mTlAccessor.listNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX + 1,
 				0, 0,
-				mTlAccessor.getCount(), 0,
+				measureCount, 0,
 				isCollect);
 	}
 
@@ -3716,10 +3660,12 @@ public class BmsContent {
 	 * @return 条件に一致したノートの数
 	 */
 	public final int countNotes(BmsNote.Tester isCounting) {
-		return mTlAccessor.countNotes(
+		assertArgNotNull(isCounting, "isCounting");
+		var measureCount = mTlAccessor.getCount();
+		return (measureCount == 0) ? 0 : mTlAccessor.countNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
 				0, 0,
-				mTlAccessor.getCount(), 0,
+				measureCount, 0,
 				isCounting);
 	}
 
@@ -3852,6 +3798,7 @@ public class BmsContent {
 	 * @param tick 小節の刻み位置
 	 * @param value ノートの値
 	 * @return 譜面に追加された新しいノートオブジェクト
+	 * @see #putNote(int, int, int, double, int, BmsNote.Creator)
 	 */
 	public final BmsNote putNote(int channel, int measure, double tick, int value) {
 		return mTlAccessor.putNote(channel, 0, measure, tick, value, BmsNote.DEFAULT_CREATOR);
@@ -3867,6 +3814,7 @@ public class BmsContent {
 	 * @param at 楽曲位置
 	 * @param value ノートの値
 	 * @return 譜面に追加された新しいノートオブジェクト
+	 * @see #putNote(int, int, int, double, int, BmsNote.Creator)
 	 */
 	public final BmsNote putNote(int channel, BmsAt at, int value) {
 		return mTlAccessor.putNote(channel, 0, at.getMeasure(), at.getTick(), value, BmsNote.DEFAULT_CREATOR);
@@ -3882,6 +3830,7 @@ public class BmsContent {
 	 * @param tick 小節の刻み位置
 	 * @param value ノートの値
 	 * @return 譜面に追加された新しいノートオブジェクト
+	 * @see #putNote(int, int, int, double, int, BmsNote.Creator)
 	 */
 	public final BmsNote putNote(int channel, int index, int measure, double tick, int value) {
 		return mTlAccessor.putNote(channel, index, measure, tick, value, BmsNote.DEFAULT_CREATOR);
@@ -3897,6 +3846,7 @@ public class BmsContent {
 	 * @param at 楽曲位置
 	 * @param value ノートの値
 	 * @return 譜面に追加された新しいノートオブジェクト
+	 * @see #putNote(int, int, int, double, int, BmsNote.Creator)
 	 */
 	public final BmsNote putNote(int channel, int index, BmsAt at, int value) {
 		return mTlAccessor.putNote(channel, index, at.getMeasure(), at.getTick(), value, BmsNote.DEFAULT_CREATOR);
@@ -3913,6 +3863,7 @@ public class BmsContent {
 	 * @param value ノートの値
 	 * @param createNote ノートオブジェクトを生成するサプライヤ
 	 * @return 譜面に追加された新しいノートオブジェクト
+	 * @see #putNote(int, int, int, double, int, BmsNote.Creator)
 	 */
 	public final <T extends BmsNote> T putNote(int channel, int measure, double tick, int value, BmsNote.Creator createNote) {
 		return mTlAccessor.putNote(channel, 0, measure, tick, value, createNote);
@@ -3929,6 +3880,7 @@ public class BmsContent {
 	 * @param value ノートの値
 	 * @param createNote ノートオブジェクトを生成するサプライヤ
 	 * @return 譜面に追加された新しいノートオブジェクト
+	 * @see #putNote(int, int, int, double, int, BmsNote.Creator)
 	 */
 	public final <T extends BmsNote> T putNote(int channel, BmsAt at, int value, BmsNote.Creator createNote) {
 		return mTlAccessor.putNote(channel, 0, at.getMeasure(), at.getTick(), value, createNote);
@@ -3945,6 +3897,7 @@ public class BmsContent {
 	 * @param value ノートの値
 	 * @param createNote ノートオブジェクトを生成するサプライヤ
 	 * @return 譜面に追加された新しいノートオブジェクト
+	 * @see #putNote(int, int, int, double, int, BmsNote.Creator)
 	 */
 	public final <T extends BmsNote> T putNote(int channel, int index, BmsAt at, int value, BmsNote.Creator createNote) {
 		return mTlAccessor.putNote(channel, index, at.getMeasure(), at.getTick(), value, createNote);
@@ -3959,8 +3912,15 @@ public class BmsContent {
 	 * <p>ノートに拡張データを持たせる場合は、createNoteサプライヤからBmsNoteを継承したオブジェクトを返し、
 	 * そのオブジェクトに対して拡張データを設定してください。オブジェクトのインスタンスはBMSコンテンツ内部でも
 	 * 管理されるようになります。</p>
-	 * <p>ノートの値に設定可能な値の範囲は16進配列の場合は1～255、36進配列の場合は1～1295になります。</p>
-	 * <p>ノートの値に0を指定することは出来ません。値0は「ノートとして存在しない」ことを示す特殊な値として扱われます。
+	 * <p>ノートに設定可能な値の範囲は{@link BmsSpec#VALUE_MIN}～{@link BmsSpec#VALUE_MAX}になります。
+	 * これは、チャンネルのデータ型が{@link BmsType#ARRAY16}・{@link BmsType#ARRAY36}のどちらであっても同様です。
+	 * ただし、それぞれのデータ型で以下の範囲外の値を持つノートが1個でも存在すると、
+	 * BMSコンテンツを標準フォーマットで出力できなくなります。</p>
+	 * <ul>
+	 * <li>{@link BmsType#ARRAY16}の場合: {@link BmsSpec#VALUE_16_MIN}～{@link BmsSpec#VALUE_16_MAX}</li>
+	 * <li>{@link BmsType#ARRAY36}の場合: {@link BmsSpec#VALUE_36_MIN}～{@link BmsSpec#VALUE_36_MAX}</li>
+	 * </ul>
+	 * <p>また、ノートの値に0を指定することはできません。値0は「ノートとして存在しない」ことを示す特殊な値として扱われます。
 	 * そのためBMSライブラリでは、明確に存在するノートに対して値0を設定することを許可していません。</p>
 	 * @param <T> 追加するノートのデータ型
 	 * @param channel チャンネル番号
@@ -3977,8 +3937,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
 	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
 	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
-	 * @exception IllegalArgumentException 16進配列チャンネル指定時、ノートの値に{@link BmsSpec#VALUE_16_MIN}未満、{@link BmsSpec#VALUE_16_MAX}超過の値を指定した
-	 * @exception IllegalArgumentException 36進配列チャンネル指定時、ノートの値に{@link BmsSpec#VALUE_MIN}未満、{@link BmsSpec#VALUE_MAX}超過の値を指定した
+	 * @exception IllegalArgumentException ノートの値に0を指定した
 	 * @exception NullPointerException createNoteがnull
 	 * @exception IllegalArgumentException createNoteの結果がnull
 	 */

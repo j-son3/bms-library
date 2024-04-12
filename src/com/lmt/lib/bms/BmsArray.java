@@ -51,10 +51,14 @@ public final class BmsArray extends AbstractList<Integer> {
 	 * 基数16で0～255、基数36で0～1295です。</p>
 	 * <p>入力元データの空白文字など、認識不可能な文字をトリミングする機能はありません。
 	 * それらの文字は予め除去したうえでこのコンストラクタを呼び出してください。</p>
+	 * <p>入力元データの文字数が奇数の場合、最後の文字が"0"である場合に限り、最後の要素を"00"と見なして解析します。
+	 * このケースは構文エラーに対する特別な救済措置であり、本来であればエラーとして処理されるべき内容です。
+	 * 救済措置は通常では不要なデータ編集などの余分な処理が行われパフォーマンスが低下しますので、
+	 * 構文誤りのデータを入力しないよう注意してください。</p>
 	 * @param src 入力元データ
 	 * @param radix 入力元データの基数(16,36のみサポートしています)
 	 * @exception NullPointerException srcがnull
-	 * @exception IllegalArgumentException srcの文字数が2で割り切れない
+	 * @exception IllegalArgumentException srcの文字数が2で割り切れず、最後の文字が"0"ではない
 	 * @exception IllegalArgumentException srcに解析不可能な文字が含まれる
 	 * @exception IllegalArgumentException radixが16,36以外
 	 */
@@ -81,11 +85,21 @@ public final class BmsArray extends AbstractList<Integer> {
 	 * @param radix 基数
 	 * @param src 変換元文字列
 	 * @exception NullPointerException srcがnullの場合
-	 * @exception IllegalArgumentException radixが16,36以外、srcの文字数が2で割り切れない、またはsrcに解析不可能な文字が含まれる場合
+	 * @exception IllegalArgumentException radixが16,36以外
+	 * @exception IllegalArgumentException srcの文字数が2で割り切れず、最後の文字が"0"ではない
+	 * @exception IllegalArgumentException srcに解析不可能な文字が含まれている
 	 */
 	private void setup(int radix, String src) {
 		assertArgNotNull(src, "src");
-		assertArg((src.length() % 2) == 0, "Argument 'src' length is wrong. src='%s'", src);
+
+		// 入力配列が奇数文字数の場合、最後の文字が"0"である場合に限り最後の要素を"00"と見なす
+		// 手打ち編集しているBMSに奇数文字数のミスが散見されるため、仕様違反ではあるがこれを救済措置とする
+		var length = src.length();
+		if ((length & 0x01) != 0) {
+			assertArg(src.endsWith("0"), "Argument 'src' length is wrong. src='%s'", src);
+			src = new StringBuilder(length + 1).append(src).append('0').toString();
+		}
+
 		if (radix == 16) {
 			mFnStoA = FN_S16TOA;
 			mFnAtoS = FN_ATOS16;

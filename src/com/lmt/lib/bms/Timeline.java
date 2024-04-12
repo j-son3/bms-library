@@ -657,7 +657,11 @@ class Timeline<E extends MeasureElement> {
 		var oldMeasureCount = getMeasureCount();
 
 		// 全体ノートリストへ追加する(既存ノートであれば上書き)
-		mNotes.add(note);
+		if (!mNotes.add(note)) {
+			// 既存ノートが存在する場合は一旦既存ノートを明示的に消去する必要がある
+			removeNote(note.getChannel(), note.getIndex(), note.getMeasure(), note.getTick());
+			mNotes.add(note);
+		}
 
 		// チャンネルごとのノートリストへ追加する
 		var chx = BmsInt.box(BmsChx.toInt(note));

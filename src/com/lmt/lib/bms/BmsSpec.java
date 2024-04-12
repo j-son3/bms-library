@@ -23,7 +23,6 @@ import java.util.function.Predicate;
  * - メタ情報。BMSの記述のうち&quot;#&quot;または&quot;%&quot;で始まる情報のことであり、{@link BmsMeta}クラスで表現されます。<br>
  * - チャンネル。BMSの記述のうち小節番号＋チャンネル番号＋&quot;:&quot;で始まる情報のことであり、{@link BmsChannel}クラスで表現されます。<br>
  * - BMSデータにおける最小値・最大値・初期値等の情報。これらの情報はBMSライブラリの規定値であり変更できません。<br>
- * - BMSライブラリで使用する標準の文字セット。{@link #setStandardCharset}で変更できます。
  * </p>
  *
  * <p>BMS仕様を生成するには{@link BmsSpecBuilder}を使用します。ビルダーに対してメタ情報、チャンネル等の情報を
@@ -79,7 +78,7 @@ public final class BmsSpec {
 	/** 重複可能メタ情報へのアクセスで使用可能な最大のインデックス値を表します。 */
 	public static final int MULTIPLE_META_INDEX_MAX = Short.MAX_VALUE;
 	/** 索引付きメタ情報へのアクセスで使用可能な最大のインデックス値を表します。 */
-	public static final int INDEXED_META_INDEX_MAX = 1295;
+	public static final int INDEXED_META_INDEX_MAX = 65535;
 
 	/** BMSライブラリで取り扱い可能な最小の譜面停止時間を表します。 */
 	public static final double STOP_MIN = 0.0;
@@ -118,7 +117,7 @@ public final class BmsSpec {
 	/** 最小の小節番号。 */
 	public static final int MEASURE_MIN = 0;
 	/** 最大の小節番号。 */
-	public static final int MEASURE_MAX = 999;
+	public static final int MEASURE_MAX = 65535;
 	/** BMSライブラリでサポートする小節数の上限を表します。 */
 	public static final int MEASURE_MAX_COUNT = MEASURE_MAX + 1;
 
@@ -129,21 +128,20 @@ public final class BmsSpec {
 	/** 小節の刻み数のデフォルト値。 */
 	public static final int TICK_COUNT_DEFAULT = 192;
 
-	/** ノートに設定可能な最小の値(16進配列型の場合)を表します。 */
+	/** 16進配列から読み込み可能な最小の値を表します。 */
 	public static final int VALUE_16_MIN = 1;
-	/** ノートに設定可能な最大の値(16進配列型の場合)を表します。 */
+	/** 16進配列から読み込み可能な最大の値を表します。 */
 	public static final int VALUE_16_MAX = 255;
 
-	/** ノートに設定可能な最小の値(36進配列型の場合)を表します。 */
-	public static final int VALUE_MIN = 1;
-	/** ノートに設定可能な最大の値(36進配列型の場合)を表します。 */
-	public static final int VALUE_MAX = 1295;
+	/** 36進配列から読み込み可能な最小の値を表します。 */
+	public static final int VALUE_36_MIN = 1;
+	/** 36進配列から読み込み可能な最大の値を表します。 */
+	public static final int VALUE_36_MAX = 1295;
 
-	/**
-	 * 標準文字セット(初期値はShift-JISで、状況に応じて変更可能)。
-	 * Shift-JISにしたいところだが、"～"が化けてしまうためMS932とする。
-	 */
-	private static Charset sStandardCharset = Charset.forName("MS932");
+	/** ノートに設定可能な最小の値を表します。 */
+	public static final int VALUE_MIN = Integer.MIN_VALUE;
+	/** ノートに設定可能な最大の値を表します。 */
+	public static final int VALUE_MAX = Integer.MAX_VALUE;
 
 	/** 単体メタ情報一式 */
 	private Map<String, BmsMeta> mSingleMetas;
@@ -541,23 +539,52 @@ public final class BmsSpec {
 	 * <p>BMSライブラリでは、デフォルトの文字セットをShift-JISとして設定しています。これはBMSライブラリが主に
 	 * 日本で使用されることを想定しているためであり、日本国外向けのアプリケーションを開発する場合はこのメソッドを
 	 * 呼び出して文字セットを変更してください。</p>
-	 * <p>この設定が使用されるのはBMSを読み込む時です。BMSライブラリがサポートする「BMS宣言」に文字セットの
-	 * 明示的な指定がない場合には、このメソッドで設定した文字セットを使用してBMS定義のデコードを試みます。
-	 * 読み込もうとするBMSをエンコードした文字セットと標準文字セットが一致しない場合、文字化けが発生します。</p>
+	 * <p>この設定が使用されるのはBMSを読み込み、書き込み時です。</p>
 	 * @param cs 標準に設定する文字セット
 	 * @exception NullPointerException csがnull
+	 * @deprecated 当メソッドは非推奨となりました。代わりに{@link BmsLibrary#setDefaultCharsets(Charset...)}
+	 * を使用してください。それにより、ライブラリで扱う文字セットを優先順に複数扱うことができます。
 	 */
+	@Deprecated(since = "0.7.0")
 	public static void setStandardCharset(Charset cs) {
-		assertArgNotNull(cs, "cs");
-		sStandardCharset = cs;
+		BmsLibrary.setDefaultCharsets(cs);
 	}
 
 	/**
 	 * BMSライブラリが扱う標準文字セットを取得します。
 	 * @return 標準文字セット
+	 * @deprecated 当メソッドは非推奨となりました。代わりに{@link BmsLibrary#getPrimaryCharset()}を使用してください。
 	 */
+	@Deprecated(since = "0.7.0")
 	public static Charset getStandardCharset() {
-		return sStandardCharset;
+		return BmsLibrary.getPrimaryCharset();
+	}
+
+	/**
+	 * 小節番号の下限値超過判定
+	 * @param measure 小節番号
+	 * @return 下限値を超過していた場合true
+	 */
+	static boolean isMeasureUnderflow(int measure) {
+		return measure < MEASURE_MIN;
+	}
+
+	/**
+	 * 小節番号の上限値超過判定
+	 * @param measure 小節番号
+	 * @return 上限値を超過していた場合true
+	 */
+	static boolean isMeasureOverflow(int measure) {
+		return measure > MEASURE_MAX;
+	}
+
+	/**
+	 * 小節番号の有効範囲内判定
+	 * @param measure 小節番号
+	 * @return 有効範囲内の場合true
+	 */
+	static boolean isMeasureWithinRange(int measure) {
+		return !isMeasureUnderflow(measure) && !isMeasureOverflow(measure);
 	}
 
 	/**
@@ -679,6 +706,60 @@ public final class BmsSpec {
 	}
 
 	/**
+	 * ノートの値の16進配列要素下限値超過判定
+	 * @param noteValue ノートの値
+	 * @return 下限値を超過していた場合true
+	 */
+	static boolean isNoteValue16Underflow(int noteValue) {
+		return noteValue < VALUE_16_MIN;
+	}
+
+	/**
+	 * ノートの値の16進配列要素上限値超過判定
+	 * @param noteValue ノートの値
+	 * @return 上限値を超過していた場合true
+	 */
+	static boolean isNoteValue16Overflow(int noteValue) {
+		return noteValue > VALUE_16_MAX;
+	}
+
+	/**
+	 * ノートの値の16進配列要素範囲内判定
+	 * @param noteValue ノートの値
+	 * @return 範囲内の場合true
+	 */
+	static boolean isNoteValue16WithinRange(int noteValue) {
+		return !isNoteValue16Underflow(noteValue) && !isNoteValue16Overflow(noteValue);
+	}
+
+	/**
+	 * ノートの値の36進配列要素下限値超過判定
+	 * @param noteValue ノートの値
+	 * @return 下限値を超過していた場合true
+	 */
+	static boolean isNoteValue36Underflow(int noteValue) {
+		return noteValue < VALUE_36_MIN;
+	}
+
+	/**
+	 * ノートの値の36進配列要素上限値超過判定
+	 * @param noteValue ノートの値
+	 * @return 上限値を超過していた場合true
+	 */
+	static boolean isNoteValue36Overflow(int noteValue) {
+		return noteValue > VALUE_36_MAX;
+	}
+
+	/**
+	 * ノートの値の36進配列要素範囲内判定
+	 * @param noteValue ノートの値
+	 * @return 範囲内の場合true
+	 */
+	static boolean isNoteValue36WithinRange(int noteValue) {
+		return !isNoteValue36Underflow(noteValue) && !isNoteValue36Overflow(noteValue);
+	}
+
+	/**
 	 * 小節の刻み数計算
 	 * <p>小節における小節の刻み数は小節長に依存する。小節長は0以下または{@link #LENGTH_MAX}を超える値を
 	 * 指定してはならない。この範囲外の値を指定した場合の計算結果は未定義となる。</p>
@@ -691,7 +772,7 @@ public final class BmsSpec {
 	 */
 	static double computeTickCount(double length, boolean normalize) {
 		var tickCount = (double)TICK_COUNT_DEFAULT * length;
-		return normalize ? Math.floor(Math.max(1.0, tickCount)) : tickCount;
+		return normalize ? Math.round(Math.max(1.0, tickCount)) : tickCount;
 	}
 
 	/**

@@ -1,14 +1,12 @@
 package com.lmt.lib.bms.bemusic;
 
-import static com.lmt.lib.bms.internal.Assertion.*;
-
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
 
 import com.lmt.lib.bms.BmsChannel;
 import com.lmt.lib.bms.BmsContent;
-import com.lmt.lib.bms.BmsError;
 import com.lmt.lib.bms.BmsException;
-import com.lmt.lib.bms.BmsLoader;
 import com.lmt.lib.bms.BmsMeta;
 import com.lmt.lib.bms.BmsSpec;
 import com.lmt.lib.bms.BmsSpecBuilder;
@@ -79,6 +77,7 @@ public class BeMusicSpec {
 				.addMeta(BeMusicMeta.CDDA)
 				.addMeta(BeMusicMeta.MIDIFILE)
 				.addMeta(BeMusicMeta.DIFFICULTY)
+				.addMeta(BeMusicMeta.CHARTNAME)
 				.addMeta(BeMusicMeta.PLAYLEVEL)
 				.addMeta(BeMusicMeta.RANK)
 				.addMeta(BeMusicMeta.DEFEXRANK)
@@ -89,6 +88,7 @@ public class BeMusicSpec {
 				.addMeta(BeMusicMeta.BANNER)
 				.addMeta(BeMusicMeta.STAGEFILE)
 				.addMeta(BeMusicMeta.BACKBMP)
+				.addMeta(BeMusicMeta.EYECATCH)
 				.addMeta(BeMusicMeta.PREVIEW)
 				.addMeta(BeMusicMeta.POORBGA)
 				.addMeta(BeMusicMeta.MOVIE)
@@ -187,55 +187,40 @@ public class BeMusicSpec {
 	}
 
 	/**
+	 * 最新バージョンのBe-Music用BMS仕様を生成します。
+	 * <p>当メソッドは、最新バージョンのBe-Music用BMS仕様に任意型メタ情報かユーザーチャンネル、
+	 * またはその両方を付加して生成したい時のヘルパーメソッドです。</p>
+	 * <p>任意型メタ情報、ユーザーチャンネルのコレクションにnullを指定すると何も付加されずにBMS仕様が生成されます。</p>
+	 * @param objectMetas 任意型メタ情報のコレクション
+	 * @param userChannels ユーザーチャンネルのコレクション
+	 * @return 最新バージョンのBe-Music用BMS仕様
+	 * @exception NullPointerException objectMetasのコレクション内にnullが含まれていた
+	 * @exception NullPointerException userChannelsのコレクション内にnullが含まれていた
+	 * @exception IllegalArgumentException objectMetasのコレクション内に任意型以外のメタ情報が含まれていた
+	 * @exception IllegalArgumentException userChannelsのコレクション内に仕様チャンネルが含まれていた
+	 */
+	public static BmsSpec createLatest(Collection<BmsMeta> objectMetas, Collection<BmsChannel> userChannels) {
+		return create(
+				LATEST_VERSION,
+				(objectMetas == null) || (objectMetas.isEmpty()) ? null : objectMetas.toArray(BmsMeta[]::new),
+				(userChannels == null) || (userChannels.isEmpty()) ? null : userChannels.toArray(BmsChannel[]::new));
+	}
+
+	/**
 	 * 最新バージョンのBe-Music用BMS仕様を用いて指定パスのファイルからBMSコンテンツを読み込みます。
-	 * <p>当メソッドは最も一般的なBMSコンテンツの読み込み機能を提供します。通常、BeMusicサブセットが持つ柔軟かつ高機能な
-	 * 処理を行うためには複数の煩雑な設定を行ったうえで読み込みを行う必要がありますが「ファイルからBMSコンテンツを読み込む」
-	 * という一般的な処理を行いたい場合には当メソッドを用いるのが最適な選択肢となります。</p>
-	 * <p>2番目の引数は、読み込みの際に厳格なフォーマットチェックを行うかどうかを選択します。
-	 * falseを指定するとBMS定義の構文エラー、値の範囲・書式、チャンネルの定義ミスなど、様々な誤りに対して寛容的になり、
-	 * 誤りを検出した際にはその誤りを無視して読み込みを続行します。この設定で読み込みを行うと当メソッドが例外をスローする
-	 * ケースが減少しますが、代償としてBMS定義の誤りに気付く機会が失われ、読み込まれたBMSコンテンツが意図せずに期待とは異なる
-	 * 内容になってしまう可能性があります。trueを指定すると以下のような場合にメソッドが例外をスローするようになります。</p>
-	 * <ul>
-	 * <li>BMSフォーマットとして不正な構文が使用されている時</li>
-	 * <li>未知のメタ情報(ヘッダ)が定義されている時</li>
-	 * <li>メタ情報の値が想定する形式の値になっていない時(例えば数値を設定する箇所に数値以外を記述する等)</li>
-	 * <li>未知のチャンネル(番号)が定義されている時</li>
-	 * <li>チャンネルに設定した値の形式が不正な時</li>
-	 * <li>同じ小節・チャンネルのデータが再定義された時</li>
-	 * <li>乱数(#RANDOM/#IF/#ELSE/#ENDIF等)の定義階層が不正な時</li>
-	 * </ul>
-	 * <p>上記以外にもファイルの読み込み中にエラーが発生する等、複数の要因で例外がスローされる可能性があります。
-	 * 例外およびエラーの詳細については{@link BmsException}、{@link BmsError}を参照してください。</p>
-	 * <p>当メソッドでは乱数を使用したCONTROL FLOW読み込みを行います。そのため乱数を使用したBMSコンテンツでは
-	 * 読み込み毎に異なる内容のBMSコンテンツになる場合があることに留意してください。</p>
-	 * <p>詳細な読み込み設定を行ったうえでBMSコンテンツを様々なデータ型から読み込みたい場合には、
-	 * {@link BmsLoader}と{@link BeMusicLoadHandler}を参照し、必要な手続きを行う処理を記述してください。
-	 * 当メソッド内部では一般的な用途向けで手続きを行っています。</p>
+	 * <p>当メソッドは{@link BeMusic#loadContentFrom(Path, Long, boolean)}を乱数の固定化なしで呼び出します。</p>
 	 * @param path 読み込み対象のBMSファイルのパス
 	 * @param strictly 厳格なフォーマットチェックを行うかどうか
 	 * @return 最新バージョンのBe-Music用BMS仕様で読み込まれたBMSコンテンツ
-	 * @throws BmsException BMSファイルの読み込みに失敗した
 	 * @exception NullPointerException pathがnull
-	 * @see BmsLoader
-	 * @see BmsError
-	 * @see BeMusicLoadHandler
+	 * @exception IOException 指定されたファイルが見つからない、読み取り権限がない、または読み取り中に異常を検出した
+	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
+	 * @see BeMusic#loadContentFrom(Path, Long, boolean)
+	 * @deprecated 当メソッドはBMS Library ver.0.7.0以降、非推奨になりました。
 	 */
-	public static BmsContent loadContentFrom(Path path, boolean strictly) throws BmsException {
-		assertArgNotNull(path, "path");
-		var handler = new BeMusicLoadHandler()
-				.setEnableControlFlow(true)
-				.setForceRandomValue(null);
-		var loader = new BmsLoader()
-				.setSpec(LATEST)
-				.setHandler(handler)
-				.setSyntaxErrorEnable(strictly)
-				.setFixSpecViolation(!strictly)
-				.setAllowRedefine(!strictly)
-				.setIgnoreUnknownMeta(!strictly)
-				.setIgnoreUnknownChannel(!strictly)
-				.setIgnoreWrongData(!strictly);
-		return loader.load(path);
+	@Deprecated(since = "0.7.0")
+	public static BmsContent loadContentFrom(Path path, boolean strictly) throws BmsException, IOException {
+		return BeMusic.loadContentFrom(path, null, strictly);
 	}
 
 	/**

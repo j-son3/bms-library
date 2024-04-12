@@ -41,27 +41,27 @@ public class BeMusicPoint implements BmsAt {
 	/** 楽曲位置の時間 */
 	private double mTime;
 	/** この楽曲位置が含まれる小節の小節長 */
-	private float mLength = 1.0f;
+	private double mLength = 1.0f;
 	/** 明示的なスクロール速度変更の有無 */
 	private boolean mChgScroll = false;
 	/** この楽曲位置の現在のスクロール速度 */
-	private float mScroll = 1.0f;
+	private double mScroll = 1.0f;
 	/** この楽曲位置の現在BPM */
-	private float mBpm;
+	private double mBpm;
 	/** 譜面停止時間 */
-	private float mStop;
+	private double mStop;
 	/** ノート情報 */
-	private short[] mNotes;
+	private int[] mNotes;
 	/** 不可視オブジェ情報 */
-	private short[] mInvisibles;
+	private int[] mInvisibles;
 	/** BGM */
-	private short[] mBgms;
+	private int[] mBgms;
 	/** BGA */
-	private short mBga;
+	private int mBga;
 	/** レイヤー */
-	private short mLayer;
+	private int mLayer;
 	/** ミス時BGA */
-	private short mMiss;
+	private int mMiss;
 	/** 各種情報 */
 	// 0-4b:NoteCount, 5-9b:LnCount, 10-14b:LmCount, 15-19b:VeCount 20b:isLastPlayable 21b:hasMovement
 	// 22b: hasHolding, 23b:hasLongNoteHead, 24b:hasLongNoteTail, 25b:hasLongNoteType, 26b:hasChangeSpeed
@@ -195,18 +195,29 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>この値が示す意味はノート種別ごとに異なります。詳細は以下を参照してください。</p>
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><td><b>ノート種別</b></td><td><b>値の意味</b></td></tr>
-	 * <tr><td>{@link BeMusicNoteType#NONE}</td><td>原則として0を返します。このノート種別では値を参照するべきではありません。</td></tr>
-	 * <tr><td>{@link BeMusicNoteType#BEAT}</td><td>値をメタ情報のインデックス値と見なします。入力デバイス操作時に{@link BeMusicMeta#WAV}に記述された音声が再生されるべきです。</td></tr>
-	 * <tr><td>{@link BeMusicNoteType#LONG_ON}</td><td>同上</td></tr>
-	 * <tr><td>{@link BeMusicNoteType#LONG_OFF}</td><td>{@link BeMusicMeta#LNOBJ}に記述された値が格納されています。</td></tr>
-	 * <tr><td>{@link BeMusicNoteType#LONG}</td><td>原則として0を返します。このノート種別では値を参照するべきではありません。</td></tr>
-	 * <tr><td>{@link BeMusicNoteType#LANDMINE}</td><td>入力デバイス操作時に、値が示す大きさのダメージを受けます。値が"ZZ"場合、プレーを即時終了させるべきです。</td></tr>
+	 * <tr><td>{@link BeMusicNoteType#NONE}</td>
+	 * <td>原則として0を返します。このノート種別では値を参照するべきではありません。</td></tr>
+	 * <tr><td>{@link BeMusicNoteType#BEAT}</td>
+	 * <td>音声データのトラックID、音声の再開フラグ、ノートごとのロングノートモードが格納されています。
+	 * 音声データはトラックIDをキーにして{@link BeMusicMeta#WAV}にアクセスすることで参照できます。
+	 * 各情報へのアクセス方法については{@link BeMusicSoundNote}を参照してください。</td></tr>
+	 * <tr><td>{@link BeMusicNoteType#LONG_ON}</td>
+	 * <td>同上</td></tr>
+	 * <tr><td>{@link BeMusicNoteType#LONG_OFF}</td>
+	 * <td>同上、または{@link BeMusicMeta#LNOBJ}に記述された値が格納されています。</td></tr>
+	 * <tr><td>{@link BeMusicNoteType#CHARGE_OFF}</td>
+	 * <td>同上</td></tr>
+	 * <tr><td>{@link BeMusicNoteType#LONG}</td>
+	 * <td>原則として0を返します。このノート種別では値を参照するべきではありません。</td></tr>
+	 * <tr><td>{@link BeMusicNoteType#LANDMINE}</td>
+	 * <td>入力デバイス操作時に、値が示す大きさのダメージを受けます。</td></tr>
 	 * </table>
 	 * @param device 入力デバイス
 	 * @return ノートの値
 	 * @exception NullPointerException deviceがnull
 	 * @see BeMusicDevice
 	 * @see BeMusicNoteType
+	 * @see BeMusicSoundNote
 	 * @see BeMusicMeta#WAV
 	 * @see BeMusicMeta#LNOBJ
 	 * @see BeMusicChannel#VISIBLE_1P_01
@@ -223,8 +234,9 @@ public class BeMusicPoint implements BmsAt {
 	 * @param noteValue ノートの値
 	 */
 	final void setNote(BeMusicDevice device, BeMusicNoteType noteType, int noteValue) {
-		if (mNotes == null) { mNotes = new short[BeMusicDevice.COUNT]; }
-		mNotes[device.getIndex()] = (short)((noteType.getId() & 0x07) | (noteValue << 3));
+		if (mNotes == null) { mNotes = new int[BeMusicDevice.COUNT]; }
+		var maskedValue = noteValue & BeMusicSoundNote.USE_BITS_MASK;
+		mNotes[device.getIndex()] = ((noteType.getId() & 0x07) | (maskedValue << 3));
 	}
 
 	/**
@@ -379,8 +391,8 @@ public class BeMusicPoint implements BmsAt {
 	 * @param value 不可視オブジェの値
 	 */
 	final void setInvisible(BeMusicDevice device, int value) {
-		if (mInvisibles == null) { mInvisibles = new short[BeMusicDevice.COUNT]; }
-		mInvisibles[device.getIndex()] = (short)value;
+		if (mInvisibles == null) { mInvisibles = new int[BeMusicDevice.COUNT]; }
+		mInvisibles[device.getIndex()] = value & BeMusicSoundNote.USE_BITS_MASK;
 	}
 
 	/**
@@ -400,7 +412,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @param length 小節長
 	 */
 	final void setMeasureLength(double length) {
-		mLength = (float)length;
+		mLength = length;
 	}
 
 	/**
@@ -420,7 +432,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @param scroll スクロール速度
 	 */
 	final void setCurrentScroll(double scroll) {
-		mScroll = (float)scroll;
+		mScroll = scroll;
 	}
 
 	/**
@@ -451,7 +463,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @param bpm 現在のBPM
 	 */
 	final void setCurrentBpm(double bpm) {
-		mBpm = (float)bpm;
+		mBpm = bpm;
 	}
 
 	/**
@@ -483,7 +495,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @param stop 譜面停止時間
 	 */
 	final void setStop(double stop) {
-		mStop = (float)stop;
+		mStop = stop;
 	}
 
 	/**
@@ -515,11 +527,13 @@ public class BeMusicPoint implements BmsAt {
 	 * BGM設定
 	 * @param bgms BGMのリスト
 	 */
-	final void setBgm(List<Short> bgms) {
+	final void setBgm(List<Integer> bgms) {
 		mBgms = null;
 		if ((bgms != null) && (bgms.size() > 0)) {
-			mBgms = new short[bgms.size()];
-			for (var i = 0; i < mBgms.length; i++) { mBgms[i] = bgms.get(i); }
+			mBgms = new int[bgms.size()];
+			for (var i = 0; i < mBgms.length; i++) {
+				mBgms[i] = bgms.get(i) & BeMusicSoundNote.USE_BITS_MASK;
+			}
 		}
 	}
 
@@ -540,7 +554,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @param bgaValue BGAの値
 	 */
 	final void setBgaValue(int bgaValue) {
-		mBga = (short)bgaValue;
+		mBga = bgaValue;
 	}
 
 	/**
@@ -560,7 +574,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @param layerValue BGAレイヤーの値
 	 */
 	final void setLayerValue(int layerValue) {
-		mLayer = (short)layerValue;
+		mLayer = layerValue;
 	}
 
 	/**
@@ -580,7 +594,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @param missValue ミス時画像の値
 	 */
 	final void setMissValue(int missValue) {
-		mMiss = (short)missValue;
+		mMiss = missValue;
 	}
 
 	/**

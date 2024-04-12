@@ -28,6 +28,8 @@ public abstract class LinearInterpolateFunction extends InterpolateFunction {
 	protected double mInWidth;
 	/** 出力値比率点リストの最大インデックス値 */
 	protected int mPtLastIdx;
+	/** 出力値比率点リストの最大インデックス値-1 */
+	protected int mPtLastPrevIdx;
 
 	/**
 	 * インスタンス生成
@@ -59,6 +61,7 @@ public abstract class LinearInterpolateFunction extends InterpolateFunction {
 		fn.mOutRange = outRange;
 		fn.mPoints = points;
 		fn.mPtLastIdx = points.length - 1;
+		fn.mPtLastPrevIdx = fn.mPtLastIdx - 1;
 		fn.mInWidth = inRange / (double)fn.mPtLastIdx;
 
 		return fn;
@@ -97,7 +100,7 @@ public abstract class LinearInterpolateFunction extends InterpolateFunction {
 		} else {
 			// 入力値が0～範囲値未満の場合に線形補間処理を実施する
 			var idx = in / mInWidth;
-			var lIdx = (int)Math.floor(idx);
+			var lIdx = Math.min((int)Math.floor(idx), mPtLastPrevIdx);
 			var lPt = mPoints[lIdx];
 			var rPt = mPoints[lIdx + 1];
 			return lPt + (rPt - lPt) * (idx - lIdx);

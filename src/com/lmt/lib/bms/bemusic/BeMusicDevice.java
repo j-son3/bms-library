@@ -281,13 +281,12 @@ public enum BeMusicDevice {
 	}
 
 	/**
-	 * この入力デバイスに対応するMGQ形式のロングノートチャンネルを取得する。
-	 * <p>MGQ形式のロングノートチャンネルは旧式の定義であり、BMSライブラリとしての正式サポートは行わない。
-	 * しかし、この形式を使用したBMSは多数存在するためBe Musicサブセットでの読み込みのみサポートを行う。
-	 * また、関連するメソッドは一般公開しない。</p>
+	 * この入力デバイスに対応するMGQ形式のロングノートチャンネルを取得します。
+	 * <p>MGQ形式のロングノートチャンネルは旧式の定義であり、BMSライブラリとしての正式サポートは行われません。
+	 * しかし、この形式を使用したBMSは多数存在するためBe-Musicサブセットでの読み込みのみサポートされます。</p>
 	 * @return MGQ形式のロングノートチャンネル
 	 */
-	final BmsChannel getLegacyLongChannel() {
+	public final BmsChannel getLegacyLongChannel() {
 		return mLegacyLongChannel;
 	}
 

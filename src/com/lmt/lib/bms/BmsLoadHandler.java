@@ -10,10 +10,6 @@ package com.lmt.lib.bms;
  * <p>BMSコンテンツの読み込み処理はデフォルトの動作が定義されており、本インターフェイスにはその動作が実装されています。
  * 個々のアプリケーションは自身の実現したい仕様に基づき、必要な振る舞いのみを変更してください。
  * 変更可能な振る舞いについては各メソッドのドキュメントを参照してください。</p>
- *
- * <p><strong>例外のポリシーについて</strong><br>
- * 当インターフェイスが提供するメソッド内で発生した例外は{@link BmsLoader#load}内でキャッチされ、{@link BmsException}に
- * 内包されて呼び出し元へスローします。本来、当インターフェイスが提供するメソッドでは例外がスローされることは想定していません。</p>
  */
 public interface BmsLoadHandler extends BmsContent.Creator, BmsNote.Creator {
 	/**

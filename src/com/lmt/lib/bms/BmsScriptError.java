@@ -40,7 +40,7 @@ public class BmsScriptError extends BmsError {
 	 * @exception NullPointerException lineがnull
 	 * @exception IllegalArgumentException lineNumberがマイナス値
 	 */
-	BmsScriptError(BmsErrorType errType, int lineNumber, String line, String message, Throwable throwable) {
+	public BmsScriptError(BmsErrorType errType, int lineNumber, String line, String message, Throwable throwable) {
 		super(errType, message, throwable);
 		assertArg(lineNumber >= 0, "Wrong lineNumber: %d", lineNumber);
 		assertArgNotNull(line, "line");

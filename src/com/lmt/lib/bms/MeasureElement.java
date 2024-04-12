@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.lmt.lib.bms.internal.MutableDouble;
+import com.lmt.lib.bms.internal.Utility;
 
 /**
  * 小節データクラス。
@@ -85,6 +85,8 @@ abstract class MeasureElement extends BmsElement {
 	private double mBeginBpm = 0.0;
 	/** 小節終了時のBPM */
 	private double mEndBpm = 0.0;
+	/** 楽曲位置(刻み位置)ごとの時間関連情報 */
+	private TreeMap<Double, PointTimeNode> mTimeNodeMap = null;
 	/** CHXごとのノートリスト */
 	private TreeMap<Integer, TreeSet<BmsNote>> mNotesChMap = null;
 	/** CHXごとの小節データ */
@@ -209,6 +211,31 @@ abstract class MeasureElement extends BmsElement {
 	 */
 	final double getEndBpm() {
 		return mEndBpm;
+	}
+
+	/**
+	 * 指定楽曲位置の実際の時間計算
+	 * @param tick 刻み位置
+	 * @return この小節の小節番号と指定刻み位置の実際の時間
+	 */
+	final double computeTime(double tick) {
+		var entry = (mTimeNodeMap != null) ? mTimeNodeMap.floorEntry(tick) : null;
+		if (entry == null) {
+			// この小節にBPM変更・譜面停止が存在しない場合、小節内の指定刻み位置までにBPM変更・譜面停止が登場しない場合
+			// 上記の場合は小節開始時の実際の時間＋指定刻み位置までの時間を返す
+			return mBaseTime + Utility.computeTime(tick, mBeginBpm);
+		} else {
+			// 指定刻み位置以下の最も大きい刻み位置にBPM変更・譜面停止が存在する場合
+			// 上記楽曲位置の実際の時間＋指定刻み位置までの時間＋譜面停止時間を返す
+			// ※ただし譜面停止時間は、指定刻み位置と取得した時間関連情報の刻み位置が同じ場合は加算しない。
+			//   BMSの基本仕様として、譜面停止は楽曲位置到達後にカウント開始されるため。
+			var nodeTick = entry.getKey().doubleValue();
+			var timeNode = entry.getValue();
+			var actualTime = timeNode.actualTime;
+			actualTime += Utility.computeTime((tick - nodeTick), timeNode.currentBpm);
+			actualTime += (tick == nodeTick) ? 0.0 : timeNode.stopTime;
+			return actualTime;
+		}
 	}
 
 	/**
@@ -442,15 +469,12 @@ abstract class MeasureElement extends BmsElement {
 	 * @param userParam ユーザー定義のパラメータ
 	 */
 	final void recalculateTimeInfo(Object userParam) {
-		var baseTime = new MutableDouble();
-		var lengthSec = new MutableDouble();
-		var beginBpm = new MutableDouble();
-		var endBpm = new MutableDouble();
-		recalculateTimeInfo(userParam, baseTime, lengthSec, beginBpm, endBpm);
-		mBaseTime = baseTime.get();
-		mLength = lengthSec.get();
-		mBeginBpm = beginBpm.get();
-		mEndBpm = endBpm.get();
+		var timeInfo = onRecalculateTimeInfo(userParam);
+		mBaseTime = timeInfo.baseTime;
+		mLength = timeInfo.length;
+		mBeginBpm = timeInfo.beginBpm;
+		mEndBpm = timeInfo.endBpm;
+		mTimeNodeMap = timeInfo.timeNodeMap;
 	}
 
 	/**
@@ -483,11 +507,7 @@ abstract class MeasureElement extends BmsElement {
 	/**
 	 * 時間・BPMに関連する情報を再計算する。
 	 * @param userParam ユーザー定義のパラメータ
-	 * @param outBaseTime この小節の開始時間(sec)
-	 * @param outLengthSec この小節の長さ(sec)
-	 * @param outBeginBpm この小節開始時のBPM
-	 * @param outEndBpm この小節終了時のBPM
+	 * @return 小節が保有する時間関連情報
 	 */
-	protected abstract void recalculateTimeInfo(Object userParam,
-			MutableDouble outBaseTime, MutableDouble outLengthSec, MutableDouble outBeginBpm, MutableDouble outEndBpm);
+	protected abstract MeasureTimeInfo onRecalculateTimeInfo(Object userParam);
 }

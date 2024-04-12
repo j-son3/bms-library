@@ -15,13 +15,6 @@ public enum BmsErrorType {
 	SYNTAX,
 
 	/**
-	 * BMS宣言が定義されている場合で、「encoding」に記述されている文字セットが未知の内容だった時。
-	 * <p>具体的に、encodingに指定する値はJavaで言うところのjava.nio.charset.Charsetを生成する際に
-	 * 用いられます。これを生成するのに使用できない内容だった場合を示します。</p>
-	 */
-	ENCODING,
-
-	/**
 	 * BMS宣言の検査に失敗した場合を表します。
 	 * <p>このエラーは{@link BmsLoadHandler#testDeclaration}が{@link BmsLoadHandler.TestResult#FAIL}
 	 * を返し、直後に呼び出される{@link BmsLoadHandler#parseError(BmsScriptError)}がfalseを返した場合に発生します。
@@ -76,10 +69,13 @@ public enum BmsErrorType {
 	WRONG_DATA,
 
 	/**
-	 * 単体メタ情報、または重複不可チャンネルの再定義を検出したことを表します。
-	 * <p>BMS仕様({@link BmsSpec})で重複が許可されていない単体メタ情報・重複不可チャンネルは同一のBMS内に複数の定義を
-	 * 記述することは認められません。このエラーは{@link BmsLoader#setAllowRedefine(boolean)}を用いることで
-	 * 発生を制御することができます。</p>
+	 * 単体メタ情報、または値型の重複不可チャンネルの再定義を検出したことを表します。
+	 * <p>BMS仕様({@link BmsSpec})で重複が許可されていない単体メタ情報・値型の重複不可チャンネルは同一のBMS内に複数の値を
+	 * 保有することができず、値を重複定義すると後発の値で上書きされます。この動作はBMS本来の仕様ですが、
+	 * {@link BmsLoader#setAllowRedefine(boolean)}を用いることでローダを重複定義を許可しない厳密な動作に変更できます。
+	 * 厳密な動作を有効にした状態で重複定義を検出した時にこのエラーを報告します。</p>
+	 * <p>なお、厳密な動作が有効であったとしても配列型の重複不可チャンネルではこのエラーは報告されません。
+	 * 配列型の重複不可チャンネルは、重複定義があった場合にはそれぞれの定義内容を合成する仕様となっているためです。</p>
 	 */
 	REDEFINE,
 

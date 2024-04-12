@@ -1,7 +1,6 @@
 package com.lmt.lib.bms.internal;
 
 import com.lmt.lib.bms.BmsSpec;
-import com.lmt.lib.bms.BmsType;
 
 /**
  * Assertionクラスでは、BMSライブラリにおけるアサーションの処理をとりまとめる。
@@ -207,7 +206,7 @@ public final class Assertion {
 	}
 
 	/**
-	 * BMS仕様としてBMSデータに記述可能な小節番号(000～999)の範囲をテストするアサーション
+	 * BMSコンテンツに設定可能な小節番号の範囲をテストするアサーション
 	 * @param measure 小節番号
 	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満、または{@link BmsSpec#MEASURE_MAX}超過
 	 */
@@ -272,27 +271,16 @@ public final class Assertion {
 
 	/**
 	 * ノートの値の範囲をテストするアサーション
-	 * @param type データ型
 	 * @param value ノートの値
-	 * @exception IllegalArgumentException 16進配列チャンネル指定時、ノートの値に{@link BmsSpec#VALUE_16_MIN}未満、{@link BmsSpec#VALUE_16_MAX}超過の値を指定した
-	 * @exception IllegalArgumentException 36進配列チャンネル指定時、ノートの値に{@link BmsSpec#VALUE_MIN}未満、{@link BmsSpec#VALUE_MAX}超過の値を指定した
+	 * @exception IllegalArgumentException valueが0
+	 * @exception IllegalArgumentException valueが{@link BmsSpec#VALUE_MIN}未満、または{@link BmsSpec#VALUE_MAX}超過
 	 */
-	public static void assertValue(BmsType type, int value) {
-		var radix = type.getRadix();
-		if (radix == 36) {
-			if ((value < BmsSpec.VALUE_MIN) || (value > BmsSpec.VALUE_MAX)) {
-				var msg = String.format("Note value is out of range in an ARRAY36 channel. expect=(%d-%d), actual=%d",
-						BmsSpec.VALUE_MIN, BmsSpec.VALUE_MAX, value);
-				throw new IllegalArgumentException(msg);
-			}
-		} else if (radix == 16) {
-			if ((value < BmsSpec.VALUE_16_MIN) || (value > BmsSpec.VALUE_16_MAX)) {
-				var msg = String.format("Note value is out of range in an ARRAY16 channel. expect=(%d-%d), actual=%d",
-						BmsSpec.VALUE_16_MIN, BmsSpec.VALUE_16_MAX, value);
-				throw new IllegalArgumentException(msg);
-			}
-		} else {
-			var msg = String.format("Detected value type. type=%s, radix=%d", type.getName(), radix);
+	public static void assertValue(int value) {
+		if (value == 0) {
+			throw new IllegalArgumentException("Can't specify 0 as the note value.");
+		} else if ((value < BmsSpec.VALUE_MIN) || (value > BmsSpec.VALUE_MAX)) {
+			var msg = String.format("Note value is out of range. expect=(%d-%d), actual=%d",
+					BmsSpec.VALUE_MIN, BmsSpec.VALUE_MAX, value);
 			throw new IllegalArgumentException(msg);
 		}
 	}

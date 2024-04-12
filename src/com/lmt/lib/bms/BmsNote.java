@@ -55,7 +55,7 @@ public class BmsNote extends BmsElement {
 	public static final Tester TEST_FAIL = n -> false;
 
 	/** ノートが持つ値 */
-	private short mValue = 0;
+	private int mValue = 0;
 
 	/**
 	 * ノートオブジェクトを新しく構築します。
@@ -81,8 +81,8 @@ public class BmsNote extends BmsElement {
 
 	/**
 	 * ノートに割り当てられた値を取得します。
-	 * <p>ノートの値とは、配列型({@link BmsArray})チャンネルデータの1つの配列要素を表します。つまり、
-	 * 16進配列では0～255、36進配列では0～1295の範囲の値を示します。</p>
+	 * <p>ノートの値は {@link BmsSpec#VALUE_MIN}～{@link BmsSpec#VALUE_MAX}
+	 * の範囲の値を示しますが、0を示すことはありません。</p>
 	 * @return ノートの値
 	 */
 	public final int getValue() {
@@ -94,7 +94,7 @@ public class BmsNote extends BmsElement {
 	 * @param value ノートの値
 	 */
 	final void setValue(int value) {
-		mValue = (short)value;
+		mValue = value;
 	}
 
 	/**
@@ -134,7 +134,7 @@ public class BmsNote extends BmsElement {
 	 */
 	@Override
 	public Object getValueAsObject() {
-		return (int)mValue;
+		return BmsInt.box(mValue);
 	}
 
 	/** {@inheritDoc} */
@@ -180,7 +180,7 @@ public class BmsNote extends BmsElement {
 		setMeasure(measure);
 		setTick(tick);
 		setChx(channel, index);
-		mValue = (short)value;
+		mValue = value;
 		onCreate();
 	}
 

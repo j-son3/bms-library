@@ -13,6 +13,7 @@ import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
 import com.lmt.lib.bms.BmsAt;
+import com.lmt.lib.bms.internal.Utility;
 
 /**
  * BMS譜面全体とその統計情報を表します。
@@ -32,6 +33,9 @@ import com.lmt.lib.bms.BmsAt;
  * 処理実装は{@link #onCreate()}で行うことを想定しています。</p>
  */
 public class BeMusicScore implements Iterable<BeMusicPoint> {
+	/** LNモードで、疑似的なBack-Spin, Multi-Spinと判定する最大間隔(秒単位) */
+	private static final double MAX_PSEUDO_TIME = 0.21;
+
 	/** 楽曲位置情報のイテレータ */
 	private class PointIterator implements Iterator<BeMusicPoint> {
 		/** インデックス */
@@ -134,6 +138,8 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	private double mRecommendTotal1;
 	/** 推奨TOTAL値2 */
 	private double mRecommendTotal2;
+	/** スクラッチモード */
+	private BeMusicScratchMode mScratchMode;
 
 	/** 小節番号・刻み位置によるコンパレータ */
 	private PointComparator mPointCmp = new PointComparator();
@@ -352,6 +358,14 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	}
 
 	/**
+	 * スクラッチモードを取得します。
+	 * @return スクラッチモード
+	 */
+	public final BeMusicScratchMode getScratchMode() {
+		return mScratchMode;
+	}
+
+	/**
 	 * ロングノート有無を取得します。
 	 * @return ロングノート有無
 	 */
@@ -525,7 +539,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 * @return 条件に該当するインデックス。そのような楽曲位置情報がない場合-1。
 	 */
 	public final int floorPointOf(int measure, double tick) {
-		return bsearchFloor(mPoints, mPointCmp.ready(measure, tick));
+		return Utility.bsearchFloor(mPoints, mPointCmp.ready(measure, tick));
 	}
 
 	/**
@@ -536,7 +550,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 */
 	public final int floorPointOf(double time) {
 		assertArg(time >= 0.0, "Argument:time is minus value. [%f]", time);
-		return bsearchFloor(mPoints, mTimeCmp.ready(time));
+		return Utility.bsearchFloor(mPoints, mTimeCmp.ready(time));
 	}
 
 	/**
@@ -557,7 +571,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 * @return 条件に該当するインデックス。そのような楽曲位置情報がない場合-1。
 	 */
 	public final int ceilPointOf(int measure, double tick) {
-		return bsearchCeil(mPoints, mPointCmp.ready(measure, tick));
+		return Utility.bsearchCeil(mPoints, mPointCmp.ready(measure, tick));
 	}
 
 	/**
@@ -568,7 +582,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 */
 	public final int ceilPointOf(double time) {
 		assertArg(time >= 0.0, "Argument:time is minus value. [%f]", time);
-		return bsearchCeil(mPoints, mTimeCmp.ready(time));
+		return Utility.bsearchCeil(mPoints, mTimeCmp.ready(time));
 	}
 
 	/**
@@ -587,6 +601,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 		mLastPlayableIndex = 0;
 		mHasBgm = false;
 		mHasBga = false;
+		mScratchMode = BeMusicScratchMode.NORMAL;
 		Arrays.fill(mNoteCounts, 0);
 		Arrays.fill(mLnCounts, 0);
 		Arrays.fill(mLmCounts, 0);
@@ -597,6 +612,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 		var lastTick = -1.0;
 		var lastTime = -1.0;
 		var lastDispPos = -1.0;
+		var lastScrPt = new BeMusicPoint[BeMusicLane.COUNT];
 		for (var ptIndex = 0; ptIndex < listCount; ptIndex++) {
 			var pt = list.get(ptIndex);
 			var measure = pt.getMeasure();
@@ -639,6 +655,42 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 				mNoteCounts[i] += (ntype.isCountNotes() ? 1 : 0);
 				mLnCounts[i] += ((ntype == BeMusicNoteType.LONG_ON) ? 1 : 0);
 				mLmCounts[i] += ((ntype == BeMusicNoteType.LANDMINE) ? 1 : 0);
+			}
+
+			// スクラッチモードを更新する
+			for (var i = 0; i < BeMusicLane.COUNT; i++) {
+				var scr = BeMusicDevice.getScratch(BeMusicLane.fromIndex(i));
+				var curNt = pt.getNoteType(scr);
+				if (curNt.hasMovement()) {
+					var prevPt = lastScrPt[i];
+					var prevNt = (prevPt == null) ? BeMusicNoteType.NONE : prevPt.getNoteType(scr);
+					switch (curNt) {
+					case BEAT:
+						if ((prevNt == BeMusicNoteType.LONG_OFF) && ((time - prevPt.getTime()) <= MAX_PSEUDO_TIME)) {
+							// LNモードで、長押し終端から次の通常ノートまでの時間が規定時間以内(疑似BSS)
+							var canTransition = (mScratchMode == BeMusicScratchMode.NORMAL);
+							mScratchMode = canTransition ? BeMusicScratchMode.BACKSPIN : mScratchMode;
+						}
+						break;
+					case LONG_ON:
+						if ((prevNt == BeMusicNoteType.LONG_OFF) && ((time - prevPt.getTime()) <= MAX_PSEUDO_TIME)) {
+							// LNモードで、長押し終端から次の長押し開始までの時間が規定時間以内(疑似MSS)
+							var canTransition = (mScratchMode != BeMusicScratchMode.MULTISPIN);
+							mScratchMode = canTransition ? BeMusicScratchMode.MULTISPIN : mScratchMode;
+						}
+						break;
+					case CHARGE_OFF: {
+						// CN/HCNモードで、長押し終了を検出(正式BSS)
+						var canTransition = (mScratchMode == BeMusicScratchMode.NORMAL);
+						mScratchMode = canTransition ? BeMusicScratchMode.BACKSPIN : mScratchMode;
+						break;
+					}
+					default:
+						// それ以外の種別ではスクラッチモードの更新は起こり得ない
+						break;
+					}
+					lastScrPt[i] = pt;
+				}
 			}
 
 			// 最終操作可能ノート位置を更新する
@@ -691,65 +743,5 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 */
 	protected void onCreate() {
 		// Do nothing
-	}
-
-	// TODO bsearchFloor()を共通化する
-	private static <L extends List<T>, T> int bsearchFloor(L list, ToIntFunction<T> comparator) {
-		var r = -1;
-		var elm = (T)null;
-		for (int l = 0, h = list.size() - 1, m = h / 2; l <= h; m = l + (h - l) / 2) {
-			// 比較要素と評価値を比較する
-			elm = list.get(m);
-			var cr = comparator.applyAsInt(elm);
-
-			// 比較結果による処理の分岐
-			if (cr == 0) {
-				// 比較要素が評価値と同じ場合、この要素で確定
-				r = m;
-				break;
-			} else if (cr > 0) {
-				// 比較要素＞評価値の場合、比較対象要素以前の要素は全て対象外
-				h = m - 1;
-			} else if (h != m) {
-				// 比較要素＜評価値で、最終要素ではない場合、暫定でこの要素を該当要素とする
-				r = m;
-				l = m + 1;
-			} else {
-				// 比較要素＜評価値で、最終要素の場合、この要素で確定
-				r = m;
-				break;
-			}
-		}
-		return r;
-	}
-
-	// TODO bsearchCeil()を共通化する
-	private static <L extends List<T>, T> int bsearchCeil(L list, ToIntFunction<T> comparator) {
-		var r = -1;
-		var elm = (T)null;
-		for (int l = 0, h = list.size() - 1, m = h / 2; l <= h; m = l + (h - l) / 2) {
-			// 比較要素と評価値を比較する
-			elm = list.get(m);
-			var cr = comparator.applyAsInt(elm);
-
-			// 比較結果による処理の分岐
-			if (cr == 0) {
-				// 比較要素が評価値と同じ場合、この要素で確定
-				r = m;
-				break;
-			} else if (cr < 0) {
-				// 比較要素＜評価値の場合、比較対象要素以前の要素は全て対象外
-				l = m + 1;
-			} else if (h != m) {
-				// 比較要素＞評価値で、最終要素ではない場合、暫定でこの要素を該当要素とする
-				r = m;
-				h = m - 1;
-			} else {
-				// 比較要素＞評価値で、最終要素の場合、この要素で確定
-				r = m;
-				break;
-			}
-		}
-		return r;
 	}
 }

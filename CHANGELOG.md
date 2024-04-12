@@ -4,6 +4,61 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.0 / 1.1-D] - 2023-10-25
+### Added
+- BmsStandardSaver クラスが新設され、標準フォーマットでのBMSコンテンツ保存に対応しました。
+- BMSコンテンツ読み込み機能の機能追加・見直しが行われ、以下の機能追加・変更が行われました。
+    - BeMusicBmsonLoader クラスを新設し、bmson形式からのBMSコンテンツ読み込みに対応しました。
+    - BmsStandardLoader クラスを新設し、標準フォーマットのBMS読み込み処理が見直されました。
+    - BeMusic クラスを新設し、BMSコンテンツ読み込みに関連する高レベルAPIを追加しました。
+    - BmsLibrary にデフォルトの文字セットを設定する setDefaultCharsets を追加しました。
+    - BmsLibrary にデフォルトの文字セットを取得する getDefaultCharsets を追加しました。
+    - BmsLibrary に最優先文字セットを取得する getPrimaryCharset を追加しました。
+    - BmsLoader にBMS読み込み時に使用する文字セットを設定する setCharsets を追加しました。
+- bmson形式サポートに伴い、コアライブラリ・Be-Musicサブセットへ以下の仕様調整が行われました。
+    - BeMusicSpec に #CHARTNAME ヘッダを追加しました。(※1)
+    - BeMusicSpec に #EYECHATCH ヘッダを追加しました。(※1)
+    - BeMusicSoundNote クラスを新設し、bmson形式で必要になるノートの値の生成・取得に対応しました。<br><br>
+※1 bmson独自の情報を保持するためのライブラリ独自のヘッダです<br><br>
+
+- BOM付きの UTF-16LE, UTF-16BE でエンコードされたBMSファイルの読み込みに対応しました。
+- BmsLibrary クラスを新設し、ライブラリバージョンを取得する getVersion を追加しました。
+- BeMusicStatistics にDelta Systemのバージョンを取得する getDeltaSystemVersion を追加しました。
+- BmsChannel に仕様チャンネルを生成する spec を追加しました。
+- BmsLoader に厳格なフォーマットチェック有無を一括設定する setStrictly を追加しました。
+- BeMusicSpec に最新のBe-Music用BMS仕様を生成する createLatest を追加しました。
+- BeMusicScore にスクラッチモードを取得する getScratchMode を追加しました。
+- Be-Musicサブセットに #SCROLL ヘッダの情報を取得する機能を追加しました。
+
+### Changed
+- BmsLoader は抽象クラスになり、インスタンス生成はできなくなりました。
+- BmsSaver は抽象クラスになり、インスタンス生成はできなくなりました。
+- BMSファイルの読み込みは、指定された文字セットで順番にデコードする方式に変更されました。
+- #DEFEXRANK ヘッダをBe-Musicサブセットで正式にサポートしました。
+- 取り扱い可能な小節番号上限を 999 から 65535 へ引き上げました。
+- 取り扱い可能な索引付きメタ情報のインデックス値上限を 1295 から 65535 へ引き上げました。
+- ノートに設定可能な値の範囲を0以外の全ての値(int型)に変更しました。
+- BmsLoader#load では IOException の例外ハンドリングが義務付けられるようになりました。
+- BeMusicPoint で扱われる小節長、スクロール速度、BPM、譜面停止時間のデータ精度が向上しました。
+- 配列型チャンネルのデータ長が奇数の時、データ次第では自動修正しエラーにならないようにしました。
+- 同一小節の配列型チャンネルが再定義された時、重複定義同士を合成するようになりました。
+- 重複可能な配列型チャンネルで、空定義(00)の配列データは空配列として読み込まれるようになりました。
+
+### Deprecated
+- BeMusic クラスの新設に伴い、BeMusicSpec#loadContentFrom は非推奨になりました。
+- BmsSpec の getStandardCharset, setStandardCharset は非推奨になりました。
+
+### Removed
+- BMS宣言に &quot;encoding&quot; を記述し文字セットを指定する機能は廃止されました。
+
+### Fixed
+- BPMの途中変更、譜面停止を多用するBMSの読み込みが極端に遅くなる問題を改善しました。
+- BmsContent#putNote で指定小節・刻み位置に既にノートが存在する時、古いノートが新しいノートで上書きされない不具合を修正しました。
+- #RANDOM による乱数の分岐判定が適切に動作しないことがある不具合を修正しました。
+- タイムラインが空の状態で特定の BmsContent のメソッドを実行すると想定外の IllegalArgumentException がスローされる不具合を修正しました。
+- 不可視オブジェ(31-3Z, 41-4Z)が重複可能チャンネルになってしまっている誤りを修正しました。
+- 特定条件を満たすBMSコンテンツでDelta Systemによるレーティング値計算を行うと、ごく稀に想定外の実行時例外がスローされることがある不具合を修正しました。
+
 ## [0.6.0 / 1.0-D] - 2023-08-01
 ### Added
 - Delta Systemによる譜面のレーティング機能を更新しました。具体的には以下の更新が含まれます。<br>※SP譜面のみ対応、BeMusicRatingType#DELTAは非対応です

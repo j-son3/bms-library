@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.lmt</groupId>
   <artifactId>bms-library</artifactId>
-  <version>0.6.0</version>
+  <version>0.7.0</version>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -43,5 +43,12 @@
     </plugins>
   </build>
   <dependencies>
+    <!-- https://mvnrepository.com/artifact/org.json/json -->
+    <!-- bmsonの読み書きを行う際に使用する -->
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20230618</version>
+    </dependency>
   </dependencies>
 </project>

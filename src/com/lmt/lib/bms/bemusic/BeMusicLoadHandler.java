@@ -121,13 +121,32 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 	/** CONTROL FLOW真偽状態 */
 	private enum RandomBooleanStatus {
 		/** 初期状態 */
-		NEUTRAL,
+		NEUTRAL(true),
 		/** 偽(真未検出) */
-		FALSE_MOVEABLE,
+		FALSE_MOVEABLE(true),
 		/** 真 */
-		TRUE,
+		TRUE(false),
 		/** 偽 */
-		FALSE;
+		FALSE(false);
+
+		/** 遷移可否 */
+		private boolean mCanTransition;
+
+		/**
+		 * コンストラクタ
+		 * @param canTransition 遷移可否
+		 */
+		private RandomBooleanStatus(boolean canTransition) {
+			mCanTransition = canTransition;
+		}
+
+		/**
+		 * 遷移可否判定
+		 * @return 遷移可能ならtrue
+		 */
+		final boolean canTransition() {
+			return mCanTransition;
+		}
 	}
 
 	/** CONTROL FLOW有効状態 */
@@ -148,7 +167,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 	/**
 	 * CONTROL FLOWの有効状態を設定します。
 	 * <p>有効にすると、#RANDOMによる乱数生成と#IF～#ELSEIF～#ELSE～#ENDIFによるフロー制御が可能になります。
-	 * 無効にするとこれらのフロー制御は非対応になり、解析エラーになります。</p>
+	 * 無効にするとこれらのフロー制御は無視され、フロー制御が存在しないものとして扱われます。</p>
 	 * <p>デフォルトではCONTROL FLOWは無効に設定されています。</p>
 	 * @param isEnable CONTROL FLOW有効状態
 	 * @return このオブジェクトのインスタンス
@@ -270,6 +289,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 			break;
 		}
 		case IF: {      // #IF
+			// 条件の値と乱数値を比較して一致していればこのブロックを真とする
 			var isTrue = (mRandomValue == (long)value);
 			mRandomDefineStatus = RandomDefineStatus.IF;
 			mRandomBooleanStatus = isTrue ? RandomBooleanStatus.TRUE : RandomBooleanStatus.FALSE_MOVEABLE;
@@ -277,14 +297,18 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 			break;
 		}
 		case ELSEIF: {  // #ELSEIF
-			var isTrue = (mRandomValue == (long)value) && (mRandomBooleanStatus == RandomBooleanStatus.FALSE_MOVEABLE);
+			// まだ真を未検出で、かつ条件の値と乱数値が一致していればこのブロックを真とする
+			var canTrans = mRandomBooleanStatus.canTransition();
+			var isTrue = (mRandomValue == (long)value);
+			var actualTrans = (canTrans && isTrue);
 			mRandomDefineStatus = RandomDefineStatus.ELSEIF;
-			mRandomBooleanStatus = isTrue ? RandomBooleanStatus.TRUE : RandomBooleanStatus.FALSE;
-			mCurrentTestResult = isTrue ? TestResult.OK : TestResult.THROUGH;
+			mRandomBooleanStatus = actualTrans ? RandomBooleanStatus.TRUE : mRandomBooleanStatus;
+			mCurrentTestResult = actualTrans ? TestResult.OK : TestResult.THROUGH;
 			break;
 		}
 		case ELSE: {    // #ELSE
-			var isTrue = (mRandomBooleanStatus != RandomBooleanStatus.TRUE);
+			// まだ真を未検出であればこのブロックを真とする
+			var isTrue = mRandomBooleanStatus.canTransition();
 			mRandomDefineStatus = RandomDefineStatus.ELSE;
 			mRandomBooleanStatus = isTrue ? RandomBooleanStatus.TRUE : RandomBooleanStatus.FALSE;
 			mCurrentTestResult = isTrue ? TestResult.OK : TestResult.THROUGH;
@@ -312,9 +336,9 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 	 * @return 生成された乱数値
 	 */
 	private long generateRandomValue(long value) {
-		if ((mRandomValueForce != null) && (mRandomValueForce > 0)) {
+		if (mRandomValueForce != null) {
 			// 乱数値強制の場合は必ず指定値とする
-			return mRandomValueForce;
+			return Math.max(mRandomValueForce, 0L);
 		} else {
 			// 乱数を生成する
 			return (mRandom.nextLong() % value) + 1;

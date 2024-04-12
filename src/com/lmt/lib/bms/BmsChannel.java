@@ -97,13 +97,13 @@ public final class BmsChannel extends BmsChannelKey {
 	 * @param multiple チャンネルデータの重複許可フラグ
 	 * @param uniqueness 同一性チェックを行う際に参照されるチャンネルかどうかを示すフラグ
 	 * @exception NullPointerException typeがnull
-	 * @exception NullPointerException typeがOBJECT以外の時、defaultValueがnull
-	 * @exception IllegalArgumentException typeがOBJECTの時、defaultValueがnullではない
-	 * @exception IllegalArgumentException numberに登録できないチャンネル番号を指定した
-	 * @exception IllegalArgumentException typeがOBJECTの時、仕様チャンネルを指定した
-	 * @exception IllegalArgumentException typeがOBJECTの時、refがnullではない
+	 * @exception NullPointerException typeが{@link BmsType#OBJECT}以外の時、defaultValueがnull
+	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、defaultValueがnullではない
+	 * @exception IllegalArgumentException numberが{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}超過
+	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、仕様チャンネルを指定した
+	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、refがnullではない
 	 * @exception IllegalArgumentException データ型が値型で参照先メタ情報を指定した
-	 * @exception IllegalArgumentException typeがOBJECT以外の時、defaultValueがtypeのテストに失敗した
+	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}以外の時、defaultValueがtypeのテストに失敗した
 	 * @exception IllegalArgumentException ユーザーチャンネルでuniquenessをtrueにしようとした
 	 */
 	public BmsChannel(int number, BmsType type, String ref, String defaultValue, boolean multiple, boolean uniqueness) {
@@ -122,18 +122,75 @@ public final class BmsChannel extends BmsChannelKey {
 	 * @exception NullPointerException numberがnull
 	 * @exception NumberFormatException numberの内容が36進数ではない
 	 * @exception NullPointerException typeがnull
-	 * @exception NullPointerException typeがOBJECT以外の時、defaultValueがnull
-	 * @exception IllegalArgumentException typeがOBJECTの時、defaultValueがnullではない
-	 * @exception IllegalArgumentException numberに登録できないチャンネル番号を指定した
-	 * @exception IllegalArgumentException typeがOBJECTの時、仕様チャンネルを指定した
-	 * @exception IllegalArgumentException typeがOBJECTの時、refがnullではない
+	 * @exception NullPointerException typeが{@link BmsType#OBJECT}以外の時、defaultValueがnull
+	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、defaultValueがnullではない
+	 * @exception IllegalArgumentException numberが{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}超過
+	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、仕様チャンネルを指定した
+	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、refがnullではない
 	 * @exception IllegalArgumentException データ型が値型で参照先メタ情報を指定した
-	 * @exception IllegalArgumentException typeがOBJECT以外の時、defaultValueがtypeのテストに失敗した
+	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}以外の時、defaultValueがtypeのテストに失敗した
 	 * @exception IllegalArgumentException ユーザーチャンネルでuniquenessをtrueにしようとした
 	 */
 	public BmsChannel(String number, BmsType type, String ref, String defaultValue, boolean multiple, boolean uniqueness) {
 		super(number);
 		initialize(type, ref, defaultValue, multiple, uniqueness);
+	}
+
+	/**
+	 * 新しい仕様チャンネルオブジェクトを生成します。
+	 * <p>当メソッドでは仕様チャンネルの範囲外のチャンネル番号は指定できません。</p>
+	 * @param number チャンネル番号
+	 * @param type チャンネルデータ型
+	 * @param ref 参照先メタ情報
+	 * @param defaultValue チャンネルデータの初期値
+	 * @param multiple チャンネルデータの重複許可フラグ
+	 * @param uniqueness 同一性チェックを行う際に参照されるチャンネルかどうかを示すフラグ
+	 * @return 仕様チャンネルオブジェクト
+	 * @exception NullPointerException typeがnull
+	 * @exception NullPointerException defaultValueがnull
+	 * @exception IllegalArgumentException numberが{@link BmsSpec#SPEC_CHANNEL_MIN}未満または{@link BmsSpec#SPEC_CHANNEL_MAX}超過
+	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}
+	 * @exception IllegalArgumentException データ型が値型の時、refがnullではない
+	 * @exception IllegalArgumentException defaultValueがtypeのテストに失敗した
+	 */
+	public static BmsChannel spec(int number, BmsType type, String ref, String defaultValue, boolean multiple,
+			boolean uniqueness) {
+		assertSpecChannelRange(number);
+		return new BmsChannel(number, type, ref, defaultValue, multiple, uniqueness);
+	}
+
+	/**
+	 * 新しいユーザーチャンネルオブジェクトを生成します。
+	 * <p>当メソッドではユーザーチャンネルの範囲外のチャンネル番号は指定できません。</p>
+	 * @param number チャンネル番号
+	 * @param type チャンネルデータ型
+	 * @param ref 参照先メタ情報
+	 * @param defaultValue チャンネルデータの初期値
+	 * @param multiple チャンネルデータの重複許可フラグ
+	 * @return ユーザーチャンネルオブジェクト
+	 * @exception NullPointerException typeがnull
+	 * @exception NullPointerException typeが{@link BmsType#OBJECT}以外の時、defaultValueがnull
+	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、defaultValueがnullではない
+	 * @exception IllegalArgumentException numberが{@link BmsSpec#USER_CHANNEL_MIN}未満または{@link BmsSpec#USER_CHANNEL_MAX}超過
+	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、refがnullではない
+	 * @exception IllegalArgumentException データ型が値型で参照先メタ情報を指定した
+	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}以外の時、defaultValueがtypeのテストに失敗した
+	 */
+	public static BmsChannel user(int number, BmsType type, String ref, String defaultValue, boolean multiple) {
+		assertUserChannelRange(number);
+		return new BmsChannel(number, type, ref, defaultValue, multiple, false);
+	}
+
+	/**
+	 * 新しい任意型ユーザーチャンネルオブジェクトを生成します。
+	 * <p>当メソッドではユーザーチャンネルの範囲外のチャンネル番号は指定できません。</p>
+	 * @param number チャンネル番号
+	 * @return 任意型ユーザーチャンネルオブジェクト
+	 * @exception IllegalArgumentException numberが{@link BmsSpec#USER_CHANNEL_MIN}未満または{@link BmsSpec#USER_CHANNEL_MAX}超過
+	 */
+	public static BmsChannel object(int number) {
+		assertUserChannelRange(number);
+		return new BmsChannel(number, BmsType.OBJECT, null, null, false, false);
 	}
 
 	/**

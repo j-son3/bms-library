@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.lmt.lib.bms.internal.deltasystem.Ds;
 import com.lmt.lib.bms.internal.deltasystem.DsContext;
 import com.lmt.lib.bms.internal.deltasystem.StatisticsAccessor;
 
@@ -325,11 +324,7 @@ public class BeMusicStatisticsBuilder {
 		}
 
 		// Delta Systemのアルゴリズムバージョン文字列を生成する
-		var ver = String.format("%d.%d-%c%s",
-				Ds.ALGORITHM_MAJOR_VERSION,
-				Ds.ALGORITHM_REVISION_NUMBER,
-				Ds.ALGORITHM_STATUS_CHAR,
-				Ds.isConfigChanged() ? Character.toString(Ds.ALGORITHM_CONFIG_CHANGED) : "");
+		var ver = BeMusicStatistics.getDeltaSystemVersion();
 		stat.setRatingAlgorithmVersion(ver);
 	}
 

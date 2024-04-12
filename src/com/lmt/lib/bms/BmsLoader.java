@@ -3,80 +3,45 @@ package com.lmt.lib.bms;
 import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * 外部データからBMSコンテンツを生成するローダーです。
+ * 外部データからBMSコンテンツを生成するローダの基底クラスです。
  *
  * <p>BMSライブラリは、「外部データ」からBMSコンテンツを読み込む機能を提供します。ここで言う「外部データ」とは、
  * BMSで記述されたテキストデータのことを指します。外部データはファイル等の何らかの形式で記録されていることを
  * 想定しており、Java言語の{@link java.io.InputStream}で読み取ることができるもの全てを指します。</p>
  *
- * <p><strong>外部データの記述形式について</strong><br>
- * 外部データは上述の通り、BMSで記述されたテキストデータです。一般的には「BMSファイル」のことを指します。
- * BMSライブラリで読み取り可能な記述形式は一般的なBMSの仕様を取り込んでいますが、一部独自の機能を盛り込んでいます。
- * 詳細については以下を参照してください。</p>
- *
- * <p><strong>BMS宣言</strong><br>
- * BMSの1行目において、&quot;;?bms&nbsp;&quot;で始まるコメントを検出した場合、1行目をBMS宣言として解析しようとします。
- * BMS宣言の構文に誤りがある場合、BMS宣言は通常のコメントとして認識されるようになり、BMS宣言の無いBMSコンテンツとして
- * 読み込まれます。BMS宣言の記述例は以下の通りです。</p>
- *
- * <pre>
- * ;?bms encoding=&quot;UTF-8&quot; rule=&quot;BM&quot;</pre>
- *
- * <p><strong>メタ情報</strong><br>
- * BMSの中で「ヘッダ」と呼ばれる宣言をメタ情報として解析します。メタ情報は&quot;#&quot;または&quot;%&quot;で始まる
- * 行が該当します。ただし、BMS仕様で規定されていない名称のメタ情報はBMSコンテンツの情報としては読み込まれません。
- * それらの行は無視されるか、解析エラーとして報告されます。<br>
- * メタ情報はBMSのどこで宣言されていても問題無く読み込むことができます(チャンネルを記述した後でもOK)。
- * ただし、一般的にはメタ情報を全て宣言した後でチャンネルを記述することがほとんどのようです。<br>
- * メタ情報の記述例は以下の通りです。</p>
- *
- * <pre>
- * #GENRE J-POP
- * #TITLE My Love Song
- * #BPM 120
- * %URL http://www.lm-t.com/
- * %MYMETA 00AA00GG00ZZ</pre>
- *
- * <p><strong>チャンネル</strong><br>
- * 数字3文字＋36進数2文字＋&quot;:&quot;で始まる行は「チャンネル」として解析します。最初の数字は小節番号、
- * 続く36進数はチャンネル番号を表し、&quot;:&quot;の後の記述は当該小節・チャンネルのデータを表します。
- * チャンネルデータの記述形式はBMS仕様によって定められているため、仕様に違反する記述をした場合、当該チャンネルは
- * 解析エラーとして報告されます。<br>
- * 一般的にチャンネルは小節番号の若い順で記述されますが、小節番号は前後しても構いません。ただし、BMSの可読性が
- * 著しく低下するので小節番号順に記述することが推奨されます。<br>
- * チャンネルの記述例は以下の通りです。</p>
- *
- * <pre>
- * 01002:1.5
- * 0880A:00AB00CD00EF00GH
- * 123ZZ:String data channel</pre>
+ * <p><strong>BMSローダの基本的な動作について</strong><br>
+ * BMS読み込み処理は「BMSコンテンツ生成処理部」と「パーサ部」に分かれており、このうちパーサ部は抽象化されています。
+ * パーサ部は当クラスを継承したクラスで実装され、そのクラスがそのまま対応するフォーマットになります。
+ * BMSライブラリでは{@link BmsStandardLoader}で標準フォーマットのBMSに対応しています。
+ * また、当クラスを継承し独自のパーサ部を実装することで別のフォーマットに対応したBMSローダを作成できます。</p>
  *
  * <p><strong>エラーハンドリングについて</strong><br>
  * 通常、BMSの読み込みにおいてエラー行を検出した場合はその行を無視し、読み込みを続行することがほとんどです。
  * アプリケーションによっては、特定のエラーを検出した場合例外的に読み込みを中止し、読み込みエラーとして扱いたい
  * ケースがあります。そのような場合は{@link #setHandler(BmsLoadHandler)}でハンドラを登録し、発生したエラーに応じて
- * 読み込みの続行・中止を選択することが	できます。発生したエラーを蓄積し、エラーをユーザーに報告するようなケースも
+ * 読み込みの続行・中止を選択することができます。発生したエラーを蓄積し、エラーをユーザーに報告するようなケースも
  * エラーハンドリングを行うことで解決できます。詳細は{@link BmsLoadHandler}を参照してください。</p>
  *
  * <p><strong>拡張したBMSコンテンツオブジェクトを読み込みたい場合</strong><br>
@@ -85,45 +50,17 @@ import java.util.regex.Pattern;
  * {@link #setHandler(BmsLoadHandler)}で設定したハンドラの{@link BmsLoadHandler#createContent(BmsSpec)}を
  * オーバーライドすることによりアプリケーションで独自拡張したBMSコンテンツオブジェクトを返すことができます。</p>
  *
- * <p><strong>BOM付きUTF-8で記録されたBMSの読み込みについて</strong><br>
- * 外部データにBOM(Byte Order Mark)が付与された場合でも正常に読み込むことはできますが、現バージョンのBMSライブラリで
- * 読み込めるのはリトルエンディアンの場合のみです。ビッグエンディアンで記録された外部データはサポートしていません。</p>
- *
  * @see BmsLoadHandler
  * @see BmsScriptError
  */
-public final class BmsLoader {
-	/** BMS宣言1行分 */
-	private static final Pattern SYNTAX_BMS_DECLARATION_ALL = Pattern.compile(
-			"^[ \\t]*;\\?bms(([ \\t]+([a-zA-Z_][a-zA-Z0-9_]*)=\\\"([^\\\"]*)\\\")*)[ \\t]*$");
-	/** BMS宣言の項目抽出用 */
-	private static final Pattern SYNTAX_BMS_DECLARATION_ELEMENT = Pattern.compile(
-			"[ \\t]+([a-zA-Z_][a-zA-Z0-9_]*)=\\\"([^\\\"]*)\\\"");
-	/** 空白の正規表現パターン */
-	private static final Pattern SYNTAX_BLANK = Pattern.compile(
-			"^[ \\t]*$");
-	/** 単一行コメントの正規表現パターン */
-	private static final Pattern SYNTAX_SINGLELINE_COMMENT = Pattern.compile(
-			"^[ \\t]*(\\*|;|//).*$");
-	/** 複数行コメント開始の正規表現パターン */
-	private static final Pattern SYNTAX_MULTILINE_COMMENT_BEGIN = Pattern.compile(
-			"^[ \\t]*/\\*.*$");
-	/** 複数行コメント終了の正規表現パターン */
-	private static final Pattern SYNTAX_MULTILINE_COMMENT_END = Pattern.compile(
-			"^(.*?)\\*/(.*)$");
-	/** メタ情報定義の正規表現パターン */
-	private static final Pattern SYNTAX_DEFINE_META = Pattern.compile(
-			"^[ \\t]*((#|%)[^ \\t]*)(([ \\t]+)(.*?))?([ \\t]*)$");
-	/** チャンネル定義の正規表現パターン */
-	private static final Pattern SYNTAX_DEFINE_CHANNEL = Pattern.compile(
-			"^[ \\t]*#(([0-9]{3})([a-zA-Z0-9]{2})):(.*)$");
+public abstract class BmsLoader {
+	/** デコード用バッファサイズ */
+	private static final int OUT_BUFFER_SIZE = 8 * 1024;
 
 	/** BMSローダのデフォルトハンドラです。具体的な振る舞いは{@link BmsLoadHandler}を参照してください。 */
 	public static final BmsLoadHandler DEFAULT_HANDLER = new BmsLoadHandler() {};
 
-	/**
-	 * ローダーの設定を参照するクラス。
-	 */
+	/** ローダーの設定を参照するクラス */
 	private class Settings implements BmsLoaderSettings {
 		/** {@inheritDoc} */
 		@Override
@@ -174,28 +111,18 @@ public final class BmsLoader {
 		}
 	}
 
-	/**
-	 * チャンネルデータのうち、配列データを一時的にプールするための1データ要素。
-	 */
+	/** チャンネルデータのうち、配列データを一時的にプールするための1データ要素 */
 	private static class ChannelArrayData {
 		/** この配列データが登場した行番号 */
 		int lineNumber;
 		/** 解析した行テキスト */
-		String line;
+		Object line;
 		/** 対象のチャンネル番号 */
 		BmsChannel channel;
 		/** 対象の小節番号 */
 		int measure;
 		/** int配列に変換された配列データ */
-		BmsArray array;
-	}
-
-	/** 解析済みチャンネル定義データ */
-	private static class ParsedChannels {
-		/** チャンネル定義リスト */
-		List<ChannelArrayData> dataList = new ArrayList<>(1295);
-		/** 検出済みチャンネル定義("XXXYY"形式の文字列)とリスト要素 */
-		Map<String, Integer> foundDefs = new HashMap<>();
+		List<Integer> array;
 	}
 
 	/** フィールドにセットしたノートオブジェクトをノート生成器で返す橋渡し用クラス */
@@ -208,6 +135,41 @@ public final class BmsLoader {
 			var note = mNote;
 			mNote = null;
 			return note;
+		}
+	}
+
+	/** 重複可能チャンネルのインデックス値採番用キー */
+	private static class MeasureChNumberKey {
+		/** 小節番号 */
+		private int mMeasure;
+		/** チャンネル番号 */
+		private int mChNumber;
+
+		/**
+		 * コンストラクタ
+		 * @param measure 小節番号
+		 * @param chNumber チャンネル番号
+		 */
+		MeasureChNumberKey(int measure, int chNumber) {
+			mMeasure = measure;
+			mChNumber = chNumber;
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof MeasureChNumberKey) {
+				var mc = (MeasureChNumberKey)obj;
+				return (mMeasure == mc.mMeasure) && (mChNumber == mc.mChNumber);
+			} else {
+				return false;
+			}
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public int hashCode() {
+			return Objects.hash(mMeasure, mChNumber);
 		}
 	}
 
@@ -231,10 +193,339 @@ public final class BmsLoader {
 	private boolean mIsIgnoreWrongData = true;
 	/** タイムライン読み込みスキップするかどうか */
 	private boolean mIsSkipReadTimeline = false;
+	/** デコード時の文字セットリスト(リストの先頭から順にデコードが試みられる) */
+	private List<Charset> mCharsets = new ArrayList<>();
 	/** ノートオブジェクト橋渡し用クラス */
 	private NoteBridge mNoteBridge = new NoteBridge();
 	/** エラー発生有無マップ */
 	private Map<BmsErrorType, BooleanSupplier> mOccurErrorMap;
+	/** BMS読み込み時のデコード用出力バッファ */
+	private CharBuffer mOutBuffer = CharBuffer.wrap(new char[OUT_BUFFER_SIZE]);
+
+	/**
+	 * 解析済み要素の種別を表す列挙型です。
+	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+	 */
+	protected static enum ParsedElementType {
+		/** BMS宣言 */
+		DECLARATION,
+		/** メタ情報 */
+		META,
+		/** 値型チャンネル */
+		VALUE_CHANNEL,
+		/** 配列型チャンネル */
+		ARRAY_CHANNEL,
+		/** エラー */
+		ERROR,
+	}
+
+	/**
+	 * BMSの入力元から解析された1つの要素を表すオブジェクトの抽象クラスです。
+	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+	 * <p>当クラスはBMSコンテンツを構成する複数種類の要素の基底クラスであり、それぞれの要素が持つ共通の情報を管理します。
+	 * このオブジェクトはBMS読み込み時にBMSローダのパーサ部から返される一時的なオブジェクトで、
+	 * BMSローダのBMSコンテンツの読み込み処理部とパーサ部とのデータの橋渡しに利用されます。
+	 * つまり、当クラスから派生するクラスは全て内部処理用のクラスであるためBMSライブラリの一般利用者はこれらを無視して構いません。</p>
+	 */
+	protected static abstract class ParsedElement {
+		/** 要素の種別 */
+		private ParsedElementType mElementType;
+		/** この要素が存在した入力元の行番号、または要素の登場した順番 */
+		public int lineNumber;
+		/** この要素の元になった行の記述内容、定義内容などのデータ */
+		public Object line;
+
+		/**
+		 * コンストラクタ
+		 * @param elementType 要素の種別
+		 */
+		private ParsedElement(ParsedElementType elementType) {
+			mElementType = elementType;
+		}
+
+		/**
+		 * この要素がエラー要素かどうかを返します。
+		 * @return エラー要素であればtrue、そうでなければfalse
+		 */
+		public final boolean error() {
+			return mElementType == ParsedElementType.ERROR;
+		}
+	}
+
+	/**
+	 * BMSの入力元から解析されたBMS宣言を表す要素データクラスです。
+	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+	 * @see ParsedElement
+	 */
+	protected static class DeclarationParsedElement extends ParsedElement {
+		/** BMS宣言のキー名 */
+		public String key;
+		/** BMS宣言の値 */
+		public String value;
+
+		/** BMS宣言要素のオブジェクトを構築します。 */
+		public DeclarationParsedElement() {
+			this(0, null, null, null);
+		}
+
+		/**
+		 * BMS宣言要素のオブジェクトを構築します。
+		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
+		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
+		 * @param key BMS宣言のキー名
+		 * @param value BMS宣言の値
+		 */
+		public DeclarationParsedElement(int lineNumber, Object line, String key, String value) {
+			super(ParsedElementType.DECLARATION);
+			set(lineNumber, line, key, value);
+		}
+
+		/**
+		 * BMS宣言要素のオブジェクトの内容を設定します。
+		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
+		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
+		 * @param key BMS宣言のキー名
+		 * @param value BMS宣言の値
+		 * @return このオブジェクトのインスタンス
+		 */
+		public final DeclarationParsedElement set(int lineNumber, Object line, String key, String value) {
+			this.lineNumber = lineNumber;
+			this.line = line;
+			this.key = key;
+			this.value = value;
+			return this;
+		}
+	}
+
+	/**
+	 * BMSの入力元から解析されたメタ情報を表す要素データクラスです。
+	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+	 * @see ParsedElement
+	 */
+	protected static class MetaParsedElement extends ParsedElement {
+		/** メタ情報 */
+		public BmsMeta meta;
+		/** 索引付きメタ情報のインデックス(索引付き以外では0であること) */
+		public int index;
+		/** メタ情報の値の文字列表現 */
+		public String value;
+
+		/** メタ情報要素のオブジェクトを構築します。 */
+		public MetaParsedElement() {
+			this(0, null, null, 0, null);
+		}
+
+		/**
+		 * メタ情報要素のオブジェクトを構築します。
+		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
+		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
+		 * @param meta メタ情報
+		 * @param index 索引付きメタ情報のインデックス
+		 * @param value メタ情報の値
+		 */
+		public MetaParsedElement(int lineNumber, Object line, BmsMeta meta, int index, String value) {
+			super(ParsedElementType.META);
+			set(lineNumber, line, meta, index, value);
+		}
+
+		/**
+		 * メタ情報要素のオブジェクトの内容を設定します。
+		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
+		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
+		 * @param meta メタ情報
+		 * @param index 索引付きメタ情報のインデックス
+		 * @param value メタ情報の値
+		 * @return このオブジェクトのインスタンス
+		 */
+		public final MetaParsedElement set(int lineNumber, Object line, BmsMeta meta, int index, String value) {
+			this.lineNumber = lineNumber;
+			this.line = line;
+			this.meta = meta;
+			this.index = index;
+			this.value = value;
+			return this;
+		}
+	}
+
+	/**
+	 * BMSの入力元から解析されたチャンネルを表す要素データクラスです。
+	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+	 * @see ParsedElement
+	 */
+	protected static abstract class ChannelParsedElement extends ParsedElement {
+		/** 小節番号 */
+		public int measure;
+		/** チャンネル番号 */
+		public int number;
+
+		/**
+		 * チャンネル要素のオブジェクトを構築します。
+		 * @param elementType 要素の種別
+		 */
+		protected ChannelParsedElement(ParsedElementType elementType) {
+			super(elementType);
+		}
+	}
+
+	/**
+	 * BMSの入力元から解析された値型チャンネルを表す要素データクラスです。
+	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+	 * @see ChannelParsedElement
+	 */
+	protected static class ValueChannelParsedElement extends ChannelParsedElement {
+		/** チャンネルの値の文字列表現 */
+		public String value;
+
+		/** 値型チャンネル要素のオブジェクトを構築します。 */
+		public ValueChannelParsedElement() {
+			this(0, null, 0, 0, null);
+		}
+
+		/**
+		 * 値型チャンネル要素のオブジェクトを構築します。
+		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
+		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
+		 * @param measure 小節番号
+		 * @param number チャンネル番号
+		 * @param value チャンネルの値の文字列表現
+		 */
+		public ValueChannelParsedElement(int lineNumber, Object line, int measure, int number, String value) {
+			super(ParsedElementType.VALUE_CHANNEL);
+			set(lineNumber, line, measure, number, value);
+		}
+
+		/**
+		 * 値型チャンネル要素のオブジェクトの内容を設定します。
+		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
+		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
+		 * @param measure 小節番号
+		 * @param number チャンネル番号
+		 * @param value チャンネルの値の文字列表現
+		 * @return このオブジェクトのインスタンス
+		 */
+		public final ChannelParsedElement set(int lineNumber, Object line, int measure, int number, String value) {
+			this.lineNumber = lineNumber;
+			this.line = line;
+			this.measure = measure;
+			this.number = number;
+			this.value = value;
+			return this;
+		}
+	}
+
+	/**
+	 * BMSの入力元から解析された配列型チャンネルを表す要素データクラスです。
+	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+	 * @see ChannelParsedElement
+	 */
+	protected static class ArrayChannelParsedElement extends ChannelParsedElement {
+		/** 配列データ */
+		public List<Integer> array;
+
+		/** 配列型チャンネル要素のオブジェクトを構築します。 */
+		public ArrayChannelParsedElement() {
+			this(0, null, 0, 0, null);
+		}
+
+		/**
+		 * 配列型チャンネル要素のオブジェクトを構築します。
+		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
+		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
+		 * @param measure 小節番号
+		 * @param number チャンネル番号
+		 * @param array 配列データ
+		 */
+		public ArrayChannelParsedElement(int lineNumber, Object line, int measure, int number, List<Integer> array) {
+			super(ParsedElementType.ARRAY_CHANNEL);
+			set(lineNumber, line, measure, number, array);
+		}
+
+		/**
+		 * 配列型チャンネル要素のオブジェクトの内容を設定します。
+		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
+		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
+		 * @param measure 小節番号
+		 * @param number チャンネル番号
+		 * @param array 配列データ
+		 * @return このオブジェクトのインスタンス
+		 */
+		public final ArrayChannelParsedElement set(int lineNumber, Object line, int measure, int number,
+				List<Integer> array) {
+			this.lineNumber = lineNumber;
+			this.line = line;
+			this.measure = measure;
+			this.number = number;
+			this.array = array;
+			return this;
+		}
+	}
+
+	/**
+	 * BMSローダのパーサ部で発生したエラーを表す要素データクラスです。
+	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+	 * @see ParsedElement
+	 */
+	protected static class ErrorParsedElement extends ParsedElement {
+		/** エラーがないことを表すエラー要素オブジェクト */
+		public static final ErrorParsedElement PASS = new ErrorParsedElement();
+
+		/** エラー発出要因となった解析対象要素の種別 */
+		public ParsedElementType causeType;
+		/** エラー情報 */
+		public BmsScriptError error;
+
+		/** エラー要素のオブジェクトを構築します。 */
+		public ErrorParsedElement() {
+			this(ParsedElementType.ERROR, null);
+		}
+
+		/**
+		 * エラー要素のオブジェクトを構築します。
+		 * @param error エラー情報
+		 */
+		public ErrorParsedElement(BmsScriptError error) {
+			super(ParsedElementType.ERROR);
+			set(ParsedElementType.ERROR, error);
+		}
+
+		/**
+		 * エラー要素のオブジェクトを構築します。
+		 * @param causeType エラー発出要因となった解析対象要素の種別
+		 * @param error エラー情報
+		 */
+		public ErrorParsedElement(ParsedElementType causeType, BmsScriptError error) {
+			super(ParsedElementType.ERROR);
+			set(causeType, error);
+		}
+
+		/**
+		 * エラー要素のオブジェクトの内容を設定します。
+		 * @param causeType エラー発出要因となった解析対象要素の種別
+		 * @param error エラー情報
+		 * @return このオブジェクトのインスタンス
+		 */
+		public final ErrorParsedElement set(ParsedElementType causeType, BmsScriptError error) {
+			this.causeType = causeType;
+			this.error = error;
+			return this;
+		}
+
+		/**
+		 * このオブジェクトが「エラーなし」を表すかどうかを判定します。
+		 * @return エラーなしであればtrue、そうでなければfalse
+		 */
+		public final boolean pass() {
+			return error == null;
+		}
+
+		/**
+		 * このオブジェクトが「エラーあり」を表すかどうかを判定します。
+		 * @return エラーありであればtrue、そうでなければfalse
+		 */
+		public final boolean fail() {
+			return error != null;
+		}
+	}
 
 	/**
 	 * BmsLoaderオブジェクトを構築します。
@@ -276,6 +567,40 @@ public final class BmsLoader {
 	}
 
 	/**
+	 * 厳格なフォーマットチェックの有無を設定します。
+	 * <p>この設定を有効にすると、BMSの記述内容のチェックが厳格になりエラーが出力されやすくなります。
+	 * 記述内容の不備に関する要因で読み込み処理が中止されやすくなりますが、
+	 * それによる意図しないBMSコンテンツの構築を防止できるというメリットがあります。</p>
+	 * <p>具体的には、この設定を有効にすると下記の設定になり、無効にすると下記とは逆の設定になります。</p>
+	 * <ul>
+	 * <li>構文エラーを無視せずエラーとして報告します。</li>
+	 * <li>BMSライブラリの仕様に違反する範囲の値を設定した時、値を仕様範囲内に収めずエラーとして報告します。</li>
+	 * <li>メタ情報・値型の重複可能チャンネルの再定義を検出した時、上書きをせずにエラーとして報告します。</li>
+	 * <li>BMS仕様にないメタ情報を検出した時、無視をせずエラーとして報告します。</li>
+	 * <li>BMS仕様にないチャンネルを検出した時、無視をせずエラーとして報告します。</li>
+	 * <li>BMS仕様・チャンネルの値が規定されたデータ型に適合しない時、無視をせずエラーとして報告します。</li>
+	 * </ul>
+	 * <p>当メソッドで設定を行うと、複数の設定が一度に書き換えられることに留意してください。</p>
+	 * @param strictly 厳格なフォーマットチェックの有無
+	 * @return このオブジェクトのインスタンス
+	 * @see #setSyntaxErrorEnable(boolean)
+	 * @see #setFixSpecViolation(boolean)
+	 * @see #setAllowRedefine(boolean)
+	 * @see #setIgnoreUnknownMeta(boolean)
+	 * @see #setIgnoreUnknownChannel(boolean)
+	 * @see #setIgnoreWrongData(boolean)
+	 */
+	public final BmsLoader setStrictly(boolean strictly) {
+		return this
+				.setSyntaxErrorEnable(strictly)
+				.setFixSpecViolation(!strictly)
+				.setAllowRedefine(!strictly)
+				.setIgnoreUnknownMeta(!strictly)
+				.setIgnoreUnknownChannel(!strictly)
+				.setIgnoreWrongData(!strictly);
+	}
+
+	/**
 	 * 構文エラーの有効状態を設定します。
 	 * <p>BMSでは、メタ情報・チャンネル定義以外の記述は全て無視される仕様になっています。BMS内での不要・不正な記述を
 	 * 防ぐために、メタ情報・チャンネル定義と認識されない全ての記述を構文エラーとしたい場合に当メソッドを使用します。</p>
@@ -314,19 +639,15 @@ public final class BmsLoader {
 	}
 
 	/**
-	 * メタ情報・重複不可チャンネルの再定義を検出した場合のデータ上書きを許可するかどうかを設定します。
-	 * <p>データ上書きを許可すると、先に定義されたメタ情報、または同じ小節の重複不可チャンネルデータを上書きするようになります。
-	 * メタ情報は単体メタ情報({@link BmsUnit#SINGLE})と定義済みの索引付きメタ情報({@link BmsUnit#INDEXED})が対象です。
-	 * 重複不可チャンネルでは、例えば以下のような定義を行った場合に上の行の定義は完全に上書きされ、
-	 * 存在しなかったものとして処理されます。</p>
-	 * <pre>
-	 * #003XY:11001100  ;上書きされ、無かったことになる
-	 * #003XY:22002222  ;上書きされ、無かったことになる
-	 * #003XY:00330033  ;この行のみが有効になる</pre>
-	 * <p>この設定は値型・配列型チャンネルの両方に適用されます。</p>
-	 * <p>再定義が不許可の状態でメタ情報・重複不可チャンネルの再定義が検出された場合、再定義された行はエラーとして処理され、
+	 * メタ情報・値型の重複不可チャンネルの再定義を検出した場合のデータ上書きを許可するかどうかを設定します。
+	 * <p>データ上書きを許可すると、先に定義されたメタ情報、または同じ小節の値型重複不可チャンネルデータを上書きするようになります。
+	 * メタ情報は単体メタ情報({@link BmsUnit#SINGLE})と定義済みの索引付きメタ情報({@link BmsUnit#INDEXED})が対象です。</p>
+	 * <p>再定義が不許可の状態でメタ情報・値型重複不可チャンネルの再定義が検出された場合、再定義された行はエラーとして処理され、
 	 * BMSコンテンツ読み込みハンドラの{@link BmsLoadHandler#parseError(BmsScriptError)}が呼び出されます。
 	 * エラーは{@link BmsErrorType#REDEFINE}として通知されます。</p>
+	 * <p>この設定は配列型の重複不可チャンネルには適用されません。配列型の重複不可チャンネルで重複定義があった場合、
+	 * 重複した配列の定義内容を合成します。これはBMSの一般的な仕様です。</p>
+	 * <p>デフォルトではこの設定は「許可」になっています。</p>
 	 * @param isAllow 再定義の許可有無
 	 * @return このオブジェクトのインスタンス
 	 */
@@ -398,27 +719,42 @@ public final class BmsLoader {
 	}
 
 	/**
+	 * BMS読み込み時、入力のテキストデータのデコードに使用する文字セットを設定します。
+	 * <p>BMS読み込みに{@link #load(Reader)}以外を使用する場合、テキストのデコード処理が必要になります。
+	 * 当メソッドを使用し、優先順位の高い文字セットから順に文字セットを登録してください。</p>
+	 * <p>同じ文字セットを複数追加しても意味はありません。後方で指定したほうの同一の文字セットが無視されます。</p>
+	 * <p>文字セットの登録は省略可能です。省略した場合{@link BmsLibrary#getDefaultCharsets()}を呼び出し、
+	 * BMSライブラリのデフォルト文字セットリストを使用してデコード処理が行われます。
+	 * これは、当メソッドで文字セットを1個も指定しなかった場合も同様です。</p>
+	 * @param charsets テキストのデコード処理時に使用する文字セットリスト
+	 * @return このオブジェクトのインスタンス
+	 * @exception NullPointerException charsetsにnullが含まれている
+	 * @see BmsLibrary#setDefaultCharsets(Charset...)
+	 */
+	public final BmsLoader setCharsets(Charset...charsets) {
+		mCharsets = Stream.of(charsets)
+				.peek(cs -> assertArgNotNull(cs, "charsets[?]"))
+				.distinct()
+				.collect(Collectors.toList());
+		return this;
+	}
+
+	/**
 	 * BMSコンテンツを読み込みます。
 	 * <p>BMSコンテンツは指定されたファイルから読み込みます。</p>
 	 * <p>読み込み処理の詳細は{@link #load(String)}を参照してください。</p>
 	 * @param bms BMSファイル
 	 * @return BMSコンテンツ
-	 * @throws BmsException bmsがnull: Cause NullPointerException
-	 * @throws BmsException {@link #load(String)}を参照
+	 * @exception NullPointerException bmsがnull
+	 * @exception IllegalStateException BMS仕様が設定されていない
+	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
+	 * @exception IOException 指定されたファイルが見つからない、読み取り権限がない、または読み取り中に異常を検出した
+	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
+	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
 	 */
-	public final BmsContent load(File bms) throws BmsException {
-		try {
-			assertArgNotNull(bms, "bms");
-		} catch (Exception e) {
-			throw new BmsException(e);
-		}
-		try {
-			return load(bms.toPath());
-		} catch (BmsException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new BmsException(e);
-		}
+	public final BmsContent load(File bms) throws BmsException, IOException {
+		assertArgNotNull(bms, "bms");
+		return load(bms.toPath());
 	}
 
 	/**
@@ -427,22 +763,17 @@ public final class BmsLoader {
 	 * <p>読み込み処理の詳細は{@link #load(String)}を参照してください。</p>
 	 * @param bms BMSファイルのパス
 	 * @return BMSコンテンツ
-	 * @throws BmsException bmsがnull: Cause NullPointerException
-	 * @throws BmsException {@link #load(String)}を参照
+	 * @exception NullPointerException bmsがnull
+	 * @exception IllegalStateException BMS仕様が設定されていない
+	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
+	 * @exception IOException 指定されたファイルが見つからない、読み取り権限がない、または読み取り中に異常を検出した
+	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
+	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
 	 */
-	public final BmsContent load(Path bms) throws BmsException {
-		try {
-			assertArgNotNull(bms, "bms");
-		} catch (Exception e) {
-			throw new BmsException(e);
-		}
-		try {
-			return load(Files.readAllBytes(bms));
-		} catch (BmsException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new BmsException(e);
-		}
+	public final BmsContent load(Path bms) throws BmsException, IOException {
+		assertArgNotNull(bms, "bms");
+		assertLoaderState();
+		return load(Files.readAllBytes(bms));
 	}
 
 	/**
@@ -451,211 +782,154 @@ public final class BmsLoader {
 	 * <p>読み込み処理の詳細は{@link #load(String)}を参照してください。</p>
 	 * @param bms BMSの入力ストリーム
 	 * @return BMSコンテンツ
-	 * @throws BmsException bmsがnull: Cause NullPointerException
-	 * @throws BmsException {@link #load(String)}を参照
+	 * @exception NullPointerException bmsがnull
+	 * @exception IllegalStateException BMS仕様が設定されていない
+	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
+	 * @exception IOException 入力ストリームからのデータ読み取り中に異常を検出した
+	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
+	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
 	 */
-	public final BmsContent load(InputStream bms) throws BmsException {
-		try {
-			assertArgNotNull(bms, "bms");
-		} catch (Exception e) {
-			throw new BmsException(e);
-		}
-		try {
-			// 入力ストリームの現在位置から終端まで一括で読み取り、バイト配列を生成したものを解析する
-			// 入力ストリームのサイズはBMSデータとして一般的にあり得るサイズであることを想定している。
-			// 最も重いBMSファイルでも約1MB程度のサイズになることを想定。
-			var baos = new ByteArrayOutputStream(1024 * 8);
-			var tempBuffer = new byte[1024];
-			for (var length = bms.read(tempBuffer); length >= 0; length = bms.read(tempBuffer)) {
-				baos.write(tempBuffer, 0, length);
-			}
-			return load(baos.toByteArray());
-		} catch (BmsException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new BmsException(e);
-		}
+	public final BmsContent load(InputStream bms) throws BmsException, IOException {
+		assertArgNotNull(bms, "bms");
+		assertLoaderState();
+		return load(bms.readAllBytes());
 	}
 
 	/**
 	 * BMSコンテンツを読み込みます。
 	 * <p>BMSコンテンツは指定されたバイト配列から読み込みます。</p>
-	 * <p>読み込み処理の詳細は{@link #load(String)}を参照してください。</p>
+	 * <p>当メソッドではバイト配列は「文字コードが不明なテキスト」として扱います。
+	 * より少ない工程で文字コードが特定できるように、最初にテキストにBOM(Byte Order Mark)が付与されているかを調べます。
+	 * この工程で判明する文字コードは「UTF-8」「UTF-16LE」「UTF-16BE」のいずれかです。</p>
+	 * <p>BOMによる文字コードの特定ができなかった場合、{@link #setCharsets(Charset...)}で指定された文字セット
+	 * (未指定の場合は{@link BmsLibrary#getDefaultCharsets()}で取得できる文字セットリスト)
+	 * で優先順にテキストのデコードを試行し、デコードがエラーなく完了するまで繰り返します。
+	 * 全ての文字セットでデコードエラーが発生した場合、最優先文字セット(リストの先頭で指定された文字セット)
+	 * でテキストの最後まで強制的にデコードします。当該文字セットで変換できなかった文字は代替文字で置き換えられますが、
+	 * 代替文字の内容は未定義の値となります。つまり、文字化けと同義の状態となることに注意してください。</p>
+	 * <p>より高速に読み込むには、読み込む想定のBMSコンテンツがどの文字セットでエンコードされていることが多いかを、
+	 * アプリケーションごとに検討のうえ最適な優先順で文字セットリストを指定することが重要になります。</p>
+	 * <p><strong>※注意</strong><br>
+	 * 入力バイト配列に格納されたテキストの実際の文字コードとデコードする文字セットが異なっていれば、
+	 * 必ずデコードが失敗するというわけではありません。例えばShift-JISのテキストをUTF-16LEでデコードした場合、
+	 * デコード失敗が期待動作ですがテキストの内容次第ではデコードが成功することがあります。
+	 * そのようなケースでは文字化けした文字列でBMS読み込みが行われてしまい、期待する結果が得られません。
+	 * デコードの誤判定が発生しやすい文字セットは優先順位を下げるか、デコード対象に含まないようにしてください。</p>
+	 * <p>テキストのデコード後の読み込み処理詳細は{@link #load(String)}を参照してください。</p>
 	 * @param bms BMSのバイト配列
 	 * @return BMSコンテンツ
-	 * @throws BmsException bmsがnull: Cause NullPointerException
-	 * @throws BmsException {@link #load(String)}を参照
+	 * @exception NullPointerException bmsがnull
+	 * @exception IllegalStateException BMS仕様が設定されていない
+	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
+	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
+	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
 	 */
 	public final BmsContent load(byte[] bms) throws BmsException {
-		try {
-			assertArgNotNull(bms, "bms");
-		} catch (Exception e) {
-			throw new BmsException(e);
-		}
+		assertArgNotNull(bms, "bms");
+		assertLoaderState();
 
-		// BOMチェックを行う
-		var isUtf8 = false;
-		var skipCount = 0L;
+		// BOMチェックを行い、文字セットを特定しようとする
+		var charset = (Charset)null;
+		var skipCount = 0;
 		if ((bms.length >= 3) && (bms[0] == (byte)0xef) && (bms[1] == (byte)0xbb) && (bms[2] == (byte)0xbf)) {
-			// データ先頭にUTF-8におけるBOMを検出した
-			isUtf8 = true;
+			// UTF-8
+			charset = StandardCharsets.UTF_8;
 			skipCount = 3;
+		} else if ((bms.length >= 2) && (bms[0] == (byte)0xff) && (bms[1] == (byte)0xfe)) {
+			// UTF-16LE
+			charset = StandardCharsets.UTF_16LE;
+			skipCount = 2;
+		} else if ((bms.length >= 2) && (bms[0] == (byte)0xfe) && (bms[1] == (byte)0xff)) {
+			// UTF-16BE
+			charset = StandardCharsets.UTF_16BE;
+			skipCount = 2;
 		} else {
-			// TODO: UTF-16のBOMチェックは不要？
+			// BOMによる文字セットの特定は不可
+			// Do nothing
 		}
 
-		// 読み込みに使用する文字セットを解決する
-		Charset charset = null;
-		if (isUtf8) {
-			// UTF-8 BOMを検出したため、文字セットはUTF-8とする
-			charset = StandardCharsets.UTF_8;
+		// テキストのデコードを行う
+		var bmsStr = (String)null;
+		if (charset != null) {
+			// BOMによる文字セット確定済み
+			bmsStr = decodeText(bms, charset, skipCount, false);
 		} else {
-			// BMS解析に使用する文字セットを、BMS宣言のencodingから決定しようとする
-			try {
-				// 1行目のみをASCIIコード限定で読み取るReaderを生成する
-				var bais = new ByteArrayInputStream(bms);
-				bais.skip(skipCount);
-				var isr = new InputStreamReader(bais, StandardCharsets.US_ASCII);
-				var reader = new BufferedReader(isr);
+			// 文字セット未決の場合は優先文字セット順でのデコードを試みる
+			// ローダに使用文字セットが指定されていなければBMSライブラリのデフォルト文字セットリストを使用する
+			var charsets = !mCharsets.isEmpty() ? mCharsets : BmsLibrary.getDefaultCharsets();
+			var numCharsets = charsets.size();
+			var isErrorStop = (numCharsets > 1);  // 文字セット1件の場合はエラー停止なし
+			for (var i = 0; (i < numCharsets) && (bmsStr == null); i++) {
+				bmsStr = decodeText(bms, charsets.get(i), 0, isErrorStop);
+			}
 
-				// バイト配列をASCII文字列として1行目を読み取る
-				var declaration = reader.readLine();
-				if (declaration != null) {
-					// BMS宣言を解析してencodingの値から文字セットを決定しようとする
-					var decls = parseDeclaration(declaration);
-					if ((decls != null) && (decls.containsKey("encoding"))) {
-						try {
-							// encodingに記述されている文字セットを使用しようとする
-							charset = Charset.forName(decls.get("encoding"));
-						} catch (Exception e) {
-							// 指定文字セットが使えない場合はエラー
-							error(BmsErrorType.ENCODING, 1, declaration, null, e);
-							charset = BmsSpec.getStandardCharset();
-						}
-					} else {
-						// BMS宣言無し、BMS宣言有りでencoding指定無しの場合はBMS標準文字セットを使用する
-						charset = BmsSpec.getStandardCharset();
-					}
-				} else {
-					// 文字列が読み取れなかった場合はBMS標準文字セットを使用する
-					// このケースではおそらく空のBMSファイルが投げられている
-					charset = BmsSpec.getStandardCharset();
-				}
-			} catch (BmsException e) {
-				throw e;
-			} catch (Exception e) {
-				// 例外発生時はBmsExceptionにラップして投げる
-				throw new BmsException(e);
+			// 全ての文字セットでデコードに失敗した場合は最優先文字セットで再デコードする
+			// その際、デコードできない文字は代替文字で置換する
+			if (bmsStr == null) {
+				bmsStr = decodeText(bms, charsets.get(0), 0, false);
 			}
 		}
 
-		// BMS読み込み用のReaderを生成し、そのReaderで読み込みを実行する
-		var bais = new ByteArrayInputStream(bms);
-		bais.skip(skipCount);
-		var reader = new InputStreamReader(bais, charset);
-		var content = load(reader);
-
-		// 文字セットを強制した場合は当該文字セットをencodingに設定する
-		if (isUtf8) {
-			content.beginEdit();
-			content.addDeclaration("encoding", charset.name());
-			content.endEdit();
-		}
+		// デコードされたテキストでBMSの解析を行う
+		var content = load(bmsStr);
 
 		return content;
 	}
 
 	/**
 	 * BMSコンテンツを読み込みます。
-	 *
-	 * <p>{@link java.io.File} / {@link java.nio.file.Path} / {@link java.io.InputStream} / byte[]が入力となる場合、
-	 * {@link BmsLoader}では最初に先頭行のBMS宣言を解析します。BMS宣言が存在し、encoding要素が存在する場合はその設定値から
-	 * 使用する文字セットを解決します。以後の読み込みは当該文字セットを用いて文字列をデコードし、BMS解析を行います。
-	 * ただし、入力にBOM(Byte Order Mark)が付いている場合はUTF-8で入力をデコードし、encoding要素は &quot;UTF-8&quot;
-	 * に設定・上書きします。</p>
-	 *
-	 * <p>上記の条件に該当しない場合は全て{@link BmsSpec#getStandardCharset}で取得できる文字セットを用いて
-	 * BMSをデコードし、解析を行います。</p>
-	 *
-	 * <p>BMS宣言は左から順に解析し、その順番でBMSコンテンツにセットされます。また、BMS解析の動作仕様は概ね以下の通りです。</p>
-	 *
-	 * <ul>
-	 * <li>行頭の半角スペースおよびタブは無視されます。</li>
-	 * <li>半角スペースおよびタブのみの行は空行として読み飛ばします。</li>
-	 * <li>改行コードは&lt;CR&gt;, &lt;LF&gt;, &lt;CR&gt;&lt;LF&gt;を自動認識します。</li>
-	 * <li>先頭行において、&quot;;bms? &quot;で始まる場合はBMS宣言として認識されます。</li>
-	 * <li>&quot;;&quot;、&quot;*&quot;、または&quot;//&quot;で始まる行はコメント行として認識されます。(単一行コメント)</li>
-	 * <li>&quot;/*&quot;で始まる行は複数行コメントの開始行として認識されます。以降、行末に&quot;* /&quot;が出現するまでの
-	 * 行は全てコメントとして認識されます。</li>
-	 * <li>複数行コメントが閉じられずにBMS解析が終了した場合、エラーハンドラにて{@link BmsErrorType#COMMENT_NOT_CLOSED}
-	 * が通知されます。</li>
-	 * <li>&quot;#&quot;または&quot;%&quot;で始まり、1文字目がアルファベットで始まる行をメタ情報の定義と見なします。</li>
-	 * <li>&quot;#&quot;に続き3文字の半角数字で始まり、次に2文字の半角英数字、更にその次が&quot;:&quot;で始まる行をチャンネルデータの定義と見なします。</li>
-	 * <li>以上のパターンに該当しない行は構文エラーとし、エラーハンドラにて{@link BmsErrorType#SYNTAX}が通知されます。</li>
-	 * </ul>
-	 *
-	 * <p>メタ情報解析について</p>
-	 *
-	 * <ul>
-	 * <li>メタ情報の値は、文字列の右側の半角空白文字は消去されます。</li>
-	 * <li>索引付きメタ情報は、名称の末端文字2文字を36進数値と見なしてその値をインデックス値とし、残りの文字を名称として扱います。</li>
-	 * <li>索引付きメタ情報のインデックス値が36進数値でない場合、エラーハンドラにて{@link BmsErrorType#UNKNOWN_META}が通知されます。</li>
-	 * <li>BMS仕様に規定されていない名称を検出した場合、エラーハンドラにて{@link BmsErrorType#UNKNOWN_META}が通知されます。</li>
-	 * <li>メタ情報の値がBMS仕様に規定されたデータ型の記述書式に適合しない場合、エラーハンドラにて{@link BmsErrorType#WRONG_DATA}が通知されます。</li>
-	 * </ul>
-	 *
-	 * <p>チャンネル解析について</p>
-	 *
-	 * <ul>
-	 * <li>チャンネル番号がBMS仕様に未定義の場合、エラーハンドラにて{@link BmsErrorType#UNKNOWN_CHANNEL}が通知されます。</li>
-	 * <li>以下のケースを検出した場合、エラーハンドラにて{@link BmsErrorType#WRONG_DATA}が通知されます。
-	 * <ul>
-	 * <li>チャンネルに定義されたデータの記述書式がBMS仕様に違反している場合。</li>
-	 * <li>データ重複許可チャンネルの同小節番号内にて{@link BmsSpec#CHINDEX_MAX}+1個を超えるデータ定義を検出した場合。</li>
-	 * <li>配列型チャンネルデータの配列要素数が当該小節の刻み総数より多い場合。</li>
-	 * <li>配列型チャンネルデータの配列要素数が0。</li>
-	 * </ul></li>
-	 * </ul>
-	 *
+	 * <p>当メソッドを使用してBMSを読み込む場合、入力のテキストデータはデコード処理が行われません。</p>
 	 * @param bms BMSのReader
 	 * @return BMSコンテンツ
-	 * @exception BmsException bmsがnull: Cause NullPointerException
-	 * @exception BmsException BMS仕様が設定されていない: Cause IllegalStateException
-	 * @exception BmsException ハンドラが設定されていない: Cause IllegalStateException
+	 * @exception NullPointerException bmsがnull
+	 * @exception IllegalStateException BMS仕様が設定されていない
+	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
+	 * @exception IOException テキストの読み取り中に異常を検出した
 	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
+	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
 	 */
-	public final BmsContent load(Reader bms) throws BmsException {
-		try {
-			// 指定Readerからデータを読み取り、生成したBMSデータの文字列を解析にかける
-			var sb = new StringBuffer();
-			var reader = new BufferedReader(bms);
-			for (var line = reader.readLine(); line != null; line = reader.readLine()) {
-				sb.append(line);
-				sb.append("\n");
-			}
-			return loadMain(sb.toString());
-		} catch (BmsException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new BmsException(e);
+	public final BmsContent load(Reader bms) throws BmsException, IOException {
+		assertArgNotNull(bms, "bms");
+		assertLoaderState();
+		var sb = new StringBuilder();
+		var reader = new BufferedReader(bms);
+		for (var line = reader.readLine(); line != null; line = reader.readLine()) {
+			sb.append(line);
+			sb.append("\n");
 		}
+		return loadMain(sb.toString());
 	}
 
 	/**
 	 * BMSコンテンツを読み込みます。
-	 * <p>BmsLoaderでは、最初に先頭行のBMS宣言を解析します。BMS宣言が存在し、encoding要素が存在する場合はその設定値から
-	 * 使用する文字セットを解決します。</p>
-	 *
+	 * <p>当メソッドには入力元のBMSテキストを直接指定します。</p>
+	 * <p>メタ情報解析について</p>
+	 * <ul>
+	 * <li>BMS仕様に規定されていない名称を検出した場合、エラーハンドラにて{@link BmsErrorType#UNKNOWN_META}が通知されます。</li>
+	 * <li>メタ情報の値がBMS仕様に規定されたデータ型の記述書式に適合しない場合、エラーハンドラにて{@link BmsErrorType#WRONG_DATA}が通知されます。</li>
+	 * </ul>
+	 * <p>チャンネル解析について</p>
+	 * <ul>
+	 * <li>チャンネル番号がBMS仕様に未定義の場合、エラーハンドラにて{@link BmsErrorType#UNKNOWN_CHANNEL}が通知されます。</li>
+	 * <li>重複可能チャンネルで空定義("00"のみの定義)の場合、空配列データとして読み込まれます。</li>
+	 * <li>重複可能チャンネルの末尾側で空配列データが連続する場合、空でない定義以降から末尾までの連続する空配列データは読み込まれません。</li>
+	 * <li>以下のケースを検出した場合、エラーハンドラにて{@link BmsErrorType#WRONG_DATA}が通知されます。
+	 * <ul>
+	 * <li>チャンネルに定義されたデータの記述書式がBMS仕様に違反している場合。</li>
+	 * <li>データ重複許可チャンネルの同小節番号内にて{@link BmsSpec#CHINDEX_MAX}+1個を超えるデータ定義を検出した場合。</li>
+	 * </ul></li>
+	 * </ul>
 	 * @param bms BMSの文字列
 	 * @return BMSコンテンツ
-	 * @exception BmsException bmsがnull: Cause NullPointerException
-	 * @exception BmsException BMS仕様が設定されていない: Cause IllegalStateException
-	 * @exception BmsException BMS読み込みハンドラが設定されていない: Cause IllegalStateException
-	 * @exception BmsException ハンドラが設定されていない: Cause IllegalStateException
-	 * @exception BmsException BMS宣言にてencoding指定時、指定の文字セットが未知: Cause Exception
+	 * @exception NullPointerException bmsがnull
+	 * @exception IllegalStateException BMS仕様が設定されていない
+	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
 	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
+	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
 	 */
 	public final BmsContent load(String bms) throws BmsException {
+		assertArgNotNull(bms, "bms");
+		assertLoaderState();
 		return loadMain(bms);
 	}
 
@@ -666,16 +940,6 @@ public final class BmsLoader {
 	 * @throws BmsException {@link #loadCore}参照
 	 */
 	private BmsContent loadMain(String bms) throws BmsException {
-		// アサーション
-		// 最初のエラーチェックで失敗する場合は、ハンドラのメソッドは何も呼ばれない
-		try {
-			assertField(mSpec != null, "BmsSpec is NOT specified.");
-			assertField(mHandler != null, "BMS load handler is NOT specified.");
-			assertArgNotNull(bms, "bms");
-		} catch (Exception e) {
-			throw new BmsException(e);
-		}
-
 		var content = (BmsContent)null;
 		try {
 			// BMSコンテンツ読み込み開始
@@ -760,116 +1024,68 @@ public final class BmsLoader {
 		}
 
 		final var content = createdContent;
+		var activeParse = Optional.of(Void.TYPE);
 		try {
-			// 読み取り用のReaderを生成する
-			var sr = new StringReader(bms);
-			var reader = new BufferedReader(sr);
+			// BMS解析を開始する
+			var beginError = beginParse(mSettings, bms);
+			bms = null;
+			if (beginError == null) {
+				// BMS解析開始結果のエラー情報が未設定の場合は処理を続行しない
+				throw new BmsException("Result of start parse is not returned.");
+			} else if (beginError.fail()) {
+				// BMS解析開始でエラーが検出された場合も処理を続行しない
+				throw new BmsLoadException(beginError.error);
+			} else {
+				// Do nothing
+			}
 
+			// 入力データから全ての要素を取り出す
 			content.beginEdit();
-
-			// 1行目の記述を読み取る
-			var line = reader.readLine();
-			if (line == null) {
-				// 1行も読み取れないBMSの場合は生成したての空コンテンツを返す
-				content.endEdit();
-				return content;
+			var element = (ParsedElement)null;
+			var dataList = new ArrayList<ChannelArrayData>(BmsSpec.SPEC_CHANNEL_MAX);
+			while ((element = nextElement()) != null) {
+				switch (element.mElementType) {
+				case DECLARATION:  // BMS宣言
+					parseDeclaration((DeclarationParsedElement)element, content);
+					break;
+				case META:  // メタ情報
+					parseMeta((MetaParsedElement)element, content);
+					break;
+				case VALUE_CHANNEL:  // 値型チャンネル
+					parseValueChannel((ValueChannelParsedElement)element, content);
+					break;
+				case ARRAY_CHANNEL:  // 配列型チャンネル
+					parseArrayChannel((ArrayChannelParsedElement)element, dataList, content);
+					break;
+				case ERROR:  // エラー
+					parseError((ErrorParsedElement)element);
+					break;
+				default:  // Don't care
+					break;
+				}
 			}
-
-			// BMS宣言の解析を試行する
-			var lineNumber = 1;
-			var decls = parseDeclaration(line);
-			if (decls != null) {
-				// BMS宣言を正常に解析できた場合は宣言内容をコンテンツに登録する
-				for (var entry : decls.entrySet()) {
-					var k = entry.getKey();
-					var v = entry.getValue();
-					var result = mHandler.testDeclaration(k, v);
-					if (result == null) {
-						var msg = "BMS declaration test result was returned null by handler";
-						error(BmsErrorType.PANIC, lineNumber, line, msg, null);
-					} else switch (result.getResult()) {
-					case BmsLoadHandler.TestResult.RESULT_OK:
-						// BMS宣言の検査合格時はコンテンツに登録する
-						content.addDeclaration(k, v);
-						break;
-					case BmsLoadHandler.TestResult.RESULT_FAIL:
-						// BMS宣言の検査失敗時はコンテンツに登録せずにエラー処理に回す
-						error(BmsErrorType.TEST_DECLARATION, 1, line, result.getMessage(), null);
-						break;
-					case BmsLoadHandler.TestResult.RESULT_THROUGH:
-						// BMS宣言を破棄する
-						break;
-					default:
-						// 想定外
-						var msg = String.format("BMS declaration test result was returned '%d' by handler",
-								result.getResult());
-						error(BmsErrorType.PANIC, 1, line, msg, null);
-						break;
-					}
-				}
-				line = reader.readLine();
-				lineNumber = 2;
-			}
-
-			// 全行を読み取り、BMSを解析する
-			var parsedCh = new ParsedChannels();
-			var isNormalMode = true;
-			while (line != null) {
-				// 読み取りモードによる処理の分岐
-				String nextLine = null;
-				if (isNormalMode) {
-					// 通常解析モード
-					if (parseChannel(lineNumber, line, parsedCh, content)) {
-						// チャンネル
-					} else if (parseMeta(lineNumber, line, content)) {
-						// ヘッダ(メタ情報)
-					} else if (SYNTAX_BLANK.matcher(line).matches()) {
-						// 空行
-					} else if (SYNTAX_SINGLELINE_COMMENT.matcher(line).matches()) {
-						// 単一行コメント
-					} else if (SYNTAX_MULTILINE_COMMENT_BEGIN.matcher(line).matches()) {
-						// 複数行コメント開始(同一行でコメントが終了する場合は通常解析モードを維持する)
-						isNormalMode = SYNTAX_MULTILINE_COMMENT_END.matcher(line).matches();
-					} else if (!mIsEnableSyntaxError) {
-						// 構文エラー無効
-					} else {
-						// 構文エラー
-						error(BmsErrorType.SYNTAX, lineNumber, line, null, null);
-					}
-				} else {
-					// 複数行コメントモード
-					var matcher = SYNTAX_MULTILINE_COMMENT_END.matcher(line);
-					if (matcher.matches()) {
-						// 複数行コメント終了
-						isNormalMode = true;
-						nextLine = matcher.group(2);
-					}
-				}
-
-				// 次行の読み取り
-				if (nextLine != null) {
-					// 複数行コメント終了後の行末残骸を次の解析とする
-					line = nextLine;
-				} else {
-					// 次行を読み取る
-					line = reader.readLine();
-					lineNumber++;
-				}
-			} // while
 			content.endEdit();
 
-			// 複数行コメントモードまま終了した場合はエラー
-			if (!isNormalMode && mIsEnableSyntaxError) {
-				var msg = "Multi-line comment is NOT finished";
-				error(BmsErrorType.COMMENT_NOT_CLOSED, lineNumber, "", msg, null);
+			// BMS解析を終了する
+			activeParse = Optional.empty();
+			var endError = endParse();
+			if (endError == null) {
+				// BMS解析終了結果のエラー情報が未設定の場合は処理を続行しない
+				throw new BmsException("Result of start parse is not returned.");
+			} else if (endError.fail()) {
+				// BMS解析終了でエラーが検出された場合も処理を続行しない
+				throw new BmsLoadException(endError.error);
+			} else {
+				// Do nothing
 			}
 
 			// 配列型のチャンネルデータをコンテンツに登録する
 			// (配列型の要素登録先(tick)が小節の長さの影響を受けるため、一旦BMS全体を解析し切った後で登録する必要あり)
+			var multiChCounts = new HashMap<MeasureChNumberKey, Integer>();
 			content.beginEdit();
-			for (ChannelArrayData data : parsedCh.dataList) {
+			for (ChannelArrayData data : dataList) {
 				var chNumber = data.channel.getNumber();
-				var chIndex = content.getChannelDataCount(chNumber, data.measure);
+				var chIndex = 0;
 				var tickCount = content.getMeasureTickCount(data.measure);
 				var count = data.array.size();
 
@@ -880,6 +1096,14 @@ public final class BmsLoader {
 					error(BmsErrorType.PANIC, data.lineNumber, data.line, msg, null);
 				} else switch (result.getResult()) {
 				case BmsLoadHandler.TestResult.RESULT_OK: {
+					// 重複可能チャンネルの場合は次のインデックスへの登録を行う
+					// 登録先インデックスの配列データ数が0個の場合そのインデックスは空データとなるが、それは意図した動作
+					if (data.channel.isMultiple()) {
+						var key = new MeasureChNumberKey(data.measure, chNumber);
+						chIndex = multiChCounts.getOrDefault(key, 0);
+						multiChCounts.put(key, BmsInt.box(chIndex + 1));
+					}
+
 					// データ配列をNoteとしてコンテンツに登録する
 					// Tickの値は配列要素数, 配列インデックス値, 当該小節の刻み数から計算
 					var occurError = false;
@@ -888,7 +1112,7 @@ public final class BmsLoader {
 					var processedPos = 0;
 					for (processedPos = 0; processedPos < count; processedPos++) {
 						var i = processedPos;
-						var value = data.array.getValue(i);
+						var value = data.array.get(i).intValue();
 						if (value == 0) {
 							// 値00はノート未存在として扱うため、ノート追記処理はスキップする
 							continue;
@@ -938,7 +1162,7 @@ public final class BmsLoader {
 					if (occurError) {
 						for (var i = 0; i < processedPos; i++) {
 							var tick = (double)i * tickRatio;
-							var value = data.array.getValue(i);
+							var value = data.array.get(i).intValue();
 							if (value != 0) {
 								content.removeNote(chNumber, chIndex, data.measure, tick);
 							}
@@ -967,6 +1191,8 @@ public final class BmsLoader {
 		} catch (Exception e) {
 			var msg = String.format("Caught un-expected exception: %s", e);
 			throw new BmsException(msg, e);
+		} finally {
+			activeParse.ifPresent(x -> endParse());
 		}
 
 		// 正常終了
@@ -975,95 +1201,74 @@ public final class BmsLoader {
 
 	/**
 	 * BMS宣言を解析する
-	 * @param declaration BMS宣言の記述(BMS宣言ではない可能性がある)
-	 * @return BMS宣言の一式が格納されたハッシュマップ。BMS宣言の構文を成していない時はnull。
+	 * @param element BMS宣言要素
+	 * @param content BMSコンテンツ
+	 * @exception BmsException エラーハンドラがfalseを返した時
 	 */
-	private Map<String, String> parseDeclaration(String declaration) {
-		// 行がBMS宣言の構文に適合するかチェックする
-		var matcherAll = SYNTAX_BMS_DECLARATION_ALL.matcher(declaration);
-		if (!matcherAll.matches()) {
-			// 構文が不適当なためBMS宣言と見なさない
-			return null;
+	private void parseDeclaration(DeclarationParsedElement element, BmsContent content) throws BmsException {
+		var lineNumber = element.lineNumber;
+		var line = element.line;
+		var key = element.key;
+		var value = element.value;
+		var result = mHandler.testDeclaration(key, value);
+		if (result == null) {
+			var msg = "BMS declaration test result was returned null by handler";
+			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
+		} else switch (result.getResult()) {
+		case BmsLoadHandler.TestResult.RESULT_OK:
+			// BMS宣言の検査合格時はコンテンツに登録する
+			content.addDeclaration(key, value);
+			break;
+		case BmsLoadHandler.TestResult.RESULT_FAIL:
+			// BMS宣言の検査失敗時はコンテンツに登録せずにエラー処理に回す
+			error(BmsErrorType.TEST_DECLARATION, 1, line, result.getMessage(), null);
+			break;
+		case BmsLoadHandler.TestResult.RESULT_THROUGH:
+			// BMS宣言を破棄する
+			break;
+		default:
+			// 想定外
+			var msg = String.format("BMS declaration test result was returned '%d' by handler",
+					result.getResult());
+			error(BmsErrorType.PANIC, 1, line, msg, null);
+			break;
 		}
-
-		// BMS宣言のキーと値を取り出す
-		var decls = new LinkedHashMap<String, String>();
-		var elements = matcherAll.group(1);
-		var matcherElem = SYNTAX_BMS_DECLARATION_ELEMENT.matcher(elements);
-		while (matcherElem.find()) {
-			var key = matcherElem.group(1);
-			var value = matcherElem.group(2);
-			decls.put(key, value);
-		}
-
-		return (decls.size() == 0) ? null : decls;
 	}
 
 	/**
 	 * メタ情報を解析する
-	 * @param lineNumber 解析対象行の行番号
-	 * @param line 解析対象行の文字列
-	 * @param content メタ情報を格納するBMSコンテンツ
-	 * @return 解析対象行をメタ情報として認識した場合はtrue、そうでなければfalse
-	 * @exception BmsParseException エラーハンドラがfalseを返した時
+	 * @param element メタ情報要素
+	 * @param content BMSコンテンツ
+	 * @exception BmsException エラーハンドラがfalseを返した時
 	 */
-	private boolean parseMeta(int lineNumber, String line, BmsContent content) throws BmsException {
-		// メタ情報定義かどうか確認する
-		var matcher = SYNTAX_DEFINE_META.matcher(line);
-		if (!matcher.matches()) {
-			// マッチしない場合はメタ情報定義ではない
-			return false;
-		}
-
-		// メタ名称を取り出す
-		var name = matcher.group(1);
-		if ((name.length() >= 2) && (name.charAt(0) == '#') && Character.isDigit(name.charAt(1))) {
-			// 1文字目が"#"で2文字目が数字の場合、チャンネルを指定しようとした形跡がある
-			// そもそも2文字目はアルファベットから始まらないとメタ情報として認定されないのでメタ情報定義ではない
-			return false;
-		}
-
+	private void parseMeta(MetaParsedElement element, BmsContent content) throws BmsException {
 		// 値を取り出す
-		var value = Objects.requireNonNullElse(matcher.group(5), "");
+		var lineNumber = element.lineNumber;
+		var line = element.line;
+		var meta = element.meta;
+		var index = element.index;
+		var value = Objects.requireNonNullElse(element.value, "");
 
-		// BMS仕様から対応するメタ情報を検索する
-		var index = 0;
-		var meta = mSpec.getMeta(name, BmsUnit.SINGLE);
+		// パーサ部から返されたメタ情報を検証する
 		if (meta == null) {
-			// 重複可能メタ情報で試行する
-			meta = mSpec.getMeta(name, BmsUnit.MULTIPLE);
+			// メタ情報が未設定の場合はエラーとして扱う
+			var msg = String.format("Parser '%s' is returned null meta.", getClass().getSimpleName());
+			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
+			return;
 		}
-		if (meta == null) {
-			// 索引付きメタ情報で試行する
-			var nameLength = name.length();
-			if (nameLength <= 2) {
-				// 2文字以下の場合、名称が無くなるのでエラー
-				var msg = "Wrong indexed meta name";
-				error(BmsErrorType.UNKNOWN_META, lineNumber, line, msg, null);
-				return true;  // メタ情報として解析済みとする
+		if (meta.getUnit() == BmsUnit.INDEXED) {
+			// 索引付きメタ情報の場合はインデックス値の範囲チェックを行う
+			if ((index < 0) || (index > BmsSpec.INDEXED_META_INDEX_MAX)) {
+				var msg = String.format("Index out of range. [index=%d]", index);
+				error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
+				return;
 			}
-
-			// 末尾2文字をインデックス値と見なす
-			var indexStr = name.substring(nameLength - 2, nameLength);
-			if (!BmsType.BASE36.test(indexStr)) {
-				// インデックス値の記述が不正のためエラー
-				var msg = "Wrong indexed meta's index";
-				error(BmsErrorType.UNKNOWN_META, lineNumber, line, msg, null);
-				return true;  // メタ情報として解析済みとする
-			}
-
-			// 索引付きメタ情報取得を試行する
-			var nameIdx = name.substring(0, nameLength - 2);
-			meta = mSpec.getMeta(nameIdx, BmsUnit.INDEXED);
-			index = BmsInt.to36i(indexStr);
-			if (meta == null) {
-				// メタ情報不明
-				var msg = String.format("'%s' No such meta in spec", name);
-				error(BmsErrorType.UNKNOWN_META, lineNumber, line, msg, null);
-				return true;  // メタ情報として解析済みとする
-			} else {
-				// 索引付きメタ情報で見つかった場合は索引を抜いた名前を控えておく
-				name = nameIdx;
+		} else {
+			// 索引付き以外ではインデックス値は0でなければならない
+			if (index != 0) {
+				var msg = String.format("At %s unit, index must be 0. [index=%d]", meta.getUnit(), index);
+				error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
+				return;
 			}
 		}
 
@@ -1073,7 +1278,7 @@ public final class BmsLoader {
 			// データの記述内容が適合しない
 			var msg = "Type mismatch meta value";
 			error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
-			return true;  // メタ情報として解析済みとする
+			return;
 		}
 
 		// 定義値の仕様違反を検査する
@@ -1087,7 +1292,7 @@ public final class BmsLoader {
 				} else {
 					var msg = "This BPM is spec violation of BMS library";
 					error(BmsErrorType.SPEC_VIOLATION, lineNumber, line, msg, null);
-					return true;
+					return;
 				}
 			}
 		}
@@ -1100,12 +1305,13 @@ public final class BmsLoader {
 				} else {
 					var msg = "This stop time is spec violation of BMS library";
 					error(BmsErrorType.SPEC_VIOLATION, lineNumber, line, msg, null);
-					return true;
+					return;
 				}
 			}
 		}
 
 		// メタ情報を検査する
+		var name = meta.getName();
 		var unit = meta.getUnit();
 		var result = BmsLoadHandler.TestResult.FAIL;
 		switch (unit) {
@@ -1118,7 +1324,7 @@ public final class BmsLoader {
 			if ((result != null) && (result.getResult() == BmsLoadHandler.TestResult.RESULT_OK) &&
 					!mIsAllowRedefine && content.containsMeta(meta, index)) {
 				error(BmsErrorType.REDEFINE, lineNumber, line, "Re-defined meta", null);
-				return true;
+				return;
 			}
 
 			break;
@@ -1157,63 +1363,52 @@ public final class BmsLoader {
 			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 			break;
 		}
-
-		return true;
 	}
 
 	/**
-	 * チャンネルを解析する
-	 *
-	 * <p>BMSコンテンツに直接登録するチャンネルデータは単一型のデータのみで、配列型のデータは一旦リストに退避する。
-	 * 配列型のデータの譜面上の配置は小節の長さの影響を受けるが、小節の長さを確定できるのは単一型のデータを完全に解析した
-	 * 後であるため、当メソッドでは配列型のデータはBMSコンテンツには直接登録しない。</p>
-	 *
-	 * @param lineNumber 解析対象行の行番号
-	 * @param line 解析対象行
-	 * @param parsed 解析済みチャンネル定義データ
-	 * @param content チャンネルデータを格納するBMSコンテンツ
-	 * @return 解析対象行をチャンネルとして認識した場合はtrue、そうでなければfalse
-	 * @exception BmsParseException エラーハンドラがfalseを返した時
+	 * 値型チャンネルを解析する
+	 * @param element 値型チャンネル要素
+	 * @param content BMSコンテンツ
+	 * @exception BmsException エラーハンドラがfalseを返した時
 	 */
-	private boolean parseChannel(int lineNumber, String line, ParsedChannels parsed, BmsContent content)
-			throws BmsException {
-		// チャンネル定義かどうか確認する
-		var matcher = SYNTAX_DEFINE_CHANNEL.matcher(line);
-		if (!matcher.matches()) {
-			// マッチしない場合はチャンネル定義ではない
-			return false;
-		}
-
+	private void parseValueChannel(ValueChannelParsedElement element, BmsContent content) throws BmsException {
 		// タイムライン読み込みをスキップする場合は何もしない
 		if (mIsSkipReadTimeline) {
-			return true;
+			return;
 		}
 
-		// 小節番号、チャンネル、値を取り出す
-		var measure = Integer.parseInt(matcher.group(2));
-		var channelNum = BmsInt.to36i(matcher.group(3));
-		var value = matcher.group(4).trim();
+		// 小節番号、チャンネル等の値を取り出す
+		var lineNumber = element.lineNumber;
+		var line = element.line;
+		var measure = element.measure;
+		var channelNum = element.number;
+		var value = element.value;
 
-		// チャンネルの取得とデータ型の適合チェック
+		// 解析結果の適合チェック
 		var channel = mSpec.getChannel(channelNum);
 		if (channel == null) {
 			// 該当するチャンネルが仕様として規定されていない
 			var msg = String.format("'%s' No such channel in spec", BmsInt.to36s(channelNum));
 			error(BmsErrorType.UNKNOWN_CHANNEL, lineNumber, line, msg, null);
-			return true;
+			return;
+		}
+		if (!BmsSpec.isMeasureWithinRange(measure)) {
+			// 小節番号が不正
+			var msg = String.format("Measure is out of range", measure);
+			error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
+			return;
 		}
 
 		// 解析したデータの登録処理
 		var channelType = channel.getType();
 		if (channelType.isValueType()) {
-			// 値型の場合
 			// 小節データの型変換を行う
 			var object = (Object)null;
 			try {
 				object = channelType.cast(value);
 			} catch (Exception e) {
 				error(BmsErrorType.WRONG_DATA, lineNumber, line, null, e);
-				return true;
+				return;
 			}
 
 			// 定義値の仕様違反を検査する
@@ -1226,7 +1421,7 @@ public final class BmsLoader {
 					} else {
 						var msg = "This length is spec violation of BMS library";
 						error(BmsErrorType.SPEC_VIOLATION, lineNumber, line, msg, null);
-						return true;
+						return;
 					}
 				}
 			}
@@ -1237,7 +1432,7 @@ public final class BmsLoader {
 			if (result == null) {
 				var msg = "Channel test result was returned null by handler";
 				error(BmsErrorType.PANIC, lineNumber, line, msg, null);
-				return true;
+				return;
 			}
 
 			// 重複不可チャンネルの重複チェックを行う
@@ -1248,7 +1443,7 @@ public final class BmsLoader {
 				} else {
 					// 上書き不許可・重複不可・再定義検出の条件が揃った場合はエラーとする
 					error(BmsErrorType.REDEFINE, lineNumber, line, "Re-defined value type channel", null);
-					return true;
+					return;
 				}
 			}
 
@@ -1276,62 +1471,77 @@ public final class BmsLoader {
 				error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 				break;
 			}
-		} else if (channelType.isArrayType()) {
-			// 配列型の場合
-			// 配列データを解析する
-			var array = (BmsArray)null;
-			try {
-				array = new BmsArray(value, channelType.getRadix());
-			} catch (IllegalArgumentException e) {
-				// 配列の書式が不正
-				var msg = "Wrong array value";
-				error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, e);
-				return true;
-			}
+		} else {
+			// 値型チャンネル要素で配列型チャンネルを返されても処理しない
+			var msg = String.format("Number %d this channel is array type", channelNum);
+			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
+			return;
+		}
+	}
 
+	/**
+	 * 配列型チャンネルを解析する
+	 * <p>配列型のデータは一旦リストに退避する。配列型のデータの譜面上の配置は小節の長さの影響を受けるが、
+	 * 小節の長さを確定できるのは単一型のデータを完全に解析した後であるため、
+	 * 当メソッドでは配列型のデータはBMSコンテンツには直接登録しない。</p>
+	 * @param element 配列型チャンネル要素
+	 * @param dataList 解析済みチャンネル定義データ
+	 * @param content BMSコンテンツ
+	 * @exception BmsException エラーハンドラがfalseを返した時
+	 */
+	private void parseArrayChannel(ArrayChannelParsedElement element, List<ChannelArrayData> dataList,
+			BmsContent content) throws BmsException {
+		// タイムライン読み込みをスキップする場合は何もしない
+		if (mIsSkipReadTimeline) {
+			return;
+		}
+
+		// 小節番号、チャンネル、等の値を取り出す
+		var lineNumber = element.lineNumber;
+		var line = element.line;
+		var measure = element.measure;
+		var channelNum = element.number;
+		var array = element.array;
+
+		// チャンネルの取得とデータ型の適合チェック
+		var channel = mSpec.getChannel(channelNum);
+		if (channel == null) {
+			// 該当するチャンネルが仕様として規定されていない
+			var msg = String.format("'%s' No such channel in spec", BmsInt.to36s(channelNum));
+			error(BmsErrorType.UNKNOWN_CHANNEL, lineNumber, line, msg, null);
+			return;
+		}
+		if (!BmsSpec.isMeasureWithinRange(measure)) {
+			// 小節番号が不正
+			var msg = String.format("Measure is out of range", measure);
+			error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
+			return;
+		}
+
+		// 解析したデータの登録処理
+		var channelType = channel.getType();
+		if (channelType.isArrayType()) {
+			// 配列型の場合
 			// チャンネルデータの検査を行う
 			var chIndex = content.getChannelDataCount(channelNum, measure);
 			var result = mHandler.testChannel(channel, chIndex, measure, array);
 			if (result == null) {
 				var msg = "Channel test result was returned null by handler";
 				error(BmsErrorType.PANIC, lineNumber, line, msg, null);
-				return true;
-			}
-
-			// 重複不可チャンネル上書き不許可・重複不可・再定義検出の条件が揃った場合はエラーとする
-			var defStr = matcher.group(1);
-			var owPos = (Integer)null;
-			if ((result == BmsLoadHandler.TestResult.OK) && !channel.isMultiple()) {
-				owPos = parsed.foundDefs.get(defStr);
-				if (!mIsAllowRedefine && (owPos != null)) {
-					error(BmsErrorType.REDEFINE, lineNumber, line, "Re-defined array type channel", null);
-					return true;
-				}
+				return;
 			}
 
 			// チャンネルデータの検査結果を判定する
 			switch (result.getResult()) {
 			case BmsLoadHandler.TestResult.RESULT_OK: {
-				// 解析済みデータを生成する
+				// 解析済みデータを生成し、小節番号・チャンネルとそのデータの場所(行番号)を覚えておく
 				ChannelArrayData data = new ChannelArrayData();
 				data.lineNumber = lineNumber;
 				data.line = line;
 				data.channel = channel;
 				data.measure = measure;
 				data.array = array;
-
-				// 解析済みデータをストックし、重複不可チャンネルの小節番号・チャンネルとそのデータの格納場所を覚えておく
-				if (channel.isMultiple()) {
-					// 重複可能であれば格納場所は記憶しない
-					parsed.dataList.add(data);
-				} else if (owPos != null) {
-					// 再定義許可時は既存定義を上書きする
-					parsed.dataList.set(owPos, data);
-				} else {
-					// 重複なし
-					parsed.foundDefs.put(defStr, BmsInt.box(parsed.dataList.size()));
-					parsed.dataList.add(data);
-				}
+				dataList.add(data);
 				break;
 			}
 			case BmsLoadHandler.TestResult.RESULT_FAIL:
@@ -1348,11 +1558,21 @@ public final class BmsLoader {
 				break;
 			}
 		} else {
-			// Do nothing
-			// どないやねん...
+			// 配列型チャンネル要素で値型チャンネルを返されても処理しない
+			var msg = String.format("Number %d this channel is value type", channelNum);
+			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 		}
+	}
 
-		return true;
+	/**
+	 * エラーを解析する
+	 * <p>ローダの解析部から報告されたエラーをハンドラに通知する。</p>
+	 * @param element エラー要素
+	 * @exception BmsException エラーハンドラがfalseを返した時
+	 */
+	private void parseError(ErrorParsedElement element) throws BmsException {
+		var err = element.error;
+		error(err.getType(), err.getLineNumber(), err.getLine(), err.getMessage(), err.getCause());
 	}
 
 	/**
@@ -1364,7 +1584,7 @@ public final class BmsLoader {
 	 * @param throwable 発生した例外
 	 * @exception BmsLoadException エラーハンドラがfalseを返した時
 	 */
-	private void error(BmsErrorType errType, int lineNumber, String line, String message, Throwable throwable)
+	private void error(BmsErrorType errType, int lineNumber, Object line, String message, Throwable throwable)
 			throws BmsLoadException {
 		// エラーが無効にされている場合は例外をスローしない
 		var fnIsOccur = mOccurErrorMap.get(errType);
@@ -1373,10 +1593,135 @@ public final class BmsLoader {
 		}
 
 		// エラーハンドラにエラー内容を通知する
-		var error = new BmsScriptError(errType, lineNumber, line, message, throwable);
+		var lineStr = (line == null) ? "" : line.toString();
+		var error = new BmsScriptError(errType, lineNumber, lineStr, message, throwable);
 		if (!mHandler.parseError(error)) {
 			// BMS解析を中断する場合は例外を投げる
 			throw new BmsLoadException(error);
 		}
 	}
+
+	/**
+	 * テキストのデコード処理
+	 * @param inRaw デコード対象テキスト
+	 * @param cs デコード文字セット
+	 * @param top デコード対象テキストの先頭位置
+	 * @param isErrorStop エラー発生時、処理を停止するかどうか
+	 * @return デコード後テキスト。エラー停止ONでエラー発生時はnull。
+	 */
+	private String decodeText(byte[] inRaw, Charset cs, int top, boolean isErrorStop) {
+		// 指定文字セットのデコーダと入力データをセットアップする
+		var in = ByteBuffer.wrap(inRaw, top, inRaw.length - top);
+		var action = isErrorStop ? CodingErrorAction.REPORT : CodingErrorAction.REPLACE;
+		var decoder = cs.newDecoder()
+				.onMalformedInput(action)
+				.onUnmappableCharacter(action);
+
+		// デコード処理
+		// デコード後のテキストは、バッファの再割り当てが起こりにくいような現実的なサイズを指定する。
+		// 基本的にASCII文字以外が用いられるのはメタ情報のみであることがほとんどのため入力バッファの10～20%だけ
+		// 大きめのサイズを初期キャパシティとして割り当てておく。ただし、際限なくデコード後バッファが肥大化しても困るので
+		// キャパシティの上限は定めておき、OutOfMemoryErrorが発生しないようにしておく。
+		final var MAX_INITIAL_CAPACITY = 1 * 1024 * 1024;  // 1M文字
+		var capacity = (int)Math.min((inRaw.length * 1.2), MAX_INITIAL_CAPACITY);
+		var decodedText = new StringBuilder(capacity);
+		var processing = true;
+		while (processing) {
+			mOutBuffer.position(0);
+			var result = decoder.decode(in, mOutBuffer, true);
+			if (result.isError()) {
+				// デコード結果にエラーがある場合は処理を中断してnullを返す
+				// エラー停止指示がONの場合のみ、このケースに入ることを想定している
+				return null;
+			} else {
+				// デコードした分のテキストをデコード済みバッファへ積み上げる
+				decodedText.append(mOutBuffer.array(), 0, mOutBuffer.position());
+				processing = !result.isUnderflow();
+			}
+		}
+
+		// 全テキストのデコード完了
+		return decodedText.toString();
+	}
+
+	/**
+	 * ローダの状態アサーション
+	 * @exception IllegalStateException BMS仕様が設定されていない
+	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
+	 */
+	private void assertLoaderState() {
+		assertField(mSpec != null, "BmsSpec is NOT specified.");
+		assertField(mHandler != null, "BMS load handler is NOT specified.");
+	}
+
+	protected final BmsLoaderSettings getSettings() {
+		return mSettings;
+	}
+
+	/**
+	 * BMSの解析処理開始を通知します。
+	 * <p><strong>※当メソッドはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+	 * <p>当メソッドが呼ばれた時点でBMSローダが持つパーサ部を初期化することを求めます。
+	 * 入力引数でローダの設定と解析対象のテキストが通知されるので、パーサ部の動作に必要な初期化処理を行ってください。</p>
+	 * <p>パーサ部の初期化完了後に{@link #nextElement()}が呼び出され、BMSコンテンツの各構成要素を返すモードに遷移します。
+	 * しかし、当メソッドの実行で以下の条件のいずれかを満たすと、パーサ部の初期化エラーと見なしBMS読み込みは中止され
+	 * {@link BmsException}がスローされます。</p>
+	 * <ul>
+	 * <li>戻り値でnullを返した</li>
+	 * <li>戻り値でエラー({@link ErrorParsedElement#fail()}がtrueになるオブジェクト)を返した({@link BmsLoadException})</li>
+	 * <li>当メソッドから実行時例外がスローされた</li>
+	 * <li>当メソッドから意図的に{@link BmsException}をスローした</li>
+	 * </ul>
+	 * <p>当メソッドが呼ばれると、上記の実行結果に関わらず{@link #endParse()}が必ず呼び出されます。</p>
+	 * @param settings ローダの設定
+	 * @param source 解析対象のテキスト
+	 * @return 初期化結果を表すエラー情報要素
+	 * @exception BmsException 解析処理開始時に続行不可能なエラーが発生した
+	 */
+	protected abstract ErrorParsedElement beginParse(BmsLoaderSettings settings, String source) throws BmsException;
+
+	/**
+	 * BMSの解析処理終了を通知します。
+	 * <p><strong>※当メソッドはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+	 * <p>当メソッドは{@link #beginParse(BmsLoaderSettings, String)}が呼ばれると、その実行の成否に関わらず必ず呼ばれます。
+	 * BMSローダのパーサ部が使用したリソースを確実に解放する契機を確保するためです。</p>
+	 * <p>パーサ部の初期化途中で実行時例外がスローされ、初期化が中途半端な状態で当メソッドが実行される可能性がありますので、
+	 * それを踏まえたうえで当メソッドの処理を実装するようにしてください。</p>
+	 * <p>当メソッドの実行で以下の条件のいずれかを満たすと読み込まれたBMSコンテンツは破棄され{@link BmsException}
+	 * がスローされます。</p>
+	 * <ul>
+	 * <li>戻り値でnullを返した</li>
+	 * <li>戻り値でエラー({@link ErrorParsedElement#fail()}がtrueになるオブジェクト)を返した({@link BmsLoadException})</li>
+	 * <li>当メソッドから実行時例外がスローされた</li>
+	 * </ul>
+	 * <p>パーサ部の初期化エラー後に当メソッドが呼ばれ実行時例外がスローされた場合、BMSローダは未定義の動作となります。
+	 * 当メソッドは極力、実行時例外がスローされる契機がないよう実装してください。</p>
+	 * @return 終了処理結果を表すエラー情報要素
+	 */
+	protected abstract ErrorParsedElement endParse();
+
+	/**
+	 * BMSの解析によって得られたBMSコンテンツの要素を1件返します。
+	 * <p><strong>※当メソッドはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+	 * <p>当メソッドは{@link #beginParse(BmsLoaderSettings, String)}によるパーサ部の初期化処理が正常に終了した後、
+	 * BMSローダによって連続で呼び出されます。パーサ部は当メソッドが呼び出される度に、
+	 * 解析によって得られた要素を順次返すように実装してください。
+	 * 全ての要素を返した後、nullを返すことで要素の抽出処理を終了することができます。</p>
+	 * <p>要素を返す順番は問いません。BMSローダによって適切にBMSコンテンツへの登録が行われます。
+	 * また、要素の正当性はBMSローダによってチェックされますのでパーサ部でチェックを行う必要はありません。
+	 * 要素の内容に問題があれば自動的にBMS読み込みハンドラへ然るべき通知が行われます。
+	 * ただし、構文エラーなどのような要素の正当性に関連しないエラーはパーサ部でチェックするようにしてください。</p>
+	 * <p>解析の過程でエラーが検出された場合、BMSコンテンツへ登録する要素ではなくエラー要素({@link ErrorParsedElement})
+	 * を返してください。エラー要素はBMSローダによってBMS読み込みハンドラの{@link BmsLoadHandler#parseError(BmsScriptError)}
+	 * へ通知されます。また、1つの要素で複数のエラーが発生した場合、当メソッドの呼び出し毎に発生したエラーの要素を全て返してください。</p>
+	 * <p>当メソッドで実行時例外がスローされた場合BMSローダによってキャッチされ、{@link BmsException}がスローされます。
+	 * 意図的に{@link BmsException}をスローした場合、その例外がそのまま呼び出し元へスローされます。</p>
+	 * @return BMSコンテンツの要素、またはエラー要素。これ以上要素がない場合はnull。
+	 * @exception BmsException 処理中に続行不可能なエラーが発生した
+	 * @see DeclarationParsedElement
+	 * @see MetaParsedElement
+	 * @see ChannelParsedElement
+	 * @see ErrorParsedElement
+	 */
+	protected abstract ParsedElement nextElement() throws BmsException;
 }
