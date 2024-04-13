@@ -340,7 +340,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 			// 小節の長さから刻み位置を計算し、刻み位置に変換する
 			var relPulse = absPulseNumber - this.pulseNumber;
 			var posValue = (this.pulseCount == 0L) ? 0.0 : (double)relPulse / this.pulseCount;
-			var tick = (double)BmsSpec.TICK_COUNT_DEFAULT * this.length * posValue;
+			var tick = BmsSpec.TICK_COUNT_DEFAULT * this.length * posValue;
 			return tick;
 		}
 	}

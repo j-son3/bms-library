@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
 import com.lmt.lib.bms.BmsAt;
@@ -55,55 +54,6 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 		}
 	}
 
-	/** 小節番号・刻み位置を用いた楽曲位置情報のコンパレータ */
-	private static class PointComparator implements ToIntFunction<BeMusicPoint> {
-		/** 小節番号 */
-		private int mMeasure;
-		/** 刻み位置 */
-		private double mTick;
-
-		/**
-		 * 使用準備
-		 * @param measure 小節番号
-		 * @param tick 小節の刻み位置
-		 * @return このオブジェクトのインスタンス
-		 */
-		final PointComparator ready(int measure, double tick) {
-			mMeasure = measure;
-			mTick = tick;
-			return this;
-		}
-
-		/** {@inheritDoc} */
-		@Override
-		public int applyAsInt(BeMusicPoint value) {
-			var comp = Integer.compare(value.getMeasure(), mMeasure);
-			return (comp != 0) ? comp : Double.compare(value.getTick(), mTick);
-		}
-	}
-
-	/** 時間を用いた楽曲位置情報のコンパレータ */
-	private static class TimeComparator implements ToIntFunction<BeMusicPoint> {
-		/** 時間 */
-		private double mTime;
-
-		/**
-		 * 使用準備
-		 * @param time 時間
-		 * @return このオブジェクトのインスタンス
-		 */
-		final TimeComparator ready(double time) {
-			mTime = time;
-			return this;
-		}
-
-		/** {@inheritDoc} */
-		@Override
-		public int applyAsInt(BeMusicPoint value) {
-			return Double.compare(value.getTime(), mTime);
-		}
-	}
-
 	/** 楽曲位置情報リスト */
 	private List<BeMusicPoint> mPoints;
 	/** 総ノート数 */
@@ -140,11 +90,6 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	private double mRecommendTotal2;
 	/** スクラッチモード */
 	private BeMusicScratchMode mScratchMode;
-
-	/** 小節番号・刻み位置によるコンパレータ */
-	private PointComparator mPointCmp = new PointComparator();
-	/** 時間によるコンパレータ */
-	private TimeComparator mTimeCmp = new TimeComparator();
 
 	/**
 	 * BMS譜面オブジェクトを構築します。
@@ -539,7 +484,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 * @return 条件に該当するインデックス。そのような楽曲位置情報がない場合-1。
 	 */
 	public final int floorPointOf(int measure, double tick) {
-		return Utility.bsearchFloor(mPoints, mPointCmp.ready(measure, tick));
+		return Utility.bsearchFloor(mPoints, p -> BmsAt.compare2(p.getMeasure(), p.getTick(), measure, tick));
 	}
 
 	/**
@@ -550,7 +495,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 */
 	public final int floorPointOf(double time) {
 		assertArg(time >= 0.0, "Argument:time is minus value. [%f]", time);
-		return Utility.bsearchFloor(mPoints, mTimeCmp.ready(time));
+		return Utility.bsearchFloor(mPoints, p -> Double.compare(p.getTime(), time));
 	}
 
 	/**
@@ -571,7 +516,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 * @return 条件に該当するインデックス。そのような楽曲位置情報がない場合-1。
 	 */
 	public final int ceilPointOf(int measure, double tick) {
-		return Utility.bsearchCeil(mPoints, mPointCmp.ready(measure, tick));
+		return Utility.bsearchCeil(mPoints, p -> BmsAt.compare2(p.getMeasure(), p.getTick(), measure, tick));
 	}
 
 	/**
@@ -582,7 +527,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 */
 	public final int ceilPointOf(double time) {
 		assertArg(time >= 0.0, "Argument:time is minus value. [%f]", time);
-		return Utility.bsearchCeil(mPoints, mTimeCmp.ready(time));
+		return Utility.bsearchCeil(mPoints, p -> Double.compare(p.getTime(), time));
 	}
 
 	/**

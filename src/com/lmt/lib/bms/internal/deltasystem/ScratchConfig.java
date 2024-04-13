@@ -43,14 +43,16 @@ class ScratchConfig extends RatingConfig {
 	/** 外回りスクラッチに対する加点量 */
 	double addScoreOuter = 0.0;
 	/** 内回りスクラッチに対する加点量 */
-	double addScoreInner = 0.2;
+	double addScoreInner = 0.26;
 
 	/** 最もスクラッチに近いスイッチの操作がある時の加点量 */
-	double addScoreNear = 0.21;
+	double addScoreNear = 0.18;
 	/** スクラッチから遠いスイッチの操作がある時の加点量 */
-	double addScoreFar = 0.29;
+	double addScoreFar = 0.32;
+	/** スクラッチをどちらの手でも操作可能な位置のスイッチの操作がある時の加点量 */
+	double addScoreBorder = 0.36;
 	/** スクラッチを操作する反対の手で操作するスイッチの操作がある時の加点量 */
-	double addScoreOpposite = 0.15;
+	double addScoreOpposite = 0.04;
 
 	/** 短押し操作がある時の加点量 */
 	double addScoreBeat = 0.1;
@@ -88,6 +90,7 @@ class ScratchConfig extends RatingConfig {
 		addScoreInner = loader.numeric("add_score_inner", addScoreInner);
 		addScoreNear = loader.numeric("add_score_near", addScoreNear);
 		addScoreFar = loader.numeric("add_score_far", addScoreFar);
+		addScoreBorder = loader.numeric("add_score_border", addScoreBorder);
 		addScoreOpposite = loader.numeric("add_score_opposite", addScoreOpposite);
 		addScoreBeat = loader.numeric("add_score_beat", addScoreBeat);
 		addScoreLongOn = loader.numeric("add_score_long_on", addScoreLongOn);
@@ -114,6 +117,7 @@ class ScratchConfig extends RatingConfig {
 		Ds.debug("  addScoreInner: %s", addScoreInner);
 		Ds.debug("  addScoreNear: %s", addScoreNear);
 		Ds.debug("  addScoreFar: %s", addScoreFar);
+		Ds.debug("  addScoreBorder: %s", addScoreBorder);
 		Ds.debug("  addScoreOpposite: %s", addScoreOpposite);
 		Ds.debug("  addScoreBeat: %s", addScoreBeat);
 		Ds.debug("  addScoreLongOn: %s", addScoreLongOn);

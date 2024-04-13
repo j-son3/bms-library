@@ -72,13 +72,15 @@ class Scratch {
 		NEAR("NEAR", 0, c -> c.addScoreNear),
 		/** スクラッチデバイスから遠い位置のスイッチ */
 		FAR("FAR ", 3, c -> c.addScoreFar),
+		/** スクラッチをどちらの手でも操作可能な位置のスイッチ */
+		BORDER("BDR", 6, c -> c.addScoreBorder),
 		/** スクラッチデバイスを操作する反対の手で操作するスイッチ */
-		OPPOSITE("OPP ", 6, c -> c.addScoreOpposite);
+		OPPOSITE("OPP ", 9, c -> c.addScoreOpposite);
 
 		/** 全領域リスト */
 		static final Area[] VALUES = values();
 		/** 状態データの合計ビット数 */
-		static final int TOTAL_BITS = 9;
+		static final int TOTAL_BITS = 12;
 
 		/** 領域の短い名前 */
 		final String shortName;
@@ -152,7 +154,7 @@ class Scratch {
 		SP(Map.ofEntries(
 				Map.entry(BeMusicDevice.SWITCH11, Area.NEAR),
 				Map.entry(BeMusicDevice.SWITCH12, Area.FAR),
-				Map.entry(BeMusicDevice.SWITCH13, Area.FAR),
+				Map.entry(BeMusicDevice.SWITCH13, Area.BORDER),
 				Map.entry(BeMusicDevice.SWITCH14, Area.OPPOSITE),
 				Map.entry(BeMusicDevice.SWITCH15, Area.OPPOSITE),
 				Map.entry(BeMusicDevice.SWITCH16, Area.OPPOSITE),

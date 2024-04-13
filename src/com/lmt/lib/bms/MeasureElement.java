@@ -72,7 +72,7 @@ abstract class MeasureElement extends BmsElement {
 	/** BMS仕様 */
 	private BmsSpec mSpec;
 	/** 小節の刻み数 */
-	private int mTickCount;
+	private double mTickCount;
 	/** 小節の刻み位置最大値 */
 	private double mTickMax;
 	/** 4/4拍子を1.0とした場合の小節の長さ比率 */
@@ -181,11 +181,11 @@ abstract class MeasureElement extends BmsElement {
 
 	/**
 	 * 当該小節の刻み数を返す。
-	 * <p>この値は小節の長さ倍率が1.0の時に192を返し、長さ倍率に応じて192に倍率を乗じた値を返す。
-	 * 小数点以下は切り捨てられる。また、刻み数の計算結果が1未満になる場合、1として返す。</p>
+	 * <p>この値は小節の長さ倍率が1.0の時に{@link BmsSpec#TICK_COUNT_DEFAULT}を返し、
+	 * 長さ倍率に応じてその値に倍率を乗じた値を返す。</p>
 	 * @return 当該小節の刻み数
 	 */
-	final int getTickCount() {
+	final double getTickCount() {
 		return mTickCount;
 	}
 
@@ -483,7 +483,7 @@ abstract class MeasureElement extends BmsElement {
 	 */
 	private void setLengthRatio(double lengthRatio) {
 		mLengthRatio = lengthRatio;
-		mTickCount = (int)BmsSpec.computeTickCount(mLengthRatio, true);
+		mTickCount = BmsSpec.computeTickCount(mLengthRatio, false);
 		mTickMax = Math.nextDown(mTickCount);
 	}
 

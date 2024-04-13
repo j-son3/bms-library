@@ -126,7 +126,7 @@ public final class BmsSpec {
 	/** 小節の刻み位置を表す最大の値。 */
 	public static final double TICK_MAX = (double)Short.MAX_VALUE;
 	/** 小節の刻み数のデフォルト値。 */
-	public static final int TICK_COUNT_DEFAULT = 192;
+	public static final double TICK_COUNT_DEFAULT = 192.0;
 
 	/** 16進配列から読み込み可能な最小の値を表します。 */
 	public static final int VALUE_16_MIN = 1;
@@ -771,7 +771,7 @@ public final class BmsSpec {
 	 * @return 小節の刻み数
 	 */
 	static double computeTickCount(double length, boolean normalize) {
-		var tickCount = (double)TICK_COUNT_DEFAULT * length;
+		var tickCount = TICK_COUNT_DEFAULT * length;
 		return normalize ? Math.round(Math.max(1.0, tickCount)) : tickCount;
 	}
 

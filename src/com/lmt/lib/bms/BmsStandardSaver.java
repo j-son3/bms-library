@@ -48,7 +48,7 @@ public class BmsStandardSaver extends BmsSaver {
 	private static final BmsNote.Tester TESTER_OVERFLOW_A36 = n -> !BmsSpec.isNoteValue36WithinRange(n.getValue());
 
 	/** 小数部を持つ刻み位置が全て整数値になる拡張倍率検索時の最終値 */
-	private static final double FIND_INT_MAX = 192.0;
+	private static final double FIND_INT_MAX = 768.0;
 
 	/** 小数部を持つ刻み位置が存在する場合の配列データ最大分解能 */
 	private int mMaxPrecision = PRECISION_DEFAULT;
@@ -91,7 +91,9 @@ public class BmsStandardSaver extends BmsSaver {
 	/**
 	 * メタ情報コメントを設定します。
 	 * <p>コメントの内容は1行につき1文字列、複数行記述する場合は複数の文字列をCollectionに設定して渡してください。</p>
-	 * <p>文字列中の改行コード&lt;CR&gt;、&lt;LF&gt;は消去したうえで出力されます。</p>
+	 * <p>文字列中の改行コード&lt;CR&gt;、&lt;LF&gt;、複数行コメントの開始文字、および末尾の空白文字は消去したうえで出力されます。</p>
+	 * <p>コメントが空文字列、または先頭文字がコメント行を表す文字(&quot;;&quot;, &quot;*&quot;, &quot;//&quot;)の場合、
+	 * その行にはコメント行を表す文字は付加されません。</p>
 	 * @param metaComments メタ情報コメント
 	 * @return このオブジェクトのインスタンス
 	 * @exception NullPointerException metaCommentsがnull
@@ -106,7 +108,10 @@ public class BmsStandardSaver extends BmsSaver {
 	/**
 	 * チャンネルコメントを設定します。
 	 * <p>コメントの内容は1行につき1文字列、複数行記述する場合は複数の文字列をCollectionに設定して渡してください。</p>
-	 * <p>文字列中の改行コード&lt;CR&gt;、&lt;LF&gt;は消去したうえで出力されます。</p>
+	 * <p>文字列中の改行コード&lt;CR&gt;、&lt;LF&gt;、複数行コメントの開始文字、および末尾の半角スペースとタブは
+	 * 消去したうえで出力されます。</p>
+	 * <p>コメントが空文字列、または先頭文字がコメント行を表す文字(&quot;;&quot;, &quot;*&quot;, &quot;//&quot;)の場合、
+	 * その行にはコメント行を表す文字は付加されません。</p>
 	 * @param channelComments チャンネルコメント
 	 * @return このオブジェクトのインスタンス
 	 * @exception NullPointerException channelCommentsがnull
@@ -121,7 +126,10 @@ public class BmsStandardSaver extends BmsSaver {
 	/**
 	 * フッターコメントを設定します。
 	 * <p>コメントの内容は1行につき1文字列、複数行記述する場合は複数の文字列をCollectionに設定して渡してください。</p>
-	 * <p>文字列中の改行コード&lt;CR&gt;、&lt;LF&gt;は消去したうえで出力されます。</p>
+	 * <p>文字列中の改行コード&lt;CR&gt;、&lt;LF&gt;、複数行コメントの開始文字、および末尾の半角スペースとタブは
+	 * 消去したうえで出力されます。</p>
+	 * <p>コメントが空文字列、または先頭文字がコメント行を表す文字(&quot;;&quot;, &quot;*&quot;, &quot;//&quot;)の場合、
+	 * その行にはコメント行を表す文字は付加されません。</p>
 	 * @param footerComments フッターコメント
 	 * @return このオブジェクトのインスタンス
 	 * @exception NullPointerException footerCommentsがnull
@@ -232,7 +240,7 @@ public class BmsStandardSaver extends BmsSaver {
 			// メタ情報コメントを出力する
 			if (outMetaFirst) {
 				outMetaFirst = false;
-				mMetaComments.forEach(c -> pw.println(String.format("; %s", c)));
+				mMetaComments.forEach(c -> writeComment(pw, c));
 			}
 
 			// 構成単位ごとのメタ情報の出力処理
@@ -286,7 +294,7 @@ public class BmsStandardSaver extends BmsSaver {
 				// チャンネルコメントを出力する
 				if (outChFirst) {
 					outChFirst = false;
-					mChannelComments.forEach(c -> pw.println(String.format("; %s", c)));
+					mChannelComments.forEach(c -> writeComment(pw, c));
 				}
 
 				// チャンネルのデータ型ごとに処理を分岐
@@ -316,7 +324,7 @@ public class BmsStandardSaver extends BmsSaver {
 		if (needEmptyLine && (mFooterComments.size() > 0)) {
 			pw.println();
 		}
-		mFooterComments.forEach(c -> pw.println(String.format("; %s", c)));
+		mFooterComments.forEach(c -> writeComment(pw, c));
 
 		// 出力完了
 		pw.close();
@@ -377,17 +385,18 @@ public class BmsStandardSaver extends BmsSaver {
 
 		// 小数部を持つ刻み位置の有無によって処理内容を選択する
 		var result = "";
+		var tickCount = content.getMeasureTickCount(measure);
+		var isTickCountDec = Utility.hasDecimal(tickCount);
 		var decNotes = notes.stream().filter(n -> Utility.hasDecimal(n.getTick())).collect(Collectors.toList());
-		if (decNotes.isEmpty()) {
+		if (decNotes.isEmpty() && !isTickCountDec) {
 			// 整数の刻み位置のみの場合、刻み位置の最大公約数によって配列データの長さを決定する
-			var tickCount = content.getMeasureTickCount(measure);
 			var division = tickCount;
 			for (var note : notes) {
-				division = Utility.gcd(division, (int)note.getTick());
+				division = Utility.gcd((int)division, (int)note.getTick());
 			}
 
 			// 刻み間隔単位で配列データを出力していく
-			var sb = new StringBuilder(tickCount / division * 2);
+			var sb = new StringBuilder((int)tickCount / (int)division * 2);
 			var nextTick = 0;
 			for (var t = 0; t < tickCount; t += division) {
 				if (nextTick >= notes.size()) {
@@ -409,19 +418,19 @@ public class BmsStandardSaver extends BmsSaver {
 		} else {
 			// 小数部を持つ刻み位置が1件でも存在する場合、配列データの最大分解能を上限にした長いデータが必要になる
 			// 小数部を持つ刻み位置が全て整数になる拡張倍率を算出する
+			final var delta = 0.00000001;
 			var arraySize = 0;
-			var tickCount = content.getMeasureTickCount(measure);
 			var numDecNotes = decNotes.size();
 			var expand = 1.0;
 			for (; expand <= FIND_INT_MAX; expand++) {
 				// 刻み位置の拡張を試行し、全ての刻み位置で整数になることを確認する
-				var hasDecimal = false;
+				var hasDecimal = Utility.hasDecimal(tickCount * expand, delta);
 				for (var i = 0; (i < numDecNotes) && !hasDecimal; i++) {
-					hasDecimal = Utility.hasDecimal(decNotes.get(i).getTick() * expand, 0.00000001);
+					hasDecimal = Utility.hasDecimal(decNotes.get(i).getTick() * expand, delta);
 				}
 				// 小数部なしになる倍率が見つかったら、その時点で処理を停止する(倍率確定)
 				if (!hasDecimal) {
-					arraySize = (int)(tickCount * expand);
+					arraySize = (int)Math.round(tickCount * expand);
 					break;
 				}
 			}
@@ -432,7 +441,7 @@ public class BmsStandardSaver extends BmsSaver {
 			} else {
 				// 整数にした全ての刻み位置の最大公約数を算出し、配列サイズの圧縮を試みる
 				// 圧縮した結果それでも最大分解能を超えるようなら、配列サイズを最大分解能範囲に収める
-				var gcd = (long)(tickCount * expand);
+				var gcd = (long)Math.round(tickCount * expand);
 				for (var note : notes) {
 					var expandedTick = Math.round(note.getTick() * expand);
 					gcd = Utility.gcd(gcd, expandedTick);
@@ -442,7 +451,7 @@ public class BmsStandardSaver extends BmsSaver {
 
 			// 確定した配列サイズでノートの値を設定する
 			var maxPos = arraySize - 1;
-			var arrayScale = arraySize / (double)tickCount;
+			var arrayScale = arraySize / tickCount;
 			var noteIndex = 0;
 			var pos = Math.min(maxPos, (int)Math.round(notes.get(0).getTick() * arrayScale));
 			var sb = new StringBuilder(arraySize * 2);
@@ -507,12 +516,16 @@ public class BmsStandardSaver extends BmsSaver {
 
 	/**
 	 * コメント文字列の正規化
-	 * <p>厳密には、改行コードを空白に変換する。</p>
+	 * <p>厳密には、改行コード、複数行コメント開始文字を空白に変換し、末尾の空白文字を消去する。</p>
 	 * @param orgComment 正規化前のコメント文字列
 	 * @return 正規化後のコメント
 	 */
 	private static String comment(String orgComment) {
-		return orgComment.replace('\r', ' ').replace('\n', ' ');
+		return orgComment
+				.replace('\r', ' ')
+				.replace('\n', ' ')
+				.replace("/*", " ")
+				.stripTrailing();
 	}
 
 	/**
@@ -549,6 +562,25 @@ public class BmsStandardSaver extends BmsSaver {
 
 		// 最後までエンコードの完了したバイトデータを返す
 		return out.toByteArray();
+	}
+
+	/**
+	 * コメント1行を出力
+	 * @param pw 出力先のWriter
+	 * @param comment コメント文
+	 */
+	private void writeComment(PrintWriter pw, String comment) {
+		var forJudge = comment.stripLeading();
+		if (forJudge.isEmpty()) {
+			// コメントが空文字列(空白文字のみで構成されている場合も含む)の場合は空行を出力する
+			pw.println();
+		} else if (forJudge.startsWith(";") || forJudge.startsWith("*") || forJudge.startsWith("//")) {
+			// 先頭文字がコメント開始文字の場合はコメントをそのまま出力する
+			pw.println(comment);
+		} else {
+			// 先頭文字がコメント開始文字ではない場合はコメント開始文字を付加して出力する
+			pw.println(String.format("; %s", comment));
+		}
 	}
 
 	/**

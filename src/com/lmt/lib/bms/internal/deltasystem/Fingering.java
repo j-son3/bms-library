@@ -3,11 +3,15 @@ package com.lmt.lib.bms.internal.deltasystem;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.lmt.lib.bms.bemusic.BeMusicDevice;
+import com.lmt.lib.bms.bemusic.BeMusicLane;
 
 /**
  * 運指を表現する列挙型
@@ -17,110 +21,78 @@ import com.lmt.lib.bms.bemusic.BeMusicDevice;
  * 反映させ、可能な限り実際のプレーに近い評価を出力できるようにすることを最終目標とする。</p>
  */
 enum Fingering {
-	/** 1048式 */
-	SP_DEFAULT(0, 'D',
-			Map.ofEntries(
-					Map.entry(BeMusicDevice.SWITCH11, Finger.LTHUMB),
-					Map.entry(BeMusicDevice.SWITCH12, Finger.LMIDDLE),
-					Map.entry(BeMusicDevice.SWITCH13, Finger.LINDEX),
-					Map.entry(BeMusicDevice.SWITCH14, Finger.RINDEX),
-					Map.entry(BeMusicDevice.SWITCH15, Finger.RTHUMB),
-					Map.entry(BeMusicDevice.SWITCH16, Finger.RMIDDLE),
-					Map.entry(BeMusicDevice.SWITCH17, Finger.RLITTLE)),
-			Map.ofEntries(
-					Map.entry(Finger.LTHUMB, resists(r(Finger.LINDEX, 0.8), r(Finger.LMIDDLE, 0.2))),
-					Map.entry(Finger.LINDEX, resists(r(Finger.LTHUMB, 0.4), r(Finger.LMIDDLE, 0.6))),
-					Map.entry(Finger.LMIDDLE, resists(r(Finger.LTHUMB, 0.6), r(Finger.LINDEX, 0.4))),
-					Map.entry(Finger.RTHUMB, resists(r(Finger.RINDEX, 0.5), r(Finger.RMIDDLE, 0.2), r(Finger.RLITTLE, 0.3))),
-					Map.entry(Finger.RINDEX, resists(r(Finger.RTHUMB, 0.4), r(Finger.RMIDDLE, 0.4), r(Finger.RLITTLE, 0.2))),
-					Map.entry(Finger.RMIDDLE, resists(r(Finger.RTHUMB, 0.1), r(Finger.RINDEX, 0.5), r(Finger.RLITTLE, 0.4))),
-					Map.entry(Finger.RLITTLE, resists(r(Finger.RTHUMB, 0.3), r(Finger.RINDEX, 0.1), r(Finger.RMIDDLE, 0.6))))),
+	/** 1048式：POWER値計算に使用する */
+	SP_DEFAULT(
+			'D',
+			"0216579 ",
+			"        ",
+			"0, 1:0.70, 2:0.30",
+			"1, 0:0.30, 2:0.70",
+			"2, 0:0.30, 1:0.70",
+			"5, 6:0.80, 7:0.20, 9:0.30",
+			"6, 5:0.30, 7:0.80, 9:0.20",
+			"7, 5:0.20, 6:0.80, 9:0.50",
+			"9, 5:0.20, 6:0.10, 7:0.80"),
 
-	/** 3・5半固定 */
-	SP_SCRATCH(1, 'S',
-			Map.ofEntries(
-					Map.entry(BeMusicDevice.SCRATCH1, Finger.LLITTLE),
-					Map.entry(BeMusicDevice.SWITCH11, Finger.LTHUMB),
-					Map.entry(BeMusicDevice.SWITCH12, Finger.LINDEX),
-					Map.entry(BeMusicDevice.SWITCH13, Finger.RTHUMB),
-					Map.entry(BeMusicDevice.SWITCH14, Finger.RINDEX),
-					Map.entry(BeMusicDevice.SWITCH15, Finger.RMIDDLE),
-					Map.entry(BeMusicDevice.SWITCH16, Finger.RRING),
-					Map.entry(BeMusicDevice.SWITCH17, Finger.RLITTLE)),
-			Map.ofEntries(
-					Map.entry(Finger.LTHUMB, resists(r(Finger.LINDEX, 0.4), r(Finger.LLITTLE, 0.6))),
-					Map.entry(Finger.LINDEX, resists(r(Finger.LTHUMB, 0.2), r(Finger.LLITTLE, 0.8))),
-					Map.entry(Finger.LLITTLE, resists(r(Finger.LTHUMB, 0.3), r(Finger.LINDEX, 0.7))),
-					Map.entry(Finger.RTHUMB, resists(r(Finger.RINDEX, 0.4), r(Finger.RMIDDLE, 0.5), r(Finger.RLITTLE, 0.1))),
-					Map.entry(Finger.RINDEX, resists(r(Finger.RTHUMB, 0.2), r(Finger.RMIDDLE, 0.7), r(Finger.RLITTLE, 0.1))),
-					Map.entry(Finger.RMIDDLE, resists(r(Finger.RTHUMB, 0.3), r(Finger.RINDEX, 0.3), r(Finger.RRING, 0.8), r(Finger.RLITTLE, 0.4))),
-					Map.entry(Finger.RRING, resists(r(Finger.RTHUMB, 0.3), r(Finger.RINDEX, 0.3), r(Finger.RMIDDLE, 0.8), r(Finger.RLITTLE, 0.4))),
-					Map.entry(Finger.RLITTLE, resists(r(Finger.RTHUMB, 0.1), r(Finger.RINDEX, 0.2), r(Finger.RMIDDLE, 0.7))))),
+	/** 3・5半固定：POWER値計算に使用する */
+	SP_SCRATCH(
+			'S',
+			"01567894",
+			"        ",
+			"0, 1:0.30, 4:0.70",
+			"1, 0:0.20, 4:0.80",
+			"4, 0:0.20, 1:0.80",
+			"5, 6:0.20, 7:0.70, 9:0.10",
+			"6, 5:0.20, 7:0.70, 9:0.10",
+			"7, 5:0.20, 6:0.40, 8:0.90, 9:0.30",
+			"8, 5:0.20, 6:0.20, 7:0.90, 9:0.50",
+			"9, 5:0.10, 6:0.20, 7:0.60, 8:0.90"),
 
 	/** HOLDING算出用：1048式完全固定として定義する */
-	SP_HOLDING(2, 'H',
-			Map.ofEntries(
-					Map.entry(BeMusicDevice.SCRATCH1, Finger.LLITTLE),
-					Map.entry(BeMusicDevice.SWITCH11, Finger.LTHUMB),
-					Map.entry(BeMusicDevice.SWITCH12, Finger.LMIDDLE),
-					Map.entry(BeMusicDevice.SWITCH13, Finger.LINDEX),
-					Map.entry(BeMusicDevice.SWITCH14, Finger.RINDEX),
-					Map.entry(BeMusicDevice.SWITCH15, Finger.RTHUMB),
-					Map.entry(BeMusicDevice.SWITCH16, Finger.RMIDDLE),
-					Map.entry(BeMusicDevice.SWITCH17, Finger.RLITTLE)),
-			// HOLDINGでの抵抗値は、標準抵抗1.0にプラスする値として定義する
-			// 実際のプレーでBSSが来た時に1048完全固定で捌くのは通常ではあり得ないが、人によってやり方が分かれる点なので
-			// BSS中はスクラッチ以外の指が思いっ切り抵抗を受けるという設定にして評価点を疑似ることにする
-			Map.ofEntries(
-					Map.entry(Finger.LLITTLE, resists(r(Finger.LTHUMB, 0.2), r(Finger.LINDEX, 0.4), r(Finger.LMIDDLE, 0.3))),
-					Map.entry(Finger.LTHUMB, resists(r(Finger.LINDEX, 0.25), r(Finger.LMIDDLE, 0.1), r(Finger.LLITTLE, 0.5))),
-					Map.entry(Finger.LMIDDLE, resists(r(Finger.LTHUMB, 0.1), r(Finger.LINDEX, 0.3), r(Finger.LLITTLE, 0.5))),
-					Map.entry(Finger.LINDEX, resists(r(Finger.LTHUMB, 0.3), r(Finger.LMIDDLE, 0.2), r(Finger.LLITTLE, 0.5))),
-					Map.entry(Finger.RINDEX, resists(r(Finger.RTHUMB, 0.4), r(Finger.RMIDDLE, 0.25), r(Finger.RLITTLE, 0.15))),
-					Map.entry(Finger.RTHUMB, resists(r(Finger.RINDEX, 0.4), r(Finger.RMIDDLE, 0.1), r(Finger.RLITTLE, 0.2))),
-					Map.entry(Finger.RMIDDLE, resists(r(Finger.RINDEX, 0.25), r(Finger.RTHUMB, 0.1), r(Finger.RLITTLE, 0.3))),
-					Map.entry(Finger.RLITTLE, resists(r(Finger.RINDEX, 0.3), r(Finger.RTHUMB, 0.15), r(Finger.RMIDDLE, 0.3))))),
+	SP_HOLDING(
+			'H',
+			"02165794",
+			"        ",
+			"4, 0:0.20, 1:0.40, 2:0.30",
+			"0, 1:0.25, 2:0.10, 4:0.50",
+			"2, 0:0.10, 1:0.30, 4:0.50",
+			"1, 0:0.30, 2:0.20, 4:0.50",
+			"6, 5:0.40, 7:0.25, 9:0.15",
+			"5, 6:0.40, 7:0.10, 9:0.20",
+			"7, 6:0.25, 5:0.10, 9:0.30",
+			"9, 6:0.30, 5:0.15, 7:0.30"),
 
 	/** GIMMICKの地雷用 */
-	SP_MINE(3, 'M',
-			Map.ofEntries(
-					Map.entry(BeMusicDevice.SCRATCH1, Finger.LLITTLE),
-					Map.entry(BeMusicDevice.SWITCH11, Finger.LTHUMB),
-					Map.entry(BeMusicDevice.SWITCH12, Finger.LMIDDLE),
-					Map.entry(BeMusicDevice.SWITCH13, Finger.LINDEX),
-					Map.entry(BeMusicDevice.SWITCH14, Finger.RINDEX),
-					Map.entry(BeMusicDevice.SWITCH15, Finger.RTHUMB),
-					Map.entry(BeMusicDevice.SWITCH16, Finger.RMIDDLE),
-					Map.entry(BeMusicDevice.SWITCH17, Finger.RLITTLE)),
-			Map.ofEntries(
-					Map.entry(Finger.LLITTLE, resists(r(Finger.LLITTLE, 1.0))),
-					Map.entry(Finger.LTHUMB, resists(r(Finger.LTHUMB, 1.0), r(Finger.LMIDDLE, 0.1), r(Finger.LINDEX, 0.1))),
-					Map.entry(Finger.LMIDDLE, resists(r(Finger.LMIDDLE, 1.0), r(Finger.LTHUMB, 0.1), r(Finger.LINDEX, 0.1))),
-					Map.entry(Finger.LINDEX, resists(r(Finger.LINDEX, 1.0), r(Finger.LTHUMB, 0.1), r(Finger.LMIDDLE, 0.1))),
-					Map.entry(Finger.RINDEX, resists(r(Finger.RINDEX, 1.0), r(Finger.RTHUMB, 0.1), r(Finger.RMIDDLE, 0.2))),
-					Map.entry(Finger.RTHUMB, resists(r(Finger.RTHUMB, 1.0), r(Finger.RINDEX, 0.1), r(Finger.RMIDDLE, 0.1), r(Finger.RLITTLE, 0.05))),
-					Map.entry(Finger.RMIDDLE, resists(r(Finger.RMIDDLE, 1.0), r(Finger.RINDEX, 0.2), r(Finger.RTHUMB, 0.1), r(Finger.RLITTLE, 0.2))),
-					Map.entry(Finger.RLITTLE, resists(r(Finger.RLITTLE, 1.0), r(Finger.RINDEX, 0.05), r(Finger.RTHUMB, 0.1), r(Finger.RMIDDLE, 0.2))))),
+	SP_MINE(
+			'M',
+			"02165794",
+			"        ",
+			"4, 4:1.00",
+			"0, 0:1.00, 2:0.10, 1:0.10",
+			"2, 2:1.00, 0:0.10, 1:0.10",
+			"1, 1:1.00, 0:0.10, 2:0.10",
+			"6, 6:1.00, 5:0.10, 7:0.20",
+			"5, 5:1.00, 6:0.10, 7:0.10, 9:0.05",
+			"7, 7:1.00, 6:0.20, 5:0.10, 9:0.20",
+			"9, 9:1.00, 6:0.05, 5:0.10, 7:0.20"),
 
 	/** 左片手 */
-	LEFT_HAND(4, 'L', Collections.emptyMap(), Collections.emptyMap()),
+	LEFT_HAND('L', Collections.emptyMap(), Collections.emptyMap()),
 
 	/** DP左レーンスクラッチ */
-	LEFT_SCRATCH(5, 'R', Collections.emptyMap(), Collections.emptyMap()),
+	LEFT_SCRATCH('R', Collections.emptyMap(), Collections.emptyMap()),
 
 	/** 右片手 */
-	RIGHT_HAND(6, '<', Collections.emptyMap(), Collections.emptyMap()),
+	RIGHT_HAND('<', Collections.emptyMap(), Collections.emptyMap()),
 
 	/** DP右レーンスクラッチ */
-	RIGHT_SCRATCH(7, '>', Collections.emptyMap(), Collections.emptyMap());
+	RIGHT_SCRATCH('>', Collections.emptyMap(), Collections.emptyMap());
 
 	/** インデックスによる運指のテーブル */
 	private static final Fingering[] TABLE = {
 			SP_DEFAULT, SP_SCRATCH, SP_HOLDING, LEFT_HAND, LEFT_SCRATCH, RIGHT_HAND, RIGHT_SCRATCH,
 	};
 
-	/** インデックス */
-	private int mIndex;
 	/** 運指の1文字表現 */
 	private char mChar;
 	/** 指と入力デバイスのマッピングテーブル */
@@ -142,15 +114,38 @@ enum Fingering {
 
 	/**
 	 * コンストラクタ
-	 * @param index インデックス
+	 * @param ch 運指の1文字表現
+	 * @param primary 主レーンの入力デバイスと指の定義
+	 * @param secondary 副レーンの入力デバイスと指の定義
+	 * @param resists 動作指と抵抗値定義リスト
+	 */
+	private Fingering(char ch, String primary, String secondary, String...resists) {
+		 var fingerMap = new HashMap<BeMusicDevice, Finger>();
+		 var resistMap = new HashMap<Finger, Resist[]>();
+		 parseDeviceFinger(fingerMap, BeMusicDevice.getDevices(BeMusicLane.PRIMARY), primary);
+		 parseDeviceFinger(fingerMap, BeMusicDevice.getDevices(BeMusicLane.SECONDARY), secondary);
+		 Stream.of(resists).forEach(r -> parseResist(resistMap, r));
+		 initialize(ch, fingerMap, resistMap);
+	}
+
+	/**
+	 * コンストラクタ
 	 * @param ch 運指の1文字表現
 	 * @param fingerMap 入力デバイスへの指のマッピング情報
 	 * @param resistMap 周囲指からの抵抗情報のマッピング
 	 */
-	private Fingering(int index, char ch, Map<BeMusicDevice, Finger> fingerMap, Map<Finger, Resist[]> resistMap) {
-		mIndex = index;
-		mChar = ch;
+	private Fingering(char ch, Map<BeMusicDevice, Finger> fingerMap, Map<Finger, Resist[]> resistMap) {
+		initialize(ch, fingerMap, resistMap);
+	}
 
+	/**
+	 * 初期化処理
+	 * @param ch 運指の1文字表現
+	 * @param fingerMap 入力デバイスへの指のマッピング情報
+	 * @param resistMap 周囲指からの抵抗情報のマッピング
+	 */
+	private void initialize(char ch, Map<BeMusicDevice, Finger> fingerMap, Map<Finger, Resist[]> resistMap) {
+		mChar = ch;
 		mDevicesFromFinger = new BeMusicDevice[Finger.COUNT];
 		mFingersFromDevice = new Finger[BeMusicDevice.COUNT];
 		var devsL = new ArrayList<BeMusicDevice>();
@@ -190,14 +185,6 @@ enum Fingering {
 		for (var e : resistMap.entrySet()) {
 			mResistTable[e.getKey().getIndex()] = e.getValue();
 		}
-	}
-
-	/**
-	 * インデックス取得
-	 * @return インデックス
-	 */
-	final int getIndex() {
-		return mIndex;
 	}
 
 	/**
@@ -272,25 +259,6 @@ enum Fingering {
 	}
 
 	/**
-	 * 抵抗情報生成
-	 * @param finger 指
-	 * @param value 抵抗値
-	 * @return 抵抗情報
-	 */
-	private static Resist r(Finger finger, double value) {
-		return new Resist(finger, value);
-	}
-
-	/**
-	 * 抵抗情報一覧生成
-	 * @param resistArgs 抵抗情報一覧
-	 * @return 抵抗情報一覧
-	 */
-	private static Resist[] resists(Resist...resistArgs) {
-		return resistArgs;
-	}
-
-	/**
 	 * 運指の文字列表現取得
 	 * @return 運指の文字列表現
 	 */
@@ -311,7 +279,6 @@ enum Fingering {
 		var ind3 = String.join("", Stream.generate(() -> "  ").limit(indent + 2).collect(Collectors.toList()));
 		var ind4 = String.join("", Stream.generate(() -> "  ").limit(indent + 3).collect(Collectors.toList()));
 		sb.append(ind1).append(name()).append(": {\n");
-		sb.append(ind2).append("index: ").append(mIndex).append("\n");
 		sb.append(ind2).append("char: ").append(mChar).append("\n");
 		sb.append(ind2).append("assign: {\n");
 		for (var h : Hand.values()) {
@@ -341,5 +308,71 @@ enum Fingering {
 		Ds.debug(SP_DEFAULT.toString(1));
 		Ds.debug(SP_SCRATCH.toString(1));
 		Ds.debug("}");
+	}
+
+	/**
+	 * 入力デバイスと指の定義解析
+	 * @param map 解析結果の追記先マップ
+	 * @param devs 入力デバイスリスト
+	 * @param def 定義内容
+	 * @exception IllegalArgumentException 定義内容の構文エラー
+	 */
+	private static void parseDeviceFinger(Map<BeMusicDevice, Finger> map, List<BeMusicDevice> devs, String def) {
+		try {
+			// 定義は8文字でなければならない1
+			if (def.length() != 8) {
+				throw new Exception();
+			}
+
+			// 解析結果を読み取り、入力デバイスと指のマップを構成する
+			for (var i = 0; i < 8; i++) {
+				var c = def.charAt(i);
+				if (c == ' ') {
+					// 半角空白の場合はアサインしない
+					// Do nothing
+				} else if ((c >= '0') && (c <= '9')) {
+					// 入力デバイスに指をアサインする
+					map.put(devs.get(i), Finger.fromIndex(c - '0'));
+				} else {
+					// 認識不可能な文字
+					throw new Exception();
+				}
+			}
+		} catch (Exception e) {
+			// 不正な定義内容を検出した
+			var msg = String.format("Device-Finger format error: '%s'", def);
+			throw new IllegalArgumentException(msg);
+		}
+	}
+
+	/**
+	 * 動作指と抵抗値定義解析
+	 * @param map 解析結果の追記先マップ
+	 * @param def 定義内容
+	 * @exception IllegalArgumentException 定義内容の構文エラー
+	 */
+	private static void parseResist(Map<Finger, Resist[]> map, String def) {
+		// 定義内容を解析する
+		final var REX_RESIST = "( *, *(\\d):(\\d+\\.\\d+))";
+		final var REX_ALL = String.format("^(\\d)%s%s?%s?%s?$", REX_RESIST, REX_RESIST, REX_RESIST, REX_RESIST);
+		var matcher = Pattern.compile(REX_ALL).matcher(def);
+		if (!matcher.matches()) {
+			var msg = String.format("Resist format error: '%s'", def);
+			throw new IllegalArgumentException(msg);
+		}
+
+		// 解析結果を読み取り、動作指と抵抗値定義のマップを構成する
+		var actionFinger = Finger.fromIndex(Integer.parseInt(matcher.group(1)));
+		var resistCount = 4;
+		var resists = new ArrayList<Resist>(resistCount);
+		for (var i = 0; i < resistCount; i++) {
+			var baseGroupIndex = 2 + (i * 3);
+			if (matcher.group(baseGroupIndex) != null) {
+				var resistFinger = Finger.fromIndex(Integer.parseInt(matcher.group(baseGroupIndex + 1)));
+				var resistValue = Double.parseDouble(matcher.group(baseGroupIndex + 2));
+				resists.add(new Resist(resistFinger, resistValue));
+			}
+		}
+		map.put(actionFinger, resists.toArray(Resist[]::new));
 	}
 }

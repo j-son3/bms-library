@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.7.1 / 1.2-D] - 2024-02-18
+### Changed
+- BmsStandardSaver でコメント文出力が一般のBMS編集ソフトと同等になるように修正しました。
+- Delta Systemの各テーマのレーティング値算出を以下のように調整しました。
+    - COMPLEX：配置ごとの評価基準を見直し、配置の違いによる値の高低が顕著化しました。
+    - POWER：指の動かしにくい配置では、より値が高くなるように調整されました。
+    - POWER：出力される値を最大で約2.5%下方修正しました。
+    - SCRATCH：スクラッチに近いKEYの配置による値の高低がより詳細に計算されるようになりました。
+    - HOLDING：長押し操作が非常に少ない楽曲での値を大幅に下方修正(最大約50%減)しました。
+
+### Fixed
+- 非常に短い小節長を持つ楽曲が意図通りに構成されないことがある不具合を修正しました。
+- BeMusicScore の楽曲位置情報検索処理がマルチスレッドで正常に動作しない不具合を修正しました。
+
 ## [0.7.0 / 1.1-D] - 2023-10-25
 ### Added
 - BmsStandardSaver クラスが新設され、標準フォーマットでのBMSコンテンツ保存に対応しました。
@@ -17,9 +31,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
     - BmsLoader にBMS読み込み時に使用する文字セットを設定する setCharsets を追加しました。
 - bmson形式サポートに伴い、コアライブラリ・Be-Musicサブセットへ以下の仕様調整が行われました。
     - BeMusicSpec に #CHARTNAME ヘッダを追加しました。(※1)
-    - BeMusicSpec に #EYECHATCH ヘッダを追加しました。(※1)
-    - BeMusicSoundNote クラスを新設し、bmson形式で必要になるノートの値の生成・取得に対応しました。<br><br>
-※1 bmson独自の情報を保持するためのライブラリ独自のヘッダです<br><br>
+    - BeMusicSpec に #EYECHATCH ヘッダを追加しました。(※1)<br>※1 bmson独自の情報を保持するためのライブラリ独自のヘッダです
+    - BeMusicSoundNote クラスを新設し、bmson形式で必要になるノートの値の生成・取得に対応しました。
 
 - BOM付きの UTF-16LE, UTF-16BE でエンコードされたBMSファイルの読み込みに対応しました。
 - BmsLibrary クラスを新設し、ライブラリバージョンを取得する getVersion を追加しました。

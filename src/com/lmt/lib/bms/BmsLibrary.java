@@ -13,7 +13,7 @@ import java.util.stream.Stream;
  */
 public class BmsLibrary {
 	/** ライブラリ本体バージョン */
-	private static final String LIBRARY_VERSION = "0.7.0";
+	private static final String LIBRARY_VERSION = "0.7.1";
 
 	/**
 	 * デフォルトの文字セットリスト

@@ -1,6 +1,7 @@
 package com.lmt.lib.bms.internal.deltasystem;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import com.lmt.lib.bms.bemusic.BeMusicDevice;
@@ -35,6 +36,7 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 		// 「楽曲位置複雑度評価点」は、同一楽曲位置上でのノートの配置状況から複雑さを数値化したもの。
 		// 「後方複雑度評価点」は、後方の楽曲位置複雑度評価点から当該楽曲位置の総合評価点に加算する点数。
 		var config = ComplexConfig.getInstance();
+		var basicScore = ComplexBasicScore.getInstance();
 		var ntypeFounds = new int[BeMusicDevice.COUNT];
 		var devs = BeMusicDevice.orderedBySpLeftScratchList();
 		var countDev = devs.size();
@@ -48,6 +50,7 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 			// 楽曲位置のノート分析を行い、各分析結果を楽曲位置要素として記録する
 			// 入力デバイスレイアウトの左から右へ走査し、評価点の元となる要素を算出する
 			// 一部、計算済みの要素は楽曲位置情報からデータを取り出すのみとなる
+			var basic = basicScore.get(elem);
 			var prevVe = true;
 			var prevVeSwNo = -1;
 			var prevVeNtype = (BeMusicNoteType)null;
@@ -59,7 +62,6 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 			var spaceCount = 0;
 			var changeColorCount = 0;
 			var changeNoteTypeCount = 0;
-			var changeColorScratch = false;
 			Arrays.fill(ntypeFounds, 0);
 			for (var j = 0; j < countDev; j++) {
 				var dev = devs.get(j);
@@ -77,7 +79,6 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 					var changeColor = computeChangeColor(prevVeSwNo, curVeSwNo);
 					changeColorCount += (changeColor & 0x01);
 					changeNoteTypeCount += computeChangeNoteType(prevVeNtype, curVeNtype);
-					changeColorScratch |= ((changeColor & 0x02) != 0);
 					prevVeSwNo = curVeSwNo;
 					prevVeNtype = curVeNtype;
 				} else {
@@ -100,16 +101,11 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 			var deductionLnTail = (lnTailCount / 8.0) * config.deductionLnTail;
 			var deductionLandmine = (landmineCount / 8.0) * config.deductionMine;
 			var deduction = 1.0 - (deductionHolding + deductionLnTail + deductionLandmine);
-			var basic = (2.0 + ((visualEffectCount / 8.0) * 4.0));
-			var colAdjustScr = changeColorScratch ? config.adjustScratchColor : 0.0;
-			var ratioSpCol1 = (changeColorCount + colAdjustScr + 1.0) / (10.0 - (spaceCount / 2.0));
-			var ratioSpCol2 = 0.8 + (spaceCount / 4.0) * 0.2;
-			var ratioSpCol = 0.5 + (ratioSpCol1 * ratioSpCol2);
 			var ratioNtype1 = ((noteTypeCount - 1.0) / 4.0) * config.typeCountRate;
 			var ratioNtype2 = (changeNoteTypeCount / 7.0) * config.typeChangeRate;
 			var ratioNtype = 1.0 + ratioNtype1 + ratioNtype2;
 			var ratioPtReduce = config.ipfnPtReduce.compute(elem.getTimeDelta());
-			var scorePointOrg = basic * ratioSpCol * ratioNtype * ratioPtReduce * deduction;
+			var scorePointOrg = basic * ratioNtype * ratioPtReduce * deduction;
 			var scorePoint = config.ipfnBasic.compute(scorePointOrg);
 			elem.setPointScore(scorePoint);
 
@@ -158,7 +154,7 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 		var complex = (int)config.ipfnComplex.compute(complexOrg);
 
 		// デバッグ出力する
-		debugOut(cxt, complexOrg, complex, elems, summarizer);
+		debugOut(cxt, complexOrg, complex, elems, summarizer, timePtRange, customRatio);
 
 		// 最終結果を設定する
 		cxt.stat.setRating(getRatingType(), complex);
@@ -174,6 +170,17 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 		sb.append(String.format("\t%.4f", org));
 		sb.append(String.format("\t%.2f", getRatingType().toValue(rating)));
 		Ds.debug(sb);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void dumpDetail(DsContext cxt, double org, int rating, List<? extends RatingElement> elems,
+			Object... values) {
+		super.dumpDetail(cxt, org, rating, elems, values);
+		var summarizer = (ScoreSummarizer)values[0];
+		Ds.debug("SCORE=(%s, Summary=%.4f)", summarizer, summarizer.summary());
+		Ds.debug("TIME=%.2f", values[1]);
+		Ds.debug("CUSTOM=%.4f", values[2]);
 	}
 
 	/**

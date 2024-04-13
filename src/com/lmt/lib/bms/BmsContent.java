@@ -958,7 +958,7 @@ public class BmsContent {
 		 * @return 当該小節の刻み数
 		 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
 		 */
-		final int getTickCount(int measure) {
+		final double getTickCount(int measure) {
 			assertArgMeasureWithinRange(measure);
 			return mTl.getMeasureTickCount(measure);
 		}
@@ -995,20 +995,12 @@ public class BmsContent {
 				return outPoint;
 			}
 
-			// 小節長の倍率を計算する
-			var measure = measureElem.getMeasure();
-			var lengthRatio = 1.0;
-			var lengthChannel = mSpec.getLengthChannel();
-			if (lengthChannel != null) {
-				lengthRatio = (double)getValue(lengthChannel.getNumber(), 0, measure, BmsType.NUMERIC, false);
-			}
-
 			// データ無し小節の場合の処理
-			var tickCount = (double)measureElem.getTickCount();
-			var actualTickCount = BmsSpec.computeTickCount(lengthRatio, false);
+			var tickCount = measureElem.getTickCount();
 			var pointTime = timeSec - measureElem.getBaseTime();
+			var measure = measureElem.getMeasure();
 			if (mTl.isMeasureEmptyNotes(measure)) {
-				if (actualTickCount >= 1.0) {
+				if (tickCount >= 1.0) {
 					// 通常の長さの小節の場合
 					var tick = Utility.computeTick(pointTime, measureElem.getBeginBpm());
 					outPoint.set(measure, tick);
@@ -1093,10 +1085,10 @@ public class BmsContent {
 					currentTick = nextStopTick;
 				} else {
 					// 現在位置からBPM変更・譜面停止のいずれも見つからなかった場合は、現在位置から小節の最後まで時間計算する
-					areaTime = Utility.computeTime(actualTickCount - currentTick, currentBpm);
+					areaTime = Utility.computeTime(tickCount - currentTick, currentBpm);
 					if ((pointTime >= currentTime) && (pointTime < (currentTime + areaTime))) {
 						// 指定位置までの刻み数を計算する
-						if (actualTickCount >= 1.0) {
+						if (tickCount >= 1.0) {
 							// 通常の長さの小節の場合
 							tickCur2Pt = Utility.computeTick(pointTime - currentTime, currentBpm);
 						} else {
@@ -4064,14 +4056,13 @@ public class BmsContent {
 	/**
 	 * 小節の刻み数を取得します。
 	 * <p>小節番号には{@link BmsSpec#MEASURE_MIN}～{@link BmsSpec#MEASURE_MAX}を指定することができます。</p>
-	 * <p>小節の刻み数は、{@link BmsSpec#TICK_COUNT_DEFAULT}にその小節の小節長を乗算した値となります。小節長に極端に
-	 * 小さい値を設定すると計算上の小節の刻み数が1未満になることがありますが、当メソッドが返す最小の刻み数は
-	 * 1 になります。</p>
+	 * <p>小節の刻み数は、{@link BmsSpec#TICK_COUNT_DEFAULT}にその小節の小節長を乗算した値となります。
+	 * 小節長に極端に小さい値を設定すると計算上の小節の刻み数が1未満になることがあります。</p>
 	 * @param measure 小節番号
 	 * @return 小節の刻み数
 	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
 	 */
-	public final int getMeasureTickCount(int measure) {
+	public final double getMeasureTickCount(int measure) {
 		return mTlAccessor.getTickCount(measure);
 	}
 

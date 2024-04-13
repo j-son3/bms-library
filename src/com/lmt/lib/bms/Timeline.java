@@ -410,7 +410,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param measure 小節番号
 	 * @return 指定小節の刻み数
 	 */
-	final int getMeasureTickCount(int measure) {
+	final double getMeasureTickCount(int measure) {
 		if ((measure < BmsSpec.MEASURE_MIN) || (measure >= getMeasureCount())) {
 			return BmsSpec.TICK_COUNT_DEFAULT;
 		} else {

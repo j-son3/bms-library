@@ -23,7 +23,7 @@ public class Ds {
 	/** アルゴリズムのメジャーバージョン */
 	public static final int ALGORITHM_MAJOR_VERSION = 1;
 	/** アルゴリズムのリビジョン番号 */
-	public static final int ALGORITHM_REVISION_NUMBER = 1;
+	public static final int ALGORITHM_REVISION_NUMBER = 2;
 	/** アルゴリズムのステータス D=Draft / R=Reviewing / F=Fixed */
 	public static final char ALGORITHM_STATUS_CHAR = 'D';
 	/** アルゴリズムパラメータ変更ステータス ''=変更なし / C=変更あり */

@@ -1108,7 +1108,7 @@ public abstract class BmsLoader {
 					// Tickの値は配列要素数, 配列インデックス値, 当該小節の刻み数から計算
 					var occurError = false;
 					var lastTick = -1.0;
-					var tickRatio = (double)tickCount / (double)count;
+					var tickRatio = tickCount / (double)count;
 					var processedPos = 0;
 					for (processedPos = 0; processedPos < count; processedPos++) {
 						var i = processedPos;

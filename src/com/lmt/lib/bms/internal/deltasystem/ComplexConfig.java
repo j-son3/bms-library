@@ -29,12 +29,10 @@ class ComplexConfig extends RatingConfig {
 	double satulateTotalScore = 2.5;
 	/** 最低楽曲位置数(視覚効果を伴う楽曲位置数がこの値を下回ると最終評価点が減点される) */
 	int leastPoints = 50;
-	/** スクラッチが絡む色切替の回数の補正値(値を増やすとスクラッチ＋スイッチ同時の複雑度が上昇する) */
-	double adjustScratchColor = 0.15;
 	/** 楽曲位置評価において、ノート種別が長押し継続時の基本点減点率(0～1) */
-	double deductionHold = 0.90;
+	double deductionHold = 0.86;
 	/** 楽曲位置評価において、ノート種別が長押し終了時の基本点減点率(0～1) */
-	double deductionLnTail = 0.95;
+	double deductionLnTail = 0.92;
 	/** 楽曲位置評価において、ノート種別が地雷の時の基本点減点率(0～1) */
 	double deductionMine = 0.75;
 	/** 楽曲位置評価において、ノート種別数が評価点に影響を及ぼす係数(適正値は0～0.5が目安) */
@@ -72,7 +70,6 @@ class ComplexConfig extends RatingConfig {
 		ipfnComplex = loader.ipfnLinear("ipfn_complex", ipfnComplex);
 		satulateTotalScore = loader.numeric("satulate_total_score", satulateTotalScore);
 		leastPoints = loader.integer("least_points", leastPoints);
-		adjustScratchColor = loader.numeric("adjust_scratch_color", adjustScratchColor);
 		deductionHold = loader.numeric("deduction_hold", deductionHold);
 		deductionLnTail = loader.numeric("deduction_ln_tail", deductionLnTail);
 		deductionMine = loader.numeric("deduction_mine", deductionMine);
@@ -92,7 +89,6 @@ class ComplexConfig extends RatingConfig {
 		Ds.debug("  ipfnComplex: %s", ipfnComplex);
 		Ds.debug("  satulateTotalScore: %s", satulateTotalScore);
 		Ds.debug("  leastPoints: %s", leastPoints);
-		Ds.debug("  adjustScratchColor: %s", adjustScratchColor);
 		Ds.debug("  deductionHold: %s", deductionHold);
 		Ds.debug("  deductionLnTail: %s", deductionLnTail);
 		Ds.debug("  deductionMine: %s", deductionMine);
