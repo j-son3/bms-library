@@ -8,6 +8,7 @@ import com.lmt.lib.bms.BmsLoadHandler;
 import com.lmt.lib.bms.BmsLoaderSettings;
 import com.lmt.lib.bms.BmsMeta;
 import com.lmt.lib.bms.BmsMetaKey;
+import com.lmt.lib.bms.parse.BmsTestResult;
 
 /**
  * Be-Music用BMSコンテンツ読み込み時のハンドラです。
@@ -162,7 +163,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 	/** 乱数オブジェクト */
 	private Random mRandom = new Random();
 	/** 検査結果 */
-	private TestResult mCurrentTestResult = TestResult.OK;
+	private BmsTestResult mCurrentTestResult = BmsTestResult.OK;
 
 	/**
 	 * CONTROL FLOWの有効状態を設定します。
@@ -207,24 +208,24 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 
 	/** {@inheritDoc} */
 	@Override
-	public TestResult testMeta(BmsMeta meta, int index, Object value) {
+	public BmsTestResult testMeta(BmsMeta meta, int index, Object value) {
 		return processControlFlow(meta, value);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public TestResult testChannel(BmsChannel channel, int index, int measure, Object value) {
+	public BmsTestResult testChannel(BmsChannel channel, int index, int measure, Object value) {
 		return mCurrentTestResult;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public TestResult testContent(BmsContent content) {
+	public BmsTestResult testContent(BmsContent content) {
 		// 読み込まれたコンテンツの受け入れ可否を決定する
 		// CONTROL FLOWの定義が不完全な場合にはコンテンツを破棄するように指示する
 		if ((mRandomDefineStatus != RandomDefineStatus.NEUTRAL) && (mRandomDefineStatus != RandomDefineStatus.RANDOM)) {
 			var msg = "#IF block is NOT finished";
-			return TestResult.fail(msg);
+			return BmsTestResult.fail(msg);
 		}
 
 		// CONTROL FLOWのメタ情報はコンテンツから取り除く
@@ -240,7 +241,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 		// CONTROL FLOWで使用したデータを初期値に戻す
 		initializeControlFlow(mRandomValue, null);
 
-		return TestResult.OK;
+		return BmsTestResult.OK;
 	}
 
 	/**
@@ -252,7 +253,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 		mRandomDefineStatus = RandomDefineStatus.NEUTRAL;
 		mRandomBooleanStatus = RandomBooleanStatus.NEUTRAL;
 		mRandom = random;
-		mCurrentTestResult = TestResult.OK;
+		mCurrentTestResult = BmsTestResult.OK;
 	}
 
 	/**
@@ -261,10 +262,10 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 	 * @param value 解析後の値
 	 * @return 検査結果
 	 */
-	private TestResult processControlFlow(BmsMeta meta, Object value) {
+	private BmsTestResult processControlFlow(BmsMeta meta, Object value) {
 		// RANDOMが無効にされている場合は無視する
 		if (!mRandomEnable) {
-			return TestResult.OK;
+			return BmsTestResult.OK;
 		}
 
 		// CONTROL FLOWの種類を特定する
@@ -276,7 +277,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 		// 現在の定義状態で定義可能なCONTROL FLOWかをチェックする
 		if (!mRandomDefineStatus.isEnableControlFlow(ctrlFlow)) {
 			//mCurrentTestResult = 現状維持
-			return TestResult.fail("Wrong control flow");
+			return BmsTestResult.fail("Wrong control flow");
 		}
 
 		// 定義状態と真偽状態の遷移を行う
@@ -285,7 +286,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 			mRandomValue = generateRandomValue((Long)value);
 			mRandomDefineStatus = RandomDefineStatus.RANDOM;
 			mRandomBooleanStatus = RandomBooleanStatus.NEUTRAL;
-			mCurrentTestResult = TestResult.OK;
+			mCurrentTestResult = BmsTestResult.OK;
 			break;
 		}
 		case IF: {      // #IF
@@ -293,7 +294,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 			var isTrue = (mRandomValue == (long)value);
 			mRandomDefineStatus = RandomDefineStatus.IF;
 			mRandomBooleanStatus = isTrue ? RandomBooleanStatus.TRUE : RandomBooleanStatus.FALSE_MOVEABLE;
-			mCurrentTestResult = isTrue ? TestResult.OK : TestResult.THROUGH;
+			mCurrentTestResult = isTrue ? BmsTestResult.OK : BmsTestResult.THROUGH;
 			break;
 		}
 		case ELSEIF: {  // #ELSEIF
@@ -303,7 +304,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 			var actualTrans = (canTrans && isTrue);
 			mRandomDefineStatus = RandomDefineStatus.ELSEIF;
 			mRandomBooleanStatus = actualTrans ? RandomBooleanStatus.TRUE : mRandomBooleanStatus;
-			mCurrentTestResult = actualTrans ? TestResult.OK : TestResult.THROUGH;
+			mCurrentTestResult = actualTrans ? BmsTestResult.OK : BmsTestResult.THROUGH;
 			break;
 		}
 		case ELSE: {    // #ELSE
@@ -311,7 +312,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 			var isTrue = mRandomBooleanStatus.canTransition();
 			mRandomDefineStatus = RandomDefineStatus.ELSE;
 			mRandomBooleanStatus = isTrue ? RandomBooleanStatus.TRUE : RandomBooleanStatus.FALSE;
-			mCurrentTestResult = isTrue ? TestResult.OK : TestResult.THROUGH;
+			mCurrentTestResult = isTrue ? BmsTestResult.OK : BmsTestResult.THROUGH;
 			break;
 		}
 		case ENDIF:       // #ENDIF
@@ -319,7 +320,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 			mRandomValue = 0L;
 			mRandomDefineStatus = RandomDefineStatus.NEUTRAL;
 			mRandomBooleanStatus = RandomBooleanStatus.NEUTRAL;
-			mCurrentTestResult = TestResult.OK;
+			mCurrentTestResult = BmsTestResult.OK;
 			break;
 		}
 		default:        // Don't care
@@ -327,7 +328,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 		}
 
 		// CONTROL FLOWのメタ情報はコンテンツに含めない
-		return TestResult.THROUGH;
+		return BmsTestResult.THROUGH;
 	}
 
 	/**

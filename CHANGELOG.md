@@ -4,6 +4,113 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.0 / 1.2-D] - 2024-04-16
+### Added
+- BeMusicSequencer クラスを追加しました。時間経過によるBMS譜面のシーケンス処理を行うクラスです。
+- BeMusicRatings に定数 TENDENCY_MIN/DELTA_ZERO/DELTA_MAX を追加しました。
+- BeMusicRatings にDELTAのレーティング値変換を行う deltaAsDouble/deltaAsString を追加しました。
+- BeMusicRatings に譜面傾向のレーティング値変換を行う tendencyAsDouble/tendencyAsString を追加しました。
+- BeMusicStatisticsBuilder に addRating(Collection) を追加しました。
+- BeMusicStatisticsBuilder にBMSコンテンツを直接指定するコンストラクタを追加しました。
+- BeMusicChart に範囲を指定して楽曲位置情報をStreamで走査する points(int, int) を追加しました。
+- BeMusicSound にノートの生値から各種情報を抽出する getNoteType/getDevice/hasDevice/hasTrack/hasExtended/isVisible/isInvisible/isBgm を追加しました。
+- BeMusicPoint に各種ノートの生値をStreamで走査する visibles/invisibles/bgms/sounds を追加しました。
+- BeMusicPoint に各種ノートの生値を列挙する enumVisibles/enumInvisibles/enumBgms/enumSounds を追加しました。
+- BeMusicChartBuilder に簡易的にBMS譜面を生成する createChart を追加しました。
+- BeMusicChartBuilder に拡張BMS譜面/楽曲位置情報を生成する setChartCreator/setPointCreator を追加しました。
+- BeMusicChartBuilder に全情報のシーク有無を決定するコンストラクタを追加しました。
+- BeMusicHeader にヘッダオブジェクトを構築する of(複数) を追加しました。
+- BeMusicDevice にチャンネル番号を入力デバイスに変換する fromChannel を追加しました。
+- BeMusicDevice に指定レーンのダブルプレー時入力デバイスリストを取得する orderedByDpList を追加しました。
+- BeMusicDevice に全入力デバイスをStreamで走査する all を追加しました。
+- BeMusicDevice にレーンの種別を取得する isPrimary/isSecondary を追加しました。
+- BeMusicDevice に定数 COUNT_PER_LANE/PRIMARY_BASE/SECONDARY_BASE を追加しました。
+- BeMusicDevice に指定レーンのベースインデックスを取得する getBaseIndex を追加しました。
+- BmsStandardSaver に保存するBMSコンテンツにBOMを付加するかを設定する setAddBom を追加しました。
+- BmsStandardSaver に最後に保存したBMSコンテンツの文字セットを取得する getLastProcessedCharset を追加しました。
+- BmsSource クラスを追加しました。これはBMSローダのパーサ部に渡す入力データとして使用されます。
+- BmsLoader への入力データとしてバイナリデータを指定できるようにしました。
+- BmsLoader のバイナリフォーマット対応に伴い isBinaryFormat を追加しました。
+- BmsLoader に最後に読み込んだBMSコンテンツの文字セット、BOM有無を取得する getLastProcessedCharset/getLastProcessedHasBom を追加しました。
+- BmsLoader に標準フォーマット用のBMSローダかどうかを判定する isStandard を追加しました。
+- BmsNote に新しいノートオブジェクトを構築する newNote を追加しました。
+- BmsType に各データ型を判定するメソッド isXXXType を追加しました。(XXXはデータ型名)
+- BmsMeasureValue(小節データのタイムライン要素) クラスを追加しました。
+- BmsMetaKey/BmsMeta に構成単位/データ型を調べるメソッド(複数)を追加しました。
+- BmsSpec にメタ情報とチャンネルをStreamで走査する metas/channels を追加しました。
+- BmsSpec にメタ情報、チャンネル一覧を取得する getMetas(boolean)/getChannels(boolean) を追加しました。
+- BmsContent に指定したBMSコンテンツのコピーを生成するコンストラクタを追加しました。
+- BmsContent に簡易的に編集モードに遷移する edit を追加しました。
+- BmsContent にタイムライン要素からデータを追加する putTimeline を追加しました。
+- BmsContent にメタ情報要素からメタ情報を追加する putMeta を追加しました。
+- BmsContent にメタ情報をStreamで走査する metas/singleMetas/multipleMetas/indexedMetas を追加しました。
+- BmsContent にBMS宣言要素からBMS宣言を追加する putDeclarations を追加しました。
+- BmsContent にBMS宣言をStreamで走査する declarations を追加しました。
+- BmsLibrary にBMS Libraryのロゴを表示する機能 printLogo を追加しました。
+- BMS Library全体を62進数データ型に対応したことに伴い、以下の追加・修正を行いました。
+    - BmsInt が基数ごとにインスタンス化できるようになりました。
+    - BmsInt のオブジェクトを取得する base16/base36/base62/of を追加しました。
+    - BmsInt に62進数用メソッド to62i/to62s/to62ia/to62sa を追加しました。
+    - BmsArray 生成時の基数に62を指定できるようになりました。
+    - BmsArray#getRadix を getBase に名称変更しました。
+    - BmsType にデータ型 BASE62/BASE/ARRAY62/ARRAY を追加しました。
+    - BmsType にデータ型判定を行う isBase62/isArray62/isSelectableBaseType/isSelectableArrayType/isSelectable を追加しました。
+    - BmsMeta にデータ型判定を行う isBase62/isArray62/isSelectableBaseType/isSelectableArrayType/isSelectableType を追加しました。
+    - BmsSpecBuilder にメタ情報を基数選択メタ情報に設定する setBaseChangerMeta を追加しました。
+    - BmsSpec に基数選択メタ情報を取得する getBaseChangerMeta/hasBaseChanger を追加しました。
+    - BmsMeta に基数選択メタ情報かどうかを取得する isBaseChanger を追加しました。
+    - BmsStandardLoader を基数選択メタ情報に対応しました。
+    - BmsStandardSaver を基数選択メタ情報に対応しました。
+    - BmsStandardSaver に標準フォーマットでの出力可否を判定する isCompatible を追加しました。
+    - BeMusicMeta に基数選択メタ情報の #BASE を追加しました。
+    - BeMusicMeta に #BASE への値の読み書きを行う getBase/setBase を追加しました。
+    - BeMusicChannel に定義されたARRAY36型のチャンネルをARRAY型に変更しました。(一部のチャンネルを除く)
+    - BeMusicSpec#createV1 で生成されるBMS仕様に #BASE を追加しました。
+    - BeMusicSpec#LATEST に #BASE を追加しました。
+    - BeMusicHeader に #BASE の値を取得する getBase を追加しました。
+
+### Changed
+- 各定数名・メソッド名に使用していた「Landmine」の単語を「Mine」に変更しました。
+- BeMusicChart#stream を points に名称変更しました。
+- BeMusicSoundNote を BeMusicSound に名称変更しました。
+- BeMusicPoint の内部データ構造を見直し、メモリ使用量を削減しました。
+- BeMusicPoint#getInvisible を getInvisibleValue に名称変更しました。
+- BeMusicPoint#getNoteValue を getVisibleValue に名称変更しました。
+- BeMusicPoint#getNoteType を getVisibleNoteType に名称変更しました。
+- BeMusicScore を BeMusicChart に名称変更しました。
+- BeMusicScoreBuilder を BeMusicChartBuilder に名称変更しました。
+- BeMusicDevice#orderedByRightScratchList を orderedByRightList に名称変更しました。
+- BeMusicDevice#orderedByLeftScratchList を orderedByLeftList に名称変更しました。
+- BeMusicDevice#getLegacyLongChannel を getLongChannel に名称変更しました。
+- BmsLoader#beginParse に渡すソースデータをString型からBmsSource型へ変更しました。
+- BmsElement を BmsTimelineElement に名称変更しました。
+- BmsType#NUMERIC を FLOAT に名称変更しました。
+- BmsContent#enumNotes の列挙関数を BmsNote#Tester から Consumer&lt;BmsNote&gt; に変更しました。
+- BmsContent#pointToTime をスレッドセーフで動作するように改良しました。
+- BmsContent#addDeclaration を putDeclaration に名称変更しました。
+- 以下のBMSコンテンツ解析関連クラスを名称変更し、com.lmt.lib.bms.parse パッケージに移動しました。
+    - BmsLoader.ParsedElementType → BmsParsedType
+    - BmsLoader.ParsedElement → BmsParsed
+    - BmsLoader.DeclarationParsedElement → BmsDeclarationParsed
+    - BmsLoader.MetaParsedElement → BmsMetaParsed
+    - BmsLoader.ChannelParsedElement → BmsTimelineParsed
+    - BmsLoader.ValueChannelParsedElement → BmsMeasureValueParsed
+    - BmsLoader.ArrayChannelParsedElement → BmsNoteParsed
+    - BmsLoadHandler.TestResult → BmsTestResult
+- BMS Libraryで使用する関数インターフェイスを以下のように標準型化しました。
+    - BmsContent#Creator → 廃止
+    - BmsChannel#Tester → IntPredicate
+    - BmsNote#Creator → Supplier&lt;BmsNote&gt;
+    - BmsNote#Tester → Predicate&lt;BmsNote&gt;
+
+### Removed
+- BeMusicChart#getLastPlayablePoint を削除しました。
+- BeMusicPoint#getDisplayPosition を削除しました。
+
+### Fixed
+- BeMusicChart からforeachで楽曲位置情報を走査すると無限ループになる不具合を修正しました。
+- BmsContent#enumNotes/listNotes/countNotes において、チャンネル番号1が重複可能チャンネルだった場合に予期しないノートが列挙関数またはテスター関数に通知されることがある不具合を修正しました。
+
 ## [0.7.1 / 1.2-D] - 2024-02-18
 ### Changed
 - BmsStandardSaver でコメント文出力が一般のBMS編集ソフトと同等になるように修正しました。

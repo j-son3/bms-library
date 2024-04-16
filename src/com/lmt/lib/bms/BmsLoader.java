@@ -24,6 +24,17 @@ import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.lmt.lib.bms.parse.BmsDeclarationParsed;
+import com.lmt.lib.bms.parse.BmsErrorParsed;
+import com.lmt.lib.bms.parse.BmsMeasureValueParsed;
+import com.lmt.lib.bms.parse.BmsMetaParsed;
+import com.lmt.lib.bms.parse.BmsNoteParsed;
+import com.lmt.lib.bms.parse.BmsParsed;
+import com.lmt.lib.bms.parse.BmsParsedType;
+import com.lmt.lib.bms.parse.BmsSource;
+import com.lmt.lib.bms.parse.BmsTestResult;
+import com.lmt.lib.bms.parse.BmsTimelineParsed;
+
 /**
  * 外部データからBMSコンテンツを生成するローダの基底クラスです。
  *
@@ -49,6 +60,21 @@ import java.util.stream.Stream;
  * {@link BmsLoader}では読み込み時に、生成するBMSコンテンツオブジェクトを決定することができるようになっています。
  * {@link #setHandler(BmsLoadHandler)}で設定したハンドラの{@link BmsLoadHandler#createContent(BmsSpec)}を
  * オーバーライドすることによりアプリケーションで独自拡張したBMSコンテンツオブジェクトを返すことができます。</p>
+ *
+ * <p><strong>基数選択について</strong><br>
+ * BMSローダは以下の要素の数値表現を行うための基数を外部データ側から指定できます。</p>
+ *
+ * <ul>
+ * <li>索引付きメタ情報のインデックス値</li>
+ * <li>データ型が{@link BmsType#BASE}, {@link BmsType#ARRAY}のメタ情報</li>
+ * <li>データ型が{@link BmsType#BASE}の小節データ</li>
+ * <li>データ型が{@link BmsType#ARRAY}のノート</li>
+ * </ul>
+ *
+ * <p>これらの要素はデフォルトでは{@link BmsSpec#BASE_DEFAULT}で規定される基数で解析を行います。
+ * この基数を変更する場合、{@link BmsSpec#getBaseChangerMeta()}で示されるメタ情報に基数を設定します。
+ * ただし、この設定を有効にするにはBMS仕様で基数選択メタ情報を規定する必要があります。
+ * 基数選択メタ情報の規定方法については{@link BmsSpecBuilder#setBaseChangerMeta(String)}を参照してください。</p>
  *
  * @see BmsLoadHandler
  * @see BmsScriptError
@@ -111,7 +137,7 @@ public abstract class BmsLoader {
 		}
 	}
 
-	/** チャンネルデータのうち、配列データを一時的にプールするための1データ要素 */
+	/** タイムライン要素のうち、配列データを一時的にプールするための1データ要素 */
 	private static class ChannelArrayData {
 		/** この配列データが登場した行番号 */
 		int lineNumber;
@@ -123,19 +149,6 @@ public abstract class BmsLoader {
 		int measure;
 		/** int配列に変換された配列データ */
 		List<Integer> array;
-	}
-
-	/** フィールドにセットしたノートオブジェクトをノート生成器で返す橋渡し用クラス */
-	private static class NoteBridge implements BmsNote.Creator {
-		/** createNoteで橋渡しするノートオブジェクト */
-		BmsNote mNote = null;
-
-		@Override
-		public BmsNote createNote() {
-			var note = mNote;
-			mNote = null;
-			return note;
-		}
 	}
 
 	/** 重複可能チャンネルのインデックス値採番用キー */
@@ -175,6 +188,10 @@ public abstract class BmsLoader {
 
 	/** ローダー設定I/F */
 	private Settings mSettings = new Settings();
+	/** 標準フォーマット用ローダかどうか */
+	private boolean mIsStandard = false;
+	/** ローダへの入力データがバイナリフォーマットかどうか */
+	private boolean mIsBinaryFormat = false;
 	/** BMS仕様 */
 	private BmsSpec mSpec = null;
 	/** BMS読み込みハンドラ */
@@ -193,344 +210,21 @@ public abstract class BmsLoader {
 	private boolean mIsIgnoreWrongData = true;
 	/** タイムライン読み込みスキップするかどうか */
 	private boolean mIsSkipReadTimeline = false;
+	/** 最後の読み込み処理で使用した文字セット */
+	private Charset mLastProcessedCharset = null;
+	/** 最後の読み込み処理で入力ソースにBOMが存在したかどうか */
+	private boolean mLastProcessedHasBom = false;
 	/** デコード時の文字セットリスト(リストの先頭から順にデコードが試みられる) */
 	private List<Charset> mCharsets = new ArrayList<>();
-	/** ノートオブジェクト橋渡し用クラス */
-	private NoteBridge mNoteBridge = new NoteBridge();
 	/** エラー発生有無マップ */
 	private Map<BmsErrorType, BooleanSupplier> mOccurErrorMap;
 	/** BMS読み込み時のデコード用出力バッファ */
 	private CharBuffer mOutBuffer = CharBuffer.wrap(new char[OUT_BUFFER_SIZE]);
 
 	/**
-	 * 解析済み要素の種別を表す列挙型です。
-	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
-	 */
-	protected static enum ParsedElementType {
-		/** BMS宣言 */
-		DECLARATION,
-		/** メタ情報 */
-		META,
-		/** 値型チャンネル */
-		VALUE_CHANNEL,
-		/** 配列型チャンネル */
-		ARRAY_CHANNEL,
-		/** エラー */
-		ERROR,
-	}
-
-	/**
-	 * BMSの入力元から解析された1つの要素を表すオブジェクトの抽象クラスです。
-	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
-	 * <p>当クラスはBMSコンテンツを構成する複数種類の要素の基底クラスであり、それぞれの要素が持つ共通の情報を管理します。
-	 * このオブジェクトはBMS読み込み時にBMSローダのパーサ部から返される一時的なオブジェクトで、
-	 * BMSローダのBMSコンテンツの読み込み処理部とパーサ部とのデータの橋渡しに利用されます。
-	 * つまり、当クラスから派生するクラスは全て内部処理用のクラスであるためBMSライブラリの一般利用者はこれらを無視して構いません。</p>
-	 */
-	protected static abstract class ParsedElement {
-		/** 要素の種別 */
-		private ParsedElementType mElementType;
-		/** この要素が存在した入力元の行番号、または要素の登場した順番 */
-		public int lineNumber;
-		/** この要素の元になった行の記述内容、定義内容などのデータ */
-		public Object line;
-
-		/**
-		 * コンストラクタ
-		 * @param elementType 要素の種別
-		 */
-		private ParsedElement(ParsedElementType elementType) {
-			mElementType = elementType;
-		}
-
-		/**
-		 * この要素がエラー要素かどうかを返します。
-		 * @return エラー要素であればtrue、そうでなければfalse
-		 */
-		public final boolean error() {
-			return mElementType == ParsedElementType.ERROR;
-		}
-	}
-
-	/**
-	 * BMSの入力元から解析されたBMS宣言を表す要素データクラスです。
-	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
-	 * @see ParsedElement
-	 */
-	protected static class DeclarationParsedElement extends ParsedElement {
-		/** BMS宣言のキー名 */
-		public String key;
-		/** BMS宣言の値 */
-		public String value;
-
-		/** BMS宣言要素のオブジェクトを構築します。 */
-		public DeclarationParsedElement() {
-			this(0, null, null, null);
-		}
-
-		/**
-		 * BMS宣言要素のオブジェクトを構築します。
-		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
-		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
-		 * @param key BMS宣言のキー名
-		 * @param value BMS宣言の値
-		 */
-		public DeclarationParsedElement(int lineNumber, Object line, String key, String value) {
-			super(ParsedElementType.DECLARATION);
-			set(lineNumber, line, key, value);
-		}
-
-		/**
-		 * BMS宣言要素のオブジェクトの内容を設定します。
-		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
-		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
-		 * @param key BMS宣言のキー名
-		 * @param value BMS宣言の値
-		 * @return このオブジェクトのインスタンス
-		 */
-		public final DeclarationParsedElement set(int lineNumber, Object line, String key, String value) {
-			this.lineNumber = lineNumber;
-			this.line = line;
-			this.key = key;
-			this.value = value;
-			return this;
-		}
-	}
-
-	/**
-	 * BMSの入力元から解析されたメタ情報を表す要素データクラスです。
-	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
-	 * @see ParsedElement
-	 */
-	protected static class MetaParsedElement extends ParsedElement {
-		/** メタ情報 */
-		public BmsMeta meta;
-		/** 索引付きメタ情報のインデックス(索引付き以外では0であること) */
-		public int index;
-		/** メタ情報の値の文字列表現 */
-		public String value;
-
-		/** メタ情報要素のオブジェクトを構築します。 */
-		public MetaParsedElement() {
-			this(0, null, null, 0, null);
-		}
-
-		/**
-		 * メタ情報要素のオブジェクトを構築します。
-		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
-		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
-		 * @param meta メタ情報
-		 * @param index 索引付きメタ情報のインデックス
-		 * @param value メタ情報の値
-		 */
-		public MetaParsedElement(int lineNumber, Object line, BmsMeta meta, int index, String value) {
-			super(ParsedElementType.META);
-			set(lineNumber, line, meta, index, value);
-		}
-
-		/**
-		 * メタ情報要素のオブジェクトの内容を設定します。
-		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
-		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
-		 * @param meta メタ情報
-		 * @param index 索引付きメタ情報のインデックス
-		 * @param value メタ情報の値
-		 * @return このオブジェクトのインスタンス
-		 */
-		public final MetaParsedElement set(int lineNumber, Object line, BmsMeta meta, int index, String value) {
-			this.lineNumber = lineNumber;
-			this.line = line;
-			this.meta = meta;
-			this.index = index;
-			this.value = value;
-			return this;
-		}
-	}
-
-	/**
-	 * BMSの入力元から解析されたチャンネルを表す要素データクラスです。
-	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
-	 * @see ParsedElement
-	 */
-	protected static abstract class ChannelParsedElement extends ParsedElement {
-		/** 小節番号 */
-		public int measure;
-		/** チャンネル番号 */
-		public int number;
-
-		/**
-		 * チャンネル要素のオブジェクトを構築します。
-		 * @param elementType 要素の種別
-		 */
-		protected ChannelParsedElement(ParsedElementType elementType) {
-			super(elementType);
-		}
-	}
-
-	/**
-	 * BMSの入力元から解析された値型チャンネルを表す要素データクラスです。
-	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
-	 * @see ChannelParsedElement
-	 */
-	protected static class ValueChannelParsedElement extends ChannelParsedElement {
-		/** チャンネルの値の文字列表現 */
-		public String value;
-
-		/** 値型チャンネル要素のオブジェクトを構築します。 */
-		public ValueChannelParsedElement() {
-			this(0, null, 0, 0, null);
-		}
-
-		/**
-		 * 値型チャンネル要素のオブジェクトを構築します。
-		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
-		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
-		 * @param measure 小節番号
-		 * @param number チャンネル番号
-		 * @param value チャンネルの値の文字列表現
-		 */
-		public ValueChannelParsedElement(int lineNumber, Object line, int measure, int number, String value) {
-			super(ParsedElementType.VALUE_CHANNEL);
-			set(lineNumber, line, measure, number, value);
-		}
-
-		/**
-		 * 値型チャンネル要素のオブジェクトの内容を設定します。
-		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
-		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
-		 * @param measure 小節番号
-		 * @param number チャンネル番号
-		 * @param value チャンネルの値の文字列表現
-		 * @return このオブジェクトのインスタンス
-		 */
-		public final ChannelParsedElement set(int lineNumber, Object line, int measure, int number, String value) {
-			this.lineNumber = lineNumber;
-			this.line = line;
-			this.measure = measure;
-			this.number = number;
-			this.value = value;
-			return this;
-		}
-	}
-
-	/**
-	 * BMSの入力元から解析された配列型チャンネルを表す要素データクラスです。
-	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
-	 * @see ChannelParsedElement
-	 */
-	protected static class ArrayChannelParsedElement extends ChannelParsedElement {
-		/** 配列データ */
-		public List<Integer> array;
-
-		/** 配列型チャンネル要素のオブジェクトを構築します。 */
-		public ArrayChannelParsedElement() {
-			this(0, null, 0, 0, null);
-		}
-
-		/**
-		 * 配列型チャンネル要素のオブジェクトを構築します。
-		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
-		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
-		 * @param measure 小節番号
-		 * @param number チャンネル番号
-		 * @param array 配列データ
-		 */
-		public ArrayChannelParsedElement(int lineNumber, Object line, int measure, int number, List<Integer> array) {
-			super(ParsedElementType.ARRAY_CHANNEL);
-			set(lineNumber, line, measure, number, array);
-		}
-
-		/**
-		 * 配列型チャンネル要素のオブジェクトの内容を設定します。
-		 * @param lineNumber この要素が存在した入力元の行番号、または要素の登場した順番
-		 * @param line この要素の元になった行の記述内容、定義内容などのデータ
-		 * @param measure 小節番号
-		 * @param number チャンネル番号
-		 * @param array 配列データ
-		 * @return このオブジェクトのインスタンス
-		 */
-		public final ArrayChannelParsedElement set(int lineNumber, Object line, int measure, int number,
-				List<Integer> array) {
-			this.lineNumber = lineNumber;
-			this.line = line;
-			this.measure = measure;
-			this.number = number;
-			this.array = array;
-			return this;
-		}
-	}
-
-	/**
-	 * BMSローダのパーサ部で発生したエラーを表す要素データクラスです。
-	 * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
-	 * @see ParsedElement
-	 */
-	protected static class ErrorParsedElement extends ParsedElement {
-		/** エラーがないことを表すエラー要素オブジェクト */
-		public static final ErrorParsedElement PASS = new ErrorParsedElement();
-
-		/** エラー発出要因となった解析対象要素の種別 */
-		public ParsedElementType causeType;
-		/** エラー情報 */
-		public BmsScriptError error;
-
-		/** エラー要素のオブジェクトを構築します。 */
-		public ErrorParsedElement() {
-			this(ParsedElementType.ERROR, null);
-		}
-
-		/**
-		 * エラー要素のオブジェクトを構築します。
-		 * @param error エラー情報
-		 */
-		public ErrorParsedElement(BmsScriptError error) {
-			super(ParsedElementType.ERROR);
-			set(ParsedElementType.ERROR, error);
-		}
-
-		/**
-		 * エラー要素のオブジェクトを構築します。
-		 * @param causeType エラー発出要因となった解析対象要素の種別
-		 * @param error エラー情報
-		 */
-		public ErrorParsedElement(ParsedElementType causeType, BmsScriptError error) {
-			super(ParsedElementType.ERROR);
-			set(causeType, error);
-		}
-
-		/**
-		 * エラー要素のオブジェクトの内容を設定します。
-		 * @param causeType エラー発出要因となった解析対象要素の種別
-		 * @param error エラー情報
-		 * @return このオブジェクトのインスタンス
-		 */
-		public final ErrorParsedElement set(ParsedElementType causeType, BmsScriptError error) {
-			this.causeType = causeType;
-			this.error = error;
-			return this;
-		}
-
-		/**
-		 * このオブジェクトが「エラーなし」を表すかどうかを判定します。
-		 * @return エラーなしであればtrue、そうでなければfalse
-		 */
-		public final boolean pass() {
-			return error == null;
-		}
-
-		/**
-		 * このオブジェクトが「エラーあり」を表すかどうかを判定します。
-		 * @return エラーありであればtrue、そうでなければfalse
-		 */
-		public final boolean fail() {
-			return error != null;
-		}
-	}
-
-	/**
 	 * BmsLoaderオブジェクトを構築します。
 	 */
-	public BmsLoader() {
+	protected BmsLoader() {
 		mOccurErrorMap = Map.ofEntries(
 				Map.entry(BmsErrorType.SYNTAX, () -> mIsEnableSyntaxError),
 				Map.entry(BmsErrorType.SPEC_VIOLATION, () -> !mIsFixSpecViolation),
@@ -540,6 +234,74 @@ public abstract class BmsLoader {
 				Map.entry(BmsErrorType.REDEFINE, () -> !mIsAllowRedefine),
 				Map.entry(BmsErrorType.COMMENT_NOT_CLOSED, () -> mIsEnableSyntaxError),
 				Map.entry(BmsErrorType.TEST_CONTENT, () -> mIsEnableSyntaxError));
+	}
+
+	/**
+	 * BmsLoaderオブジェクトを構築します。
+	 * @param isStandard 標準フォーマット用ローダかどうか
+	 * @param isBinaryFormat ローダへの入力データがバイナリフォーマットかどうか
+	 */
+	protected BmsLoader(boolean isStandard, boolean isBinaryFormat) {
+		this();
+		mIsStandard = isStandard;
+		mIsBinaryFormat = isBinaryFormat;
+	}
+
+	/**
+	 * このローダが標準フォーマット用のローダかどうかを返します。
+	 * <p>標準フォーマット用ローダとは{@link BmsStandardLoader}を指します。それ以外のローダは常にfalseを返します。</p>
+	 * @return ローダが標準フォーマット用の場合に限りtrue
+	 * @see BmsStandardLoader
+	 */
+	public final boolean isStandard() {
+		return mIsStandard;
+	}
+
+	/**
+	 * このローダへの入力データがバイナリフォーマットかどうかを返します。
+	 * @return 入力データがバイナリフォーマットの場合true
+	 */
+	public final boolean isBinaryFormat() {
+		return mIsBinaryFormat;
+	}
+
+	/**
+	 * このローダで最後に読み込んだBMSコンテンツで使用した文字セットを取得します。
+	 * <p>当メソッドは以下のメソッドによりBMSコンテンツの読み込みを行った場合に使用された文字セットを取得します。</p>
+	 * <ul>
+	 * <li>{@link #load(File)}</li>
+	 * <li>{@link #load(Path)}</li>
+	 * <li>{@link #load(InputStream)}</li>
+	 * <li>{@link #load(byte[])}</li>
+	 * </ul>
+	 * <p>上記以外のメソッドで読み込みを行った場合、ローダがバイナリフォーマットの場合、
+	 * または一度も読み込みを行っていない場合当メソッドはnullを返します。</p>
+	 * <p>読み込み処理の途中で例外がスローされると文字セットの更新は行われません。</p>
+	 * @return 最後に読み込んだBMSコンテンツで使用した文字セット、またはnull
+	 * @see #setCharsets(Charset...)
+	 * @see BmsLibrary#setDefaultCharsets(Charset...)
+	 */
+	public final Charset getLastProcessedCharset() {
+		return mLastProcessedCharset;
+	}
+
+	/**
+	 * このローダで最後に読み込んだBMSコンテンツにBOM(Byte Order Mark)が含まれていたかどうかを取得します。
+	 * <p>当メソッドは以下のメソッドによりBMSコンテンツの読み込みを行った場合に、入力ソースにBOMが含まれていたかどうかを返します。</p>
+	 * <ul>
+	 * <li>{@link #load(File)}</li>
+	 * <li>{@link #load(Path)}</li>
+	 * <li>{@link #load(InputStream)}</li>
+	 * <li>{@link #load(byte[])}</li>
+	 * </ul>
+	 * <p>当ローダがどの文字セットのBOM検出に対応するかについては{@link #load(byte[])}のドキュメントを参照してください。
+	 * 上記以外のメソッドで読み込みを行った場合、またはBOM検出に対応していない文字セットが使用された場合当メソッドは
+	 * false を返します。</p>
+	 * <p>読み込み処理の途中で例外がスローされるとBOMの有無の更新は行われません。</p>
+	 * @return 最後に読み込んだBMSコンテンツにBOMが含まれていた場合true
+	 */
+	public final boolean getLastProcessedHasBom() {
+		return mLastProcessedHasBom;
 	}
 
 	/**
@@ -557,7 +319,7 @@ public abstract class BmsLoader {
 	 * BMS読み込みハンドラを設定します。
 	 * <p>デフォルトでは{@link #DEFAULT_HANDLER}が設定されています。BMS読み込み時の振る舞いを変えたい場合は
 	 * 実装をカスタマイズした{@link BmsLoadHandler}オブジェクトを設定してください。</p>
-	 * <p>nullを設定することは出来ません。nullにした状態で{@link #load}メソッドを呼び出すと例外がスローされます。</p>
+	 * <p>nullを設定することはできません。nullにした状態で{@link #load}メソッドを呼び出すと例外がスローされます。</p>
 	 * @param handler BMS読み込みハンドラ
 	 * @return このオブジェクトのインスタンス
 	 */
@@ -640,7 +402,7 @@ public abstract class BmsLoader {
 
 	/**
 	 * メタ情報・値型の重複不可チャンネルの再定義を検出した場合のデータ上書きを許可するかどうかを設定します。
-	 * <p>データ上書きを許可すると、先に定義されたメタ情報、または同じ小節の値型重複不可チャンネルデータを上書きするようになります。
+	 * <p>データ上書きを許可すると、先に定義されたメタ情報、または同じ小節の小節データを上書きするようになります。
 	 * メタ情報は単体メタ情報({@link BmsUnit#SINGLE})と定義済みの索引付きメタ情報({@link BmsUnit#INDEXED})が対象です。</p>
 	 * <p>再定義が不許可の状態でメタ情報・値型重複不可チャンネルの再定義が検出された場合、再定義された行はエラーとして処理され、
 	 * BMSコンテンツ読み込みハンドラの{@link BmsLoadHandler#parseError(BmsScriptError)}が呼び出されます。
@@ -726,6 +488,7 @@ public abstract class BmsLoader {
 	 * <p>文字セットの登録は省略可能です。省略した場合{@link BmsLibrary#getDefaultCharsets()}を呼び出し、
 	 * BMSライブラリのデフォルト文字セットリストを使用してデコード処理が行われます。
 	 * これは、当メソッドで文字セットを1個も指定しなかった場合も同様です。</p>
+	 * <p>入力データがバイナリフォーマットのローダでは、当メソッドで設定した文字セットは使用されません。</p>
 	 * @param charsets テキストのデコード処理時に使用する文字セットリスト
 	 * @return このオブジェクトのインスタンス
 	 * @exception NullPointerException charsetsにnullが含まれている
@@ -798,7 +561,7 @@ public abstract class BmsLoader {
 	/**
 	 * BMSコンテンツを読み込みます。
 	 * <p>BMSコンテンツは指定されたバイト配列から読み込みます。</p>
-	 * <p>当メソッドではバイト配列は「文字コードが不明なテキスト」として扱います。
+	 * <p>ローダへの入力データがテキストの場合、バイト配列は「文字コードが不明なテキスト」として扱います。
 	 * より少ない工程で文字コードが特定できるように、最初にテキストにBOM(Byte Order Mark)が付与されているかを調べます。
 	 * この工程で判明する文字コードは「UTF-8」「UTF-16LE」「UTF-16BE」のいずれかです。</p>
 	 * <p>BOMによる文字コードの特定ができなかった場合、{@link #setCharsets(Charset...)}で指定された文字セット
@@ -816,6 +579,8 @@ public abstract class BmsLoader {
 	 * そのようなケースでは文字化けした文字列でBMS読み込みが行われてしまい、期待する結果が得られません。
 	 * デコードの誤判定が発生しやすい文字セットは優先順位を下げるか、デコード対象に含まないようにしてください。</p>
 	 * <p>テキストのデコード後の読み込み処理詳細は{@link #load(String)}を参照してください。</p>
+	 * <p>ローダへの入力データがバイナリフォーマットの場合、上記で述べた文字コードの判別は行われません。
+	 * 入力データのバイト配列が直接BMSパーサ部への入力データとなります。</p>
 	 * @param bms BMSのバイト配列
 	 * @return BMSコンテンツ
 	 * @exception NullPointerException bmsがnull
@@ -828,59 +593,79 @@ public abstract class BmsLoader {
 		assertArgNotNull(bms, "bms");
 		assertLoaderState();
 
-		// BOMチェックを行い、文字セットを特定しようとする
+		// 入力データがバイナリかテキストかで処理を分岐する
+		var content = (BmsContent)null;
 		var charset = (Charset)null;
-		var skipCount = 0;
-		if ((bms.length >= 3) && (bms[0] == (byte)0xef) && (bms[1] == (byte)0xbb) && (bms[2] == (byte)0xbf)) {
-			// UTF-8
-			charset = StandardCharsets.UTF_8;
-			skipCount = 3;
-		} else if ((bms.length >= 2) && (bms[0] == (byte)0xff) && (bms[1] == (byte)0xfe)) {
-			// UTF-16LE
-			charset = StandardCharsets.UTF_16LE;
-			skipCount = 2;
-		} else if ((bms.length >= 2) && (bms[0] == (byte)0xfe) && (bms[1] == (byte)0xff)) {
-			// UTF-16BE
-			charset = StandardCharsets.UTF_16BE;
-			skipCount = 2;
+		var hasBom = false;
+		if (mIsBinaryFormat) {
+			// 入力データがバイナリの場合
+			content = loadMain(new BmsSource(bms));
 		} else {
-			// BOMによる文字セットの特定は不可
-			// Do nothing
-		}
-
-		// テキストのデコードを行う
-		var bmsStr = (String)null;
-		if (charset != null) {
-			// BOMによる文字セット確定済み
-			bmsStr = decodeText(bms, charset, skipCount, false);
-		} else {
-			// 文字セット未決の場合は優先文字セット順でのデコードを試みる
-			// ローダに使用文字セットが指定されていなければBMSライブラリのデフォルト文字セットリストを使用する
-			var charsets = !mCharsets.isEmpty() ? mCharsets : BmsLibrary.getDefaultCharsets();
-			var numCharsets = charsets.size();
-			var isErrorStop = (numCharsets > 1);  // 文字セット1件の場合はエラー停止なし
-			for (var i = 0; (i < numCharsets) && (bmsStr == null); i++) {
-				bmsStr = decodeText(bms, charsets.get(i), 0, isErrorStop);
+			// 入力データがテキストの場合
+			// BOMチェックを行い、文字セットを特定しようとする
+			var skipCount = 0;
+			hasBom = true;
+			if ((bms.length >= 3) && (bms[0] == (byte)0xef) && (bms[1] == (byte)0xbb) && (bms[2] == (byte)0xbf)) {
+				// UTF-8
+				charset = StandardCharsets.UTF_8;
+				skipCount = 3;
+			} else if ((bms.length >= 2) && (bms[0] == (byte)0xff) && (bms[1] == (byte)0xfe)) {
+				// UTF-16LE
+				charset = StandardCharsets.UTF_16LE;
+				skipCount = 2;
+			} else if ((bms.length >= 2) && (bms[0] == (byte)0xfe) && (bms[1] == (byte)0xff)) {
+				// UTF-16BE
+				charset = StandardCharsets.UTF_16BE;
+				skipCount = 2;
+			} else {
+				// BOMによる文字セットの特定は不可
+				hasBom = false;
 			}
 
-			// 全ての文字セットでデコードに失敗した場合は最優先文字セットで再デコードする
-			// その際、デコードできない文字は代替文字で置換する
-			if (bmsStr == null) {
-				bmsStr = decodeText(bms, charsets.get(0), 0, false);
+			// テキストのデコードを行う
+			var bmsStr = (String)null;
+			if (charset != null) {
+				// BOMによる文字セット確定済み
+				bmsStr = decodeText(bms, charset, skipCount, false);
+			} else {
+				// 文字セット未決の場合は優先文字セット順でのデコードを試みる
+				// ローダに使用文字セットが指定されていなければBMSライブラリのデフォルト文字セットリストを使用する
+				var charsets = !mCharsets.isEmpty() ? mCharsets : BmsLibrary.getDefaultCharsets();
+				var numCharsets = charsets.size();
+				var isErrorStop = (numCharsets > 1);  // 文字セット1件の場合はエラー停止なし
+				for (var i = 0; (i < numCharsets) && (bmsStr == null); i++) {
+					charset = charsets.get(i);
+					bmsStr = decodeText(bms, charset, 0, isErrorStop);
+				}
+
+				// 全ての文字セットでデコードに失敗した場合は最優先文字セットで再デコードする
+				// その際、デコードできない文字は代替文字で置換する
+				if (bmsStr == null) {
+					charset = charsets.get(0);
+					bmsStr = decodeText(bms, charset, 0, false);
+				}
 			}
+
+			// デコードされたテキストでBMSの解析を行う
+			content = loadMain(new BmsSource(bmsStr));
 		}
 
-		// デコードされたテキストでBMSの解析を行う
-		var content = load(bmsStr);
+		// 最後の読み込みで使用した文字セットとBOM有無を更新する
+		// ※全ての読み込み処理が完了し、例外スローの可能性が無くなったタイミングで更新を行う
+		mLastProcessedCharset = charset;
+		mLastProcessedHasBom = hasBom;
 
 		return content;
 	}
 
 	/**
 	 * BMSコンテンツを読み込みます。
-	 * <p>当メソッドを使用してBMSを読み込む場合、入力のテキストデータはデコード処理が行われません。</p>
+	 * <p>当メソッドを使用してBMSを読み込む場合、入力のテキストデータはデコード処理が行われません。
+	 * また、入力データがバイナリフォーマットのローダでは当メソッドを使用できません。
+	 * 呼び出すと例外をスローします。</p>
 	 * @param bms BMSのReader
 	 * @return BMSコンテンツ
+	 * @exception UnsupportedOperationException 入力データがバイナリフォーマットのローダで当メソッドを呼び出した
 	 * @exception NullPointerException bmsがnull
 	 * @exception IllegalStateException BMS仕様が設定されていない
 	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
@@ -889,6 +674,7 @@ public abstract class BmsLoader {
 	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
 	 */
 	public final BmsContent load(Reader bms) throws BmsException, IOException {
+		assertIsTextFormat();
 		assertArgNotNull(bms, "bms");
 		assertLoaderState();
 		var sb = new StringBuilder();
@@ -897,7 +683,7 @@ public abstract class BmsLoader {
 			sb.append(line);
 			sb.append("\n");
 		}
-		return loadMain(sb.toString());
+		return load(sb.toString());
 	}
 
 	/**
@@ -919,8 +705,10 @@ public abstract class BmsLoader {
 	 * <li>データ重複許可チャンネルの同小節番号内にて{@link BmsSpec#CHINDEX_MAX}+1個を超えるデータ定義を検出した場合。</li>
 	 * </ul></li>
 	 * </ul>
+	 * <p>入力データがバイナリフォーマットのローダでは当メソッドを使用できません。呼び出すと例外をスローします。</p>
 	 * @param bms BMSの文字列
 	 * @return BMSコンテンツ
+	 * @exception UnsupportedOperationException 入力データがバイナリフォーマットのローダで当メソッドを呼び出した
 	 * @exception NullPointerException bmsがnull
 	 * @exception IllegalStateException BMS仕様が設定されていない
 	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
@@ -928,18 +716,25 @@ public abstract class BmsLoader {
 	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
 	 */
 	public final BmsContent load(String bms) throws BmsException {
+		assertIsTextFormat();
 		assertArgNotNull(bms, "bms");
 		assertLoaderState();
-		return loadMain(bms);
+		var content = loadMain(new BmsSource(bms));
+
+		// 最後の読み込みで使用した文字セットとBOM有無をクリアする
+		mLastProcessedCharset = null;
+		mLastProcessedHasBom = false;
+
+		return content;
 	}
 
 	/**
 	 * 引数のBMSスクリプトを解析し、BMS仕様に従ってBMSコンテンツを生成する。
-	 * @param bms Unicode文字列に変換されたBMSスクリプト
+	 * @param bms 入力データ
 	 * @return 生成されたBMSコンテンツ
 	 * @throws BmsException {@link #loadCore}参照
 	 */
-	private BmsContent loadMain(String bms) throws BmsException {
+	private BmsContent loadMain(BmsSource bms) throws BmsException {
 		var content = (BmsContent)null;
 		try {
 			// BMSコンテンツ読み込み開始
@@ -961,15 +756,15 @@ public abstract class BmsLoader {
 				var msg = "Content test result was returned null by handler";
 				error(BmsErrorType.PANIC, 0, "", msg, null);
 			} else switch (result.getResult()) {
-			case BmsLoadHandler.TestResult.RESULT_OK:
-			case BmsLoadHandler.TestResult.RESULT_THROUGH:
+			case BmsTestResult.RESULT_OK:
+			case BmsTestResult.RESULT_THROUGH:
 				// 検査失敗でなければ合格とする
 				if (content.isEditMode()) {
 					// BMSコンテンツが編集モードの場合はエラーとする
 					throw new BmsException("Loaded content is edit mode");
 				}
 				break;
-			case BmsLoadHandler.TestResult.RESULT_FAIL: {
+			case BmsTestResult.RESULT_FAIL: {
 				// BMSコンテンツ検査失敗
 				error(BmsErrorType.TEST_CONTENT, 0, "", result.getMessage(), null);
 				break;
@@ -991,7 +786,7 @@ public abstract class BmsLoader {
 
 	/**
 	 * 引数のBMSスクリプトを解析し、BMS仕様に従ってBMSコンテンツを生成する。
-	 * @param bms Unicode文字列に変換されたBMSスクリプト
+	 * @param bms 入力データ
 	 * @return 生成されたBMSコンテンツ
 	 * @exception IllegalStateException BMS仕様が設定されていない時
 	 * @exception IllegalStateException ハンドラが設定されていない時
@@ -1001,7 +796,7 @@ public abstract class BmsLoader {
 	 * @exception BmsParseException エラーハンドラがfalseを返した時
 	 * @exception BmsException 入出力エラー等、解析処理中にエラーが発生した時。causeが設定される場合がある。
 	 */
-	private BmsContent loadCore(String bms) throws BmsException {
+	private BmsContent loadCore(BmsSource bms) throws BmsException {
 		// 出力対象となるBmsContentを生成する
 		var createdContent = (BmsContent)null;
 		try {
@@ -1032,38 +827,50 @@ public abstract class BmsLoader {
 			if (beginError == null) {
 				// BMS解析開始結果のエラー情報が未設定の場合は処理を続行しない
 				throw new BmsException("Result of start parse is not returned.");
-			} else if (beginError.fail()) {
+			} else if (beginError.isFail()) {
 				// BMS解析開始でエラーが検出された場合も処理を続行しない
 				throw new BmsLoadException(beginError.error);
 			} else {
 				// Do nothing
 			}
 
+			// 全ての要素を解析し、一旦解析順にリスト化しておく
+			// その際、後続処理で使用する基数も判定する
+			var intc = (BmsInt)null;
+			var elements = new ArrayList<BmsParsed>();
+			for (var element = nextElement(); element != null; element = nextElement()) {
+				elements.add(element);
+				if (element.getType() == BmsParsedType.META) {
+					intc = parseBase((BmsMetaParsed)element, intc);
+				}
+			}
+			intc = Objects.requireNonNullElse(intc, BmsInt.of(BmsSpec.BASE_DEFAULT));
+
 			// 入力データから全ての要素を取り出す
 			content.beginEdit();
-			var element = (ParsedElement)null;
 			var dataList = new ArrayList<ChannelArrayData>(BmsSpec.SPEC_CHANNEL_MAX);
-			while ((element = nextElement()) != null) {
-				switch (element.mElementType) {
+			for (var element : elements) {
+				switch (element.getType()) {
 				case DECLARATION:  // BMS宣言
-					parseDeclaration((DeclarationParsedElement)element, content);
+					parseDeclaration((BmsDeclarationParsed)element, content);
 					break;
 				case META:  // メタ情報
-					parseMeta((MetaParsedElement)element, content);
+					parseMeta((BmsMetaParsed)element, intc, content);
 					break;
-				case VALUE_CHANNEL:  // 値型チャンネル
-					parseValueChannel((ValueChannelParsedElement)element, content);
+				case MEASURE_VALUE:  // 小節データ
+					parseValueChannel((BmsMeasureValueParsed)element, intc, content);
 					break;
-				case ARRAY_CHANNEL:  // 配列型チャンネル
-					parseArrayChannel((ArrayChannelParsedElement)element, dataList, content);
+				case NOTE:  // ノート
+					parseArrayChannel((BmsNoteParsed)element, intc, dataList, content);
 					break;
 				case ERROR:  // エラー
-					parseError((ErrorParsedElement)element);
+					parseError((BmsErrorParsed)element);
 					break;
 				default:  // Don't care
 					break;
 				}
 			}
+			elements.clear();
 			content.endEdit();
 
 			// BMS解析を終了する
@@ -1072,14 +879,14 @@ public abstract class BmsLoader {
 			if (endError == null) {
 				// BMS解析終了結果のエラー情報が未設定の場合は処理を続行しない
 				throw new BmsException("Result of start parse is not returned.");
-			} else if (endError.fail()) {
+			} else if (endError.isFail()) {
 				// BMS解析終了でエラーが検出された場合も処理を続行しない
 				throw new BmsLoadException(endError.error);
 			} else {
 				// Do nothing
 			}
 
-			// 配列型のチャンネルデータをコンテンツに登録する
+			// 全てノートをBMSコンテンツに登録する
 			// (配列型の要素登録先(tick)が小節の長さの影響を受けるため、一旦BMS全体を解析し切った後で登録する必要あり)
 			var multiChCounts = new HashMap<MeasureChNumberKey, Integer>();
 			content.beginEdit();
@@ -1089,13 +896,13 @@ public abstract class BmsLoader {
 				var tickCount = content.getMeasureTickCount(data.measure);
 				var count = data.array.size();
 
-				// チャンネルデータの検査を行う
+				// タイムライン要素の検査を行う
 				var result = mHandler.testChannel(data.channel, chIndex, data.measure, data.array);
 				if (result == null) {
 					var msg = "Channel test result was returned null by handler";
 					error(BmsErrorType.PANIC, data.lineNumber, data.line, msg, null);
 				} else switch (result.getResult()) {
-				case BmsLoadHandler.TestResult.RESULT_OK: {
+				case BmsTestResult.RESULT_OK: {
 					// 重複可能チャンネルの場合は次のインデックスへの登録を行う
 					// 登録先インデックスの配列データ数が0個の場合そのインデックスは空データとなるが、それは意図した動作
 					if (data.channel.isMultiple()) {
@@ -1132,9 +939,10 @@ public abstract class BmsLoader {
 						}
 
 						// ノートオブジェクトを生成する
+						var newNote = (BmsNote)null;
 						try {
-							mNoteBridge.mNote = mHandler.createNote();
-							if (mNoteBridge.mNote == null) {
+							newNote = mHandler.createNote();
+							if (newNote == null) {
 								// ノートオブジェクト生成でnullを返した場合は続行不可
 								var msg = String.format("New note object is returned null by '%s'.",
 										mHandler.getClass().getSimpleName());
@@ -1149,7 +957,8 @@ public abstract class BmsLoader {
 
 						// ノートを追記する
 						try {
-							content.putNote(chNumber, chIndex, data.measure, tick, value, mNoteBridge);
+							final var note = newNote;
+							content.putNote(chNumber, chIndex, data.measure, tick, value, () -> note);
 						} catch (Exception e) {
 							// データ不備により例外発生時はデータ不正とする
 							error(BmsErrorType.WRONG_DATA, data.lineNumber, data.line, null, e);
@@ -1171,12 +980,12 @@ public abstract class BmsLoader {
 
 					break;
 				}
-				case BmsLoadHandler.TestResult.RESULT_FAIL:
+				case BmsTestResult.RESULT_FAIL:
 					// 検査に失敗した場合はエラーとし、ノートの登録処理は省略しようとする
 					error(BmsErrorType.TEST_CHANNEL, data.lineNumber, data.line, result.getMessage(), null);
 					break;
-				case BmsLoadHandler.TestResult.RESULT_THROUGH:
-					// 解析したチャンネルデータを破棄する
+				case BmsTestResult.RESULT_THROUGH:
+					// 解析したタイムライン要素を破棄する
 					break;
 				default:
 					// 不明なエラー
@@ -1205,25 +1014,25 @@ public abstract class BmsLoader {
 	 * @param content BMSコンテンツ
 	 * @exception BmsException エラーハンドラがfalseを返した時
 	 */
-	private void parseDeclaration(DeclarationParsedElement element, BmsContent content) throws BmsException {
+	private void parseDeclaration(BmsDeclarationParsed element, BmsContent content) throws BmsException {
 		var lineNumber = element.lineNumber;
 		var line = element.line;
-		var key = element.key;
+		var key = element.name;
 		var value = element.value;
 		var result = mHandler.testDeclaration(key, value);
 		if (result == null) {
 			var msg = "BMS declaration test result was returned null by handler";
 			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 		} else switch (result.getResult()) {
-		case BmsLoadHandler.TestResult.RESULT_OK:
+		case BmsTestResult.RESULT_OK:
 			// BMS宣言の検査合格時はコンテンツに登録する
-			content.addDeclaration(key, value);
+			content.putDeclaration(key, value);
 			break;
-		case BmsLoadHandler.TestResult.RESULT_FAIL:
+		case BmsTestResult.RESULT_FAIL:
 			// BMS宣言の検査失敗時はコンテンツに登録せずにエラー処理に回す
 			error(BmsErrorType.TEST_DECLARATION, 1, line, result.getMessage(), null);
 			break;
-		case BmsLoadHandler.TestResult.RESULT_THROUGH:
+		case BmsTestResult.RESULT_THROUGH:
 			// BMS宣言を破棄する
 			break;
 		default:
@@ -1236,17 +1045,47 @@ public abstract class BmsLoader {
 	}
 
 	/**
+	 * 基数を解析する
+	 * @param element メタ情報要素
+	 * @param curIntc 現在の基数
+	 * @return 基数に応じた整数オブジェクト
+	 */
+	private BmsInt parseBase(BmsMetaParsed element, BmsInt curIntc) {
+		// この解析処理ではエラーを発火しない。
+		// エラーは後続のメタ情報解析処理にて発火することを想定している。
+		if (!element.meta.isBaseChanger()) {
+			// 基数選択メタ情報でない場合は読み飛ばす
+			return curIntc;
+		}
+		if ((curIntc != null) && !mIsAllowRedefine) {
+			// 再定義不許可時に基数選択メタ情報が再定義された
+			return curIntc;
+		}
+		var type = element.meta.getType();
+		if (!type.test(element.value)) {
+			// 定義値がデータ型に適合しない形式で記述されていた
+			return curIntc;
+		}
+		var base = ((Long)type.cast(element.value)).intValue();
+		if (!BmsInt.isSupportBase(base)) {
+			// 非サポートの基数が記述されていた
+			return curIntc;
+		}
+		return BmsInt.of(base);
+	}
+
+	/**
 	 * メタ情報を解析する
 	 * @param element メタ情報要素
+	 * @param intc 基数に応じた整数オブジェクト
 	 * @param content BMSコンテンツ
 	 * @exception BmsException エラーハンドラがfalseを返した時
 	 */
-	private void parseMeta(MetaParsedElement element, BmsContent content) throws BmsException {
+	private void parseMeta(BmsMetaParsed element, BmsInt intc, BmsContent content) throws BmsException {
 		// 値を取り出す
 		var lineNumber = element.lineNumber;
 		var line = element.line;
 		var meta = element.meta;
-		var index = element.index;
 		var value = Objects.requireNonNullElse(element.value, "");
 
 		// パーサ部から返されたメタ情報を検証する
@@ -1256,7 +1095,22 @@ public abstract class BmsLoader {
 			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 			return;
 		}
-		if (meta.getUnit() == BmsUnit.INDEXED) {
+
+		// インデックス値を解析する
+		var index = element.index;
+		if (element.encodedIndex != null) {
+			try {
+				// 選択された基数でインデックス値をデコードする
+				index = intc.toi(element.encodedIndex);
+			} catch (Exception e) {
+				// インデックス値のデコードに失敗
+				error(BmsErrorType.WRONG_DATA, lineNumber, line, "Wrong meta index.", e);
+				return;
+			}
+		}
+
+		// インデックス値を検証する
+		if (meta.isIndexedUnit()) {
 			// 索引付きメタ情報の場合はインデックス値の範囲チェックを行う
 			if ((index < 0) || (index > BmsSpec.INDEXED_META_INDEX_MAX)) {
 				var msg = String.format("Index out of range. [index=%d]", index);
@@ -1281,8 +1135,23 @@ public abstract class BmsLoader {
 			return;
 		}
 
+		// 値の型変換を行う
+		var obj = (Object)null;
+		try {
+			obj = castValue(type, intc, value);
+		} catch (Exception e) {
+			error(BmsErrorType.WRONG_DATA, lineNumber, line, "Failed to parse meta value", e);
+			return;
+		}
+
+		// 基数選択の内容を検査する
+		if (meta.isBaseChanger() && !BmsInt.isSupportBase(((Long)obj).intValue())) {
+			// 非サポートの基数が選択された
+			error(BmsErrorType.WRONG_DATA, lineNumber, line, "Wrong base value", null);
+			return;
+		}
+
 		// 定義値の仕様違反を検査する
-		var obj = type.cast(value);
 		if (meta.isInitialBpm() || meta.isReferenceBpm()) {
 			// 初期BPMまたはBPM変更メタ情報
 			var bpm = ((Number)obj).doubleValue();
@@ -1313,7 +1182,7 @@ public abstract class BmsLoader {
 		// メタ情報を検査する
 		var name = meta.getName();
 		var unit = meta.getUnit();
-		var result = BmsLoadHandler.TestResult.FAIL;
+		var result = BmsTestResult.FAIL;
 		switch (unit) {
 		case SINGLE:
 		case INDEXED: {
@@ -1321,7 +1190,7 @@ public abstract class BmsLoader {
 			result = mHandler.testMeta(meta, index, obj);
 
 			// 再定義不許可の状態で再定義を検出した場合はエラーとする
-			if ((result != null) && (result.getResult() == BmsLoadHandler.TestResult.RESULT_OK) &&
+			if ((result != null) && (result.getResult() == BmsTestResult.RESULT_OK) &&
 					!mIsAllowRedefine && content.containsMeta(meta, index)) {
 				error(BmsErrorType.REDEFINE, lineNumber, line, "Re-defined meta", null);
 				return;
@@ -1341,7 +1210,7 @@ public abstract class BmsLoader {
 			var msg = "Meta test result was returned null by handler";
 			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
 		} else switch (result.getResult()) {
-		case BmsLoadHandler.TestResult.RESULT_OK:
+		case BmsTestResult.RESULT_OK:
 			// メタ情報をBMSコンテンツに登録する
 			switch (unit) {
 			case SINGLE: content.setSingleMeta(name, obj); break;
@@ -1350,11 +1219,11 @@ public abstract class BmsLoader {
 			default: break;
 			}
 			break;
-		case BmsLoadHandler.TestResult.RESULT_FAIL:
+		case BmsTestResult.RESULT_FAIL:
 			// 検査不合格
 			error(BmsErrorType.TEST_META, lineNumber, line, result.getMessage(), null);
 			break;
-		case BmsLoadHandler.TestResult.RESULT_THROUGH:
+		case BmsTestResult.RESULT_THROUGH:
 			// メタ情報破棄
 			break;
 		default:
@@ -1368,10 +1237,11 @@ public abstract class BmsLoader {
 	/**
 	 * 値型チャンネルを解析する
 	 * @param element 値型チャンネル要素
+	 * @param intc 基数に応じた整数オブジェクト
 	 * @param content BMSコンテンツ
 	 * @exception BmsException エラーハンドラがfalseを返した時
 	 */
-	private void parseValueChannel(ValueChannelParsedElement element, BmsContent content) throws BmsException {
+	private void parseValueChannel(BmsMeasureValueParsed element, BmsInt intc, BmsContent content) throws BmsException {
 		// タイムライン読み込みをスキップする場合は何もしない
 		if (mIsSkipReadTimeline) {
 			return;
@@ -1405,9 +1275,9 @@ public abstract class BmsLoader {
 			// 小節データの型変換を行う
 			var object = (Object)null;
 			try {
-				object = channelType.cast(value);
+				object = castValue(channelType, intc, value);
 			} catch (Exception e) {
-				error(BmsErrorType.WRONG_DATA, lineNumber, line, null, e);
+				error(BmsErrorType.WRONG_DATA, lineNumber, line, "Failed to parse measure value", e);
 				return;
 			}
 
@@ -1426,7 +1296,7 @@ public abstract class BmsLoader {
 				}
 			}
 
-			// チャンネルデータの検査を行う
+			// 小節データの検査を行う
 			var chIndex = content.getChannelDataCount(channelNum, measure);
 			var result = mHandler.testChannel(channel, chIndex, measure, object);
 			if (result == null) {
@@ -1436,7 +1306,7 @@ public abstract class BmsLoader {
 			}
 
 			// 重複不可チャンネルの重複チェックを行う
-			if ((result == BmsLoadHandler.TestResult.OK) && (chIndex > 0) && !channel.isMultiple()) {
+			if ((result == BmsTestResult.OK) && (chIndex > 0) && !channel.isMultiple()) {
 				if (mIsAllowRedefine) {
 					// 再定義が許可されている場合は上書きするようにする
 					chIndex = 0;
@@ -1447,23 +1317,23 @@ public abstract class BmsLoader {
 				}
 			}
 
-			// チャンネルデータの検査結果を判定する
+			// 小節データの検査結果を判定する
 			switch (result.getResult()) {
-			case BmsLoadHandler.TestResult.RESULT_OK:
+			case BmsTestResult.RESULT_OK:
 				try {
-					// 小節データの空き領域にチャンネルデータを登録する
+					// 小節データの空き領域に小節データを登録する
 					content.setMeasureValue(channelNum, chIndex, measure, object);
 				} catch (Exception e) {
 					// 何らかのエラーが発生した場合はデータの不備
 					error(BmsErrorType.WRONG_DATA, lineNumber, line, null, e);
 				}
 				break;
-			case BmsLoadHandler.TestResult.RESULT_FAIL:
+			case BmsTestResult.RESULT_FAIL:
 				// 検査不合格
 				error(BmsErrorType.TEST_CHANNEL, lineNumber, line, result.getMessage(), null);
 				break;
-			case BmsLoadHandler.TestResult.RESULT_THROUGH:
-				// チャンネルデータを破棄する
+			case BmsTestResult.RESULT_THROUGH:
+				// 小節データを破棄する
 				break;
 			default:
 				// 想定外
@@ -1482,15 +1352,16 @@ public abstract class BmsLoader {
 	/**
 	 * 配列型チャンネルを解析する
 	 * <p>配列型のデータは一旦リストに退避する。配列型のデータの譜面上の配置は小節の長さの影響を受けるが、
-	 * 小節の長さを確定できるのは単一型のデータを完全に解析した後であるため、
+	 * 小節の長さを確定できるのは小節データを完全に解析した後であるため、
 	 * 当メソッドでは配列型のデータはBMSコンテンツには直接登録しない。</p>
 	 * @param element 配列型チャンネル要素
+	 * @param intc 基数に応じた整数オブジェクト
 	 * @param dataList 解析済みチャンネル定義データ
 	 * @param content BMSコンテンツ
 	 * @exception BmsException エラーハンドラがfalseを返した時
 	 */
-	private void parseArrayChannel(ArrayChannelParsedElement element, List<ChannelArrayData> dataList,
-			BmsContent content) throws BmsException {
+	private void parseArrayChannel(BmsNoteParsed element, BmsInt intc, List<ChannelArrayData> dataList, BmsContent content)
+			throws BmsException {
 		// タイムライン読み込みをスキップする場合は何もしない
 		if (mIsSkipReadTimeline) {
 			return;
@@ -1501,7 +1372,6 @@ public abstract class BmsLoader {
 		var line = element.line;
 		var measure = element.measure;
 		var channelNum = element.number;
-		var array = element.array;
 
 		// チャンネルの取得とデータ型の適合チェック
 		var channel = mSpec.getChannel(channelNum);
@@ -1518,11 +1388,24 @@ public abstract class BmsLoader {
 			return;
 		}
 
+		// 配列データを解析する
+		var array = element.array;
+		if (element.encodedArray != null) {
+			try {
+				// 選択された基数で配列データをデコードする
+				array = new BmsArray(element.encodedArray, intc.base());
+			} catch (Exception e) {
+				// 配列データのデコードに失敗
+				error(BmsErrorType.WRONG_DATA, lineNumber, line, "Wrong array data", e);
+				return;
+			}
+		}
+
 		// 解析したデータの登録処理
 		var channelType = channel.getType();
 		if (channelType.isArrayType()) {
 			// 配列型の場合
-			// チャンネルデータの検査を行う
+			// ノートの検査を行う
 			var chIndex = content.getChannelDataCount(channelNum, measure);
 			var result = mHandler.testChannel(channel, chIndex, measure, array);
 			if (result == null) {
@@ -1531,9 +1414,9 @@ public abstract class BmsLoader {
 				return;
 			}
 
-			// チャンネルデータの検査結果を判定する
+			// ノートの検査結果を判定する
 			switch (result.getResult()) {
-			case BmsLoadHandler.TestResult.RESULT_OK: {
+			case BmsTestResult.RESULT_OK: {
 				// 解析済みデータを生成し、小節番号・チャンネルとそのデータの場所(行番号)を覚えておく
 				ChannelArrayData data = new ChannelArrayData();
 				data.lineNumber = lineNumber;
@@ -1544,12 +1427,12 @@ public abstract class BmsLoader {
 				dataList.add(data);
 				break;
 			}
-			case BmsLoadHandler.TestResult.RESULT_FAIL:
+			case BmsTestResult.RESULT_FAIL:
 				// 検査不合格
 				error(BmsErrorType.TEST_CHANNEL, lineNumber, line, result.getMessage(), null);
 				break;
-			case BmsLoadHandler.TestResult.RESULT_THROUGH:
-				// チャンネルデータを破棄する
+			case BmsTestResult.RESULT_THROUGH:
+				// ノートを破棄する
 				break;
 			default:
 				// 想定外
@@ -1570,9 +1453,27 @@ public abstract class BmsLoader {
 	 * @param element エラー要素
 	 * @exception BmsException エラーハンドラがfalseを返した時
 	 */
-	private void parseError(ErrorParsedElement element) throws BmsException {
+	private void parseError(BmsErrorParsed element) throws BmsException {
 		var err = element.error;
 		error(err.getType(), err.getLineNumber(), err.getLine(), err.getMessage(), err.getCause());
+	}
+
+	/**
+	 * 定義値を指定データ型に変換
+	 * <p>基数選択が可能なデータ型の場合、選択された基数の整数オブジェクトによって定義値をデコードする。</p>
+	 * @param type 変換先データ型
+	 * @param intc 選択された基数の整数オブジェクト
+	 * @param value 変換対象データ
+	 * @return 変換後データ
+	 */
+	private Object castValue(BmsType type, BmsInt intc, String value) {
+		if (type.isSelectableBaseType()) {
+			return Long.valueOf(intc.toi(value));
+		} else if (type.isSelectableArrayType()) {
+			return new BmsArray(value, intc.base());
+		} else {
+			return type.cast(value);
+		}
 	}
 
 	/**
@@ -1654,6 +1555,18 @@ public abstract class BmsLoader {
 		assertField(mHandler != null, "BMS load handler is NOT specified.");
 	}
 
+	/**
+	 * ローダへの入力データがテキストフォーマットであることを確認するアサーション
+	 * @exception UnsupportedOperationException ローダへの入力データがバイナリフォーマット
+	 */
+	private void assertIsTextFormat() {
+		if (mIsBinaryFormat) {
+			var msg = String.format("This operation is un-available for binary format loaders (%s)",
+					getClass().getName());
+			throw new UnsupportedOperationException(msg);
+		}
+	}
+
 	protected final BmsLoaderSettings getSettings() {
 		return mSettings;
 	}
@@ -1662,28 +1575,28 @@ public abstract class BmsLoader {
 	 * BMSの解析処理開始を通知します。
 	 * <p><strong>※当メソッドはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
 	 * <p>当メソッドが呼ばれた時点でBMSローダが持つパーサ部を初期化することを求めます。
-	 * 入力引数でローダの設定と解析対象のテキストが通知されるので、パーサ部の動作に必要な初期化処理を行ってください。</p>
+	 * 入力引数でローダの設定と解析対象の入力データが通知されるので、パーサ部の動作に必要な初期化処理を行ってください。</p>
 	 * <p>パーサ部の初期化完了後に{@link #nextElement()}が呼び出され、BMSコンテンツの各構成要素を返すモードに遷移します。
 	 * しかし、当メソッドの実行で以下の条件のいずれかを満たすと、パーサ部の初期化エラーと見なしBMS読み込みは中止され
 	 * {@link BmsException}がスローされます。</p>
 	 * <ul>
 	 * <li>戻り値でnullを返した</li>
-	 * <li>戻り値でエラー({@link ErrorParsedElement#fail()}がtrueになるオブジェクト)を返した({@link BmsLoadException})</li>
+	 * <li>戻り値でエラー({@link BmsErrorParsed#isFail()}がtrueになるオブジェクト)を返した({@link BmsLoadException})</li>
 	 * <li>当メソッドから実行時例外がスローされた</li>
 	 * <li>当メソッドから意図的に{@link BmsException}をスローした</li>
 	 * </ul>
 	 * <p>当メソッドが呼ばれると、上記の実行結果に関わらず{@link #endParse()}が必ず呼び出されます。</p>
 	 * @param settings ローダの設定
-	 * @param source 解析対象のテキスト
+	 * @param source 解析対象の入力データ
 	 * @return 初期化結果を表すエラー情報要素
 	 * @exception BmsException 解析処理開始時に続行不可能なエラーが発生した
 	 */
-	protected abstract ErrorParsedElement beginParse(BmsLoaderSettings settings, String source) throws BmsException;
+	protected abstract BmsErrorParsed beginParse(BmsLoaderSettings settings, BmsSource source) throws BmsException;
 
 	/**
 	 * BMSの解析処理終了を通知します。
 	 * <p><strong>※当メソッドはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
-	 * <p>当メソッドは{@link #beginParse(BmsLoaderSettings, String)}が呼ばれると、その実行の成否に関わらず必ず呼ばれます。
+	 * <p>当メソッドは{@link #beginParse(BmsLoaderSettings, BmsSource)}が呼ばれると、その実行の成否に関わらず必ず呼ばれます。
 	 * BMSローダのパーサ部が使用したリソースを確実に解放する契機を確保するためです。</p>
 	 * <p>パーサ部の初期化途中で実行時例外がスローされ、初期化が中途半端な状態で当メソッドが実行される可能性がありますので、
 	 * それを踏まえたうえで当メソッドの処理を実装するようにしてください。</p>
@@ -1691,19 +1604,19 @@ public abstract class BmsLoader {
 	 * がスローされます。</p>
 	 * <ul>
 	 * <li>戻り値でnullを返した</li>
-	 * <li>戻り値でエラー({@link ErrorParsedElement#fail()}がtrueになるオブジェクト)を返した({@link BmsLoadException})</li>
+	 * <li>戻り値でエラー({@link BmsErrorParsed#isFail()}がtrueになるオブジェクト)を返した({@link BmsLoadException})</li>
 	 * <li>当メソッドから実行時例外がスローされた</li>
 	 * </ul>
 	 * <p>パーサ部の初期化エラー後に当メソッドが呼ばれ実行時例外がスローされた場合、BMSローダは未定義の動作となります。
 	 * 当メソッドは極力、実行時例外がスローされる契機がないよう実装してください。</p>
 	 * @return 終了処理結果を表すエラー情報要素
 	 */
-	protected abstract ErrorParsedElement endParse();
+	protected abstract BmsErrorParsed endParse();
 
 	/**
 	 * BMSの解析によって得られたBMSコンテンツの要素を1件返します。
 	 * <p><strong>※当メソッドはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
-	 * <p>当メソッドは{@link #beginParse(BmsLoaderSettings, String)}によるパーサ部の初期化処理が正常に終了した後、
+	 * <p>当メソッドは{@link #beginParse(BmsLoaderSettings, BmsSource)}によるパーサ部の初期化処理が正常に終了した後、
 	 * BMSローダによって連続で呼び出されます。パーサ部は当メソッドが呼び出される度に、
 	 * 解析によって得られた要素を順次返すように実装してください。
 	 * 全ての要素を返した後、nullを返すことで要素の抽出処理を終了することができます。</p>
@@ -1711,17 +1624,17 @@ public abstract class BmsLoader {
 	 * また、要素の正当性はBMSローダによってチェックされますのでパーサ部でチェックを行う必要はありません。
 	 * 要素の内容に問題があれば自動的にBMS読み込みハンドラへ然るべき通知が行われます。
 	 * ただし、構文エラーなどのような要素の正当性に関連しないエラーはパーサ部でチェックするようにしてください。</p>
-	 * <p>解析の過程でエラーが検出された場合、BMSコンテンツへ登録する要素ではなくエラー要素({@link ErrorParsedElement})
+	 * <p>解析の過程でエラーが検出された場合、BMSコンテンツへ登録する要素ではなくエラー要素({@link BmsErrorParsed})
 	 * を返してください。エラー要素はBMSローダによってBMS読み込みハンドラの{@link BmsLoadHandler#parseError(BmsScriptError)}
 	 * へ通知されます。また、1つの要素で複数のエラーが発生した場合、当メソッドの呼び出し毎に発生したエラーの要素を全て返してください。</p>
 	 * <p>当メソッドで実行時例外がスローされた場合BMSローダによってキャッチされ、{@link BmsException}がスローされます。
 	 * 意図的に{@link BmsException}をスローした場合、その例外がそのまま呼び出し元へスローされます。</p>
 	 * @return BMSコンテンツの要素、またはエラー要素。これ以上要素がない場合はnull。
 	 * @exception BmsException 処理中に続行不可能なエラーが発生した
-	 * @see DeclarationParsedElement
-	 * @see MetaParsedElement
-	 * @see ChannelParsedElement
-	 * @see ErrorParsedElement
+	 * @see BmsDeclarationParsed
+	 * @see BmsMetaParsed
+	 * @see BmsTimelineParsed
+	 * @see BmsErrorParsed
 	 */
-	protected abstract ParsedElement nextElement() throws BmsException;
+	protected abstract BmsParsed nextElement() throws BmsException;
 }

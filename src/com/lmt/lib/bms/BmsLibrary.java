@@ -2,6 +2,7 @@ package com.lmt.lib.bms;
 
 import static com.lmt.lib.bms.internal.Assertion.*;
 
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.stream.Stream;
  */
 public class BmsLibrary {
 	/** ライブラリ本体バージョン */
-	private static final String LIBRARY_VERSION = "0.7.1";
+	private static final String LIBRARY_VERSION = "0.8.0";
 
 	/**
 	 * デフォルトの文字セットリスト
@@ -75,5 +76,26 @@ public class BmsLibrary {
 		// ユニークな文字セットのリストを構築する
 		var uniqueChasets = Stream.of(charsets).distinct().collect(Collectors.toList());
 		sDefaultCharsets = Collections.unmodifiableList(uniqueChasets);
+	}
+
+	/**
+	 * BMSライブラリのロゴを標準出力に出力します。
+	 */
+	public static void printLogo() {
+		printLogo(System.out);
+	}
+
+	/**
+	 * BMSライブラリのロゴを指定した出力ストリームに出力します。
+	 * @param ps ロゴの出力先ストリーム
+	 * @exception NullPointerException psがnull
+	 */
+	public static void printLogo(PrintStream ps) {
+		assertArgNotNull(ps, "ps");
+		ps.println("   _____  ___ __  _____");
+		ps.println("  / __  \\/ _ '_ \\/ ____)");
+		ps.println(" / __  </ // // /\\___ \\");
+		ps.println("/______/_//_//_/(_____/ Library v" + LIBRARY_VERSION);
+		ps.println("======================================");
 	}
 }

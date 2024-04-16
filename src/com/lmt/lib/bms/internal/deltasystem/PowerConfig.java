@@ -83,7 +83,7 @@ class PowerConfig extends RatingConfig {
 		ipfnNotes = loader.ipfnLinear("ipfn_notes", ipfnNotes);
 		ipfnResist = loader.ipfnLinear("ipfn_resist", ipfnResist);
 		ipfnDensity = loader.ipfnLinear("ipfn_density", ipfnDensity);
-		ipfnRapidBeat = loader.ipfnLinear("ipfn_rapid_beat", ipfnDensity);
+		ipfnRapidBeat = loader.ipfnLinear("ipfn_rapid_beat", ipfnRapidBeat);
 		ipfnPower = loader.ipfnLinear("ipfn_power", ipfnPower);
 		ipfnAdjust = loader.ipfnLinear("ipfn_adjust", ipfnAdjust);
 

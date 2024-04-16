@@ -38,7 +38,7 @@ public class PowerAnalyzer extends RatingAnalyzer {
 
 		// 楽曲位置ごとの評価点を計算する
 		var config = PowerConfig.getInstance();
-		var devs = BeMusicDevice.orderedBySpLeftScratchList();
+		var devs = BeMusicDevice.orderedBySpLeftList();
 		var countDev = devs.size();
 		for (var i = 0; i < countElem; i++) {
 			var elem = elems.get(i);
@@ -209,7 +209,7 @@ public class PowerAnalyzer extends RatingAnalyzer {
 		// また、譜面の一部だけ簡単な配置の高密度にしPOWER値を吊り上げる不正な譜面に対処するためこのような調整を行う。
 		var baseDensity = config.ipfnAdjust.compute(power);
 		var acceptableDensity = baseDensity - (baseDensity * config.densityAcceptableRate);
-		var avgDensity = cxt.score.getNoteCount() / cxt.score.getPlayTime(); // 統計情報の平均密度は使用しない
+		var avgDensity = cxt.chart.getNoteCount() / cxt.chart.getPlayTime(); // 統計情報の平均密度は使用しない
 		if (avgDensity < acceptableDensity) {
 			// 平均密度が許容平均密度を下回っていた場合はPOWER値の調整を行う
 			var downRate = ((acceptableDensity - avgDensity) / acceptableDensity) * config.powerDownwardRate;

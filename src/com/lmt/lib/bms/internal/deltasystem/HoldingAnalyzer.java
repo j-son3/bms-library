@@ -64,9 +64,9 @@ public class HoldingAnalyzer extends RatingAnalyzer {
 		var tlScore = new HoldingScore(lane);
 
 		// 長押しノートが全く存在しない譜面では評価を実行しない
-		if (!cxt.score.hasLongNote()) {
-			tlScore.numNotesTotal = cxt.score.getNoteCount();
-			tlScore.playTime = cxt.score.getPlayTime();
+		if (!cxt.chart.hasLongNote()) {
+			tlScore.numNotesTotal = cxt.chart.getNoteCount();
+			tlScore.playTime = cxt.chart.getPlayTime();
 			return tlScore;
 		}
 
@@ -235,9 +235,9 @@ public class HoldingAnalyzer extends RatingAnalyzer {
 
 		// タイムラインの評価結果を設定する
 		tlScore.elems = elems;
-		tlScore.numNotesTotal = cxt.score.getNoteCount();
+		tlScore.numNotesTotal = cxt.chart.getNoteCount();
 		tlScore.numNotesInLn = notesInLn;
-		tlScore.numLn = cxt.score.getLongNoteCount();
+		tlScore.numLn = cxt.chart.getLongNoteCount();
 		tlScore.playTime = RatingElement.computeTimeOfPointRange(elems);
 		tlScore.lnTime = lnTime;
 		tlScore.noteScoreSummary = noteScoreSummarizer;

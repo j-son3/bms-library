@@ -109,7 +109,7 @@ abstract class RatingElement {
 	static <T extends RatingElement> List<T> listElements(DsContext cxt, Function<BeMusicPoint, T> constructor,
 			Predicate<BeMusicPoint> filter) {
 		// 条件に合致する楽曲位置のみでレーティング要素のリストを構築する
-		var elems = cxt.score.stream().filter(filter).map(constructor).collect(Collectors.toList());
+		var elems = cxt.chart.points().filter(filter).map(constructor).collect(Collectors.toList());
 		var countElem = elems.size();
 
 		// レーティング要素に必要情報を設定する
@@ -125,7 +125,7 @@ abstract class RatingElement {
 			var point = elem.getPoint();
 			for (var j = 0; j < countDev; j++) {
 				var dev = BeMusicDevice.fromIndex(j);
-				var ntype = point.getNoteType(layout.get(dev));
+				var ntype = point.getVisibleNoteType(layout.get(dev));
 				elem.setNoteType(dev, ntype);
 			}
 		}
@@ -242,7 +242,7 @@ abstract class RatingElement {
 			return "+--+";
 		case LONG:
 			return "|  |";
-		case LANDMINE:
+		case MINE:
 			return "****";
 		default:
 			return "    ";

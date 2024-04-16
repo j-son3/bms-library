@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.function.Supplier;
 
 import com.lmt.lib.bms.BmsContent;
 import com.lmt.lib.bms.BmsInt;
@@ -93,72 +94,78 @@ public class BeMusicHeader {
 	 */
 	public static final int FLAG_USER_AREA = 0xffff0000;
 
-	/** 文字列データの空マップ */
-	private static final Map<Integer, String> EMPTY_STRING_IMAP = Collections.emptyMap();
-	/** 数値データの空マップ */
-	private static final Map<Integer, Double> EMPTY_NUMERIC_IMAP = Collections.emptyMap();
-
+	/** #BASE */
+	private int mBase = 0;
 	/** #PLAYER */
-	private BeMusicPlayer mPlayer;
+	private BeMusicPlayer mPlayer = BeMusicPlayer.OTHER;
 	/** #GENRE */
-	private String mGenre;
+	private String mGenre = "";
 	/** #TITLE */
-	private String mTitle;
+	private String mTitle = "";
 	/** #SUBTITLE */
-	private String mSubTitle;
+	private String mSubTitle = "";
 	/** #ARTIST */
-	private String mArtist;
+	private String mArtist = "";
 	/** #SUBARTIST */
-	private List<String> mSubArtists;
+	private List<String> mSubArtists = Collections.emptyList();
 	/** #BPM(初期BPM) */
-	private double mInitialBpm;
+	private double mInitialBpm = 0.0;
 	/** #DIFFICULTY */
-	private BeMusicDifficulty mDifficulty;
+	private BeMusicDifficulty mDifficulty = BeMusicDifficulty.OTHER;
 	/** #CHARTNAME */
-	private String mChartName;
+	private String mChartName = "";
 	/** #PLAYLEVEL */
-	private String mPlayLevelRaw;
+	private String mPlayLevelRaw = "";
 	/** #PLAYLEVEL(数値) */
-	private double mPlayLevel;
+	private double mPlayLevel = 0.0;
 	/** #RANK */
-	private BeMusicRank mRank;
+	private BeMusicRank mRank = BeMusicRank.OTHER;
 	/** #DEFEXRANK */
-	private Double mDefExRank;
+	private Double mDefExRank = null;
 	/** #TOTAL */
-	private double mTotal;
+	private double mTotal = 0.0;
 	/** #COMMENT */
-	private String mComment;
+	private String mComment = "";
 	/** #BANNER */
-	private String mBanner;
+	private String mBanner = "";
 	/** #STAGEFILE */
-	private String mStageFile;
+	private String mStageFile = "";
 	/** #BACKBMP */
-	private String mBackBmp;
+	private String mBackBmp = "";
 	/** #EYECATCH */
-	private String mEyecatch;
+	private String mEyecatch = "";
 	/** #PREVIEW */
-	private String mPreview;
+	private String mPreview = "";
 	/** #LNOBJ */
-	private List<Long> mLnObjs;
+	private List<Long> mLnObjs = Collections.emptyList();
 	/** #LNMODE */
-	private BeMusicLongNoteMode mLnMode;
+	private BeMusicLongNoteMode mLnMode = BeMusicLongNoteMode.LN;
 	/** %URL */
-	private String mUrl;
+	private String mUrl = "";
 	/** %EMAIL */
-	private String mEmail;
+	private String mEmail = "";
 
 	/** #WAV */
-	private Map<Integer, String> mWavs;
+	private Map<Integer, String> mWavs = Collections.emptyMap();
 	/** #BMP */
-	private Map<Integer, String> mBmps;
+	private Map<Integer, String> mBmps = Collections.emptyMap();
 	/** #BPM */
-	private Map<Integer, Double> mBpms;
+	private Map<Integer, Double> mBpms = Collections.emptyMap();
 	/** #STOP */
-	private Map<Integer, Double> mStops;
+	private Map<Integer, Double> mStops = Collections.emptyMap();
 	/** #SCROLL */
-	private Map<Integer, Double> mScrolls;
+	private Map<Integer, Double> mScrolls = Collections.emptyMap();
 	/** #TEXT */
-	private Map<Integer, String> mTexts;
+	private Map<Integer, String> mTexts = Collections.emptyMap();
+
+	/**
+	 * 空のヘッダ定義オブジェクトを構築します。
+	 * <p>このコンストラクタは当クラスを継承したヘッダクラスが{@link #of(BmsContent, Supplier)} または
+	 * {@link #of(BmsContent, int, Supplier)} を使用してオブジェクトを構築する際に使用することを想定しています。</p>
+	 */
+	public BeMusicHeader() {
+		// Do nothing
+	}
 
 	/**
 	 * ヘッダ定義オブジェクトを構築します。
@@ -195,6 +202,14 @@ public class BeMusicHeader {
 	public BeMusicHeader(BmsContent content, int flags) {
 		assertArgNotNull(content, "content");
 		setup(content, flags);
+	}
+
+	/**
+	 * #BASEを取得します。
+	 * @return #BASEの値
+	 */
+	public final int getBase() {
+		return mBase;
 	}
 
 	/**
@@ -510,12 +525,78 @@ public class BeMusicHeader {
 	}
 
 	/**
+	 * ヘッダ定義オブジェクトを構築します。
+	 * <p>当メソッドは{@link #BeMusicHeader(BmsContent)}と同じ機能を提供します。</p>
+	 * @param content BMSコンテンツ
+	 * @return ヘッダ定義オブジェクト
+	 * @exception NullPointerException contentがnull
+	 */
+	public static BeMusicHeader of(BmsContent content) {
+		return new BeMusicHeader(content);
+	}
+
+	/**
+	 * ヘッダ定義オブジェクトを構築します。
+	 * <p>当メソッドは{@link #BeMusicHeader(BmsContent, int)}と同じ機能を提供します。</p>
+	 * @param content BMSコンテンツ
+	 * @param flags ヘッダ定義収集フラグ
+	 * @return ヘッダ定義オブジェクト
+	 * @exception NullPointerException contentがnull
+	 */
+	public static BeMusicHeader of(BmsContent content, int flags) {
+		return new BeMusicHeader(content, flags);
+	}
+
+	/**
+	 * ヘッダ定義オブジェクトを構築します。
+	 * <p>当クラスはヘッダ定義収集を全て行うことを除き、{@link #of(BmsContent, int, Supplier)}と同じです。</p>
+	 * @param <H> 拡張ヘッダクラス
+	 * @param content BMSコンテンツ
+	 * @param creator 拡張ヘッダ定義オブジェクト生成関数
+	 * @return 拡張ヘッダ定義オブジェクト
+	 * @exception NullPointerException contentがnull
+	 * @exception NullPointerException creatorがnull
+	 * @exception NullPointerException creatorがnullを返した
+	 * @see #of(BmsContent, int, Supplier)
+	 */
+	public static <H extends BeMusicHeader> H of(BmsContent content, Supplier<H> creator) {
+		return of(content, ALL, creator);
+	}
+
+	/**
+	 * ヘッダ定義オブジェクトを構築します。
+	 * <p>当メソッドは{@link BeMusicHeader}を継承した拡張ヘッダクラスを構築しセットアップする仕組みを提供します。
+	 * creatorによって生成された拡張ヘッダ定義オブジェクトを指定BMSコンテンツでセットアップし、
+	 * {@link #onCreate(BmsContent, int)}によって拡張情報を初期化します。</p>
+	 * @param <H> 拡張ヘッダクラス
+	 * @param content BMSコンテンツ
+	 * @param flags ヘッダ定義収集フラグ
+	 * @param creator 拡張ヘッダ定義オブジェクト生成関数
+	 * @return 拡張ヘッダ定義オブジェクト
+	 * @exception NullPointerException contentがnull
+	 * @exception NullPointerException creatorがnull
+	 * @exception NullPointerException creatorがnullを返した
+	 * @see #onCreate(BmsContent, int)
+	 */
+	public static <H extends BeMusicHeader> H of(BmsContent content, int flags, Supplier<H> creator) {
+		assertArgNotNull(content, "content");
+		assertArgNotNull(creator, "creator");
+		var header = creator.get();
+		if (header == null) {
+			throw new NullPointerException("Creator returned null header");
+		}
+		header.setup(content, flags);
+		return header;
+	}
+
+	/**
 	 * オブジェクトのセットアップ。
 	 * @param content BMSコンテンツ
 	 * @param flags ヘッダ定義収集フラグ
 	 */
 	final void setup(BmsContent content, int flags) {
 		// 取得フラグに関わらず必ず取得するメタ情報
+		mBase = BeMusicMeta.getBase(content);
 		mPlayer = BeMusicMeta.getPlayer(content);
 		mGenre = BeMusicMeta.getGenre(content);
 		mTitle = BeMusicMeta.getTitle(content);
@@ -542,12 +623,12 @@ public class BeMusicHeader {
 		mEmail = BeMusicMeta.getEmail(content);
 
 		// 取得フラグによって取得有無を決定するメタ情報
-		mWavs = ((flags & WAV) == 0) ? EMPTY_STRING_IMAP : BeMusicMeta.getWavs(content);
-		mBmps = ((flags & BMP) == 0) ? EMPTY_STRING_IMAP : BeMusicMeta.getBmps(content);
-		mBpms = ((flags & BPM) == 0) ? EMPTY_NUMERIC_IMAP : BeMusicMeta.getBpms(content);
-		mStops = ((flags & STOP) == 0) ? EMPTY_NUMERIC_IMAP : BeMusicMeta.getStops(content);
+		mWavs = ((flags & WAV) == 0) ? Collections.emptyMap() : BeMusicMeta.getWavs(content);
+		mBmps = ((flags & BMP) == 0) ? Collections.emptyMap() : BeMusicMeta.getBmps(content);
+		mBpms = ((flags & BPM) == 0) ? Collections.emptyMap() : BeMusicMeta.getBpms(content);
+		mStops = ((flags & STOP) == 0) ? Collections.emptyMap() : BeMusicMeta.getStops(content);
 		mScrolls = ((flags & SCROLL) == 0) ? Collections.emptyMap() : BeMusicMeta.getScrolls(content);
-		mTexts = ((flags & TEXT) == 0) ? EMPTY_STRING_IMAP : BeMusicMeta.getTexts(content);
+		mTexts = ((flags & TEXT) == 0) ? Collections.emptyMap() : BeMusicMeta.getTexts(content);
 
 		// 拡張情報取得用処理を実行する
 		onCreate(content, flags);

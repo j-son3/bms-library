@@ -4,10 +4,12 @@ import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.lmt.lib.bms.BmsContent;
 import com.lmt.lib.bms.internal.deltasystem.DsContext;
 import com.lmt.lib.bms.internal.deltasystem.StatisticsAccessor;
 
@@ -26,7 +28,7 @@ public class BeMusicStatisticsBuilder {
 	/** 楽曲のヘッダ情報 */
 	private BeMusicHeader mHeader;
 	/** 譜面データ */
-	private BeMusicScore mScore;
+	private BeMusicChart mChart;
 	/** 期間統計情報の長さ */
 	private double mLength;
 	/** ノートレイアウト */
@@ -59,21 +61,33 @@ public class BeMusicStatisticsBuilder {
 
 	/**
 	 * 譜面統計情報ビルダーオブジェクトを構築します。
+	 * <p>指定されたBMSコンテンツからヘッダ情報の抽出、譜面データの構築を行い、それらを譜面統計情報の入力データとします。
+	 * 譜面統計情報集計オプションについては当クラスの各種Setterメソッドの解説を参照してください。</p>
+	 * <p>当コンストラクタを使用するのは、ヘッダ情報と譜面データを譜面統計情報の集計以外の用途で使用しない場合に限定するべきです。
+	 * ヘッダ情報と譜面データの生成処理には相応のCPU負荷がかかるため、これらを他の処理で再利用する想定があるケースでは
+	 * {@link #BeMusicStatisticsBuilder(BeMusicHeader, BeMusicChart)} を使用することを推奨します。</p>
+	 * @param content BMSコンテンツ
+	 * @exception NullPointerException contentがnull
+	 */
+	public BeMusicStatisticsBuilder(BmsContent content) {
+		assertArgNotNull(content, "content");
+		var header = BeMusicHeader.of(content);
+		var chart = BeMusicChartBuilder.createChart(content);
+		setup(header, chart);
+	}
+
+	/**
+	 * 譜面統計情報ビルダーオブジェクトを構築します。
 	 * <p>指定された楽曲のヘッダ情報・譜面データが譜面統計情報の入力データとなります。
 	 * その他の譜面統計情報集計オプションについては当クラスの各種Setterメソッドの解説を参照してください。</p>
 	 * <p>ヘッダ情報の値は譜面統計情報の集計の際に必要に応じて参照されます。ヘッダ情報と譜面データが同一楽曲から
 	 * 生成されたものでない場合、譜面統計情報は予期しない集計を行うことになりますので注意してください。</p>
 	 * @param header ヘッダ情報
-	 * @param score 譜面データ
-	 * @exception NullPointerException headerまたはscoreがnull
+	 * @param chart 譜面データ
+	 * @exception NullPointerException headerまたはchartがnull
 	 */
-	public BeMusicStatisticsBuilder(BeMusicHeader header, BeMusicScore score) {
-		assertArgNotNull(header, "header");
-		assertArgNotNull(score, "score");
-		mHeader = header;
-		mScore = score;
-		mLength = BeMusicTimeSpan.RECOMMENDED_SPAN;
-		mLayout = BeMusicNoteLayout.SP_REGULAR;
+	public BeMusicStatisticsBuilder(BeMusicHeader header, BeMusicChart chart) {
+		setup(header, chart);
 	}
 
 	/**
@@ -125,6 +139,23 @@ public class BeMusicStatisticsBuilder {
 	}
 
 	/**
+	 * Delta Systemによる譜面のレーティングを行うレーティングの種別を追加します。
+	 * <p>当メソッドは入力引数としてレーティング種別一覧のコレクションを指定することを除き
+	 * {@link #addRating(BeMusicRatingType...)} と同様の機能を持ちます。
+	 * 当メソッドの詳細な動作仕様についてはそちらを参照してください。</p>
+	 * @param <C> レーティング種別一覧のコレクション
+	 * @param ratingTypes レーティング種別一覧
+	 * @return このオブジェクトのインスタンス
+	 * @exception NullPointerException ratingTypesがnull
+	 * @see BeMusicRatingType
+	 */
+	public final <C extends Collection<BeMusicRatingType>> BeMusicStatisticsBuilder addRating(C ratingTypes) {
+		assertArgNotNull(ratingTypes, "ratingTypes");
+		ratingTypes.stream().filter(Objects::nonNull).filter(t -> !mRatings.contains(t)).forEach(mRatings::add);
+		return this;
+	}
+
+	/**
 	 * 指定された楽曲とオプションで譜面統計情報の集計を行います。
 	 * <p>各種Setterメソッドで指定した集計オプションに誤りがある場合、集計は行われずに例外がスローされます。</p>
 	 * <p>一度集計を行ったビルダーで再度集計を行うことはできません。異なるオプションで集計したい場合は
@@ -154,10 +185,25 @@ public class BeMusicStatisticsBuilder {
 		// ビルダー使用終了のため保有オブジェクトを全て解放する
 		mUsed = true;
 		mHeader = null;
-		mScore = null;
+		mChart = null;
 		mLayout = null;
 
 		return statistics;
+	}
+
+	/**
+	 * 初期化処理
+	 * @param header ヘッダ情報
+	 * @param chart 譜面データ
+	 * @exception NullPointerException headerまたはchartがnull
+	 */
+	private void setup(BeMusicHeader header, BeMusicChart chart) {
+		assertArgNotNull(header, "header");
+		assertArgNotNull(chart, "chart");
+		mHeader = header;
+		mChart = chart;
+		mLength = BeMusicTimeSpan.RECOMMENDED_SPAN;
+		mLayout = BeMusicNoteLayout.SP_REGULAR;
 	}
 
 	/**
@@ -166,7 +212,7 @@ public class BeMusicStatisticsBuilder {
 	 */
 	private void doStat(BeMusicStatistics stat) {
 		var curTime = 0.0;
-		var termTime = mScore.getPlayTime();
+		var termTime = mChart.getPlayTime();
 		var advTime = mLength / 2.0;
 		var prevTs = (BeMusicTimeSpan)null;
 		var curIdx = 0;
@@ -178,18 +224,18 @@ public class BeMusicStatisticsBuilder {
 		while (curTime < termTime) {
 			// 統計情報収集範囲を計算する
 			var endTime = curTime + mLength;
-			var firstIdx = mScore.ceilPointOf(curTime);
-			var lastIdx = mScore.floorPointOf(Math.nextDown(endTime));
+			var firstIdx = mChart.ceilPointOf(curTime);
+			var lastIdx = mChart.floorPointOf(Math.nextDown(endTime));
 
 			// 注視点と視野幅を計算する
 			Arrays.fill(gazePoints, 0.0);
 			Arrays.fill(viewWidths, 0.0);
 			if (isSp) {
 				// シングルプレー用処理
-				computeVisual(firstIdx, lastIdx, BeMusicDevice.orderedBySpLeftScratchList(), visuals);
+				computeVisual(firstIdx, lastIdx, BeMusicDevice.orderedBySpLeftList(), visuals);
 				gazePoints[0] = visuals[0];
 				viewWidths[0] = visuals[1];
-				computeVisual(firstIdx, lastIdx, BeMusicDevice.orderedBySpRightScratchList(), visuals);
+				computeVisual(firstIdx, lastIdx, BeMusicDevice.orderedBySpRightList(), visuals);
 				gazePoints[1] = visuals[0];
 				viewWidths[1] = visuals[1];
 			} else {
@@ -204,12 +250,12 @@ public class BeMusicStatisticsBuilder {
 			// 単純カウント項目を集計する
 			var noteCount = 0;
 			var lnCount = 0;
-			var lmCount = 0;
+			var mineCount = 0;
 			for (var i = firstIdx; i <= lastIdx; i++) {
-				var pt = mScore.getPoint(i);
+				var pt = mChart.getPoint(i);
 				noteCount += pt.getNoteCount();
 				lnCount += pt.getLongNoteCount();
-				lmCount += pt.getLandmineCount();
+				mineCount += pt.getMineCount();
 			}
 
 			// 時間範囲データを生成する
@@ -230,7 +276,7 @@ public class BeMusicStatisticsBuilder {
 			ts.setViewWidth(viewWidths[0], viewWidths[1]);
 			ts.setNoteCount(noteCount);
 			ts.setLongNoteCount(lnCount);
-			ts.setLandmineCount(lmCount);
+			ts.setMineCount(mineCount);
 			if (prevTs == null) {
 				// 先頭の時間範囲データ
 				ts.setPrevious(ts);
@@ -291,7 +337,7 @@ public class BeMusicStatisticsBuilder {
 		}
 
 		// ビルダーに要求のあった全てのレーティング値を計算し、統計情報に設定する
-		var cxt = new DsContext(mHeader, mScore, mLayout, new DsStatisticsAccessor(stat));
+		var cxt = new DsContext(mHeader, mChart, mLayout, new DsStatisticsAccessor(stat));
 		for (var ratingType : mRatings) {
 			// TODO ダブルプレーの分析に対応したら以下のif文を削除する。
 			if (cxt.dpMode) {
@@ -338,7 +384,7 @@ public class BeMusicStatisticsBuilder {
 	private void computeVisual(int firstIndex, int lastIndex, List<BeMusicDevice> deviceList, double[] results) {
 		// 視覚効果のある両端のノート位置を特定する
 		var deviceCount = deviceList.size();
-		var minWidth = (deviceCount > 8) ? 0.03 : 0.07;
+		var minWidth = (deviceCount > BeMusicDevice.COUNT_PER_LANE) ? 0.03 : 0.07;
 		var maxWidth = (double)(deviceCount - 1);
 		var halfWidth = maxWidth / 2.0;
 		var hasVeCount = 0.0;
@@ -346,14 +392,14 @@ public class BeMusicStatisticsBuilder {
 		var viewWidthSum = 0.0;
 		for (var i = firstIndex; i <= lastIndex; i++) {
 			// 同一楽曲位置単位で注視点と視野幅を算出する
-			var pt = mScore.getPoint(i);
+			var pt = mChart.getPoint(i);
 			var hasVe = false;
 			var left = 0.0;
 			var right = 0.0;
 			for (var j = 0; j < deviceCount; j++) {
 				// ノートレイアウト変更後の視覚効果で計算を行う
 				var actualDevice = mLayout.get(deviceList.get(j));
-				var visualEffect = pt.getNoteType(actualDevice).hasVisualEffect();
+				var visualEffect = pt.getVisibleNoteType(actualDevice).hasVisualEffect();
 				if (visualEffect) {
 					left = hasVe ? left : j;
 					right = j;

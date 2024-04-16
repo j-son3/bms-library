@@ -18,11 +18,11 @@ package com.lmt.lib.bms;
  * 任意の楽曲位置に配置される情報です。配列型({@link BmsChannel#isArrayType()}がtrueを返す全てのチャンネルのデータ型)の
  * データが対象となります。</p>
  */
-public abstract class BmsElement extends BmsAddress {
+public abstract class BmsTimelineElement extends BmsAddress {
 	/**
 	 * 新しいタイムライン要素オブジェクトを構築します。
 	 */
-	protected BmsElement() {
+	protected BmsTimelineElement() {
 		super();
 	}
 
@@ -31,7 +31,7 @@ public abstract class BmsElement extends BmsAddress {
 	 * @param adr アドレス
 	 * @exception NullPointerException adrがnull
 	 */
-	protected BmsElement(BmsAddress adr) {
+	protected BmsTimelineElement(BmsAddress adr) {
 		super(adr);
 	}
 
@@ -41,7 +41,7 @@ public abstract class BmsElement extends BmsAddress {
 	 * @param chx CHX
 	 * @exception NullPointerException atまたはchxがnull
 	 */
-	protected BmsElement(BmsAt at, BmsChx chx) {
+	protected BmsTimelineElement(BmsAt at, BmsChx chx) {
 		super(at, chx);
 	}
 
@@ -52,7 +52,7 @@ public abstract class BmsElement extends BmsAddress {
 	 * @param channel チャンネル番号
 	 * @param index チャンネルインデックス
 	 */
-	protected BmsElement(int measure, double tick, int channel, int index) {
+	protected BmsTimelineElement(int measure, double tick, int channel, int index) {
 		super(measure, tick, channel, index);
 	}
 

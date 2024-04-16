@@ -72,7 +72,7 @@ class ComplexBasicScore {
 		}
 
 		// その他の初期化処理
-		mDevices = BeMusicDevice.orderedBySpLeftScratchList().toArray(BeMusicDevice[]::new);
+		mDevices = BeMusicDevice.orderedBySpLeftList().toArray(BeMusicDevice[]::new);
 	}
 
 	/**

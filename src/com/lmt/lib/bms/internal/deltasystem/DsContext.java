@@ -2,7 +2,7 @@ package com.lmt.lib.bms.internal.deltasystem;
 
 import com.lmt.lib.bms.bemusic.BeMusicHeader;
 import com.lmt.lib.bms.bemusic.BeMusicNoteLayout;
-import com.lmt.lib.bms.bemusic.BeMusicScore;
+import com.lmt.lib.bms.bemusic.BeMusicChart;
 
 /**
  * Delta System用コンテキストクラス
@@ -11,7 +11,7 @@ public class DsContext {
 	/** 分析対象楽曲のヘッダ情報 */
 	BeMusicHeader header;
 	/** 分析対象楽曲の譜面データ */
-	BeMusicScore score;
+	BeMusicChart chart;
 	/** ノートレイアウト */
 	BeMusicNoteLayout layout;
 	/** 統計情報へのアクセッサ */
@@ -22,13 +22,13 @@ public class DsContext {
 	/**
 	 * コンストラクタ
 	 * @param header 分析対象楽曲のヘッダ情報
-	 * @param score 分析対象楽曲の譜面データ
+	 * @param chart 分析対象楽曲の譜面データ
 	 * @param layout ノートレイアウト
 	 * @param stat 統計情報へのアクセッサ
 	 */
-	public DsContext(BeMusicHeader header, BeMusicScore score, BeMusicNoteLayout layout, StatisticsAccessor stat) {
+	public DsContext(BeMusicHeader header, BeMusicChart chart, BeMusicNoteLayout layout, StatisticsAccessor stat) {
 		this.header = header;
-		this.score = score;
+		this.chart = chart;
 		this.layout = layout;
 		this.stat = stat;
 		this.dpMode = header.getPlayer().isDoublePlay() && layout.isDoublePlayLayout();

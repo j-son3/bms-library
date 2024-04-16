@@ -6,69 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.IntPredicate;
 
 import com.lmt.lib.bms.internal.Utility;
 
 /**
  * 小節データクラス。
  */
-abstract class MeasureElement extends BmsElement {
-	/**
-	 * タイムライン要素の小節データ
-	 */
-	private static class ValueElement extends BmsElement {
-		/** 値 */
-		private Object mValue;
-
-		/**
-		 * コンストラクタ
-		 * @param measure 小節番号
-		 * @param channel チャンネル番号
-		 * @param index チャンネルインデックス
-		 * @param value 値
-		 */
-		ValueElement(int measure, int channel, int index, Object value) {
-			super(measure, BmsSpec.TICK_MIN, channel, index);
-			mValue = value;
-		}
-
-		/** {@inheritDoc} */
-		@Override
-		public long getValueAsLong() {
-			return ((Number)mValue).longValue();
-		}
-
-		/** {@inheritDoc} */
-		@Override
-		public double getValueAsDouble() {
-			return ((Number)mValue).doubleValue();
-		}
-
-		/** {@inheritDoc} */
-		@Override
-		public String getValueAsString() {
-			return mValue.toString();
-		}
-
-		/** {@inheritDoc} */
-		@Override
-		public BmsArray getValueAsArray() {
-			return (BmsArray)mValue;
-		}
-
-		/** {@inheritDoc} */
-		@Override
-		public Object getValueAsObject() {
-			return mValue;
-		}
-
-		/** {@inheritDoc} */
-		@Override
-		public boolean isMeasureValueElement() {
-			return true;
-		}
-	}
-
+abstract class MeasureElement extends BmsTimelineElement {
 	/** BMS仕様 */
 	private BmsSpec mSpec;
 	/** 小節の刻み数 */
@@ -90,7 +35,7 @@ abstract class MeasureElement extends BmsElement {
 	/** CHXごとのノートリスト */
 	private TreeMap<Integer, TreeSet<BmsNote>> mNotesChMap = null;
 	/** CHXごとの小節データ */
-	private TreeMap<Integer, BmsElement> mValuesChMap = null;
+	private TreeMap<Integer, BmsTimelineElement> mValuesChMap = null;
 
 	/**
 	 * コンストラクタ
@@ -150,7 +95,7 @@ abstract class MeasureElement extends BmsElement {
 	/**
 	 * 4/4拍子を1倍とした当該小節の長さ倍率を返す。
 	 * <p>小節長変更チャンネルを用いて小節長を変更した場合に、1以外の値となる。この倍率は小節の刻み数を
-	 * 決定するための値として用いられる。そのため、値が0になることは無い。最小値は刻み数が最小となる1/192である。</p>
+	 * 決定するための値として用いられる。そのため、値が0になることはない。最小値は刻み数が最小となる1/192である。</p>
 	 * <p>BMSの仕様により、小節長を変更しない場合の初期値は必ず1となる。また、{@link BmsSpec}によって
 	 * 小節長変更チャンネルを定義しなかった場合には、このメソッドは必ず1を返す結果となる。</p>
 	 * @return 4/4拍子を1.0とした当該小節の長さ倍率
@@ -310,7 +255,7 @@ abstract class MeasureElement extends BmsElement {
 		// マップに値を追加する
 		mValuesChMap.put(
 				BmsInt.box(BmsChx.toInt(channel, index)),
-				new ValueElement(getMeasure(), channel, index, value));
+				new BmsMeasureValue(getMeasure(), channel, index, value));
 
 		// 小節長を更新する
 		var lengthChannel = mSpec.getLengthChannel();
@@ -374,9 +319,9 @@ abstract class MeasureElement extends BmsElement {
 	 * この小節が持つ全ての小節データ取得
 	 * @return CHXごとの小節データマップ
 	 */
-	final Map<Integer, BmsElement> mapValues() {
+	final Map<Integer, BmsTimelineElement> mapValues() {
 		// CHXごとの小節の値が存在しない場合は何もしない
-		var result = new TreeMap<Integer, BmsElement>();
+		var result = new TreeMap<Integer, BmsTimelineElement>();
 		if (mValuesChMap == null) {
 			return result;
 		}
@@ -391,7 +336,7 @@ abstract class MeasureElement extends BmsElement {
 	 * @param tester チャンネルを検査するテスター
 	 * @return 検査に合格するチャンネルが存在した場合true、そうでなければfalse
 	 */
-	final boolean testValueChannels(BmsChannel.Tester tester) {
+	final boolean testValueChannels(IntPredicate tester) {
 		// CHXごとの小節の値が存在しない場合はテスト不合格とする
 		if (mValuesChMap == null) {
 			return false;
@@ -399,7 +344,7 @@ abstract class MeasureElement extends BmsElement {
 
 		// 全小節データのチャンネルを検査する
 		for (var key : mValuesChMap.keySet()) {
-			if (tester.testChannel(BmsChx.toChannel(key))) {
+			if (tester.test(BmsChx.toChannel(key))) {
 				return true;
 			}
 		}
@@ -414,7 +359,7 @@ abstract class MeasureElement extends BmsElement {
 	 * @param index チャンネルインデックス
 	 * @return 小節データ
 	 */
-	final BmsElement getValue(int channel, int index) {
+	final BmsTimelineElement getValue(int channel, int index) {
 		return (mValuesChMap == null) ? null : mValuesChMap.get(BmsInt.box(BmsChx.toInt(channel, index)));
 	}
 
@@ -422,7 +367,7 @@ abstract class MeasureElement extends BmsElement {
 	 * 小節データのイテレータ取得
 	 * @return 小節データのイテレータ
 	 */
-	final Iterator<? extends BmsElement> valueIterator() {
+	final Iterator<? extends BmsTimelineElement> valueIterator() {
 		return (mValuesChMap == null) ? Collections.emptyIterator() : mValuesChMap.values().iterator();
 	}
 
@@ -488,10 +433,10 @@ abstract class MeasureElement extends BmsElement {
 	}
 
 	/**
-	 * チャンネルデータ数取得
+	 * データ数取得
 	 * @param channel チャンネル番号
 	 * @param chx CHX値
-	 * @return チャンネルデータ数
+	 * @return データ数
 	 */
 	private static int getChannelDataCount(int channel, Integer chx) {
 		if (chx == null) {

@@ -7,15 +7,17 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
+import java.util.function.IntPredicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * BMSの仕様を表します。
  *
- * <p>BMSライブラリで扱うことの出来るBMSの仕様は、利用者がBMSデータの仕様を決定することができるようになっています。
+ * <p>BMSライブラリで扱うことのできるBMSの仕様は、利用者がBMSデータの仕様を決定することができるようになっています。
  * このクラスは利用者が決定したBMS仕様を表現し、必要に応じて利用者が参照できます。また、本クラスの最大の目的は
  * {@link BmsContent}の挙動を制御することにあります。</p>
  *
@@ -40,7 +42,7 @@ import java.util.function.Predicate;
  * <p>チャンネル({@link BmsChannel})について<br>
  * チャンネルはBMSコンテンツにおいて、時間軸を必要とする要素を表す情報のことです。チャンネルで表すことのできる情報は
  * 音の発音タイミング、画像の切り替えタイミング等が存在します。これらの情報は1小節につき最大で{@link #CHINDEX_MAX}+1個
- * まで保有することが出来るようになっています。BMSでは各チャンネルに保有される「チャンネルデータ」を用いて
+ * まで保有することができるようになっています。BMSでは各チャンネルに保有される「タイムライン要素」を用いて
  * BMSコンテンツを表現していきます。</p>
  *
  * <p>ユーザーチャンネルについて<br>
@@ -90,7 +92,7 @@ public final class BmsSpec {
 	 * <p>このチャンネル番号は、BMS仕様には存在しないものです。BMSライブラリを使用するうえでの処理でのみ
 	 * 用いられるチャンネル番号で、唯一最小～最大チャンネル番号の範囲外を示す特別な値です。</p>
 	 * <p>楽曲位置の走査を行う場合に、走査対象のチャンネルを検査するテスターに渡される場合があります。
-	 * 詳しくは{@link BmsContent#seekNextPoint(int, double, boolean, BmsChannel.Tester, BmsPoint)}を参照してください。</p>
+	 * 詳しくは{@link BmsContent#seekNextPoint(int, double, boolean, IntPredicate, BmsPoint)}を参照してください。</p>
 	 */
 	public static final int CHANNEL_MEASURE = 0;
 
@@ -128,6 +130,9 @@ public final class BmsSpec {
 	/** 小節の刻み数のデフォルト値。 */
 	public static final double TICK_COUNT_DEFAULT = 192.0;
 
+	/** 基数選択可能なデータ型({@link BmsType#BASE}, {@link BmsType#ARRAY})のデフォルトの基数。 */
+	public static final int BASE_DEFAULT = 36;
+
 	/** 16進配列から読み込み可能な最小の値を表します。 */
 	public static final int VALUE_16_MIN = 1;
 	/** 16進配列から読み込み可能な最大の値を表します。 */
@@ -137,6 +142,11 @@ public final class BmsSpec {
 	public static final int VALUE_36_MIN = 1;
 	/** 36進配列から読み込み可能な最大の値を表します。 */
 	public static final int VALUE_36_MAX = 1295;
+
+	/** 62進配列から読み込み可能な最小の値を表します。 */
+	public static final int VALUE_62_MIN = 1;
+	/** 62進配列から読み込み可能な最大の値を表します。 */
+	public static final int VALUE_62_MAX = 3843;
 
 	/** ノートに設定可能な最小の値を表します。 */
 	public static final int VALUE_MIN = Integer.MIN_VALUE;
@@ -149,11 +159,17 @@ public final class BmsSpec {
 	private Map<String, BmsMeta> mMultipleMetas;
 	/** 索引付きメタ情報一式 */
 	private Map<String, BmsMeta> mIndexedMetas;
-	/** チャンネル一式 */
+	/** ソートキーによる並び替え済みのメタ情報一式 */
+	private List<BmsMeta> mOrderedMetas;
+	/** 全チャンネルマップ */
 	private Map<Integer, BmsChannel> mChannels;
+	/** チャンネル番号による並び替え済みの全チャンネルリスト */
+	private List<BmsChannel> mOrderedChannels;
 	/** 初期BPMメタ情報 */
 	private BmsMeta mInitialBpmMeta;
-	/** 小節長変更チャンネル(無い場合はnull) */
+	/** 基数選択メタ情報 */
+	private BmsMeta mBaseChangerMeta;
+	/** 小節長変更チャンネル(ない場合はnull) */
 	private BmsChannel mLengthChannel;
 	/** BPM変更チャンネル一覧 */
 	private BmsChannel[] mBpmChannels;
@@ -163,27 +179,44 @@ public final class BmsSpec {
 	/**
 	 * コンストラクタ
 	 * <p>BMS仕様オブジェクトはビルダークラスを通して生成する仕様のため、外部から直接このクラスの
-	 * インスタンスを生成することは出来ない。</p>
-	 * @param nonIndexedMetas 索引の無いメタ情報一式
+	 * インスタンスを生成することはできない。</p>
+	 * @param nonIndexedMetas 索引のないメタ情報一式
 	 * @param indexedMetas 索引付きメタ情報一式
 	 * @param channels チャンネル一式
 	 * @param initialBpmMeta 初期BPMメタ情報
-	 * @param lengthChannel 小節長変更チャンネル(無い場合はnull)
+	 * @param baseChangerMeta 基数選択メタ情報
+	 * @param lengthChannel 小節長変更チャンネル(ない場合はnull)
 	 * @param bpmChannels BPM変更チャンネル一覧
 	 * @param stopChannels 譜面停止チャンネル一覧
 	 * @see BmsSpecBuilder
 	 */
 	BmsSpec(Map<String, BmsMeta> singleMetas, Map<String, BmsMeta> multipleMetas,
 			Map<String, BmsMeta> indexedMetas, Map<Integer, BmsChannel> channels,
-			BmsMeta initialBpmMeta, BmsChannel lengthChannel, BmsChannel[] bpmChannels, BmsChannel[] stopChannels) {
+			BmsMeta initialBpmMeta, BmsMeta baseChangerMeta, BmsChannel lengthChannel,
+			BmsChannel[] bpmChannels, BmsChannel[] stopChannels) {
 		mSingleMetas = singleMetas;
 		mMultipleMetas = multipleMetas;
 		mIndexedMetas = indexedMetas;
 		mChannels = channels;
 		mInitialBpmMeta = initialBpmMeta;
+		mBaseChangerMeta = baseChangerMeta;
 		mLengthChannel = lengthChannel;
 		mBpmChannels = bpmChannels;
 		mStopChannels = stopChannels;
+
+		// ソートキーによる並び替え済みのメタ情報マップを構築する
+		var metaCount = singleMetas.size() + multipleMetas.size() + indexedMetas.size();
+		var allMetas = new ArrayList<BmsMeta>(metaCount);
+		allMetas.addAll(singleMetas.values());
+		allMetas.addAll(multipleMetas.values());
+		allMetas.addAll(indexedMetas.values());
+		Collections.sort(allMetas, BmsMeta.COMPARATOR_BY_ORDER);
+		mOrderedMetas = allMetas;
+
+		// チャンネル番号による並び替え済みの全チャンネルリストを構築する
+		mOrderedChannels = channels.values().stream()
+				.sorted((c1, c2) -> Integer.compare(c1.getNumber(), c2.getNumber()))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -286,24 +319,28 @@ public final class BmsSpec {
 	 * @return メタ情報のリスト
 	 */
 	public final List<BmsMeta> getMetas() {
-		// 任意型以外の全メタ情報を収集する
-		return getMetas(m -> !m.isObject(), BmsMeta.COMPARATOR_BY_ORDER);
+		return getMetas(false);
 	}
 
 	/**
-	 * メタ情報のリストを取得する。
-	 * @param tester メタ情報のテスター
-	 * @param sortOrder リストのソート条件
+	 * BMS仕様として定義されたメタ情報のリストを取得します。
+	 * <p>リストに格納されたメタ情報の順番は設定されたソートキーで決定されます。ソートキーの小さいメタ情報が
+	 * リストの先頭に格納されます。ソートキーが同一のメタ情報は、BMS仕様に先に登録したものが先に格納されます。</p>
+	 * @param includeObject メタ情報のリストに任意型メタ情報を含むかどうか
 	 * @return メタ情報のリスト
 	 */
-	final List<BmsMeta> getMetas(Predicate<BmsMeta> tester, Comparator<BmsMeta> sortOrder) {
-		var metaCount = mSingleMetas.size() + mMultipleMetas.size() + mIndexedMetas.size();
-		var metas = new ArrayList<BmsMeta>(metaCount);
-		for (var meta : mSingleMetas.values()) { if (tester.test(meta)) { metas.add(meta); } }
-		for (var meta : mMultipleMetas.values()) { if (tester.test(meta)) { metas.add(meta); } }
-		for (var meta : mIndexedMetas.values()) { if (tester.test(meta)) { metas.add(meta); } }
-		metas.sort(sortOrder);
-		return metas;
+	public final List<BmsMeta> getMetas(boolean includeObject) {
+		return (includeObject ? metas() : metas().filter(m -> !m.isObjectType())).collect(Collectors.toList());
+	}
+
+	/**
+	 * メタ情報を走査するストリームを返します。
+	 * <p>走査する順番は設定されたソートキーで決定され、ソートキーの小さいメタ情報が先に登場します。
+	 * ソートキーが同一のメタ情報は、BMS仕様に先に登録したものが先に登場します。</p>
+	 * @return メタ情報を走査するストリーム
+	 */
+	public final Stream<BmsMeta> metas() {
+		return mOrderedMetas.stream();
 	}
 
 	/**
@@ -331,20 +368,26 @@ public final class BmsSpec {
 	 * @return チャンネルのリスト
 	 */
 	public final List<BmsChannel> getChannels() {
-		return getChannels(c -> c.isSpec(), (c1, c2) -> Integer.compare(c1.getNumber(), c2.getNumber()));
+		return getChannels(false);
 	}
 
 	/**
-	 * 指定条件にマッチするチャンネルのリストを取得する。
-	 * @param tester 取得するチャンネルの条件を確認するテスター
-	 * @param sortOrder リストのソート条件
+	 * BMS仕様として定義されたチャンネルのリストを取得します。
+	 * <p>リストへの格納順は、チャンネル番号の若いチャンネルが先になります。</p>
+	 * @param includeUser チャンネルのリストにユーザーチャンネルを含むかどうか
 	 * @return チャンネルのリスト
 	 */
-	final List<BmsChannel> getChannels(Predicate<BmsChannel> tester, Comparator<BmsChannel> sortOrder) {
-		var channels = new ArrayList<BmsChannel>(mChannels.size());
-		mChannels.values().forEach(channel -> { if (tester.test(channel)) { channels.add(channel); } });
-		channels.sort(sortOrder);
-		return channels;
+	public final List<BmsChannel> getChannels(boolean includeUser) {
+		return (includeUser ? channels() : channels().filter(BmsChannel::isSpec)).collect(Collectors.toList());
+	}
+
+	/**
+	 * チャンネルを走査するストリームを返します。
+	 * <p>チャンネル番号の若いチャンネルが先に登場します。</p>
+	 * @return チャンネルを走査するストリーム
+	 */
+	public final Stream<BmsChannel> channels() {
+		return mOrderedChannels.stream();
 	}
 
 	/**
@@ -353,6 +396,23 @@ public final class BmsSpec {
 	 */
 	public final BmsMeta getInitialBpmMeta() {
 		return mInitialBpmMeta;
+	}
+
+	/**
+	 * 基数選択メタ情報を取得します。
+	 * <p>基数選択メタ情報が未設定の場合、nullを返します。</p>
+	 * @return 基数選択メタ情報、またはnull
+	 */
+	public final BmsMeta getBaseChangerMeta() {
+		return mBaseChangerMeta;
+	}
+
+	/**
+	 * 基数選択メタ情報が設定されているかを取得します。
+	 * @return 基数選択メタ情報が設定されていればtrue
+	 */
+	public final boolean hasBaseChanger() {
+		return mBaseChangerMeta != null;
 	}
 
 	/**
@@ -703,60 +763,6 @@ public final class BmsSpec {
 	 */
 	static boolean isChIndexWithinRange(int index, boolean isMultiple) {
 		return isMultiple ? (!isChIndexUnderflow(index) && !isChIndexOverflow(index)) : (index == BmsSpec.CHINDEX_MIN);
-	}
-
-	/**
-	 * ノートの値の16進配列要素下限値超過判定
-	 * @param noteValue ノートの値
-	 * @return 下限値を超過していた場合true
-	 */
-	static boolean isNoteValue16Underflow(int noteValue) {
-		return noteValue < VALUE_16_MIN;
-	}
-
-	/**
-	 * ノートの値の16進配列要素上限値超過判定
-	 * @param noteValue ノートの値
-	 * @return 上限値を超過していた場合true
-	 */
-	static boolean isNoteValue16Overflow(int noteValue) {
-		return noteValue > VALUE_16_MAX;
-	}
-
-	/**
-	 * ノートの値の16進配列要素範囲内判定
-	 * @param noteValue ノートの値
-	 * @return 範囲内の場合true
-	 */
-	static boolean isNoteValue16WithinRange(int noteValue) {
-		return !isNoteValue16Underflow(noteValue) && !isNoteValue16Overflow(noteValue);
-	}
-
-	/**
-	 * ノートの値の36進配列要素下限値超過判定
-	 * @param noteValue ノートの値
-	 * @return 下限値を超過していた場合true
-	 */
-	static boolean isNoteValue36Underflow(int noteValue) {
-		return noteValue < VALUE_36_MIN;
-	}
-
-	/**
-	 * ノートの値の36進配列要素上限値超過判定
-	 * @param noteValue ノートの値
-	 * @return 上限値を超過していた場合true
-	 */
-	static boolean isNoteValue36Overflow(int noteValue) {
-		return noteValue > VALUE_36_MAX;
-	}
-
-	/**
-	 * ノートの値の36進配列要素範囲内判定
-	 * @param noteValue ノートの値
-	 * @return 範囲内の場合true
-	 */
-	static boolean isNoteValue36WithinRange(int noteValue) {
-		return !isNoteValue36Underflow(noteValue) && !isNoteValue36Overflow(noteValue);
 	}
 
 	/**

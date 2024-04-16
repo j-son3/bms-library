@@ -52,7 +52,7 @@ public enum BeMusicNoteType {
 	 * <p>プレイヤーはこのオブジェ付近で入力デバイスを操作してはなりません。スイッチであれば押すとミス、
 	 * スクラッチであればどちらか単一の方向に動かすとミスと判定されます。</p>
 	 */
-	LANDMINE(6, false, false, false, true, false, false);
+	MINE(6, false, false, false, true, false, false);
 
 	/** Be Musicにおけるノート種別の数 */
 	public static final int COUNT = 7;

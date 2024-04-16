@@ -34,6 +34,13 @@ import com.lmt.lib.bms.BmsMeta;
 import com.lmt.lib.bms.BmsScriptError;
 import com.lmt.lib.bms.BmsSpec;
 import com.lmt.lib.bms.internal.Utility;
+import com.lmt.lib.bms.parse.BmsErrorParsed;
+import com.lmt.lib.bms.parse.BmsMeasureValueParsed;
+import com.lmt.lib.bms.parse.BmsMetaParsed;
+import com.lmt.lib.bms.parse.BmsNoteParsed;
+import com.lmt.lib.bms.parse.BmsParsed;
+import com.lmt.lib.bms.parse.BmsParsedType;
+import com.lmt.lib.bms.parse.BmsSource;
 
 /**
  * bmson形式のJSONからBMSコンテンツを生成するBMSローダクラスです。
@@ -211,7 +218,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	/** 処理フェーズ */
 	private ParserPhase mPhase;
 	/** 出力する要素リスト */
-	private Deque<ParsedElement> mElements;
+	private Deque<BmsParsed> mElements;
 	/** 4/4拍子時の1小節あたりのパルス数("resolution"の4倍の値) */
 	private long mPulsePerMeasure;
 	/** 当該小節の初期位置の絶対パルス数をキーにした小節情報マップ */
@@ -510,7 +517,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 		/** 当該タイムラインに関連するメタ情報(関連するものがなければnull) */
 		protected BmsMeta mMeta;
 		/** 変換処理で発見されたエラー一覧(キーはエラーの種類を表す通し番号) */
-		protected Map<Integer, ParsedElement> mErrors = new TreeMap<>();
+		protected Map<Integer, BmsParsed> mErrors = new TreeMap<>();
 
 		/**
 		 * 配列データの定義が必須かどうか取得
@@ -627,7 +634,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 					var array = new ArrayList<Integer>(arrayLength);
 					for (var i = 0; i < arrayLength; i++) { array.add(0); }
 					for (var e : data.entrySet()) { array.set(e.getKey().intValue() / division, e.getValue()); }
-					var element = new ArrayChannelParsedElement(phaseNumber, unit, unit.measure, unit.channel, array);
+					var element = new BmsNoteParsed(phaseNumber, unit, unit.measure, unit.channel, array);
 					publishElement(element);
 				}
 			}
@@ -782,7 +789,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 				var minfo = e.getValue();
 				var line = String.format("{ \"y\": %d }", e.getKey());
 				var value = String.valueOf(minfo.length);
-				var element = new ValueChannelParsedElement(phaseNumber, line, minfo.measure, chNum, value);
+				var element = new BmsMeasureValueParsed(phaseNumber, line, minfo.measure, chNum, value);
 				publishElement(element);
 			}
 
@@ -1140,7 +1147,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 		protected SoundExchanger() {
 			super(ParserPhase.SOUND_CHANNELS,
 					channels(BeMusicChannel.BGM, BeMusicDevice::getVisibleChannel),
-					channels(null, BeMusicDevice::getLegacyLongChannel));
+					channels(null, BeMusicDevice::getLongChannel));
 		}
 
 		@Override
@@ -1200,9 +1207,9 @@ public class BeMusicBmsonLoader extends BmsLoader {
 					putNoteData(pulseNumber, channel, value);
 				} else {
 					// 長押し終了時の定義で上書きする場合、トラックIDのみ更新する
-					var lnMode = BeMusicSoundNote.getLongNoteMode(valueLnOff, null);
-					var restart = BeMusicSoundNote.isRestartTrack(valueLnOff);
-					var newValue = BeMusicSoundNote.makeValue(getTrackId(), restart, lnMode);
+					var lnMode = BeMusicSound.getLongNoteMode(valueLnOff, null);
+					var restart = BeMusicSound.isRestartTrack(valueLnOff);
+					var newValue = BeMusicSound.makeValue(getTrackId(), restart, lnMode);
 					putNoteData(measure, tick, minfo.length, channelLn, newValue);
 				}
 			} else {
@@ -1226,8 +1233,8 @@ public class BeMusicBmsonLoader extends BmsLoader {
 					var lnType = noteData.optLong("t", 0L);
 					var lnMode = LNMODES.contains(lnType) ? BeMusicLongNoteMode.fromNative(lnType) : null;
 					var restart = noteData.optBoolean("c", false) ? false : true;
-					var trackId = BeMusicSoundNote.getTrackId(valueLnOff);
-					var newValue = BeMusicSoundNote.makeValue(trackId, restart, lnMode);
+					var trackId = BeMusicSound.getTrackId(valueLnOff);
+					var newValue = BeMusicSound.makeValue(trackId, restart, lnMode);
 					putNoteData(measure, tick, length, channel, newValue);
 				}
 			}
@@ -1236,7 +1243,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 		@Override
 		protected int getNoteValue(JSONObject noteData) {
 			var lnType = noteData.optLong("t", 0L);
-			return BeMusicSoundNote.makeValue(
+			return BeMusicSound.makeValue(
 					getTrackId(),
 					noteData.optBoolean("c", false) ? false : true,
 					LNMODES.contains(lnType) ? BeMusicLongNoteMode.fromNative(lnType) : null);
@@ -1247,7 +1254,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	private class MineExchanger extends TrackExchanger {
 		/** コンストラクタ */
 		protected MineExchanger() {
-			super(ParserPhase.MINE_CHANNELS, channels(null, BeMusicDevice::getLandmineChannel), null);
+			super(ParserPhase.MINE_CHANNELS, channels(null, BeMusicDevice::getMineChannel), null);
 		}
 
 		@Override
@@ -1376,6 +1383,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * bmson形式のJSONからのBMSローダオブジェクトを構築します。
 	 */
 	public BeMusicBmsonLoader() {
+		super(false, false);
 		mParsers = Map.ofEntries(
 				Map.entry(ParserPhase.INFO, this::parseInfo),
 				Map.entry(ParserPhase.LINES, this::parseLines),
@@ -1395,10 +1403,10 @@ public class BeMusicBmsonLoader extends BmsLoader {
 
 	/** {@inheritDoc} */
 	@Override
-	protected ErrorParsedElement beginParse(BmsLoaderSettings settings, String source) throws BmsCompatException {
+	protected BmsErrorParsed beginParse(BmsLoaderSettings settings, BmsSource source) throws BmsCompatException {
 		try {
 			// 入力されたbmsonを解析する
-			mRoot = new JSONObject(source);
+			mRoot = new JSONObject(source.getAsScript());
 		} catch (JSONException e) {
 			// bmsonにエラーがある場合はこれ以上続行しない
 			var msg = String.format("JSON parse error. '%s'", e.getMessage());
@@ -1430,12 +1438,12 @@ public class BeMusicBmsonLoader extends BmsLoader {
 			throw incompatible("Wrong 'version' value.");
 		}
 
-		return ErrorParsedElement.PASS;
+		return BmsErrorParsed.PASS;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected ErrorParsedElement endParse() {
+	protected BmsErrorParsed endParse() {
 		mRoot = null;
 		mBga = null;
 		mPhase = null;
@@ -1443,7 +1451,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 		mPulsePerMeasure = 0L;
 		mMeasures = null;
 		mWavs = null;
-		return ErrorParsedElement.PASS;
+		return BmsErrorParsed.PASS;
 	}
 
 	/**
@@ -1456,8 +1464,8 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * @exception BmsCompatException BMSライブラリで表現できない定義を検出した時
 	 */
 	@Override
-	protected ParsedElement nextElement() throws BmsCompatException {
-		var element = (ParsedElement)null;
+	protected BmsParsed nextElement() throws BmsCompatException {
+		var element = (BmsParsed)null;
 		while (true) {
 			// 解析によって蓄積された要素を1件取り出す
 			element = mElements.pollLast();
@@ -1501,15 +1509,15 @@ public class BeMusicBmsonLoader extends BmsLoader {
 			}
 		}
 
-		var elements = (List<ParsedElement>)null;
+		var elements = (List<BmsParsed>)null;
 
 		// モード
 		elements = getMeta(info, JsonType.STR, "mode_hint", "beat-7k", BeMusicMeta.PLAYER);
-		if (elements.get(0).error()) {
+		if (elements.get(0).isErrorType()) {
 			// モードの解決に失敗した場合は不正形式と見なしエラーとする
 			throw incompatible("Could not resolve 'mode_hint'.");
 		}
-		var modeHint = (MetaParsedElement)elements.get(0);
+		var modeHint = (BmsMetaParsed)elements.get(0);
 		var modeName = modeHint.value;
 		var player = PLAYER_MAP.get(modeName);
 		if (player == null) {
@@ -1523,11 +1531,11 @@ public class BeMusicBmsonLoader extends BmsLoader {
 
 		// 分解能
 		elements = getMeta(info, JsonType.INT, "resolution", BmsInt.box(240), null);
-		if (elements.get(0).error()) {
+		if (elements.get(0).isErrorType()) {
 			// 分解能が解決できないと以後の読み込みが続行できないためエラーとする
 			throw incompatible("Could not read 'resolution'.");
 		}
-		var resolution = Math.abs(Long.parseLong(((MetaParsedElement)elements.get(0)).value));
+		var resolution = Math.abs(Long.parseLong(((BmsMetaParsed)elements.get(0)).value));
 		if (resolution == 0) {
 			// 分解能に0を設定することはできないためエラーとする
 			throw incompatible("Cannot set 0 to 'resolution'.");
@@ -1562,12 +1570,12 @@ public class BeMusicBmsonLoader extends BmsLoader {
 		// #CHARTNAME
 		elements = getMeta(info, JsonType.STR, "chart_name", null, BeMusicMeta.CHARTNAME);
 		var maybeChartName = elements.get(0);
-		if (maybeChartName.error()) {
+		if (maybeChartName.isErrorType()) {
 			// エラー時はエラー内容を設定する
 			publishElement(maybeChartName);
 		} else {
 			// bmson側の定義内容により、定義するメタ情報を決定する
-			var chartName = ((MetaParsedElement)maybeChartName).value.strip();
+			var chartName = ((BmsMetaParsed)maybeChartName).value.strip();
 			var difficulty = (BeMusicDifficulty)null;
 			if (chartName.isEmpty()) {
 				// 空文字列なら#CHARTNAME, #DIFFICULTYの両方を未定義とする
@@ -1575,7 +1583,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 			} else if ((difficulty = DIFFICULTY_MAP.get(chartName.toLowerCase())) != null) {
 				// 定義済みの#DIFFICULTYと同じ文字列なら#DIFFICULTYのみ定義する
 				var value = String.valueOf(difficulty.getNativeValue());
-				publishElement(new MetaParsedElement(0, "", BeMusicMeta.DIFFICULTY, 0, value));
+				publishElement(new BmsMetaParsed(0, "", BeMusicMeta.DIFFICULTY, 0, value));
 			} else {
 				// #CHARTNAMEのみを定義する
 				publishElement(maybeChartName);
@@ -1625,7 +1633,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 			// ロングノート種別指定時のみ取り込もうとする
 			elements = getMeta(info, JsonType.INT, "ln_type", null, BeMusicMeta.LNMODE);
 			var lnType = elements.get(0);
-			if (!lnType.error() && ((MetaParsedElement)lnType).value.equals("0")) {
+			if (!lnType.isErrorType() && ((BmsMetaParsed)lnType).value.equals("0")) {
 				// ロングノート種別を0で指定していた場合は"ln_type"未指定時と同様の振る舞いとする
 				// Do nothing
 			} else {
@@ -1658,7 +1666,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 				// 要素が存在する場合、定義なしではなく定義型不正のためエラー出力
 				var line = mRoot.get(rootName);
 				var msg = "Wrong 'lines' definition.";
-				var err = error(ParsedElementType.VALUE_CHANNEL, BmsErrorType.SYNTAX, mPhase, line, msg, null);
+				var err = error(BmsParsedType.MEASURE_VALUE, BmsErrorType.SYNTAX, mPhase, line, msg, null);
 				publishElement(err);
 			}
 
@@ -1671,7 +1679,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 			var minfo = new MeasureInfo(0, 0L, pulseCount, mPulsePerMeasure);
 			var chNum = BeMusicChannel.LENGTH.getNumber();
 			var value = String.valueOf(minfo.length);
-			var element = new ValueChannelParsedElement(mPhase.getNumber(), "[]", minfo.measure, chNum, value);
+			var element = new BmsMeasureValueParsed(mPhase.getNumber(), "[]", minfo.measure, chNum, value);
 			mMeasures.put(0L, minfo);
 			publishElement(element);
 		} else {
@@ -1743,7 +1751,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 				// BGAの定義内容が不正
 				var line = String.format("{ \"%s\": ??? }", rootName);
 				var msg = "Wrong BGA definition.";
-				publishElement(error(ParsedElementType.META, BmsErrorType.SYNTAX, mPhase, line, msg, null));
+				publishElement(error(BmsParsedType.META, BmsErrorType.SYNTAX, mPhase, line, msg, null));
 			} else {
 				// BGAの定義未存在時はエラーにはしない
 				// Do nothing
@@ -1789,7 +1797,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * 1個の要素データを出力する
 	 * @param element 要素データ
 	 */
-	private void publishElement(ParsedElement element) {
+	private void publishElement(BmsParsed element) {
 		mElements.push(element);
 	}
 
@@ -1797,7 +1805,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * 複数の要素データを出力する
 	 * @param elements 要素データ
 	 */
-	private void publishElements(Collection<ParsedElement> elements) {
+	private void publishElements(Collection<BmsParsed> elements) {
 		for (var element : elements) {
 			publishElement(element);
 		}
@@ -1811,14 +1819,14 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * @param def エラー・検査失敗時に出力する代替値の文字列表現
 	 * @param tester 検査処理
 	 */
-	private void publishMetaOrDefaultIfError(ParsedElement element, String key, BmsMeta meta, String def, Predicate<String> tester) {
+	private void publishMetaOrDefaultIfError(BmsParsed element, String key, BmsMeta meta, String def, Predicate<String> tester) {
 		var needDefault = false;
-		if (element.error()) {
+		if (element.isErrorType()) {
 			// エラー時はエラーと指定のデフォルト値も出力する
 			publishElement(element);
 			needDefault = true;
 		} else {
-			var elemMeta = (MetaParsedElement)element;
+			var elemMeta = (BmsMetaParsed)element;
 			if (tester.test(elemMeta.value)) {
 				// 正常値の場合は解析結果をそのまま出力する
 				publishElement(element);
@@ -1832,7 +1840,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 
 		// デフォルト値が必要であれば出力する
 		if (needDefault && (meta != null)) {
-			publishElement(new MetaParsedElement(0, "", meta, 0, def));
+			publishElement(new BmsMetaParsed(0, "", meta, 0, def));
 		}
 	}
 
@@ -1840,11 +1848,11 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * 指定メタ情報が空文字列でなければ出力する
 	 * @param element 出力対象要素データ(メタ情報またはエラー要素であること)
 	 */
-	private void publishMetaIfNotEmpty(ParsedElement element) {
-		if (element.error()) {
+	private void publishMetaIfNotEmpty(BmsParsed element) {
+		if (element.isErrorType()) {
 			// エラー時はエラー内容を設定する
 			publishElement(element);
-		} else if (!((MetaParsedElement)element).value.isEmpty()) {
+		} else if (!((BmsMetaParsed)element).value.isEmpty()) {
 			// 値が空文字列でない場合のみ出力する
 			publishElement(element);
 		} else {
@@ -1870,7 +1878,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 			if ((index >= 0) && (index <= BmsSpec.INDEXED_META_INDEX_MAX)) {
 				var value = toValue.apply(entry);
 				var line = String.format("%s[%d] %s", metaName, index, value);
-				var element = new MetaParsedElement(phaseNumber, line, meta, index, value);
+				var element = new BmsMetaParsed(phaseNumber, line, meta, index, value);
 				publishElement(element);
 			}
 		}
@@ -1885,7 +1893,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * @param meta 取り込み先のメタ情報
 	 * @return メタ情報要素データのリスト(複数メタ情報時に複数出力される場合があるため)
 	 */
-	private List<ParsedElement> getMeta(JSONObject o, JsonType t, String key, Object def, BmsMeta meta) {
+	private List<BmsParsed> getMeta(JSONObject o, JsonType t, String key, Object def, BmsMeta meta) {
 		// 項目の有無による処理の分岐
 		if (def == null) {
 			// 必須項目の場合、指定キーの項目が未存在であればエラーとする
@@ -1896,30 +1904,30 @@ public class BeMusicBmsonLoader extends BmsLoader {
 		} else {
 			// 任意項目の場合、指定キーの項目が未存在であればデフォルト値を採用する
 			if (!o.has(key)) {
-				return List.of(new MetaParsedElement(mPhase.getNumber(), key, meta, 0, def.toString()));
+				return List.of(new BmsMetaParsed(mPhase.getNumber(), key, meta, 0, def.toString()));
 			}
 		}
 
 		// データ型ごとのデータ変換処理を実行する
-		var result = (List<ParsedElement>)null;
+		var result = (List<BmsParsed>)null;
 		try {
 			switch (t) {
 			case STR: {
 				// 文字列型：項目を文字列表記でそのまま使用する
 				var value = o.getString(key);
-				result = List.of(new MetaParsedElement(mPhase.getNumber(), key, meta, 0, value));
+				result = List.of(new BmsMetaParsed(mPhase.getNumber(), key, meta, 0, value));
 				break;
 			}
 			case INT: {
 				// 整数型：long型に変換後、その値を文字列に変換して使用する
 				var value = String.valueOf(o.getLong(key));
-				result = List.of(new MetaParsedElement(mPhase.getNumber(), key, meta, 0, value));
+				result = List.of(new BmsMetaParsed(mPhase.getNumber(), key, meta, 0, value));
 				break;
 			}
 			case NUM: {
 				// 実数型：double型に変換後、その値を文字列に変換して使用する
 				var value = String.valueOf(o.getDouble(key));
-				result = List.of(new MetaParsedElement(mPhase.getNumber(), key, meta, 0, value));
+				result = List.of(new BmsMetaParsed(mPhase.getNumber(), key, meta, 0, value));
 				break;
 			}
 			case ARY: {
@@ -1927,12 +1935,12 @@ public class BeMusicBmsonLoader extends BmsLoader {
 				var foundWrong = false;
 				var array = o.getJSONArray(key);
 				var count = array.length();
-				var list = new ArrayList<ParsedElement>(count);
+				var list = new ArrayList<BmsParsed>(count);
 				for (var i = 0; i < count; i++) {
 					try {
 						// 配列要素を文字列として読み込み、リストに追記する
 						var value = array.getString(i);
-						list.add(new MetaParsedElement(mPhase.getNumber(), key, meta, 0, value));
+						list.add(new BmsMetaParsed(mPhase.getNumber(), key, meta, 0, value));
 					} catch (JSONException e) {
 						// 文字列以外で定義されていた場合はデータ不正とする
 						if (!foundWrong) {
@@ -2056,19 +2064,19 @@ public class BeMusicBmsonLoader extends BmsLoader {
 					// 配列データの定義が不正
 					var line = String.format("{ \"%s\": ??? }", rootName);
 					var msg = String.format("'%s' wrong definition.", rootName);
-					publishElement(error(ParsedElementType.META, BmsErrorType.SYNTAX, phase, line, msg, null));
+					publishElement(error(BmsParsedType.META, BmsErrorType.SYNTAX, phase, line, msg, null));
 				} else {
 					// 配列データが未定義
 					var line = "";
 					var msg = String.format("'%s' undefined.", rootName);
-					publishElement(error(ParsedElementType.META, BmsErrorType.SYNTAX, phase, line, msg, null));
+					publishElement(error(BmsParsedType.META, BmsErrorType.SYNTAX, phase, line, msg, null));
 				}
 			}
 			return;
 		}
 
 		// 配列データから1個ずつノートオブジェクトを走査してメタ情報を収集する
-		var errors = new TreeMap<Integer, ParsedElement>();
+		var errors = new TreeMap<Integer, BmsParsed>();
 		var count = array.length();
 		for (var i = 0; i < count; i++) {
 			// ノートオブジェクトを取得する
@@ -2078,7 +2086,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 				if (outErr && !errors.containsKey(1)) {
 					var line = String.format("%s[%d]", rootName, i);
 					var msg = "Wrong definition.";
-					errors.put(1, error(ParsedElementType.META, BmsErrorType.SYNTAX, phase, line, msg, null));
+					errors.put(1, error(BmsParsedType.META, BmsErrorType.SYNTAX, phase, line, msg, null));
 				}
 				continue;
 			}
@@ -2090,7 +2098,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 				if (outErr && !errors.containsKey(2)) {
 					var line = String.format("%s[%d] { ... }", rootName, i);
 					var msg = "Wrong value.";
-					errors.put(2, error(ParsedElementType.META, BmsErrorType.WRONG_DATA, phase, line, msg, null));
+					errors.put(2, error(BmsParsedType.META, BmsErrorType.WRONG_DATA, phase, line, msg, null));
 				}
 				continue;
 			} else if (id < 0) {
@@ -2098,7 +2106,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 				if (outErr && !errors.containsKey(3)) {
 					var line = String.format("%s[%d] { ... }", rootName, i);
 					var msg = "Wrong definition.";
-					errors.put(3, error(ParsedElementType.META, BmsErrorType.WRONG_DATA, phase, line, msg, null));
+					errors.put(3, error(BmsParsedType.META, BmsErrorType.WRONG_DATA, phase, line, msg, null));
 				}
 				continue;
 			}
@@ -2107,7 +2115,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 				if (outErr && !errors.containsKey(4)) {
 					var line = String.format("%s[%d] { ... }", rootName, i);
 					var msg = "Too many (or large) identifier.";
-					errors.put(4, error(ParsedElementType.META, BmsErrorType.WRONG_DATA, phase, line, msg, null));
+					errors.put(4, error(BmsParsedType.META, BmsErrorType.WRONG_DATA, phase, line, msg, null));
 				}
 				//continue;  // IDがインデックス値上限を超過してもデータ収集は行う
 			}
@@ -2127,7 +2135,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 				if (outErr && !errors.containsKey(5)) {
 					var line = String.format("%s[%d] { \"name\": \"%s\" }", rootName, i, name);
 					var msg = "Wrong name.";
-					errors.put(5, error(ParsedElementType.META, BmsErrorType.WRONG_DATA, phase, line, msg, null));
+					errors.put(5, error(BmsParsedType.META, BmsErrorType.WRONG_DATA, phase, line, msg, null));
 				}
 				continue;
 			}
@@ -2174,7 +2182,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 		}
 
 		// 全トラックを解析する
-		var errors = new TreeMap<Integer, ParsedElement>();
+		var errors = new TreeMap<Integer, BmsParsed>();
 		var exchanger = exgCreator.get();
 		var trackCount = trackArray.length();
 		for (var i = 0; i < trackCount; i++) {
@@ -2283,10 +2291,10 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * @param cause エラーの元になった例外
 	 * @return メタ情報エラー要素
 	 */
-	private ErrorParsedElement metaError(BmsErrorType type, String key, Object value, String reason, Throwable cause) {
+	private BmsErrorParsed metaError(BmsErrorType type, String key, Object value, String reason, Throwable cause) {
 		var line = String.format("\"%s\": { \"%s\": \"%s\" }", mPhase.getRootName(), key, value);
 		var err = new BmsScriptError(type, mPhase.getNumber(), line, reason, null);
-		return new ErrorParsedElement(ParsedElementType.META, err);
+		return new BmsErrorParsed(BmsParsedType.META, err);
 	}
 
 	/**
@@ -2329,8 +2337,8 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * @param reason エラー理由
 	 * @return 配列型チャンネルのエラー要素
 	 */
-	private static ErrorParsedElement achError(BmsErrorType type, ParserPhase phase, Object line, String reason) {
-		return error(ParsedElementType.ARRAY_CHANNEL, type, phase, line, reason, null);
+	private static BmsErrorParsed achError(BmsErrorType type, ParserPhase phase, Object line, String reason) {
+		return error(BmsParsedType.NOTE, type, phase, line, reason, null);
 	}
 
 	/**
@@ -2340,8 +2348,8 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * @param reason エラー理由
 	 * @return 配列型チャンネルの構文エラー
 	 */
-	private static ErrorParsedElement achSyntax(ParserPhase phase, Object line, String reason) {
-		return error(ParsedElementType.ARRAY_CHANNEL, BmsErrorType.SYNTAX, phase, line, reason, null);
+	private static BmsErrorParsed achSyntax(ParserPhase phase, Object line, String reason) {
+		return error(BmsParsedType.NOTE, BmsErrorType.SYNTAX, phase, line, reason, null);
 	}
 
 	/**
@@ -2351,8 +2359,8 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * @param reason エラー理由
 	 * @return 配列型チャンネルのデータ不正エラー
 	 */
-	private static ErrorParsedElement achWrong(ParserPhase phase, Object line, String reason) {
-		return error(ParsedElementType.ARRAY_CHANNEL, BmsErrorType.WRONG_DATA, phase, line, reason, null);
+	private static BmsErrorParsed achWrong(ParserPhase phase, Object line, String reason) {
+		return error(BmsParsedType.NOTE, BmsErrorType.WRONG_DATA, phase, line, reason, null);
 	}
 
 	/**
@@ -2365,10 +2373,10 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * @param cause エラーの原因となった例外
 	 * @return エラー要素
 	 */
-	private static ErrorParsedElement error(ParsedElementType where, BmsErrorType type, ParserPhase phase, Object line,
+	private static BmsErrorParsed error(BmsParsedType where, BmsErrorType type, ParserPhase phase, Object line,
 			String reason, Throwable cause) {
 		var err = new BmsScriptError(type, phase.getNumber(), line.toString(), reason, cause);
-		return new ErrorParsedElement(where, err);
+		return new BmsErrorParsed(where, err);
 	}
 
 	/**

@@ -137,7 +137,7 @@ class GimmickElement extends RatingElement {
 			var mineEnds = mineFirst || (pos == mineGrp.last);
 			var mine = mineGrp.mines.get(pos);
 			var mineHasMv = (mine != null) && mine.hasMovement();
-			var mineExist = getPoint().hasLandmine();
+			var mineExist = getPoint().hasMine();
 			sb.append(mineGrp.isOnePoint() ? 'O' : mineEnds ? '<' : ' ');
 			sb.append(mineHasMv ? "==" : mineEnds ? "--" : "  ");
 			sb.append(mineExist ? '*' : mineHasMv ? '=' : mineEnds ? '-' : ' ');

@@ -67,8 +67,8 @@ public class ScratchAnalyzer extends RatingAnalyzer {
 		var tlScore = new Scratch.Score(lane);
 
 		// スクラッチが全く存在しない譜面では評価を実行しない
-		if (cxt.score.getNoteCount(mDevScr) == 0) {
-			tlScore.playTime = cxt.score.getPlayTime();
+		if (cxt.chart.getNoteCount(mDevScr) == 0) {
+			tlScore.playTime = cxt.chart.getPlayTime();
 			return tlScore;
 		}
 
@@ -251,8 +251,8 @@ public class ScratchAnalyzer extends RatingAnalyzer {
 		tlScore.numPulse = numPulse;
 		tlScore.numRtrip = numRtrip;
 		tlScore.numSpin = numSpin;
-		tlScore.numScratch = cxt.score.getNoteCount(cxt.layout.get(mDevScr));
-		tlScore.numSwitch = mDevSws.stream().mapToInt(dev -> cxt.score.getNoteCount(cxt.layout.get(dev))).sum();
+		tlScore.numScratch = cxt.chart.getNoteCount(cxt.layout.get(mDevScr));
+		tlScore.numSwitch = mDevSws.stream().mapToInt(dev -> cxt.chart.getNoteCount(cxt.layout.get(dev))).sum();
 		tlScore.playTime = RatingElement.computeTimeOfPointRange(elems);
 		tlScore.scratchingTime = scrTotalTime;
 		tlScore.scrDifficulty = scrDifficulty;

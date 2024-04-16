@@ -1,58 +1,25 @@
 package com.lmt.lib.bms;
 
+import static com.lmt.lib.bms.internal.Assertion.*;
+
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
 /**
  * タイムライン要素の一つであるノートの情報を表します。
  *
  * <p>情報には、アドレス、およびノートが示す値の2つが存在します。当クラスの情報は変更不可であり、
  * BMSライブラリの外部から情報の変更が加えられることを想定していません。</p>
  *
- * @see BmsElement
+ * @see BmsTimelineElement
  */
-public class BmsNote extends BmsElement {
-	/**
-	 * ノートオブジェクトを生成するI/Fを提供します。
-	 * <p>当インターフェイスは主に{@link BmsContent}のメソッドにパラメータとして渡されます。1個のノートオブジェクトの
-	 * インスタンスを生成し、戻り値として返却する役割を担います。</p>
-	 */
-	@FunctionalInterface
-	public interface Creator {
-		/**
-		 * ノートオブジェクトを生成します。
-		 * <p>配列型チャンネルのデータ要素は全てノートオブジェクトとしてBMSコンテンツ内で管理されます。
-		 * 当メソッドで返されたノートオブジェクトはBMSコンテンツ内のタイムライン要素として格納されることになります。
-		 * アプリケーションが個々のノートオブジェクトに何らかの情報を付加してBMSコンテンツ内で管理させたい場合、
-		 * 当メソッドで{@link BmsNote}を継承したノートオブジェクトを返します。</p>
-		 * <p>付加情報の更新は{@link #onCreate()}を使用して行ってください。
-		 * これらのメソッドは{@link BmsContent}内部から呼び出されるよう設計されています。</p>
-		 * @return ノートオブジェクト
-		 */
-		BmsNote createNote();
-	}
-
-	/**
-	 * ノートオブジェクトを検査するI/Fを提供します。
-	 * <p>当インターフェイスは主に{@link BmsContent}のメソッドにパラメータとして渡されます。1個のノートオブジェクトの
-	 * 検査を実施し、戻り値として検査結果を返却する役割を担います。</p>
-	 */
-	@FunctionalInterface
-	public interface Tester {
-		/**
-		 * ノートオブジェクトの検査を行います。
-		 * <p>パラメータで渡されるノートオブジェクトが検査対象です。オブジェクトの内容を確認し、検査OKとなる場合には
-		 * 戻り値でtrueを返し、検査失敗の場合はfalseを返します。検査後、どのような振る舞いになるかは当インターフェイスを
-		 * 扱うメソッドに依存します。</p>
-		 * @param note 検査対象のノートオブジェクト
-		 * @return 検査合格の場合はtrue、不合格の場合はfalse
-		 */
-		boolean testNote(BmsNote note);
-	}
-
+public class BmsNote extends BmsTimelineElement {
 	/** デフォルトのノートオブジェクト生成器。 */
-	public static final Creator DEFAULT_CREATOR = () -> new BmsNote();
+	public static final Supplier<BmsNote> DEFAULT_CREATOR = () -> new BmsNote();
 	/** 常に検査合格とするテスター。 */
-	public static final Tester TEST_OK = n -> true;
+	public static final Predicate<BmsNote> TEST_OK = n -> true;
 	/** 常に検査不合格とするテスター。 */
-	public static final Tester TEST_FAIL = n -> false;
+	public static final Predicate<BmsNote> TEST_FAIL = n -> false;
 
 	/** ノートが持つ値 */
 	private int mValue = 0;
@@ -144,6 +111,37 @@ public class BmsNote extends BmsElement {
 	}
 
 	/**
+	 * このオブジェクトと同じ型のノートオブジェクトを構築し、指定したアドレス・値を設定します。
+	 * <p>厳密には{@link #onNewInstance()}を呼び出して新しいノートオブジェクトを構築し、
+	 * そのオブジェクトに対して入力引数のデータを設定して返します。構築の際、入力引数の内容は検証されません。</p>
+	 * @param address アドレス
+	 * @param value ノートの値
+	 * @return 入力引数の各情報を設定した新しいノートオブジェクト
+	 * @exception NullPointerException addressがnull
+	 */
+	public final BmsNote newNote(BmsAddress address, int value) {
+		assertArgNotNull(address, "address");
+		return newNote(address.getChannel(), address.getIndex(), address.getMeasure(), address.getTick(), value);
+	}
+
+	/**
+	 * このオブジェクトと同じ型のノートオブジェクトを構築し、指定したCHX・楽曲位置・値を設定します。
+	 * <p>厳密には{@link #onNewInstance()}を呼び出して新しいノートオブジェクトを構築し、
+	 * そのオブジェクトに対して入力引数のデータを設定して返します。構築の際、入力引数の内容は検証されません。</p>
+	 * @param channel チャンネル番号
+	 * @param index チャンネルインデックス
+	 * @param measure 小節番号
+	 * @param tick 小節の刻み位置
+	 * @param value ノートの値
+	 * @return 入力引数の各情報を設定した新しいノートオブジェクト
+	 */
+	public final BmsNote newNote(int channel, int index, int measure, double tick, int value) {
+		var newNote = onNewInstance();
+		newNote.setup(channel, index, measure, tick, value);
+		return newNote;
+	}
+
+	/**
 	 * このオブジェクトと同等の新しいノートオブジェクトのインスタンスを生成します。
 	 * <p>当メソッドはノートの移動・コピーが発生した時に内部処理が呼び出します。当クラスを継承したノートオブジェクトは
 	 * 当メソッドをオーバーライドし、継承先クラスのインスタンスを生成するように実装するべきです。デフォルトの実装では
@@ -169,7 +167,7 @@ public class BmsNote extends BmsElement {
 	/**
 	 * ノートの正式なセットアップ処理
 	 * <p>ノートに対して刻み位置と値を設定するために用いる。ユーザーによる無秩序な刻み位置と値の設定を
-	 * 防ぐため、外部からはそれらを設定出来ないようにしている。</p>
+	 * 防ぐため、外部からはそれらを設定できないようにしている。</p>
 	 * @param channel チャンネル番号
 	 * @param index チャンネル内インデックス
 	 * @param measure 小節番号

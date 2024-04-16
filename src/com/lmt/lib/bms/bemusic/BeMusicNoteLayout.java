@@ -17,22 +17,22 @@ import java.util.Random;
  * ノートの入れ替えを実現することが可能になります。</p>
  */
 public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
-	/** プライマリレーンにおける正規配置パターン */
+	/** 主レーンにおける正規配置パターン */
 	public static final String PATTERN_PRIMARY_REGULAR = "1234567S";
-	/** プライマリレーンにおけるミラー配置パターン */
+	/** 主レーンにおけるミラー配置パターン */
 	public static final String PATTERN_PRIMARY_MIRROR = "7654321S";
-	/** セカンダリレーンにおける正規配置パターン */
+	/** 副レーンにおける正規配置パターン */
 	public static final String PATTERN_SECONDARY_REGULAR = "ABCDEFGS";
-	/** セカンダリレーンにおけるミラー配置パターン */
+	/** 副レーンにおけるミラー配置パターン */
 	public static final String PATTERN_SECONDARY_MIRROR = "GFEDCBAS";
 
-	/** プライマリレーンに指定可能な文字リスト(スクラッチなし) */
+	/** 主レーンに指定可能な文字リスト(スクラッチなし) */
 	private static final List<Character> PRIMARY_LIST = List.of('1', '2', '3', '4', '5', '6', '7');
-	/** プライマリレーンに指定可能な文字リスト(スクラッチあり) */
+	/** 主レーンに指定可能な文字リスト(スクラッチあり) */
 	private static final List<Character> PRIMARY_FULL_LIST = List.of('1', '2', '3', '4', '5', '6', '7', 'S');
-	/** セカンダリレーンに指定可能な文字リスト(スクラッチなし) */
+	/** 副レーンに指定可能な文字リスト(スクラッチなし) */
 	private static final List<Character> SECONDARY_LIST = List.of('A', 'B', 'C', 'D', 'E', 'F', 'G');
-	/** セカンダリレーンに指定可能な文字リスト(スクラッチあり) */
+	/** 副レーンに指定可能な文字リスト(スクラッチあり) */
 	private static final List<Character> SECONDARY_FULL_LIST = List.of('A', 'B', 'C', 'D', 'E', 'F', 'G', 'S');
 	/** レーンレイアウトに指定可能な文字リスト(スクラッチなし)全て */
 	private static final List<List<Character>> SWITCH_LIST = List.of(PRIMARY_LIST, SECONDARY_LIST);
@@ -40,13 +40,13 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	/** 任意のレイアウトパターン生成用乱数オブジェクト */
 	private static final Random RANDOM_OBJECT = new Random();
 
-	/** プライマリレーン用デバイスマップ */
+	/** 主レーン用デバイスマップ */
 	private static final Map<Character, BeMusicDevice> PRIMARY_DEVICE_MAP = Map.ofEntries(
 			Map.entry('1', BeMusicDevice.SWITCH11), Map.entry('2', BeMusicDevice.SWITCH12),
 			Map.entry('3', BeMusicDevice.SWITCH13), Map.entry('4', BeMusicDevice.SWITCH14),
 			Map.entry('5', BeMusicDevice.SWITCH15), Map.entry('6', BeMusicDevice.SWITCH16),
 			Map.entry('7', BeMusicDevice.SWITCH17), Map.entry('S', BeMusicDevice.SCRATCH1));
-	/** セカンダリレーン用デバイスマップ */
+	/** 副レーン用デバイスマップ */
 	private static final Map<Character, BeMusicDevice> SECONDARY_DEVICE_MAP = Map.ofEntries(
 			Map.entry('A', BeMusicDevice.SWITCH21), Map.entry('B', BeMusicDevice.SWITCH22),
 			Map.entry('C', BeMusicDevice.SWITCH23), Map.entry('D', BeMusicDevice.SWITCH24),
@@ -63,23 +63,23 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	public static final BeMusicNoteLayout DP_REGULAR =
 			new BeMusicNoteLayout(PATTERN_PRIMARY_REGULAR, PATTERN_SECONDARY_REGULAR);
 
-	/** プライマリレーンのレイアウト */
+	/** 主レーンのレイアウト */
 	private String mPrimary;
-	/** セカンダリレーンのレイアウト */
+	/** 副レーンのレイアウト */
 	private String mSecondary;
-	/** プライマリ/セカンダリレーンが入れ替わっているかどうか */
+	/** 主・副レーンが入れ替わっているかどうか */
 	private boolean mIsFlip;
 	/** デバイスレイアウトテーブル */
 	private BeMusicDevice[] mLayout;
 
 	/**
 	 * シングルプレー用のノートレイアウトオブジェクトを構築します。
-	 * <p>レイアウトはプライマリレーンのスイッチ1～7を表す'1'～'7'の文字とスクラッチを表す'S'の文字で指定します。
+	 * <p>レイアウトは主レーンのスイッチ1～7を表す'1'～'7'の文字とスクラッチを表す'S'の文字で指定します。
 	 * レイアウトは7または8文字で指定し、スクラッチのみ省略が可能です。
 	 * スクラッチを指定する場合、スイッチとスクラッチを含めたレイアウトが行えます。スクラッチにアサインするノートは
 	 * 8文字目に記述してください。</p>
 	 * <p>1つの入力デバイスを複数にアサインすることはできません。そのような指定があった場合は例外をスローします。</p>
-	 * @param layout プライマリレーンのレイアウト文字列
+	 * @param layout 主レーンのレイアウト文字列
 	 * @exception NullPointerException layoutがnull
 	 * @exception IllegalArgumentException レイアウト記述ルール違反
 	 */
@@ -89,23 +89,22 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 
 	/**
 	 * ノートレイアウトオブジェクトを構築します。
-	 * <p>プライマリレーンのレイアウトはスイッチ1～7を表す'1'～'7'の文字とスクラッチを表す'S'の文字で指定します。
-	 * セカンダリレーンのレイアウトはスイッチ1～7を表す'A'～'G'の文字とスクラッチを表す'S'の文字で指定します。</p>
+	 * <p>主レーンのレイアウトはスイッチ1～7を表す'1'～'7'の文字とスクラッチを表す'S'の文字で指定します。
+	 * 副レーンのレイアウトはスイッチ1～7を表す'A'～'G'の文字とスクラッチを表す'S'の文字で指定します。</p>
 	 * <p>レイアウトは7または8文字で指定し、スクラッチのみ省略が可能です。
 	 * スクラッチを指定する場合、スイッチとスクラッチを含めたレイアウトが行えます。スクラッチにアサインするノートは
 	 * 8文字目に記述してください。</p>
 	 * <p>1つのノートを複数にアサインすることはできません。そのような指定があった場合は例外をスローします。</p>
-	 * <p>セカンダリレーンのレイアウトを省略(null指定)するとシングルプレー用、指定するとダブルプレー用の
-	 * ノートレイアウトオブジェクトとなります。プライマリレーンにセカンダリレーンのレイアウトを指定すると両者を
-	 * 入れ替えるレイアウト(FLIP)を構築することができます。ただし、シングルプレー用レイアウトでセカンダリレーンの
+	 * <p>副レーンのレイアウトを省略(null指定)するとシングルプレー用、指定するとダブルプレー用の
+	 * ノートレイアウトオブジェクトとなります。主レーンに副レーンのレイアウトを指定すると両者を
+	 * 入れ替えるレイアウト(FLIP)を構築することができます。ただし、シングルプレー用レイアウトで副レーンの
 	 * レイアウトを指定することはできません。指定すると例外がスローされます。</p>
-	 * @param primary プライマリレーンのレイアウト文字列
-	 * @param secondary セカンダリレーンのレイアウト文字列
+	 * @param primary 主レーンのレイアウト文字列
+	 * @param secondary 副レーンのレイアウト文字列
 	 * @exception NullPointerException primaryがnull
-	 * @exception IllegalArgumentException プライマリレーンのレイアウト記述ルール違反
-	 * @exception IllegalArgumentException セカンダリレーンのレイアウト記述ルール違反
-	 * @exception IllegalArgumentException プライマリレーンにセカンダリレーンのレイアウト指定時、
-	 *                                       セカンダリレーンのレイアウトがプライマリレーンのレイアウトではない
+	 * @exception IllegalArgumentException 主レーンのレイアウト記述ルール違反
+	 * @exception IllegalArgumentException 副レーンのレイアウト記述ルール違反
+	 * @exception IllegalArgumentException 主レーンに副レーンのレイアウト指定時、副レーンのレイアウトが主レーンのレイアウトではない
 	 */
 	public BeMusicNoteLayout(String primary, String secondary) {
 		// PRIMARYのセットアップ
@@ -120,7 +119,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 		mSecondary = secondary;
 		mIsFlip = pOkS;
 		if (!isSp) {
-			// ダブルプレー用の場合のみセカンダリレーンを検査する
+			// ダブルプレー用の場合のみ副レーンを検査する
 			var sList = pOkP ? SECONDARY_FULL_LIST : PRIMARY_FULL_LIST;
 			var sOk = testPattern(secondary, sList);
 			assertArg(sOk, "Argument 'secondary' syntax error. primary=%s, secondary=%s", primary, secondary);
@@ -130,20 +129,21 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 		var map = pOkP ? PRIMARY_DEVICE_MAP : SECONDARY_DEVICE_MAP;
 		mLayout = new BeMusicDevice[BeMusicDevice.COUNT];
 		primary = (primary.length() == 7) ? (primary + "S") : primary;
-		for (var i = 0; i < 8; i++) {
+		for (var i = 0; i < BeMusicDevice.COUNT_PER_LANE; i++) {
 			mLayout[i] = map.get(primary.charAt(i));
 		}
 		if (isSp) {
-			// シングルプレー用の場合セカンダリレーンはレイアウト変更なしとする
-			for (var i = 8; i < 16; i++) {
-				mLayout[i] = BeMusicDevice.fromIndex(i);
+			// シングルプレー用の場合副レーンはレイアウト変更なしとする
+			for (var i = 0; i < BeMusicDevice.COUNT_PER_LANE; i++) {
+				var index = BeMusicDevice.SECONDARY_BASE + i;
+				mLayout[index] = BeMusicDevice.fromIndex(index);
 			}
 		} else {
-			// ダブルプレー用の場合セカンダリレーンのレイアウト替えを行う
+			// ダブルプレー用の場合副レーンのレイアウト替えを行う
 			map = pOkP ? SECONDARY_DEVICE_MAP : PRIMARY_DEVICE_MAP;
 			secondary = (secondary.length() == 7) ? (secondary + "S") : secondary;
-			for (var i = 0; i < 8; i++) {
-				mLayout[i + 8] = map.get(secondary.charAt(i));
+			for (var i = 0; i < BeMusicDevice.COUNT_PER_LANE; i++) {
+				mLayout[BeMusicDevice.SECONDARY_BASE + i] = map.get(secondary.charAt(i));
 			}
 		}
 	}
@@ -228,7 +228,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	/**
 	 * レイアウトの文字列表現を返します。
 	 * <p>具体的にはレイアウトパターン文字列が返されます。
-	 * ダブルプレー用レイアウトではプライマリレーン用とセカンダリレーン用のレイアウトパターン文字列を結合した文字列が
+	 * ダブルプレー用レイアウトでは主レーン用と副レーン用のレイアウトパターン文字列を結合した文字列が
 	 * 返されます。</p>
 	 * @return レイアウトの文字列表現
 	 */
@@ -240,7 +240,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	/**
 	 * レイアウトパターンの比較を行います。
 	 * <p>比較のソースとしてレイアウトオブジェクト構築時に指定されたレイアウトパターンを用います。
-	 * プライマリレーンのレイアウトパターンが同じ場合、セカンダリレーンのレイアウトパターンで比較を行います。
+	 * 主レーンのレイアウトパターンが同じ場合、副レーンのレイアウトパターンで比較を行います。
 	 * このようなケースではダブルプレー用のレイアウトのほうが大きいと判定されます。</p>
 	 * @param o 比較対象レイアウト
 	 * @return 比較対象レイアウトと等価の場合0、小さければ負の値、大きければ正の値
@@ -262,7 +262,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * レイアウトパターンに従ってマッピングされた入力デバイスを取得します。
 	 * <p>引数の入力デバイスはレイアウト変更前の正規の入力デバイスを指定します。戻り値ではレイアウトパターンに従って
 	 * 変更された入力デバイスを返します。</p>
-	 * <p>シングルプレー用レイアウトでセカンダリレーンの入力デバイスを指定しても効果はありません。</p>
+	 * <p>シングルプレー用レイアウトで副レーンの入力デバイスを指定しても効果はありません。</p>
 	 * @param before レイアウト変更前のノートを示す入力デバイス
 	 * @return レイアウト変更後のノートを示す入力デバイス
 	 * @exception NullPointerException beforeがnull
@@ -273,19 +273,19 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	}
 
 	/**
-	 * プライマリレーン用レイアウトパターンを取得します。
+	 * 主レーン用レイアウトパターンを取得します。
 	 * <p>当メソッドは、オブジェクト構築時に指定したレイアウトパターンを返します。</p>
-	 * @return プライマリレーン用レイアウトパターン
+	 * @return 主レーン用レイアウトパターン
 	 */
 	public final String getPrimaryPattern() {
 		return mPrimary;
 	}
 
 	/**
-	 * セカンダリレーン用レイアウトパターンを取得します。
+	 * 副レーン用レイアウトパターンを取得します。
 	 * <p>当メソッドは、レイアウトオブジェクト構築時に指定したレイアウトパターンを返します。シングルプレー用レイアウトでは
-	 * セカンダリレーンのレイアウトパターンがnullで返ることに注意してください。</p>
-	 * @return セカンダリレーン用レイアウトパターン
+	 * 副レーンのレイアウトパターンがnullで返ることに注意してください。</p>
+	 * @return 副レーン用レイアウトパターン
 	 */
 	public final String getSecondaryPattern() {
 		return mSecondary;
@@ -308,7 +308,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	}
 
 	/**
-	 * プライマリレーンとセカンダリレーンが入れ替わった状態(FLIP)であるかを判定します。
+	 * 主レーンと副レーンが入れ替わった状態(FLIP)であるかを判定します。
 	 * <p>当メソッドはシングルプレー用レイアウトでは必ずfalseを返します。</p>
 	 * @return このレイアウトがFLIPの場合true
 	 */

@@ -66,6 +66,7 @@ public class BeMusicSpec {
 		// メタ情報を登録する
 		// BMS書き出し時は上から登録順に書き出されるので、記述順に注意すること
 		builder
+				.addMeta(BeMusicMeta.BASE)
 				.addMeta(BeMusicMeta.PLAYER)
 				.addMeta(BeMusicMeta.GENRE)
 				.addMeta(BeMusicMeta.TITLE)
@@ -166,7 +167,7 @@ public class BeMusicSpec {
 		for (var c : BeMusicChannel.VISIBLE_2P_CHANNELS) { builder.addChannel(c); }
 		for (var c : BeMusicChannel.INVISIBLE_CHANNELS) { builder.addChannel(c); }
 		for (var c : BeMusicChannel.LONG_CHANNELS) { builder.addChannel(c); }
-		for (var c : BeMusicChannel.LANDMINE_CHANNELS) { builder.addChannel(c); }
+		for (var c : BeMusicChannel.MINE_CHANNELS) { builder.addChannel(c); }
 
 		// 任意型メタ情報とユーザーチャンネルを登録する
 		if (objectMetas != null) {
@@ -179,6 +180,7 @@ public class BeMusicSpec {
 		// 初期BPMメタ情報、小節長変更、BPM変更、譜面停止チャンネルを設定する
 		builder
 				.setInitialBpmMeta(BeMusicMeta.BPM.getName())
+				.setBaseChangerMeta(BeMusicMeta.BASE.getName())
 				.setLengthChannel(BeMusicChannel.LENGTH.getNumber())
 				.setBpmChannel(BeMusicChannel.BPM_LEGACY.getNumber(), BeMusicChannel.BPM.getNumber())
 				.setStopChannel(BeMusicChannel.STOP.getNumber());
@@ -233,7 +235,7 @@ public class BeMusicSpec {
 			return;
 		}
 		for (var i = 0; i < objectMetas.length; i++) {
-			if (!objectMetas[i].isObject()) {
+			if (!objectMetas[i].isObjectType()) {
 				throw new IllegalArgumentException(String.format(
 						"There is non-object meta in the list. [index=%d]", i));
 			}

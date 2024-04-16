@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.lmt.lib.bms.BmsAt;
@@ -31,7 +32,7 @@ import com.lmt.lib.bms.internal.Utility;
  * <p>当クラスが持つ情報や機能では足りない場合には、当クラスを拡張し、処理や機能を追加してください。そのための
  * 処理実装は{@link #onCreate()}で行うことを想定しています。</p>
  */
-public class BeMusicScore implements Iterable<BeMusicPoint> {
+public class BeMusicChart implements Iterable<BeMusicPoint> {
 	/** LNモードで、疑似的なBack-Spin, Multi-Spinと判定する最大間隔(秒単位) */
 	private static final double MAX_PSEUDO_TIME = 0.21;
 
@@ -39,18 +40,20 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	private class PointIterator implements Iterator<BeMusicPoint> {
 		/** インデックス */
 		private int mIndex = 0;
+		/** 楽曲位置情報の数 */
+		private int mCount = mPoints.size();
 
 		/** {@inheritDoc} */
 		@Override
 		public boolean hasNext() {
-			return (mIndex < mPoints.size());
+			return (mIndex < mCount);
 		}
 
 		/** {@inheritDoc} */
 		@Override
 		public BeMusicPoint next() {
 			if (!hasNext()) { throw new NoSuchElementException(); }
-			return mPoints.get(mIndex);
+			return mPoints.get(mIndex++);
 		}
 	}
 
@@ -97,29 +100,29 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 * 想定していません。オブジェクトの生成は{@link #create(List, Supplier)}のオブジェクトクリエータで
 	 * インスタンス生成されることを意図しています。</p>
 	 */
-	public BeMusicScore() {
+	public BeMusicChart() {
 		// Do nothing
 	}
 
 	/**
 	 * 指定した楽曲位置情報リストを用いてBMS譜面オブジェクトを構築します。
-	 * <p>当メソッドでは{@link BeMusicScore}クラスのインスタンスを生成してオブジェクトを構築します。
+	 * <p>当メソッドでは{@link BeMusicChart}クラスのインスタンスを生成してオブジェクトを構築します。
 	 * それ以外の動作仕様については{@link #create(List, Supplier)}を参照してください。</p>
 	 * @param list 楽曲位置情報リスト
 	 * @return BMS譜面オブジェクト
 	 * @see #create(List, Supplier)
 	 */
-	public static BeMusicScore create(List<BeMusicPoint> list) {
-		return create(list, () -> new BeMusicScore());
+	public static BeMusicChart create(List<BeMusicPoint> list) {
+		return create(list, () -> new BeMusicChart());
 	}
 
 	/**
 	 * 指定した楽曲位置情報リストを用いてBMS譜面オブジェクトを構築します。
 	 * <p>BMSコンテンツから楽曲位置情報を抽出したリストから、BMS譜面オブジェクトクリエータで生成したオブジェクトを
-	 * 生成しデータを構築します。楽曲位置情報の抽出については{@link BeMusicScoreBuilder}を参照してください。</p>
+	 * 生成しデータを構築します。楽曲位置情報の抽出については{@link BeMusicChartBuilder}を参照してください。</p>
 	 * <p>通常、当メソッドは当クラスの拡張を行わない限り使用されることはありません。アプリケーションによって
 	 * 当クラスの拡張を行い、情報・機能を追加する場合にのみ参照することを推奨します。ライブラリが提供する
-	 * BMS譜面オブジェクトを用いる場合は{@link #create(List)}または{@link BeMusicScoreBuilder#createScore()}を
+	 * BMS譜面オブジェクトを用いる場合は{@link #create(List)}または{@link BeMusicChartBuilder#createChart()}を
 	 * 使用してBMS譜面オブジェクトを生成してください。</p>
 	 * <p>楽曲位置情報リストは小節番号・刻み位置と時間が昇順でソートされていなければなりません。
 	 * リストが前述のような状態になっていない場合はBMS譜面オブジェクトは生成されず例外がスローされます。</p>
@@ -132,11 +135,10 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 * @exception NullPointerException creatorがnullを返した
 	 * @exception IllegalArgumentException 楽曲位置情報リストで小節番号・刻み位置が後退した
 	 * @exception IllegalArgumentException 楽曲位置情報リストで時間が後退した
-	 * @exception IllegalArgumentException 楽曲位置情報リストで表示位置が後退した
-	 * @see BeMusicScoreBuilder
+	 * @see BeMusicChartBuilder
 	 * @see #create(List)
 	 */
-	public static <S extends BeMusicScore> S create(List<BeMusicPoint> list, Supplier<S> creator) {
+	public static <S extends BeMusicChart> S create(List<BeMusicPoint> list, Supplier<S> creator) {
 		assertArgNotNull(list, "list");
 		assertArgNotNull(creator, "creator");
 		var instance = creator.get();
@@ -217,7 +219,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 * 地雷オブジェの数を取得します。
 	 * @return 地雷オブジェの数
 	 */
-	public final int getLandmineCount() {
+	public final int getMineCount() {
 		return mLmCount;
 	}
 
@@ -227,18 +229,9 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 * @return 指定入力デバイスの地雷オブジェ数
 	 * @exception NullPointerException deviceがnull
 	 */
-	public final int getLandmineCount(BeMusicDevice device) {
+	public final int getMineCount(BeMusicDevice device) {
 		assertArgNotNull(device, "device");
 		return mLmCounts[device.getIndex()];
-	}
-
-	/**
-	 * 最後の操作可能ノートを持つ楽曲位置情報を取得します。
-	 * <p>譜面が空の場合、当メソッドは{@link BeMusicPoint#EMPTY}を返します。</p>
-	 * @return 最後の操作可能ノートを持つ楽曲位置情報
-	 */
-	public final BeMusicPoint getLastPlayablePoint() {
-		return mPoints.isEmpty() ? BeMusicPoint.EMPTY : mPoints.get(mLastPlayableIndex);
 	}
 
 	/**
@@ -249,7 +242,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 * @return この譜面の演奏時間
 	 */
 	public final double getPlayTime() {
-		return  mPoints.isEmpty() ? 0.0 :mPoints.get(mLastPlayableIndex).getTime();
+		return  mPoints.isEmpty() ? 0.0 : mPoints.get(mLastPlayableIndex).getTime();
 	}
 
 	/**
@@ -322,7 +315,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 * 地雷オブジェ有無を取得します。
 	 * @return 地雷オブジェ有無
 	 */
-	public final boolean hasLandmine() {
+	public final boolean hasMine() {
 		return (mLmCount > 0);
 	}
 
@@ -386,7 +379,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 	 * @see #hasChangeBpm()
 	 * @see #hasChangeScroll()
 	 * @see #hasStop()
-	 * @see #hasLandmine()
+	 * @see #hasMine()
 	 */
 	public final boolean hasGimmick() {
 		return mGimmick;
@@ -400,12 +393,27 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 
 	/**
 	 * 楽曲位置情報リストを走査するストリームを返します。
-	 * <p>楽曲位置情報リストは、楽曲位置の時間で昇順ソートされていることを保証します。類似の情報として「表示位置」
-	 * がありますが、楽曲位置情報リストがこの情報で昇順ソートされていることを期待するべきではありません。</p>
+	 * <p>楽曲位置情報リストは、楽曲位置の時間で昇順ソートされていることを保証します。</p>
 	 * @return 楽曲位置情報リストを走査するストリーム
 	 */
-	public final Stream<BeMusicPoint> stream() {
+	public final Stream<BeMusicPoint> points() {
 		return mPoints.stream();
+	}
+
+	/**
+	 * 指定範囲の楽曲位置情報リストを走査するストリームを返します。
+	 * <p>引数に指定可能な値は 0～{@link #getPointCount()}-1 の範囲です。</p>
+	 * @param start 走査を開始する楽曲位置情報リストのインデックス(この値を含む)
+	 * @param end 走査を終了する楽曲位置情報リストのインデックス(この値を含まない)
+	 * @return 楽曲位置情報リストを走査するストリーム
+	 * @exception IndexOutOfBoundsException startが 0～{@link #getPointCount()}-1 の範囲外
+	 * @exception IndexOutOfBoundsException endが 0～{@link #getPointCount()} の範囲外
+	 */
+	public final Stream<BeMusicPoint> points(int start, int end) {
+		var count = mPoints.size();
+		assertArgIndexRange(start, count, "start");
+		assertArgIndexRange(end, count + 1, "end");
+		return IntStream.range(start, end).mapToObj(this::getPoint);
 	}
 
 	/**
@@ -556,14 +564,12 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 		var lastMeasure = -1;
 		var lastTick = -1.0;
 		var lastTime = -1.0;
-		var lastDispPos = -1.0;
 		var lastScrPt = new BeMusicPoint[BeMusicLane.COUNT];
 		for (var ptIndex = 0; ptIndex < listCount; ptIndex++) {
 			var pt = list.get(ptIndex);
 			var measure = pt.getMeasure();
 			var tick = pt.getTick();
 			var time = pt.getTime();
-			var disp = pt.getDisplayPosition();
 
 			// 小節が増加した場合は最終刻み位置を更新する
 			if (measure > lastMeasure) { lastTick = -1.0; }
@@ -587,28 +593,22 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 						measure, tick, lastTime, time);
 				throw new IllegalArgumentException(msg);
 			}
-			if (disp <= lastDispPos) {
-				var msg = String.format(
-						"Detected incorrectly display position. measure=%d, tick=%.16g, time=%.16g, expect-disp>%.16g, actual-disp=%.16g",
-						measure, tick, time, lastDispPos, disp);
-				throw new IllegalArgumentException(msg);
-			}
 
 			// 各ノート数を更新する
 			for (var i = 0; i < BeMusicDevice.COUNT; i++) {
-				var ntype = pt.getNoteType(BeMusicDevice.fromIndex(i));
+				var ntype = pt.getVisibleNoteType(BeMusicDevice.fromIndex(i));
 				mNoteCounts[i] += (ntype.isCountNotes() ? 1 : 0);
 				mLnCounts[i] += ((ntype == BeMusicNoteType.LONG_ON) ? 1 : 0);
-				mLmCounts[i] += ((ntype == BeMusicNoteType.LANDMINE) ? 1 : 0);
+				mLmCounts[i] += ((ntype == BeMusicNoteType.MINE) ? 1 : 0);
 			}
 
 			// スクラッチモードを更新する
 			for (var i = 0; i < BeMusicLane.COUNT; i++) {
 				var scr = BeMusicDevice.getScratch(BeMusicLane.fromIndex(i));
-				var curNt = pt.getNoteType(scr);
+				var curNt = pt.getVisibleNoteType(scr);
 				if (curNt.hasMovement()) {
 					var prevPt = lastScrPt[i];
-					var prevNt = (prevPt == null) ? BeMusicNoteType.NONE : prevPt.getNoteType(scr);
+					var prevNt = (prevPt == null) ? BeMusicNoteType.NONE : prevPt.getVisibleNoteType(scr);
 					switch (curNt) {
 					case BEAT:
 						if ((prevNt == BeMusicNoteType.LONG_OFF) && ((time - prevPt.getTime()) <= MAX_PSEUDO_TIME)) {
@@ -646,7 +646,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 			// その他の統計情報を更新する
 			mNoteCount += pt.getNoteCount();
 			mLnCount += pt.getLongNoteCount();
-			mLmCount += pt.getLandmineCount();
+			mLmCount += pt.getMineCount();
 			mChgScrollCount += (pt.hasScroll() ? 1 : 0);
 			mChgBpmCount += (pt.hasBpm() ? 1 : 0);
 			mStopCount += (pt.hasStop() ? 1 : 0);
@@ -657,7 +657,6 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 			lastMeasure = measure;
 			lastTick = tick;
 			lastTime = time;
-			lastDispPos = disp;
 		}
 
 		// 推奨TOTAL値1を計算する
@@ -680,7 +679,7 @@ public class BeMusicScore implements Iterable<BeMusicPoint> {
 
 	/**
 	 * BMS譜面オブジェクトが構築された時に実行されます。
-	 * <p>当メソッドが実行されるのはオブジェクトのベースクラスである{@link BeMusicScore}の構築処理が完了した後です。
+	 * <p>当メソッドが実行されるのはオブジェクトのベースクラスである{@link BeMusicChart}の構築処理が完了した後です。
 	 * 従って、クラスのGetterを使用することで構築済みの情報にアクセス可能な状態となっています。</p>
 	 * <p>当メソッドの意図は、ベースクラスを拡張したクラスにおいて自身が必要とする情報を構築する機会を提供する
 	 * ことにあります。メソッドはコンストラクタの最後で実行され、当メソッドの実行が完了する時には全ての情報構築が

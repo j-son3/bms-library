@@ -8,6 +8,15 @@ import java.util.Deque;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import com.lmt.lib.bms.parse.BmsDeclarationParsed;
+import com.lmt.lib.bms.parse.BmsErrorParsed;
+import com.lmt.lib.bms.parse.BmsMeasureValueParsed;
+import com.lmt.lib.bms.parse.BmsMetaParsed;
+import com.lmt.lib.bms.parse.BmsNoteParsed;
+import com.lmt.lib.bms.parse.BmsParsed;
+import com.lmt.lib.bms.parse.BmsParsedType;
+import com.lmt.lib.bms.parse.BmsSource;
+
 /**
  * 標準フォーマットのBMSからBMSコンテンツを生成するBMSローダクラスです。
  *
@@ -37,13 +46,13 @@ import java.util.regex.Pattern;
  * %URL http://www.lm-t.com/
  * %MYMETA 00AA00GG00ZZ</pre>
  *
- * <p><strong>チャンネル</strong><br>
- * "#"＋数字3文字＋36進数2文字＋":"で始まる行は「チャンネル」として解析します。
+ * <p><strong>タイムライン要素</strong><br>
+ * "#"＋数字3文字＋36進数2文字＋":"で始まる行は「タイムライン要素」として解析します。
  * 最初の数字は小節番号、続く36進数はチャンネル番号を表し、":"の後の記述は当該小節・チャンネルのデータを表します。
- * チャンネルデータの記述形式はBMS仕様によって定められているため、仕様に違反する記述をした場合、
+ * タイムライン要素の記述形式はBMS仕様によって定められているため、仕様に違反する記述をした場合、
  * 当該チャンネルは構文エラーとして報告されます。一般的にチャンネルは小節番号の若い順で記述されますが、
  * 小節番号は前後しても構いません。ただし、BMSの可読性が著しく低下するので小節番号順に記述することが推奨されます。<br>
- * チャンネルの記述例は以下の通りです。</p>
+ * タイムライン要素の記述例は以下の通りです。</p>
  *
  * <pre>
  * #01002:1.5
@@ -96,36 +105,36 @@ public class BmsStandardLoader extends BmsLoader {
 	/** 解析フェーズ */
 	private int mParsePhase;
 	/** 解析済みBMS宣言リスト */
-	private Deque<DeclarationParsedElement> mDeclarations;
+	private Deque<BmsDeclarationParsed> mDeclarations;
 
-	/** メタ情報要素コンテナ */
-	private MetaParsedElement mMetaElement = new MetaParsedElement();
-	/** 値型チャンネル要素コンテナ */
-	private ValueChannelParsedElement mValueChElement = new ValueChannelParsedElement();
-	/** 配列型チャンネル要素コンテナ */
-	private ArrayChannelParsedElement mArrayChElement = new ArrayChannelParsedElement();
-
-	/** {@inheritDoc} */
-	@Override
-	protected ErrorParsedElement beginParse(BmsLoaderSettings settings, String source) {
-		mLoaderSettings = settings;
-		mReader = new BufferedReader(new StringReader(source));
-		mLineNumber = 0;
-		mParsePhase = PHASE_DECLARATION;
-		mDeclarations = null;
-		return ErrorParsedElement.PASS;
+	/**
+	 * 新しい標準フォーマット用ローダオブジェクトを構築します。
+	 */
+	public BmsStandardLoader() {
+		super(true, false);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected ErrorParsedElement endParse() {
+	protected BmsErrorParsed beginParse(BmsLoaderSettings settings, BmsSource source) {
+		mLoaderSettings = settings;
+		mReader = new BufferedReader(new StringReader(source.getAsScript()));
+		mLineNumber = 0;
+		mParsePhase = PHASE_DECLARATION;
+		mDeclarations = null;
+		return BmsErrorParsed.PASS;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected BmsErrorParsed endParse() {
 		try { mReader.close(); } catch (IOException e) {}
 		mLoaderSettings = null;
 		mReader = null;
 		mLineNumber = 0;
 		mParsePhase = PHASE_DONE;
 		mDeclarations = null;
-		return ErrorParsedElement.PASS;
+		return BmsErrorParsed.PASS;
 	}
 
 	/**
@@ -144,13 +153,13 @@ public class BmsStandardLoader extends BmsLoader {
 	 * <li>複数行コメントが閉じられずにBMS解析が終了した場合、エラーハンドラにて{@link BmsErrorType#COMMENT_NOT_CLOSED}
 	 * が通知されます。</li>
 	 * <li>"#"または"%"で始まり、1文字目がアルファベットで始まる行をメタ情報の定義と見なします。</li>
-	 * <li>"#"に続き3文字の半角数字で始まり、次に2文字の半角英数字、更にその次が":"で始まる行をチャンネルデータの定義と見なします。</li>
+	 * <li>"#"に続き3文字の半角数字で始まり、次に2文字の半角英数字、更にその次が":"で始まる行をタイムライン要素の定義と見なします。</li>
 	 * <li>以上のパターンに該当しない行は構文エラーとしてエラー要素を返します。</li>
 	 * </ul>
 	 * @return BMSコンテンツの要素、またはエラー要素。これ以上要素がない場合はnull。
 	 */
 	@Override
-	protected ParsedElement nextElement() {
+	protected BmsParsed nextElement() {
 		try {
 			// 読み取りが既に完了している場合は何もしない
 			if (mParsePhase == PHASE_DONE) {
@@ -163,7 +172,7 @@ public class BmsStandardLoader extends BmsLoader {
 			}
 
 			// 行単位の解析処理
-			var element = (ParsedElement)null;
+			var element = (BmsParsed)null;
 			var line = "";
 			while ((element == null) && ((line = mReader.readLine()) != null)) {
 				mLineNumber++;
@@ -176,7 +185,7 @@ public class BmsStandardLoader extends BmsLoader {
 					// 複数行コメントモードまま終了した場合はエラー(構文エラー有効時のみ)
 					var msg = "Multi-line comment is not closed.";
 					var err = new BmsScriptError(BmsErrorType.COMMENT_NOT_CLOSED, mLineNumber, "", msg, null);
-					element = new ErrorParsedElement(err);
+					element = new BmsErrorParsed(err);
 				}
 				mParsePhase = PHASE_DONE;
 			}
@@ -193,7 +202,7 @@ public class BmsStandardLoader extends BmsLoader {
 	 * @param line 行テキスト
 	 * @return 解析されたBMSコンテンツ要素、またはエラー要素
 	 */
-	private ParsedElement parseElement(String line) {
+	private BmsParsed parseElement(String line) {
 		switch (mParsePhase) {
 		case PHASE_DECLARATION:  // BMS宣言モード
 			return parseDeclaration(line);
@@ -211,7 +220,7 @@ public class BmsStandardLoader extends BmsLoader {
 	 * @param line 行テキスト
 	 * @return BMS宣言要素
 	 */
-	private ParsedElement parseDeclaration(String line) {
+	private BmsParsed parseDeclaration(String line) {
 		// 行がBMS宣言の構文に適合するかチェックする
 		var matcherAll = SYNTAX_BMS_DECLARATION_ALL.matcher(line);
 		if (!matcherAll.matches()) {
@@ -221,13 +230,13 @@ public class BmsStandardLoader extends BmsLoader {
 		}
 
 		// BMS宣言のキーと値を取り出す
-		var decls = new ArrayDeque<DeclarationParsedElement>();
+		var decls = new ArrayDeque<BmsDeclarationParsed>();
 		var elements = matcherAll.group(1);
 		var matcherElem = SYNTAX_BMS_DECLARATION_ELEMENT.matcher(elements);
 		while (matcherElem.find()) {
 			var key = matcherElem.group(1);
 			var value = matcherElem.group(2);
-			decls.push(new DeclarationParsedElement(1, line, key, value));
+			decls.push(new BmsDeclarationParsed(1, line, key, value));
 		}
 
 		// BMS宣言が1件も存在しない場合はこの行を単なるコメントと見なし、通常解析モードで解析を続行する
@@ -247,8 +256,8 @@ public class BmsStandardLoader extends BmsLoader {
 	 * @param line 行テキスト
 	 * @return BMSコンテンツ要素、またはエラー要素
 	 */
-	private ParsedElement parseNormal(String line) {
-		var element = (ParsedElement)null;
+	private BmsParsed parseNormal(String line) {
+		var element = (BmsParsed)null;
 		if ((element = parseChannel(line)) != null) {
 			// チャンネルを検出
 		} else if ((element = parseMeta(line)) != null) {
@@ -265,7 +274,7 @@ public class BmsStandardLoader extends BmsLoader {
 			// 構文エラー無効
 		} else {
 			// 構文エラー
-			element = new ErrorParsedElement(new BmsScriptError(BmsErrorType.SYNTAX, mLineNumber, line, null, null));
+			element = new BmsErrorParsed(new BmsScriptError(BmsErrorType.SYNTAX, mLineNumber, line, null, null));
 		}
 		return element;
 	}
@@ -275,8 +284,8 @@ public class BmsStandardLoader extends BmsLoader {
 	 * @param line 行テキスト
 	 * @return BMSコンテンツ要素
 	 */
-	private ParsedElement parseMultilineComment(String line) {
-		var element = (ParsedElement)null;
+	private BmsParsed parseMultilineComment(String line) {
+		var element = (BmsParsed)null;
 		var matcher = SYNTAX_MULTILINE_COMMENT_END.matcher(line);
 		if (matcher.matches()) {
 			// 複数行コメント終了
@@ -291,7 +300,7 @@ public class BmsStandardLoader extends BmsLoader {
 	 * @param line 行テキスト
 	 * @return メタ情報要素
 	 */
-	private ParsedElement parseMeta(String line) {
+	private BmsParsed parseMeta(String line) {
 		// メタ情報定義かどうか確認する
 		var matcher = SYNTAX_DEFINE_META.matcher(line);
 		if (!matcher.matches()) {
@@ -309,49 +318,40 @@ public class BmsStandardLoader extends BmsLoader {
 
 		// BMS仕様から対応するメタ情報を検索する
 		var spec = mLoaderSettings.getSpec();
-		var index = 0;
-		var meta = spec.getMeta(name, BmsUnit.SINGLE);
-		if (meta == null) {
-			// 重複可能メタ情報で試行する
-			meta = spec.getMeta(name, BmsUnit.MULTIPLE);
+		var value = Objects.requireNonNullElse(matcher.group(5), "");
+		var meta = (BmsMeta)null;
+		if ((meta = spec.getMeta(name, BmsUnit.SINGLE)) != null) {
+			// 単体メタ情報
+			return new BmsMetaParsed(mLineNumber, line, meta, 0, value);
 		}
-		if (meta == null) {
+		if ((meta = spec.getMeta(name, BmsUnit.MULTIPLE)) != null) {
+			// 複数メタ情報
+			return new BmsMetaParsed(mLineNumber, line, meta, 0, value);
+		} else {
 			// 索引付きメタ情報で試行する
 			var nameLength = name.length();
 			if (nameLength <= 2) {
 				// 2文字以下の場合、名称が無くなるのでエラー
 				var msg = "Wrong indexed meta name";
 				var err = new BmsScriptError(BmsErrorType.UNKNOWN_META, mLineNumber, line, msg, null);
-				return new ErrorParsedElement(ParsedElementType.META, err);
+				return new BmsErrorParsed(BmsParsedType.META, err);
 			}
 
 			// 末尾2文字をインデックス値と見なす
-			var indexStr = name.substring(nameLength - 2, nameLength);
-			if (!BmsType.BASE36.test(indexStr)) {
-				// インデックス値の記述が不正のためエラー
-				var msg = "Wrong indexed meta's index";
-				var err = new BmsScriptError(BmsErrorType.UNKNOWN_META, mLineNumber, line, msg, null);
-				return new ErrorParsedElement(ParsedElementType.META, err);
-			}
+			var index = name.substring(nameLength - 2, nameLength);
 
 			// 索引付きメタ情報取得を試行する
 			var nameIdx = name.substring(0, nameLength - 2);
 			meta = spec.getMeta(nameIdx, BmsUnit.INDEXED);
-			index = BmsInt.to36i(indexStr);
 			if (meta == null) {
 				// メタ情報不明
 				var msg = String.format("'%s' No such meta in spec", name);
 				var err = new BmsScriptError(BmsErrorType.UNKNOWN_META, mLineNumber, line, msg, null);
-				return new ErrorParsedElement(ParsedElementType.META, err);
-			} else {
-				// 索引付きメタ情報で見つかった場合は索引を抜いた名前を控えておく
-				name = nameIdx;
+				return new BmsErrorParsed(BmsParsedType.META, err);
 			}
-		}
 
-		// メタ情報を検出
-		var value = Objects.requireNonNullElse(matcher.group(5), "");
-		return mMetaElement.set(mLineNumber, line, meta, index, value);
+			return new BmsMetaParsed(mLineNumber, line, meta, index, value);
+		}
 	}
 
 	/**
@@ -359,7 +359,7 @@ public class BmsStandardLoader extends BmsLoader {
 	 * @param line 行テキスト
 	 * @return チャンネル要素
 	 */
-	private ParsedElement parseChannel(String line) {
+	private BmsParsed parseChannel(String line) {
 		// チャンネル定義かどうか確認する
 		var matcher = SYNTAX_DEFINE_CHANNEL.matcher(line);
 		if (!matcher.matches()) {
@@ -383,24 +383,27 @@ public class BmsStandardLoader extends BmsLoader {
 			// 該当するチャンネルが仕様として規定されていない
 			var msg = String.format("'%s' No such channel in spec", BmsInt.to36s(channelNum));
 			var err = new BmsScriptError(BmsErrorType.UNKNOWN_CHANNEL, mLineNumber, line, msg, null);
-			return new ErrorParsedElement(ParsedElementType.VALUE_CHANNEL, err);
+			return new BmsErrorParsed(BmsParsedType.MEASURE_VALUE, err);
 		}
 
 		// データ型ごとの処理
 		if (channel.isValueType()) {
 			// 値型の場合
-			return mValueChElement.set(mLineNumber, line, measure, channelNum, value);
+			return new BmsMeasureValueParsed(mLineNumber, line, measure, channelNum, value);
+		} else if (channel.getType().isSelectableArrayType()) {
+			// 基数選択数値配列型の場合
+			return new BmsNoteParsed(mLineNumber, line, measure, channelNum, value);
 		} else {
-			// 配列型の場合
+			// 基数が固定された配列型の場合
 			try {
 				// チャンネルの定義値から配列を生成する
-				var array = new BmsArray(value, channel.getType().getRadix());
-				return mArrayChElement.set(mLineNumber, line, measure, channelNum, array);
+				var array = new BmsArray(value, channel.getType().getBase());
+				return new BmsNoteParsed(mLineNumber, line, measure, channelNum, array);
 			} catch (IllegalArgumentException e) {
 				// 配列の書式が不正
 				var msg = "Wrong array value";
 				var err = new BmsScriptError(BmsErrorType.WRONG_DATA, mLineNumber, line, msg, e);
-				return new ErrorParsedElement(ParsedElementType.ARRAY_CHANNEL, err);
+				return new BmsErrorParsed(BmsParsedType.NOTE, err);
 			}
 		}
 	}
@@ -409,7 +412,7 @@ public class BmsStandardLoader extends BmsLoader {
 	 * BMS宣言要素取り出し
 	 * @return BMS宣言要素
 	 */
-	private ParsedElement fetchDeclaration() {
+	private BmsParsed fetchDeclaration() {
 		var element = mDeclarations.removeLast();
 		mParsePhase = mDeclarations.isEmpty() ? PHASE_NORMAL : PHASE_DECLARATION_FETCH;
 		return element;

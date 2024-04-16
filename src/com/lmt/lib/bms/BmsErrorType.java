@@ -1,5 +1,7 @@
 package com.lmt.lib.bms;
 
+import com.lmt.lib.bms.parse.BmsTestResult;
+
 /**
  * BMS読み込み時に発生するエラーの種別を表します。
  */
@@ -16,7 +18,7 @@ public enum BmsErrorType {
 
 	/**
 	 * BMS宣言の検査に失敗した場合を表します。
-	 * <p>このエラーは{@link BmsLoadHandler#testDeclaration}が{@link BmsLoadHandler.TestResult#FAIL}
+	 * <p>このエラーは{@link BmsLoadHandler#testDeclaration}が{@link BmsTestResult#FAIL}
 	 * を返し、直後に呼び出される{@link BmsLoadHandler#parseError(BmsScriptError)}がfalseを返した場合に発生します。
 	 * 検査に失敗したBMS宣言はBMSコンテンツには登録されません。</p>
 	 */
@@ -24,23 +26,23 @@ public enum BmsErrorType {
 
 	/**
 	 * メタ情報の検査に失敗した場合を表します。
-	 * <p>このエラーは{@link BmsLoadHandler#testMeta}が{@link BmsLoadHandler.TestResult#FAIL}を返し、
+	 * <p>このエラーは{@link BmsLoadHandler#testMeta}が{@link BmsTestResult#FAIL}を返し、
 	 * 直後に呼び出される{@link BmsLoadHandler#parseError(BmsScriptError)}がfalseを返した場合に発生します。
 	 * 検査に失敗したメタ情報はBMSコンテンツには登録されません。</p>
 	 */
 	TEST_META,
 
 	/**
-	 * チャンネルデータの検査に失敗した場合を表します。
-	 * <p>このエラーは{@link BmsLoadHandler#testChannel}が{@link BmsLoadHandler.TestResult#FAIL}を返し、
+	 * チャンネルデータ(タイムライン要素)の検査に失敗した場合を表します。
+	 * <p>このエラーは{@link BmsLoadHandler#testChannel}が{@link BmsTestResult#FAIL}を返し、
 	 * 直後に呼び出される{@link BmsLoadHandler#parseError(BmsScriptError)}がfalseを返した場合に発生します。
-	 * 検査に失敗したチャンネルデータはBMSコンテンツには登録されません。</p>
+	 * 検査に失敗したタイムライン要素はBMSコンテンツには登録されません。</p>
 	 */
 	TEST_CHANNEL,
 
 	/**
 	 * BMS読み込みによって生成されたBMSコンテンツの検査に失敗した場合を表します。
-	 * <p>このエラーは{@link BmsLoadHandler#testContent(BmsContent)}が{@link BmsLoadHandler.TestResult#FAIL}
+	 * <p>このエラーは{@link BmsLoadHandler#testContent(BmsContent)}が{@link BmsTestResult#FAIL}
 	 * を返した場合に発生します。他の検査失敗とは異なり、{@link BmsLoadHandler#parseError(BmsScriptError)}
 	 * の呼び出しは行われません。検査に失敗した場合、当該BMSコンテンツは破棄されます。</p>
 	 */

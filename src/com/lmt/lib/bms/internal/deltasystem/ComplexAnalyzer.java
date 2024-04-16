@@ -38,7 +38,7 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 		var config = ComplexConfig.getInstance();
 		var basicScore = ComplexBasicScore.getInstance();
 		var ntypeFounds = new int[BeMusicDevice.COUNT];
-		var devs = BeMusicDevice.orderedBySpLeftScratchList();
+		var devs = BeMusicDevice.orderedBySpLeftList();
 		var countDev = devs.size();
 		var scoreMin = Double.MAX_VALUE;
 		var scoreMax = Double.MIN_VALUE;
@@ -55,7 +55,7 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 			var prevVeSwNo = -1;
 			var prevVeNtype = (BeMusicNoteType)null;
 			var visualEffectCount = curPoint.getVisualEffectCount();
-			var landmineCount = curPoint.getLandmineCount();
+			var mineCount = curPoint.getMineCount();
 			var holdingCount = 0;
 			var lnTailCount = 0;
 			var noteTypeCount = 0;
@@ -91,7 +91,7 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 			elem.setVisualEffectCount(visualEffectCount);
 			elem.setNoteTypeCount(noteTypeCount);
 			elem.setHoldingCount(holdingCount);
-			elem.setLandmineCount(landmineCount);
+			elem.setMineCount(mineCount);
 			elem.setSpaceCount(spaceCount);
 			elem.setChangeColorCount(changeColorCount);
 			elem.setChangeNoteTypeCount(changeNoteTypeCount);
@@ -99,8 +99,8 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 			// 楽曲位置要素から「楽曲位置複雑度評価点」を計算する
 			var deductionHolding = (holdingCount / 8.0) * config.deductionHold;
 			var deductionLnTail = (lnTailCount / 8.0) * config.deductionLnTail;
-			var deductionLandmine = (landmineCount / 8.0) * config.deductionMine;
-			var deduction = 1.0 - (deductionHolding + deductionLnTail + deductionLandmine);
+			var deductionMine = (mineCount / 8.0) * config.deductionMine;
+			var deduction = 1.0 - (deductionHolding + deductionLnTail + deductionMine);
 			var ratioNtype1 = ((noteTypeCount - 1.0) / 4.0) * config.typeCountRate;
 			var ratioNtype2 = (changeNoteTypeCount / 7.0) * config.typeChangeRate;
 			var ratioNtype = 1.0 + ratioNtype1 + ratioNtype2;

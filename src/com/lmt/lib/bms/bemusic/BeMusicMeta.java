@@ -35,6 +35,19 @@ import com.lmt.lib.bms.BmsUnit;
  */
 public class BeMusicMeta {
 	/**
+	 * #BASE
+	 * <table><caption>&nbsp;</caption>
+	 * <tr><th style="text-align:left;">構成単位</th><td>単体</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>INTEGER</td></tr>
+	 * <tr><th style="text-align:left;">初期値</th><td>36</td></tr>
+	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
+	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
+	 * <tr><th style="text-align:left;">説明</th>
+	 * <td>BMS標準フォーマットにおいてヘッダのインデックス値、配列データの基数を表します。</td></tr>
+	 * </table>
+	 */
+	public static final BmsMeta BASE = BmsMeta.single("#base", BmsType.INTEGER, "36", 0, true);
+	/**
 	 * #PLAYER
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">構成単位</th><td>単体</td></tr>
@@ -116,7 +129,7 @@ public class BeMusicMeta {
 	 * #BPM
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">構成単位</th><td>単体</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>NUMERIC</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>FLOAT</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>130</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
@@ -124,12 +137,12 @@ public class BeMusicMeta {
 	 * <td>楽曲の初期BPMを表します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsMeta INITIAL_BPM = BmsMeta.single("#bpm", BmsType.NUMERIC, "130.0", 0, true);
+	public static final BmsMeta INITIAL_BPM = BmsMeta.single("#bpm", BmsType.FLOAT, "130.0", 0, true);
 	/**
 	 * #BASEBPM
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">構成単位</th><td>単体</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>NUMERIC</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>FLOAT</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>0.0</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>NO</td></tr>
@@ -137,7 +150,7 @@ public class BeMusicMeta {
 	 * <td>譜面のスクロール速度の標準値として使われるBPMを表します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsMeta BASEBPM = BmsMeta.single("#basebpm", BmsType.NUMERIC, "0.0", 1, true);
+	public static final BmsMeta BASEBPM = BmsMeta.single("#basebpm", BmsType.FLOAT, "0.0", 1, true);
 	/**
 	 * #CDDA
 	 * <table><caption>&nbsp;</caption>
@@ -225,7 +238,7 @@ public class BeMusicMeta {
 	 * #DEFEXRANK
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">構成単位</th><td>単体</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>NUMERIC</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>FLOAT</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>100</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
@@ -233,12 +246,12 @@ public class BeMusicMeta {
 	 * <td>{@link #RANK}よりも詳細な判定難易度値を表します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsMeta DEFEXRANK = BmsMeta.single("#defexrank", BmsType.NUMERIC, "100", 0, true);
+	public static final BmsMeta DEFEXRANK = BmsMeta.single("#defexrank", BmsType.FLOAT, "100", 0, true);
 	/**
 	 * #TOTAL
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">構成単位</th><td>単体</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>NUMERIC</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>FLOAT</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>160</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
@@ -246,7 +259,7 @@ public class BeMusicMeta {
 	 * <td>プレー判定が最良だった場合のゲージの増加率を表します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsMeta TOTAL = BmsMeta.single("#total", BmsType.NUMERIC, "160", 0, true);
+	public static final BmsMeta TOTAL = BmsMeta.single("#total", BmsType.FLOAT, "160", 0, true);
 	/**
 	 * #VOLWAV
 	 * <table><caption>&nbsp;</caption>
@@ -533,7 +546,7 @@ public class BeMusicMeta {
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">説明</th>
-	 * <td>ロングノートの終端を表すノートの値を表します。この値は複数記述することが出来ます。</td></tr>
+	 * <td>ロングノートの終端を表すノートの値を表します。この値は複数記述することができます。</td></tr>
 	 * </table>
 	 */
 	public static final BmsMeta LNOBJ = BmsMeta.multiple("#lnobj", BmsType.BASE36, "00", 0, true);
@@ -790,7 +803,7 @@ public class BeMusicMeta {
 	 * #BPM
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">構成単位</th><td>索引付き</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>NUMERIC</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>FLOAT</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>{@link BmsSpec#BPM_DEFAULT}</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
@@ -798,12 +811,12 @@ public class BeMusicMeta {
 	 * <td>BPM変更で使用するBPMの値を表します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsMeta BPM = BmsMeta.indexed("#bpm", BmsType.NUMERIC, String.valueOf(BmsSpec.BPM_DEFAULT), 0, true);
+	public static final BmsMeta BPM = BmsMeta.indexed("#bpm", BmsType.FLOAT, String.valueOf(BmsSpec.BPM_DEFAULT), 0, true);
 	/**
 	 * #EXBPM
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">構成単位</th><td>索引付き</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>NUMERIC</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>FLOAT</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>0</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>NO</td></tr>
@@ -811,12 +824,12 @@ public class BeMusicMeta {
 	 * <td>BPM変更で使用するBPMの値を表します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsMeta EXBPM = BmsMeta.indexed("#exbpm", BmsType.NUMERIC, "0.0", 1, true);
+	public static final BmsMeta EXBPM = BmsMeta.indexed("#exbpm", BmsType.FLOAT, "0.0", 1, true);
 	/**
 	 * #STOP
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">構成単位</th><td>索引付き</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>NUMERIC</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>FLOAT</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>{@link BmsSpec#STOP_MIN}</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
@@ -824,7 +837,7 @@ public class BeMusicMeta {
 	 * <td>譜面停止で使用する譜面停止時間(刻み数)を表します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsMeta STOP = BmsMeta.indexed("#stop", BmsType.NUMERIC, String.valueOf(BmsSpec.STOP_MIN), 0, true);
+	public static final BmsMeta STOP = BmsMeta.indexed("#stop", BmsType.FLOAT, String.valueOf(BmsSpec.STOP_MIN), 0, true);
 	/**
 	 * #STP
 	 * <table><caption>&nbsp;</caption>
@@ -842,7 +855,7 @@ public class BeMusicMeta {
 	 * #SCROLL
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">構成単位</th><td>索引付き</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>NUMERIC</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>FLOAT</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>1</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">ライブラリ対応</th><td>YES</td></tr>
@@ -850,7 +863,7 @@ public class BeMusicMeta {
 	 * <td>譜面のスクロール速度(倍率)を表します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsMeta SCROLL = BmsMeta.indexed("#scroll", BmsType.NUMERIC, "1", 0, true);
+	public static final BmsMeta SCROLL = BmsMeta.indexed("#scroll", BmsType.FLOAT, "1", 0, true);
 	/**
 	 * #EXRANK
 	 * <table><caption>&nbsp;</caption>
@@ -939,6 +952,30 @@ public class BeMusicMeta {
 //	public static final BmsMeta DEF = BmsMeta.single("#def", BmsType.STRING, "", 1, false);
 //	public static final BmsMeta SETSWITCH = BmsMeta.single("#setswitch", BmsType.INTEGER, "0", 1, false);
 //	public static final BmsMeta ENDSW = BmsMeta.single("#endsw", BmsType.STRING, "", 1, false);
+
+	/**
+	 * #BASEを設定します。
+	 * @param content BMSコンテンツ
+	 * @param base #BASEの値
+	 * @exception NullPointerException contentがnull
+	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @exception IllegalArgumentException baseがnull, 16, 36, 62以外
+	 * @see #BASE
+	 */
+	public static void setBase(BmsContent content, Integer base) {
+		content.setSingleMeta(BeMusicMeta.BASE.getName(), base);
+	}
+
+	/**
+	 * #BASEを取得します。
+	 * @param content BMSコンテンツ
+	 * @return #BASEの値
+	 * @exception NullPointerException contentがnull
+	 * @see #BASE
+	 */
+	public static int getBase(BmsContent content) {
+		return ((Long)content.getSingleMeta(BeMusicMeta.BASE.getName())).intValue();
+	}
 
 	/**
 	 * #GENREを設定します。
@@ -1337,7 +1374,7 @@ public class BeMusicMeta {
 	 */
 	public static double getPlayLevel(BmsContent content) {
 		var playLevel = (String)content.getSingleMeta(BeMusicMeta.PLAYLEVEL.getName());
-		return BmsType.NUMERIC.test(playLevel) ? Double.parseDouble(playLevel) : 0.0;
+		return BmsType.FLOAT.test(playLevel) ? Double.parseDouble(playLevel) : 0.0;
 	}
 
 	/**

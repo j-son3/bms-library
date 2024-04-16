@@ -10,6 +10,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -28,7 +30,7 @@ class Timeline<E extends MeasureElement> {
 	/**
 	 * {@link BmsContent#timeline()}向けのSpliterator
 	 */
-	private class ElementSpliterator implements Spliterator<BmsElement> {
+	private class ElementSpliterator implements Spliterator<BmsTimelineElement> {
 		/** 走査開始楽曲位置の小節番号 */
 		private int mMeasureBegin;
 		/** 走査開始楽曲位置の小節の刻み位置 */
@@ -42,9 +44,9 @@ class Timeline<E extends MeasureElement> {
 		/** 現在走査中の小節の刻み位置 */
 		private double mCurTick;
 		/** 現在の走査進行処理 */
-		private Supplier<BmsElement> mCurAdvance;
+		private Supplier<BmsTimelineElement> mCurAdvance;
 		/** 走査進行処理で使用するイテレータ */
-		private Iterator<? extends BmsElement> mCurIterator;
+		private Iterator<? extends BmsTimelineElement> mCurIterator;
 
 		/**
 		 * コンストラクタ
@@ -63,7 +65,7 @@ class Timeline<E extends MeasureElement> {
 
 		/** {@inheritDoc} */
 		@Override
-		public boolean tryAdvance(Consumer<? super BmsElement> action) {
+		public boolean tryAdvance(Consumer<? super BmsTimelineElement> action) {
 			var elem = mCurAdvance.get();
 			if (elem == null) {
 				return false;
@@ -75,7 +77,7 @@ class Timeline<E extends MeasureElement> {
 
 		/** {@inheritDoc} */
 		@Override
-		public Spliterator<BmsElement> trySplit() {
+		public Spliterator<BmsTimelineElement> trySplit() {
 			return null;
 		}
 
@@ -95,7 +97,7 @@ class Timeline<E extends MeasureElement> {
 		 * 小節線の走査進行処理
 		 * @return 小節線のタイムライン要素
 		 */
-		private BmsElement advanceMeasureLine() {
+		private BmsTimelineElement advanceMeasureLine() {
 			// 小節線を返し、次回から小節データを走査するように設定する
 			mCurIterator = mMeasureList.get(mCurMeasure).valueIterator();
 			mCurAdvance = this::advanceMeasureValues;
@@ -106,7 +108,7 @@ class Timeline<E extends MeasureElement> {
 		 * 小節データの走査進行処理
 		 * @return 小節データのタイムライン要素。小節データのタイムライン要素がなければノートのタイムライン要素。
 		 */
-		private BmsElement advanceMeasureValues() {
+		private BmsTimelineElement advanceMeasureValues() {
 			if (mCurIterator.hasNext()) {
 				// 次の小節データを返す
 				return mCurIterator.next();
@@ -122,7 +124,7 @@ class Timeline<E extends MeasureElement> {
 		 * @return ノートのタイムライン要素。現在の小節にこれ以上ノートがない場合は次小節の小節線タイムライン要素。
 		 *          楽曲の末端に到達した場合はnull。
 		 */
-		private BmsElement advanceNotes() {
+		private BmsTimelineElement advanceNotes() {
 			// 走査範囲のノートが残存している場合は次のノートを返す
 			if (mCurIterator.hasNext()) {
 				return mCurIterator.next();
@@ -147,7 +149,7 @@ class Timeline<E extends MeasureElement> {
 		 * 走査終了
 		 * @return null
 		 */
-		private BmsElement advanceEnd() {
+		private BmsTimelineElement advanceEnd() {
 			return null;
 		}
 
@@ -194,85 +196,6 @@ class Timeline<E extends MeasureElement> {
 		}
 	}
 
-	/** ノートリスト生成クラス */
-	private static class NoteLister implements BmsNote.Tester {
-		/** ノート格納先リスト */
-		private List<BmsNote> mList = null;
-		/** 格納対象ノートを検査するテスター */
-		private BmsNote.Tester mTester = null;
-
-		/**
-		 * セットアップ
-		 * @param list ノート格納先リスト
-		 * @param tester 格納対象ノートを検査するテスター
-		 */
-		final void setup(List<BmsNote> list, BmsNote.Tester tester) {
-			mList = list;
-			mTester = tester;
-		}
-
-		/**
-		 * 処理を終了し、ノート格納先リスト取得
-		 * @return ノート格納先リスト
-		 */
-		final List<BmsNote> finish() {
-			var result = mList;
-			mList = null;
-			mTester = null;
-			return result;
-		}
-
-		/**
-		 * ノート格納先リストに追加するノートを検査するテスター
-		 * @param note 検査対象ノート
-		 * @return 常にtrueを返し、列挙続行
-		 */
-		@Override
-		public boolean testNote(BmsNote note) {
-			if (mTester.testNote(note)) { mList.add(note); }
-			return true;
-		}
-	}
-
-	/** ノートカウントクラス */
-	private static class NoteCounter implements BmsNote.Tester {
-		/** カウンタ */
-		private int mCount = 0;
-		/** カウント有無を検査するテスター */
-		private BmsNote.Tester mTester = null;
-
-		/**
-		 * セットアップ
-		 * @param tester カウント有無を検査するテスター
-		 */
-		final void setup(BmsNote.Tester tester) {
-			mCount = 0;
-			mTester = tester;
-		}
-
-		/**
-		 * 処理を終了し、カウンタを取得する
-		 * @return カウンタ
-		 */
-		final int finish() {
-			var result = mCount;
-			mCount = 0;
-			mTester = null;
-			return result;
-		}
-
-		/**
-		 * カウント有無を検査するテスター
-		 * @param note 検査対象ノート
-		 * @return 常にtrueを返し、列挙続行
-		 */
-		@Override
-		public boolean testNote(BmsNote note) {
-			if (mTester.testNote(note)) { mCount++; }
-			return true;
-		}
-	}
-
 	/** BMS仕様 */
 	private BmsSpec mSpec;
 	/** 拡張小節データ生成関数 */
@@ -287,10 +210,6 @@ class Timeline<E extends MeasureElement> {
 	private BmsNote mNoteTemp1 = new BmsNote();
 	/** 検索キー用ノート2 */
 	private BmsNote mNoteTemp2 = new BmsNote();
-	/** ノートリスト生成クラス */
-	private NoteLister mNoteLister = new NoteLister();
-	/** ノートカウンタクラス */
-	private NoteCounter mNoteCounter = new NoteCounter();
 	/** 時間・BPM情報の再計算が必要な最初の小節データ */
 	private int mRecalcFirst = Integer.MAX_VALUE;
 	/** 時間・BPM情報の再計算が必要な最後の小節データ */
@@ -373,7 +292,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param measure 小節番号
 	 * @return 小節データ
 	 */
-	final BmsElement getMeasureValue(int channel, int index, int measure) {
+	final BmsTimelineElement getMeasureValue(int channel, int index, int measure) {
 		return mMeasureList.get(measure).getValue(channel, index);
 	}
 
@@ -457,10 +376,10 @@ class Timeline<E extends MeasureElement> {
 	 * @param tester ノートを検査するテスター
 	 * @return 見つかった次のノート。そのようなノートが存在しない場合null
 	 */
-	final BmsNote pointOf(int measureFrom, double tickFrom, BmsNote.Tester tester) {
+	final BmsNote pointOf(int measureFrom, double tickFrom, Predicate<BmsNote> tester) {
 		// 指定位置から進行方向にノートを検索し、テスターの検査に合格した最初のノートを返す
 		for (var note : mNotes.tailSet(note1(BmsSpec.CHANNEL_MIN, BmsSpec.CHINDEX_MIN, measureFrom, tickFrom))) {
-			if (tester.testNote(note)) { return note; }
+			if (tester.test(note)) { return note; }
 		}
 		return null;
 	}
@@ -474,7 +393,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param outPoint 見つかった楽曲位置を格納する楽曲位置のインスタンス
 	 * @return パラメータで指定した楽曲位置のインスタンス
 	 */
-	final BmsPoint seekNextPoint(int measure, double tick, boolean inclusiveFrom, BmsChannel.Tester chTester, BmsPoint outPoint) {
+	final BmsPoint seekNextPoint(int measure, double tick, boolean inclusiveFrom, IntPredicate chTester, BmsPoint outPoint) {
 		// 検索開始位置を決定する
 		var noteFrom = (BmsNote)null;
 		var inclusive = false;
@@ -501,7 +420,7 @@ class Timeline<E extends MeasureElement> {
 			}
 
 			// ノートをテストする
-			if (chTester.testChannel(note.getChannel())) {
+			if (chTester.test(note.getChannel())) {
 				outPoint.setMeasure(note.getMeasure());
 				outPoint.setTick(note.getTick());
 				return outPoint;
@@ -534,7 +453,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param tickEnd 走査終了楽曲位置の小節の刻み位置(この位置を含まない)
 	 * @return タイムラインの指定楽曲位置の範囲を走査するストリーム
 	 */
-	final Stream<BmsElement> timeline(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
+	final Stream<BmsTimelineElement> timeline(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
 		var spliterator = new ElementSpliterator(measureBegin, tickBegin, measureEnd, tickEnd);
 		return StreamSupport.stream(spliterator, false);
 	}
@@ -589,14 +508,14 @@ class Timeline<E extends MeasureElement> {
 	 * @param tBeg 列挙開始小節の刻み位置
 	 * @param mEnd 列挙終了小節番号
 	 * @param tEnd 列挙終了小節の刻み位置(この刻み位置を含まない)
-	 * @param tester 列挙終了を判定するテスター
+	 * @param action 列挙終了を判定する関数
 	 */
-	final void enumNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd, BmsNote.Tester tester) {
+	final void enumNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd, Consumer<BmsNote> action) {
 		var begin = note1(BmsSpec.CHANNEL_MIN, BmsSpec.CHINDEX_MIN, mBeg, tBeg);
-		var end = note2(BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MIN, mEnd, tEnd);
+		var end = note2(BmsSpec.CHANNEL_MIN, BmsSpec.CHINDEX_MIN, mEnd, tEnd);
 		for (var note : mNotes.subSet(begin, true, end, false)) {
 			var ch = note.getChannel();
-			if ((ch >= chBeg) && (ch < chEnd)) { if (!tester.testNote(note)) { return; } }
+			if ((ch >= chBeg) && (ch < chEnd)) { action.accept(note); }
 		}
 	}
 
@@ -611,11 +530,12 @@ class Timeline<E extends MeasureElement> {
 	 * @param tester リスト追加有無を判定するテスター
 	 * @return ノートリスト
 	 */
-	final List<BmsNote> listNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd, BmsNote.Tester tester) {
+	final List<BmsNote> listNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd,
+			Predicate<BmsNote> tester) {
 		// ノート列挙を使用して列挙されたノートをリスト化する
-		mNoteLister.setup(new ArrayList<>(), tester);
-		enumNotes(chBeg, chEnd, mBeg, tBeg, mEnd, tEnd, mNoteLister);
-		return mNoteLister.finish();
+		var notes = new ArrayList<BmsNote>();
+		enumNotes(chBeg, chEnd, mBeg, tBeg, mEnd, tEnd, n -> { if (tester.test(n)) { notes.add(n); } });
+		return notes;
 	}
 
 	/**
@@ -642,11 +562,12 @@ class Timeline<E extends MeasureElement> {
 	 * @param tester カウント有無を判定するテスター
 	 * @return
 	 */
-	final int countNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd, BmsNote.Tester tester) {
+	final int countNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd,
+			Predicate<BmsNote> tester) {
 		// ノート列挙を使用して列挙されたノートをカウントする
-		mNoteCounter.setup(tester);
-		enumNotes(chBeg, chEnd, mBeg, tBeg, mEnd, tEnd, mNoteCounter);
-		return mNoteCounter.finish();
+		var num = new MutableInt(0);
+		enumNotes(chBeg, chEnd, mBeg, tBeg, mEnd, tEnd, n -> { if (tester.test(n) ) { num.set(num.get() + 1); } });
+		return num.get();
 	}
 
 	/**
@@ -865,8 +786,8 @@ class Timeline<E extends MeasureElement> {
 	 * @param index チャンネルインデックス
 	 * @return チャンネルに該当する全小節データマップ
 	 */
-	private Map<MutableInt, BmsElement> pullChannelAllValues(int channel, int index) {
-		var allValues = new TreeMap<MutableInt, BmsElement>();
+	private Map<MutableInt, BmsTimelineElement> pullChannelAllValues(int channel, int index) {
+		var allValues = new TreeMap<MutableInt, BmsTimelineElement>();
 		var measureCount = getMeasureCount();
 		for (var m = BmsSpec.MEASURE_MIN; m < measureCount; m++) {
 			var measureData = mMeasureList.get(m);
@@ -885,11 +806,11 @@ class Timeline<E extends MeasureElement> {
 	 * @param count 抜き出す小節数
 	 * @return 全小節データリスト
 	 */
-	private ArrayList<Map<Integer, BmsElement>> pullMeasureValues(int measureFrom, int count) {
-		var valuesList = new ArrayList<Map<Integer, BmsElement>>(count);
+	private ArrayList<Map<Integer, BmsTimelineElement>> pullMeasureValues(int measureFrom, int count) {
+		var valuesList = new ArrayList<Map<Integer, BmsTimelineElement>>(count);
 		for (var i = measureFrom; i < (measureFrom + count); i++) {
 			var measureData = mMeasureList.get(i);
-			var values = (measureData == null) ? Collections.<Integer, BmsElement>emptyMap() : measureData.mapValues();
+			var values = (measureData == null) ? Collections.<Integer, BmsTimelineElement>emptyMap() : measureData.mapValues();
 			for (var key : values.keySet()) {
 				var chx = key.intValue();
 				var channel = BmsChx.toChannel(chx);
@@ -906,7 +827,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param valuesList 全小節データリスト
 	 * @param measureFrom 復元開始位置の小節番号
 	 */
-	private void restoreMeasureValues(ArrayList<Map<Integer, BmsElement>> valuesList, int measureFrom) {
+	private void restoreMeasureValues(ArrayList<Map<Integer, BmsTimelineElement>> valuesList, int measureFrom) {
 		for (var i = 0; i < valuesList.size(); i++) {
 			var values = valuesList.get(i);
 			for (var entry : values.entrySet()) {
@@ -947,7 +868,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param chTester チャンネルを検査するテスター
 	 * @return チャンネルの検査に最初に合格した小節番号。そのような小節がない場合-1
 	 */
-	private int testMeasureChannels(int measureFirst, int measureLast, BmsChannel.Tester chTester) {
+	private int testMeasureChannels(int measureFirst, int measureLast, IntPredicate chTester) {
 		// 小節が変化しない場合は何もしない
 		if (measureLast <= measureFirst) {
 			return -1;
@@ -956,7 +877,7 @@ class Timeline<E extends MeasureElement> {
 		// 飛んだ分の小節の小節線と小節データをテストする
 		for (var m = (measureFirst + 1); m < (measureLast + 1); m++) {
 			// 小節線をテストする
-			if (chTester.testChannel(BmsSpec.CHANNEL_MEASURE)) {
+			if (chTester.test(BmsSpec.CHANNEL_MEASURE)) {
 				return m;
 			}
 

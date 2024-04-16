@@ -13,12 +13,12 @@ import java.util.regex.Pattern;
  *
  * <p>メタ情報は「構成単位」「名称」の2つの情報を用いてデータを管理します。以下にそれぞれの情報について記載します。</p>
  *
- * <p><b>構成単位</b>({@link BmsUnit})<br>
+ * <p><strong>構成単位</strong>({@link BmsUnit})<br>
  * BMSコンテンツ内で複数のメタ情報を管理するにあたり、管理構造は以下に分類されます。<br>
  * - 単体メタ情報<br>
  * 1つのメタ情報に対して1個のデータを割り当てる構造です。多くの情報はこの構成単位に分類されます。<br>
  * - 複数メタ情報<br>
- * 1つのメタ情報に対して複数のデータを割り当てることが出来る構造です。当該メタ情報として登録したい情報が
+ * 1つのメタ情報に対して複数のデータを割り当てることができる構造です。当該メタ情報として登録したい情報が
  * 複数あるような情報に対して適用することを想定しています。<br>
  * - 索引付きメタ情報<br>
  * 1つのメタ情報に対して複数のデータを割り当て、そのデータに00～ZZの索引を割り当てて管理する構造です。
@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  * メタ情報の名称の語尾に00～ZZの索引を2文字で記述し、その後ろに情報内容を記述するようにします。<br>
  * 例：#WAV8J aaa.wav</p>
  *
- * <p><b>名称</b><br>
+ * <p><strong>名称</strong><br>
  * 全てのメタ情報に付与される名前です。名前は&quot;#&quot;または&quot;%&quot;で始まり、1文字目が半角英字、
  * 2文字目以降が半角英数字または&quot;_&quot;, &quot;/&quot;のいずれかで指定しなければなりません。また、
  * メタ情報を定義する際の英字は必ず小文字とし、名称全体が64文字を超えてはなりません。BMSデータにメタ情報を
@@ -38,20 +38,20 @@ import java.util.regex.Pattern;
  * 「BMSコンテンツを外部データへ出力する際の並び順を決定するソートキー」「同一性チェック対象かどうか」が
  * 存在します。それぞれの情報の詳細については以下の記述を参照してください。</p>
  *
- * <p><b>データ型</b>({@link BmsType})<br>
+ * <p><strong>データ型</strong>({@link BmsType})<br>
  * メタ情報のデータを記述する際の型を決定します。<br>
  * 詳細は{@link BmsType}を参照してください。</p>
  *
- * <p><b>初期値</b><br>
- * BMSの仕様として、全てのメタ情報は指定必須とすることが出来ません。そのため、メタ情報には必ず初期値を
+ * <p><strong>初期値</strong><br>
+ * BMSの仕様として、全てのメタ情報は指定必須とすることができません。そのため、メタ情報には必ず初期値を
  * 定義しなければなりません。初期値の記述は文字列のみですが記述の書式はデータ型の指定内容に依存します。</p>
  *
- * <p><b>ソートキー</b><br>
+ * <p><strong>ソートキー</strong><br>
  * BMSコンテンツを外部データに出力する際、複数あるメタ情報をどういった順番で出力するかを決定するための数値です。
  * この数値がより小さいメタ情報が先に出力されるようになります。同じ数値を指定したメタ情報同士では、
  * {@link BmsSpec}に対して先に定義したほうが先に出力されます。</p>
  *
- * <p><b>同一性チェック</b><br>
+ * <p><strong>同一性チェック</strong><br>
  * BMSライブラリにおいて「同一性」とは、「プレイヤーがプレーするBMSコンテンツの譜面が同一の内容を示している
  * 状態のこと」を指します。同一性チェックは、譜面が同一の内容を示しているかどうかを確認するために使用される
  * データであるかどうかを決定します。<br>
@@ -62,14 +62,14 @@ import java.util.regex.Pattern;
  * メタ情報が変更されることでプレーする譜面が変わってしまうものは原則として同一性チェックをONにするべきです。
  * そうしないと、譜面を比較した際、実際には譜面に変更があっても同一の譜面であると判定されてしまうことになります。</p>
  *
- * <p><b>任意型メタ情報</b><br>
+ * <p><strong>任意型メタ情報</strong><br>
  * 任意型メタ情報は、データ型を任意型({@link BmsType#OBJECT})にすることで作成することが可能なメタ情報です。
- * 任意型メタ情報はアプリケーションの動作上必要な情報を格納する用途に利用することが出来ます。通常のメタ情報とは
+ * 任意型メタ情報はアプリケーションの動作上必要な情報を格納する用途に利用することができます。通常のメタ情報とは
  * 下記の点が異なります。</p>
  *
  * <ul>
  * <li>初期値はnullでなければいけません。</li>
- * <li>同一性チェックをONにすることは出来ません。</li>
+ * <li>同一性チェックをONにすることはできません。</li>
  * <li>{@link BmsSpec#getMetas}において、リストの格納対象外になります。</li>
  * <li>{@link BmsLoader}, {@link BmsSaver}の入出力対象外になります。</li>
  * </ul>
@@ -101,21 +101,21 @@ public final class BmsMeta extends BmsMetaKey {
 	private boolean mUniqueness;
 	/** 初期BPMメタ情報かどうか */
 	private boolean mIsInitialBpm;
-	/** 任意型メタ情報かどうか */
-	private boolean mIsObject;
 	/** BPM変更チャンネルの参照先になっているかどうか */
 	private boolean mIsReferenceBpm = false;
 	/** 譜面停止チャンネルの参照先になっているかどうか */
 	private boolean mIsReferenceStop = false;
+	/** 基数選択メタ情報かどうか */
+	private boolean mIsBaseChanger = false;
 
 	/**
-	 * 単一メタ情報を生成します。
+	 * 単体メタ情報を生成します。
 	 * @param name メタ情報の名称
 	 * @param type データ型
 	 * @param defaultValue 初期値の文字列表現
 	 * @param order ソートキー
 	 * @param uniqueness 同一性チェック時に使用されるべきメタ情報かどうか
-	 * @return 単一メタ情報オブジェクト
+	 * @return 単体メタ情報オブジェクト
 	 * @exception NullPointerException nameがnull
 	 * @exception NullPointerException typeがnull
 	 * @exception NullPointerException defaultValueがnull
@@ -165,7 +165,7 @@ public final class BmsMeta extends BmsMetaKey {
 	/**
 	 * 任意型メタ情報を生成します。
 	 * @param name メタ情報の名称
-	 * @param unit データ単位
+	 * @param unit 構成単位
 	 * @return 任意型メタ情報オブジェクト
 	 * @exception NullPointerException nameがnull
 	 * @exception NullPointerException unitがnull
@@ -178,7 +178,7 @@ public final class BmsMeta extends BmsMetaKey {
 	/**
 	 * 新しいメタ情報オブジェクトを生成します。
 	 * @param name メタ情報の名称
-	 * @param unit データ単位
+	 * @param unit 構成単位
 	 * @param type データ型
 	 * @param defaultValue 初期値の文字列表現
 	 * @param order ソートキー
@@ -197,8 +197,7 @@ public final class BmsMeta extends BmsMetaKey {
 		// アサーション
 		assertArgNotNull(type, "type");
 		assertArg(NAME_PATTERN.matcher(name).matches(), "Wrong name: '%s'", name);
-		var isObject = BmsType.OBJECT.equals(type);
-		if (isObject) {
+		if (type.isObjectType()) {
 			assertArg(defaultValue == null, "When type is OBJECT, 'defaultValue' is allowed null only.");
 			assertArg(uniqueness == false, "When type is OBJECT, 'uniqueness' is allowed false only.");
 		} else {
@@ -209,11 +208,10 @@ public final class BmsMeta extends BmsMetaKey {
 		// データを初期化する
 		mType = type;
 		mDefaultValueStr = defaultValue;
-		mDefaultValue = isObject ? null : BmsType.cast(defaultValue, type);
+		mDefaultValue = type.isObjectType() ? null : BmsType.cast(defaultValue, type);
 		mOrder = order;
 		mOrder2 = 0;
 		mUniqueness = uniqueness;
-		mIsObject = isObject;
 	}
 
 	/**
@@ -287,11 +285,165 @@ public final class BmsMeta extends BmsMetaKey {
 	}
 
 	/**
-	 * 任意型メタ情報であるかどうかを取得します。
-	 * @return 任意型メタ情報である場合はtrue
+	 * このメタ情報が基数選択メタ情報かどうかを取得します。
+	 * @return 基数選択メタ情報であればtrue
 	 */
-	public boolean isObject() {
-		return mIsObject;
+	public boolean isBaseChanger() {
+		return mIsBaseChanger;
+	}
+
+	/**
+	 * メタ情報のデータ型が整数であるかどうかを取得します。
+	 * @return データ型が整数であればtrue
+	 * @see BmsType#INTEGER
+	 */
+	public boolean isIntegerType() {
+		return mType.isIntegerType();
+	}
+
+	/**
+	 * メタ情報のデータ型が実数であるかどうかを取得します。
+	 * @return データ型が実数であればtrue
+	 * @see BmsType#FLOAT
+	 */
+	public boolean isFloatType() {
+		return mType.isFloatType();
+	}
+
+	/**
+	 * メタ情報のデータ型が文字列であるかどうかを取得します。
+	 * @return データ型が文字列であればtrue
+	 * @see BmsType#STRING
+	 */
+	public boolean isStringType() {
+		return mType.isStringType();
+	}
+
+	/**
+	 * メタ情報のデータ型が16進数値であるかどうかを取得します。
+	 * @return データ型が16進数値であればtrue
+	 * @see BmsType#BASE16
+	 */
+	public boolean isBase16Type() {
+		return mType.isBase16Type();
+	}
+
+	/**
+	 * メタ情報のデータ型が36進数値であるかどうかを取得します。
+	 * @return データ型が36進数値であればtrue
+	 * @see BmsType#BASE36
+	 */
+	public boolean isBase36Type() {
+		return mType.isBase36Type();
+	}
+
+	/**
+	 * メタ情報のデータ型が62進数値であるかどうかを取得します。
+	 * @return データ型が62進数値であればtrue
+	 * @see BmsType#BASE62
+	 */
+	public boolean isBase62Type() {
+		return mType.isBase62Type();
+	}
+
+	/**
+	 * メタ情報のデータ型が16進数値配列であるかどうかを取得します。
+	 * @return データ型が16進数値配列であればtrue
+	 * @see BmsType#ARRAY16
+	 */
+	public boolean isArray16Type() {
+		return mType.isArray16Type();
+	}
+
+	/**
+	 * メタ情報のデータ型が36進数値配列であるかどうかを取得します。
+	 * @return データ型が36進数値配列であればtrue
+	 * @see BmsType#ARRAY36
+	 */
+	public boolean isArray36Type() {
+		return mType.isArray36Type();
+	}
+
+	/**
+	 * メタ情報のデータ型が62進数値配列であるかどうかを取得します。
+	 * @return データ型が62進数値配列であればtrue
+	 * @see BmsType#ARRAY62
+	 */
+	public boolean isArray62Type() {
+		return mType.isArray62Type();
+	}
+
+	/**
+	 * メタ情報のデータ型が任意型であるかどうかを取得します。
+	 * @return データ型が任意型である場合はtrue
+	 * @see BmsType#OBJECT
+	 */
+	public boolean isObjectType() {
+		return mType.isObjectType();
+	}
+
+	/**
+	 * メタ情報のデータ型が数値型であるかどうかを取得します。
+	 * @return データ型が数値型であればtrue
+	 * @see BmsType#isNumberType()
+	 */
+	public boolean isNumberType() {
+		return mType.isNumberType();
+	}
+
+	/**
+	 * メタ情報のデータ型が値型であるかどうかを取得します。
+	 * @return データ型が値型であればtrue
+	 * @see BmsType#isValueType()
+	 */
+	public boolean isValueType() {
+		return mType.isValueType();
+	}
+
+	/**
+	 * メタ情報のデータ型が配列型であるかどうかを取得します。
+	 * @return データ型が配列型であればtrue
+	 * @see BmsType#isArrayType()
+	 */
+	public boolean isArrayType() {
+		return mType.isArrayType();
+	}
+
+	/**
+	 * メタ情報のデータ型が基数選択数値型であるかどうかを取得します。
+	 * @return データ型が基数選択数値型であればtrue
+	 * @see BmsType#isSelectableBaseType()
+	 */
+	public boolean isSelectableBaseType() {
+		return mType.isSelectableBaseType();
+	}
+
+	/**
+	 * メタ情報のデータ型が基数選択数値配列型であるかどうかを取得します。
+	 * @return データ型が基数選択数値配列型であればtrue
+	 * @see BmsType#isSelectableArrayType()
+	 */
+	public boolean isSelectableArrayType() {
+		return mType.isSelectableArrayType();
+	}
+
+	/**
+	 * メタ情報のデータ型が基数選択可能な型かどうかを取得します
+	 * @return データ型が基数選択可能な型であればtrue
+	 * @see BmsType#isSelectable()
+	 */
+	public boolean isSelectableType() {
+		return mType.isSelectable();
+	}
+
+	/**
+	 * メタ情報のデータ型が通常型であるかどうかを取得します。
+	 * <p>通常型とは {@link BmsType#OBJECT} 以外の全てのデータ型が該当します。<br>
+	 * つまり、{@link #isObjectType()} とは常に逆の結果を返します。</p>
+	 * @return データ型が通常型である場合はtrue
+	 */
+	public boolean isNormalType() {
+		return mType.isNormalType();
 	}
 
 	/**
@@ -337,5 +489,12 @@ public final class BmsMeta extends BmsMetaKey {
 	 */
 	final boolean isReferenceStop() {
 		return mIsReferenceStop;
+	}
+
+	/**
+	 * メタ情報を基数選択メタ情報に設定
+	 */
+	final void setIsBaseChanger() {
+		mIsBaseChanger = true;
 	}
 }

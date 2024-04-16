@@ -4,51 +4,38 @@ import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.util.AbstractList;
 import java.util.Arrays;
-import java.util.function.Function;
 
 /**
- * BMSで取り扱う0(00)～255(FF)の16進整数値、または0(00)～1295(ZZ)の36進整数値の配列を表現するクラスです。
+ * 0(00)～255(FF)の16進整数値、0(00)～1295(ZZ)の36進整数値、0(00)～3843(zz)の62進整数値の配列を表現するクラスです。
  *
- * <p>{@link BmsArray}では、オブジェクト生成時に配列を表現した文字列、およびその文字列が表す基数を入力し、
+ * <p>当クラスでは、オブジェクト生成時に配列を表現した文字列、およびその文字列が表す基数を入力し、
  * 文字列の解析結果を整数の配列データに変換します。その後は配列に対して変更を加えることはできません。</p>
  *
  * <p>また、配列データを外部データ出力されたBMS上での文字列に変換する機能も有しています。以下に変換例を示します。<br>
  * 16進数の場合：&quot;004A007800FFC9&quot;<br>
- * 36進数の場合：&quot;GH00ZAZ60000AFPIZZ&quot;</p>
+ * 36進数の場合：&quot;GH00ZAZ60000AFPIZZ&quot;<br>
+ * 62進数の場合：&quot;A8006x00zC00QPyt&quot;</p>
  */
 public final class BmsArray extends AbstractList<Integer> {
-	/** 16進数用文字列配列から整数配列への変換関数 */
-	private static final Function<String, int[]> FN_S16TOA = s -> BmsInt.to16ia(s, 0, s.length() / 2);
-	/** 36進数用文字列配列から整数配列への変換関数 */
-	private static final Function<String, int[]> FN_S36TOA = s -> BmsInt.to36ia(s, 0, s.length() / 2);
-	/** 16進数用整数配列から文字列配列への変換関数 */
-	private static final Function<int[], String> FN_ATOS16 = a -> BmsInt.to16sa(a, 0, a.length);
-	/** 36進数用整数配列から文字列配列への変換関数 */
-	private static final Function<int[], String> FN_ATOS36 = a -> BmsInt.to36sa(a, 0, a.length);
-
-	/** 基数 */
-	private int mRadix;
-	/** 文字列配列から整数配列への変換関数 */
-	private Function<String, int[]> mFnStoA;
-	/** 整数配列から文字列配列への変換関数 */
-	private Function<int[], String> mFnAtoS;
+	/** 基数に応じた整数オブジェクト */
+	private BmsInt mInt;
 	/** 整数配列 */
 	private int[] mArray;
 
 	/**
 	 * 指定された基数の空の配列を生成します。
-	 * @param radix 入力元データの基数(16,36のいずれかのみサポートしています)
-	 * @exception IllegalArgumentException radixが16,36以外
+	 * @param base 入力元データの基数(16, 36, 62のいずれかのみサポートしています)
+	 * @exception IllegalArgumentException radixが16, 36, 62以外
 	 */
-	public BmsArray(int radix) {
-		setup(radix, "");
+	public BmsArray(int base) {
+		setup(base, "");
 	}
 
 	/**
 	 * 指定された基数で入力元データを解析し、配列を生成します。
-	 * <p>基数に16を指定した場合、認識可能な文字は0～9,a～f,A～F、36の場合は0～9,a～z,A～Zとなり、
+	 * <p>基数に16を指定した場合、認識可能な文字は0～9,a～f,A～F、36, 62の場合は0～9,a～z,A～Zとなり、
 	 * いずれの場合も2文字1セットの整数値となります。従って、1つの要素で表現可能な値の範囲は
-	 * 基数16で0～255、基数36で0～1295です。</p>
+	 * 基数16で0～255、基数36で0～1295、基数62で0～3843です。</p>
 	 * <p>入力元データの空白文字など、認識不可能な文字をトリミングする機能はありません。
 	 * それらの文字は予め除去したうえでこのコンストラクタを呼び出してください。</p>
 	 * <p>入力元データの文字数が奇数の場合、最後の文字が"0"である場合に限り、最後の要素を"00"と見なして解析します。
@@ -56,14 +43,14 @@ public final class BmsArray extends AbstractList<Integer> {
 	 * 救済措置は通常では不要なデータ編集などの余分な処理が行われパフォーマンスが低下しますので、
 	 * 構文誤りのデータを入力しないよう注意してください。</p>
 	 * @param src 入力元データ
-	 * @param radix 入力元データの基数(16,36のみサポートしています)
+	 * @param base 入力元データの基数(16, 36, 62のみサポートしています)
 	 * @exception NullPointerException srcがnull
 	 * @exception IllegalArgumentException srcの文字数が2で割り切れず、最後の文字が"0"ではない
 	 * @exception IllegalArgumentException srcに解析不可能な文字が含まれる
-	 * @exception IllegalArgumentException radixが16,36以外
+	 * @exception IllegalArgumentException radixが16, 36, 62以外
 	 */
-	public BmsArray(String src, int radix) {
-		setup(radix, src);
+	public BmsArray(String src, int base) {
+		setup(base, src);
 	}
 
 	/**
@@ -74,22 +61,20 @@ public final class BmsArray extends AbstractList<Integer> {
 	 */
 	public BmsArray(BmsArray array) {
 		assertArgNotNull(array, "array");
-		mRadix = array.mRadix;
-		mFnStoA = array.mFnStoA;
-		mFnAtoS = array.mFnAtoS;
+		mInt = array.mInt;
 		mArray = array.mArray;  // 一度生成されると変更されないので参照のみ渡す
 	}
 
 	/**
 	 * BmsArrayオブジェクトをセットアップする
-	 * @param radix 基数
+	 * @param base 基数
 	 * @param src 変換元文字列
 	 * @exception NullPointerException srcがnullの場合
-	 * @exception IllegalArgumentException radixが16,36以外
+	 * @exception IllegalArgumentException radixが16, 36, 62以外
 	 * @exception IllegalArgumentException srcの文字数が2で割り切れず、最後の文字が"0"ではない
 	 * @exception IllegalArgumentException srcに解析不可能な文字が含まれている
 	 */
-	private void setup(int radix, String src) {
+	private void setup(int base, String src) {
 		assertArgNotNull(src, "src");
 
 		// 入力配列が奇数文字数の場合、最後の文字が"0"である場合に限り最後の要素を"00"と見なす
@@ -100,18 +85,8 @@ public final class BmsArray extends AbstractList<Integer> {
 			src = new StringBuilder(length + 1).append(src).append('0').toString();
 		}
 
-		if (radix == 16) {
-			mFnStoA = FN_S16TOA;
-			mFnAtoS = FN_ATOS16;
-		} else if (radix == 36) {
-			mFnStoA = FN_S36TOA;
-			mFnAtoS = FN_ATOS36;
-		} else {
-			var msg = String.format("Unsupported radix. radix=%d", radix);
-			throw new IllegalArgumentException(msg);
-		}
-		mRadix = radix;
-		mArray = mFnStoA.apply(src);
+		mInt = BmsInt.of(base);
+		mArray = mInt.toia(src, 0, src.length() / 2);
 	}
 
 	/**
@@ -122,7 +97,7 @@ public final class BmsArray extends AbstractList<Integer> {
 	 */
 	@Override
 	public String toString() {
-		return mFnAtoS.apply(mArray);
+		return mInt.tosa(mArray, 0, mArray.length);
 	}
 
 	/**
@@ -136,7 +111,7 @@ public final class BmsArray extends AbstractList<Integer> {
 	public boolean equals(Object obj) {
 		if (obj instanceof BmsArray) {
 			var o = (BmsArray)obj;
-			return (mRadix == o.mRadix) && Arrays.equals(mArray, o.mArray);
+			return (mInt == o.mInt) && Arrays.equals(mArray, o.mArray);
 		} else {
 			return false;
 		}
@@ -169,7 +144,7 @@ public final class BmsArray extends AbstractList<Integer> {
 	 * 入力元データの基数を返します。
 	 * @return 基数
 	 */
-	public int getRadix() {
-		return mRadix;
+	public int getBase() {
+		return mInt.base();
 	}
 }

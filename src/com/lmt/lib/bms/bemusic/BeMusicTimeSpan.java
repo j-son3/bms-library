@@ -58,7 +58,7 @@ public class BeMusicTimeSpan {
 	/** ロングノート数 */
 	private int mLnCount;
 	/** 地雷数 */
-	private int mLmCount;
+	private int mMineCount;
 
 	/**
 	 * コンストラクタ
@@ -156,7 +156,7 @@ public class BeMusicTimeSpan {
 
 	/**
 	 * 統計情報の元になった譜面でこの期間に含まれる楽曲位置情報の最初のインデックス値を取得します。
-	 * <p>当メソッドで取得できる値は、統計情報の元になった{@link BeMusicScore}オブジェクトから楽曲位置情報を
+	 * <p>当メソッドで取得できる値は、統計情報の元になった{@link BeMusicChart}オブジェクトから楽曲位置情報を
 	 * 取得する際に使用することができます。この期間内に楽曲位置情報が1件も含まれない場合は負の値を返します。</p>
 	 * @return 楽曲位置情報の最初のインデックス値
 	 */
@@ -174,7 +174,7 @@ public class BeMusicTimeSpan {
 
 	/**
 	 * 統計情報の元になった譜面でこの期間に含まれる楽曲位置情報の最後のインデックス値を取得します。
-	 * <p>当メソッドで取得できる値は、統計情報の元になった{@link BeMusicScore}オブジェクトから楽曲位置情報を
+	 * <p>当メソッドで取得できる値は、統計情報の元になった{@link BeMusicChart}オブジェクトから楽曲位置情報を
 	 * 取得する際に使用することができます。この期間内に楽曲位置情報が1件も含まれない場合は負の値を返します。</p>
 	 * @return 楽曲位置情報の最後のインデックス値
 	 */
@@ -372,16 +372,16 @@ public class BeMusicTimeSpan {
 	 * 地雷オブジェ数を取得します。
 	 * @return 地雷オブジェ数
 	 */
-	public final int getLandmineCount() {
-		return mLmCount;
+	public final int getMineCount() {
+		return mMineCount;
 	}
 
 	/**
 	 * 地雷オブジェ数設定
 	 * @param count 地雷オブジェ数
 	 */
-	void setLandmineCount(int count) {
-		mLmCount = count;
+	void setMineCount(int count) {
+		mMineCount = count;
 	}
 
 	/**

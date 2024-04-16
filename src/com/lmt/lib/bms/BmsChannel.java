@@ -12,74 +12,56 @@ import static com.lmt.lib.bms.internal.Assertion.*;
  * 「データが定義されなかった場合の初期値」「データの重複可否」「同一性チェック対象かどうか」が
  * 存在します。それぞれの情報の詳細については以下の記述を参照してください。</p>
  *
- * <p><b>番号</b><br>
+ * <p><strong>番号</strong><br>
  * 当該チャンネルの番号を示します。チャンネル番号には「仕様チャンネル」「ユーザーチャンネル」の2種類が存在します。<br>
  * 仕様チャンネルは{@link BmsSpec#SPEC_CHANNEL_MIN}～{@link BmsSpec#SPEC_CHANNEL_MAX}の範囲で指定し、<br>
  * ユーザーチャンネルは{@link BmsSpec#USER_CHANNEL_MIN}～{@link BmsSpec#USER_CHANNEL_MAX}の範囲で指定します。<br>
  * 仕様チャンネルはBMS仕様として定義するチャンネルを示し、このチャンネルのデータは外部データからの入出力の
- * 対象として扱われます。一方、ユーザーチャンネルはアプリケーションがBMSコンテンツを制御する目的で使用出来る
+ * 対象として扱われます。一方、ユーザーチャンネルはアプリケーションがBMSコンテンツを制御する目的で使用できる
  * 一時的なデータとしての扱いになり、外部データからの入出力対象にはなりません。</p>
  *
- * <p><b>データ型</b>({@link BmsType})<br>
+ * <p><strong>データ型</strong>({@link BmsType})<br>
  * チャンネルのデータを記述する際の型を決定します。<br>
  * 詳細は{@link BmsType}を参照してください。</p>
  *
- * <p><b>チャンネルと関連付いたメタ情報</b><br>
+ * <p><strong>チャンネルと関連付いたメタ情報</strong><br>
  * チャンネルのデータは、しばしば索引付きメタ情報のインデックス値を示すことがあります。例えば、チャンネルのデータが
  * 時間軸上で鳴らす音の種類を示し、関連付いたメタ情報がその音のファイル名を示す場合などです。このような表現を行う
  * ためにはチャンネルのデータ型が「配列型」であり、且つ関連付けようとするメタ情報の構成要素が「索引付き」である
  * 必要があります。</p>
  *
- * <p><b>初期値</b><br>
- * BMSの仕様として、全てのチャンネルは指定必須とすることが出来ません。そのため、チャンネルには必ず初期値を
+ * <p><strong>初期値</strong><br>
+ * BMSの仕様として、全てのチャンネルは指定必須とすることができません。そのため、チャンネルには必ず初期値を
  * 定義しなければなりません。初期値の記述は文字列のみですが記述の書式はデータ型の指定内容に依存します。</p>
  *
- * <p><b>データの重複可否</b><br>
+ * <p><strong>データの重複可否</strong><br>
  * チャンネルに登録するデータの中には、同じ種類のデータを複数重複して登録したい場合があります。例えば、
  * 任意のタイミングで発音したい音(BGM)等がそれに該当します。そのようなデータはチャンネルを複数作成して重ねるのではなく
  * チャンネルをデータ重複可能にすることで実現できます。BMSライブラリでは、このような機能をサポートします。</p>
  *
- * <p><b>同一性チェック</b><br>
+ * <p><strong>同一性チェック</strong><br>
  * 同一性チェックの詳細な説明に関しては{@link BmsMeta}の説明を参照してください。<br>
  * 同一性についてはチャンネルに対しても適用することができ、データの内容が同一であるかどうかをチェックする必要が
- * あるかどうかについての情報を付与することが出来るようになっています。</p>
+ * あるかどうかについての情報を付与することができるようになっています。</p>
  *
- * <p><b>任意型チャンネル</b><br>
+ * <p><strong>任意型チャンネル</strong><br>
  * データ型を{@link BmsType#OBJECT}に指定したチャンネルは「任意型チャンネル」という扱いになります。
  * 任意型チャンネルは、その他のチャンネルとは下記の点が異なります。</p>
  *
  * <ul>
- * <li>仕様チャンネルの番号は指定出来ません。</li>
+ * <li>仕様チャンネルの番号は指定できません。</li>
  * <li>初期値はnullでなければいけません。</li>
- * <li>同一性チェックをONにすることは出来ません。</li>
+ * <li>同一性チェックをONにすることはできません。</li>
  * </ul>
  */
 public final class BmsChannel extends BmsChannelKey {
-	/**
-	 * チャンネルを検査するI/Fを提供します。
-	 * <p>当インターフェイスは主に{@link BmsContent}のメソッドにパラメータとして渡されます。1個のチャンネルの
-	 * 検査を実施し、戻り値として検査結果を返却する役割を担います。</p>
-	 */
-	@FunctionalInterface
-	public interface Tester {
-		/**
-		 * チャンネルの検査を行います。
-		 * <p>パラメータで渡されるチャンネルが検査対象です。オブジェクトの内容を確認し、検査OKとなる場合には
-		 * 戻り値でtrueを返し、検査失敗の場合はfalseを返します。検査後、どのような振る舞いになるかは当インターフェイスを
-		 * 扱うメソッドに依存します。</p>
-		 * @param number 検査対象のチャンネルの番号
-		 * @return 検査合格の場合はtrue、不合格の場合はfalse
-		 */
-		boolean testChannel(int number);
-	}
-
 	/** チャンネルのデータ型 */
 	private BmsType mType;
 	/** チャンネルに関連するメタ情報の参照先の名前(索引付きであること) */
 	private String mRef;
-	/** チャンネルのデータ定義が無い場合の初期値(文字列表現) */
+	/** チャンネルのデータ定義がない場合の初期値(文字列表現) */
 	private String mDefaultValueStr;
-	/** チャンネルのデータ定義が無い場合の初期値 */
+	/** チャンネルのデータ定義がない場合の初期値 */
 	private Object mDefaultValue;
 	/** チャンネルのデータ用途を示す値 1:小節長 2:BPM変更 3:譜面停止 */
 	private int mRelatedFlag;
@@ -363,7 +345,7 @@ public final class BmsChannel extends BmsChannelKey {
 			boolean uniqueness) {
 		// 各種チェックを実施する
 		assertArgNotNull(type, "type");
-		if (BmsType.OBJECT.equals(type)) {
+		if (type.isObjectType()) {
 			assertUserChannelRange(getNumber());
 			assertArg(ref == null, "When type is OBJECT, 'ref' can NOT set.");
 			assertArg(defaultValue == null, "When type is OBJECT, 'defaultValue' is allowed null only.");

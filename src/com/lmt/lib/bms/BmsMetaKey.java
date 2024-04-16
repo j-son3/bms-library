@@ -66,10 +66,37 @@ public class BmsMetaKey {
 	}
 
 	/**
-	 * メタ情報のデータ単位を取得します。
-	 * @return メタ情報のデータ単位
+	 * メタ情報の構成単位を取得します。
+	 * @return メタ情報の構成単位
 	 */
 	public BmsUnit getUnit() {
 		return mUnit;
+	}
+
+	/**
+	 * メタ情報の構成単位が単体であるかどうかを取得します。
+	 * <p>当メソッドは {@link #getUnit()} == {@link BmsUnit#SINGLE} と等価です。</p>
+	 * @return 構成単位が単体であればtrue
+	 */
+	public final boolean isSingleUnit() {
+		return mUnit == BmsUnit.SINGLE;
+	}
+
+	/**
+	 * メタ情報の構成単位が複数であるかどうかを取得します。
+	 * <p>当メソッドは {@link #getUnit()} == {@link BmsUnit#MULTIPLE} と等価です。</p>
+	 * @return 構成単位が複数であればtrue
+	 */
+	public final boolean isMultipleUnit() {
+		return mUnit == BmsUnit.MULTIPLE;
+	}
+
+	/**
+	 * メタ情報の構成単位が索引付きであるかどうかを取得します。
+	 * <p>当メソッドは {@link #getUnit()} == {@link BmsUnit#INDEXED} と等価です。</p>
+	 * @return 構成単位が索引付きであればtrue
+	 */
+	public final boolean isIndexedUnit() {
+		return mUnit == BmsUnit.INDEXED;
 	}
 }

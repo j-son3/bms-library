@@ -92,7 +92,7 @@ class ComplexElement extends RatingElement {
 	 * 地雷の数取得
 	 * @return 地雷の数
 	 */
-	final int getLandmineCount() {
+	final int getMineCount() {
 		return mCounts[I_NUM_MINE];
 	}
 
@@ -100,7 +100,7 @@ class ComplexElement extends RatingElement {
 	 * 地雷の数設定
 	 * @param count 地雷の数
 	 */
-	final void setLandmineCount(int count) {
+	final void setMineCount(int count) {
 		mCounts[I_NUM_MINE] = (byte)count;
 	}
 
@@ -223,7 +223,7 @@ class ComplexElement extends RatingElement {
 		var s = String.format("   |%.3f|%s|%2d|%2d|%2d|%2d|%2d|%2d|%2d|%-8.3f|%2d:%-5.3f|%-8.3f",
 				getTimeDelta(),
 				makeNotesString(),
-				getVisualEffectCount(), getNoteTypeCount(), getHoldingCount(), getLandmineCount(), getSpaceCount(),
+				getVisualEffectCount(), getNoteTypeCount(), getHoldingCount(), getMineCount(), getSpaceCount(),
 				getChangeColorCount(), getChangeNoteTypeCount(),
 				getPointScore(), getBackwardScoreCount(), getBackwardScore(), getTotalScore());
 		Ds.debug(s);

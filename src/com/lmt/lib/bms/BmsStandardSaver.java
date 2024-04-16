@@ -12,12 +12,13 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,11 +43,6 @@ public class BmsStandardSaver extends BmsSaver {
 	/** 標準フォーマットで対応する索引付きメタ情報のインデックス値の最大値 */
 	public static final int META_INDEX_MAX = 1295;
 
-	/** 16進配列の値が標準フォーマットで表現可能な範囲を超過しているかをチェックするテスター */
-	private static final BmsNote.Tester TESTER_OVERFLOW_A16 = n -> !BmsSpec.isNoteValue16WithinRange(n.getValue());
-	/** 36進配列の値が標準フォーマットで表現可能な範囲を超過しているかをチェックするテスター */
-	private static final BmsNote.Tester TESTER_OVERFLOW_A36 = n -> !BmsSpec.isNoteValue36WithinRange(n.getValue());
-
 	/** 小数部を持つ刻み位置が全て整数値になる拡張倍率検索時の最終値 */
 	private static final double FIND_INT_MAX = 768.0;
 
@@ -60,6 +56,23 @@ public class BmsStandardSaver extends BmsSaver {
 	private List<String> mFooterComments = Collections.emptyList();
 	/** エンコード時の文字セットリスト(リストの先頭から順にエンコードが試みられる) */
 	private List<Charset> mCharsets = Collections.emptyList();
+	/** BOMを付加するかどうか */
+	private boolean mAddBom = false;
+	/** 最後の書き込み処理で使用した文字セット */
+	private Charset mLastProcessedCharset = null;
+
+	/**
+	 * このセーバで最後に書き込んだBMSコンテンツで使用した文字セットを取得します。
+	 * <p>当メソッドは以下のメソッドによりBMSコンテンツの読み込みを行った場合に使用された文字セットを取得します。</p>
+	 * <p>一度も読み込みを行っていない場合当メソッドはnullを返します。
+	 * また、読み込み処理の途中で例外がスローされると文字セットの更新は行われません。</p>
+	 * @return 最後に書き込んだBMSコンテンツで使用した文字セット、またはnull
+	 * @see #setCharsets(Charset...)
+	 * @see BmsLibrary#setDefaultCharsets(Charset...)
+	 */
+	public final Charset getLastProcessedCharset() {
+		return mLastProcessedCharset;
+	}
 
 	/**
 	 * 小数部を持つ刻み位置が存在する場合の配列データ最大分解能を設定します。
@@ -106,13 +119,13 @@ public class BmsStandardSaver extends BmsSaver {
 	}
 
 	/**
-	 * チャンネルコメントを設定します。
+	 * タイムライン要素コメントを設定します。
 	 * <p>コメントの内容は1行につき1文字列、複数行記述する場合は複数の文字列をCollectionに設定して渡してください。</p>
 	 * <p>文字列中の改行コード&lt;CR&gt;、&lt;LF&gt;、複数行コメントの開始文字、および末尾の半角スペースとタブは
 	 * 消去したうえで出力されます。</p>
 	 * <p>コメントが空文字列、または先頭文字がコメント行を表す文字(&quot;;&quot;, &quot;*&quot;, &quot;//&quot;)の場合、
 	 * その行にはコメント行を表す文字は付加されません。</p>
-	 * @param channelComments チャンネルコメント
+	 * @param channelComments タイムライン要素コメント
 	 * @return このオブジェクトのインスタンス
 	 * @exception NullPointerException channelCommentsがnull
 	 * @exception NullPointerException channelCommentsの中にnullが含まれる
@@ -161,13 +174,59 @@ public class BmsStandardSaver extends BmsSaver {
 	}
 
 	/**
+	 * BMS書き込み時、BOM(Byte Order Mark)を付加するかどうかを設定します。
+	 * <p>この設定を有効にすると、BOMに対応する文字セットの場合にそれぞれの文字セットに対応したBOMを付加します。
+	 * BMSライブラリでBOMの付加に対応する文字セットは「UTF-8」「UTF-16LE」「UTF-16BE」です。
+	 * それ以外の文字セットではBOMの付加は行われません。</p>
+	 * <p>デフォルトではこの設定は無効になっています。</p>
+	 * @param addBom BOMを付加するかどうか
+	 * @return このオブジェクトのインスタンス
+	 */
+	public final BmsStandardSaver setAddBom(boolean addBom) {
+		mAddBom = addBom;
+		return this;
+	}
+
+	/**
+	 * 指定BMSコンテンツが標準フォーマットと互換性があるかを検査します。
+	 * <p>BMSの標準フォーマットでは表現可能なデータの範囲に制限があり、
+	 * BMSコンテンツの構成次第では標準フォーマットでの出力ができない場合があります。
+	 * 当メソッドは標準フォーマットとしての出力が可能かどうか検査し、その結果を返します。
+	 * 当メソッドでは具体的に以下の観点で標準フォーマットとの互換性の有無を検査します。</p>
+	 * <ul>
+	 * <li>データ型が{@link BmsType#BASE}, {@link BmsType#ARRAY}のメタ情報が設定された基数の最大値を超過していないか</li>
+	 * <li>索引付きメタ情報で、設定された基数の最大値を超えるインデックスにデータを設定していないか</li>
+	 * <li>小節数が{@link #MEASURE_COUNT_MAX}を超過していないか</li>
+	 * <li>データ型が{@link BmsType#BASE}の小節データが、設定された基数の最大値を超過していないか</li>
+	 * <li>ノートの値が、データ型ごとの基数({@link BmsType#ARRAY}の場合選択された基数)の最大値を超過していないか</li>
+	 * </ul>
+	 * <p>※ユーザーチャンネルのタイムライン要素は検査対象外です。</p>
+	 * <p>以上の検査を行い1つでも該当するデータが見つかった場合、標準フォーマットとの互換性はありません。
+	 * 尚、当クラスでの出力を行う際にも当メソッドと同じ検査が行われます。</p>
+	 * @param content 検査対象のBMSコンテンツ
+	 * @return 標準フォーマットとの互換性があればtrue、そうでなければfalse
+	 * @exception NullPointerException contentがnull
+	 * @exception IllegalArgumentException contentが編集モード
+	 */
+	public static boolean isCompatible(BmsContent content) {
+		assertArgNotNull(content, "content");
+		assertArg(content.isReferenceMode(), "Specified content is edit mode");
+		try {
+			checkContentCompatible(content);
+			return true;
+		} catch (BmsCompatException e) {
+			return false;
+		}
+	}
+
+	/**
 	 * 指定された出力ストリームへ標準フォーマットでBMSコンテンツを出力します。
 	 * <p>当クラスによる標準フォーマットのBMSコンテンツ出力では、以下の順に各要素が出力されます。<br>
 	 * 1. BMS宣言(存在する場合のみ)<br>
 	 * 2. メタ情報コメント(指定した場合のみ)<br>
 	 * 3. メタ情報<br>
-	 * 4. チャンネルコメント(指定した場合のみ)<br>
-	 * 5. チャンネルデータ<br>
+	 * 4. タイムライン要素コメント(指定した場合のみ)<br>
+	 * 5. タイムライン要素<br>
 	 * 6. フッターコメント(指定した場合のみ)</p>
 	 * <p>指定BMSコンテンツに1件でもBMS宣言が存在する場合、BMSの先頭行には";?bms"が出力されます。</p>
 	 * <p>メタ情報は原則としてBMS仕様で規定されたメタ情報のソート順で出力されますが、
@@ -176,28 +235,30 @@ public class BmsStandardSaver extends BmsSaver {
 	 * 文字セットを指定しなかった場合は{@link BmsLibrary#getDefaultCharsets()}
 	 * でBMSライブラリのデフォルト文字セットリストを取得し使用します。全ての文字セットでテキストのエンコードに失敗した場合、
 	 * BMSコンテンツの出力は中止され{@link BmsCompatException}をスローします。</p>
-	 * <p>小数点以下の刻み位置を持つノートが含まれるチャンネルデータで出力位置に端数が発生する場合、
+	 * <p>小数点以下の刻み位置を持つノートが含まれるタイムライン要素で出力位置に端数が発生する場合、
 	 * 配列データの最大分解能の範囲で最も近い場所にノートの値を出力します。
 	 * 分解能が不足していると、刻み位置の値が近いノート同士が同じ場所に出力しようとする現象が発生する場合があります。
 	 * その場合先に出力したほうの値が上書きされてしまい、データの欠落が発生することになりますので、
 	 * 上書きを検出した時点でBMSコンテンツの出力は中止され{@link BmsCompatException}をスローします。</p>
 	 * <p>標準フォーマットのBMSでは小節数、索引付きメタ情報のインデックス値などで上限値の制約が厳しく、
 	 * 楽曲の構成次第では標準フォーマットでは全ての情報を完全に出力できない場合があります。
-	 * そのようなケースでは、出力できない情報を欠落させ不完全な状態で出力するようなことはせず、
-	 * 出力を中止して{@link BmsCompatException}をスローします。</p>
+	 * 当メソッドはそのようなケースがないかを検査し、出力できない情報を欠落させ不完全な状態で出力するようなことはせず、
+	 * 出力を中止して{@link BmsCompatException}をスローします。検査は内部的に {@link #isCompatible(BmsContent)}
+	 * と同じ検査アルゴリズムを使用します。具体的な検査処理の詳細は同メソッドの説明を参照してください。</p>
 	 * @param content 出力対象のBMSコンテンツ
 	 * @param dst 出力先ストリーム
 	 * @exception IOException dstへのBMSコンテンツ出力時に入出力エラーが発生した
 	 * @exception BmsException BMSに関連する要因、または出力処理で例外がスローされエラー終了した
 	 * @exception BmsCompatException 指定された全ての文字セットでテキストのエンコードが失敗した
-	 * @exception BmsCompatException 配列データの分解能不足によりチャンネルデータの欠落が発生した
+	 * @exception BmsCompatException 配列データの分解能不足によりノートの欠落が発生した
 	 * @exception BmsCompatException 楽曲の構成が標準フォーマットのデータ表現可能範囲を超えた
 	 */
 	protected void onWrite(BmsContent content, OutputStream dst) throws IOException, BmsException {
 		// 指定BMSコンテンツを標準フォーマットで完全に表現可能かをチェックする
 		checkContentCompatible(content);
 
-		// 書き込み用のWriterを生成する
+		// 書き込み用のWriter等を生成する
+		var intc = getIntClass(content);
 		var sw = new StringWriter();
 		var pw = new PrintWriter(sw);
 		var needEmptyLine = false;
@@ -219,8 +280,8 @@ public class BmsStandardSaver extends BmsSaver {
 		// その後で索引付きメタ情報を出力するように並び順を調整する。
 		var metas = content.getSpec().getMetas();
 		var orderedMetas = new ArrayList<BmsMeta>(metas.size());
-		orderedMetas.addAll(metas.stream().filter(s -> s.getUnit() != BmsUnit.INDEXED).collect(Collectors.toList()));
-		orderedMetas.addAll(metas.stream().filter(s -> s.getUnit() == BmsUnit.INDEXED).collect(Collectors.toList()));
+		orderedMetas.addAll(metas.stream().filter(Predicate.not(BmsMeta::isIndexedUnit)).collect(Collectors.toList()));
+		orderedMetas.addAll(metas.stream().filter(BmsMeta::isIndexedUnit).collect(Collectors.toList()));
 
 		// メタ情報を出力する
 		var outMetaFirst = true;
@@ -233,7 +294,7 @@ public class BmsStandardSaver extends BmsSaver {
 			}
 
 			// 空行を出力する
-			if ((outMetaFirst && needEmptyLine) || (!outMetaFirst && (meta.getUnit() == BmsUnit.INDEXED))) {
+			if ((outMetaFirst && needEmptyLine) || (!outMetaFirst && (meta.isIndexedUnit()))) {
 				pw.println();
 			}
 
@@ -246,19 +307,19 @@ public class BmsStandardSaver extends BmsSaver {
 			// 構成単位ごとのメタ情報の出力処理
 			var outName = name.toUpperCase();
 			switch (unit) {
-			case SINGLE:  // 単一データ
+			case SINGLE:  // 単体メタ情報
 				pw.println(String.format("%s %s",
-						outName, bmsValueToString(content.getSingleMeta(name), type)));
+						outName, bmsValueToString(content.getSingleMeta(name), intc, type)));
 				break;
-			case MULTIPLE:  // 複数データ
+			case MULTIPLE:  // 複数メタ情報
 				content.getMultipleMetas(name).forEach(v -> {
-					pw.println(String.format("%s %s", outName, bmsValueToString(v, type)));
+					pw.println(String.format("%s %s", outName, bmsValueToString(v, intc, type)));
 				});
 				break;
-			case INDEXED:  // 索引付きデータ
+			case INDEXED:  // 索引付きメタ情報
 				content.getIndexedMetas(name).forEach((i, v) -> {
 					String index = BmsInt.to36s(i);
-					String value = bmsValueToString(v, type);
+					String value = bmsValueToString(v, intc, type);
 					pw.println(String.format("%s%s %s", outName, index, value));
 				});
 				break;
@@ -271,7 +332,7 @@ public class BmsStandardSaver extends BmsSaver {
 			needEmptyLine = true;
 		}
 
-		// チャンネルデータを出力する
+		// タイムライン要素を出力する
 		var outChFirst = true;
 		var channelSpecs = content.getSpec().getChannels();
 		var measureCount = content.getMeasureCount();
@@ -291,7 +352,7 @@ public class BmsStandardSaver extends BmsSaver {
 					pw.println();
 				}
 
-				// チャンネルコメントを出力する
+				// タイムライン要素コメントを出力する
 				if (outChFirst) {
 					outChFirst = false;
 					mChannelComments.forEach(c -> writeComment(pw, c));
@@ -303,11 +364,11 @@ public class BmsStandardSaver extends BmsSaver {
 				for (var j = 0; j < dataCount; j++) {
 					String value;
 					if (chType.isValueType()) {
-						// 値型の場合、定義値の文字列表現を生成する
-						value = bmsValueToString(content.getMeasureValue(channel, j, measure), chType);
+						// 値型(小節データ)の場合、定義値の文字列表現を生成する
+						value = bmsValueToString(content.getMeasureValue(channel, j, measure), intc, chType);
 					} else if (chType.isArrayType()) {
-						// 配列型の場合、ノートの配置から配列データの文字列表現を生成する
-						value = notesToString(content, channel, j, measure, chType.getRadix());
+						// 配列型(ノート)の場合、ノートの配置から配列データの文字列表現を生成する
+						value = notesToString(content, channel, j, measure, intc, chType);
 					} else {
 						// Don't care
 						value = "";
@@ -330,12 +391,14 @@ public class BmsStandardSaver extends BmsSaver {
 		pw.close();
 
 		// 指定文字セットでのテキストのエンコードを試行する
+		var charset = (Charset)null;
 		var charsets = mCharsets.isEmpty() ? BmsLibrary.getDefaultCharsets() : mCharsets;
 		var bmsText = sw.toString();
 		var outBytes = (byte[])null;
 		for (var i = 0; (outBytes == null) && (i < charsets.size()); i++) {
 			// 優先順位の高い文字セットから順にエンコードを試行する
-			outBytes = encodeText(bmsText, charsets.get(i));
+			charset = charsets.get(i);
+			outBytes = encodeText(bmsText, charset);
 		}
 		if (outBytes == null) {
 			// 全ての文字セットでのエンコードに失敗した
@@ -344,33 +407,46 @@ public class BmsStandardSaver extends BmsSaver {
 			throw new BmsCompatException(msg);
 		}
 
+		// BOM付加が指定されていて、対応する文字セットの場合はBOMを生成する
+		var bom = new byte[0];
+		if (mAddBom) {
+			if (charset.equals(StandardCharsets.UTF_8)) {
+				// UTF-8
+				bom = new byte[] { (byte)0xef, (byte)0xbb, (byte)0xbf };
+			} else if (charset.equals(StandardCharsets.UTF_16LE)) {
+				// UTF-16LE
+				bom = new byte[] { (byte)0xff, (byte)0xfe };
+			} else if (charset.equals(StandardCharsets.UTF_16BE)) {
+				// UTF-16BE
+				bom = new byte[] { (byte)0xfe, (byte)0xff };
+			} else {
+				// Do nothing
+			}
+		}
+
 		// エンコードされたテキストをストリームへ出力する
+		dst.write(bom);
 		dst.write(outBytes);
+
+		// 処理した文字セットを記録する
+		mLastProcessedCharset = charset;
 	}
 
 	/**
-	 * チャンネルの配列データを文字列に変換する(Base16/36両対応)
+	 * チャンネルの配列データを文字列に変換する
 	 * @param content 配列データが格納されたBMSコンテンツ
 	 * @param channel 配列データが格納されたチャンネル番号
 	 * @param index チャンネルのインデックス
 	 * @param measure 配列データを取り出す小節番号
-	 * @param radix 基数(16/36)
+	 * @param intc 設定された基数に応じた整数オブジェクト
+	 * @param type 変換対象の値のデータ型(配列型)
 	 * @return 文字列に変換された配列データ
 	 * @exception BmsCompatException 分解能不足によるノートの上書き発生
 	 */
-	private String notesToString(BmsContent content, int channel, int index, int measure, int radix)
+	private String notesToString(BmsContent content, int channel, int index, int measure, BmsInt intc, BmsType type)
 			throws BmsCompatException {
-		// 使用する配列データ変換関数を準備しておく
-		IntFunction<String> converter;
-		if (radix == 36) {
-			converter = BmsInt::to36s;
-		} else if (radix == 16) {
-			converter = BmsInt::to16s;
-		} else {
-			converter = null;
-		}
-
 		// 当該小節・チャンネル・インデックスの全ノートを抽出する
+		IntFunction<String> converter = type.isSelectableArrayType() ? intc::tos : BmsInt.of(type.getBase())::tos;
 		var notes = content.listNotes(channel, channel + 1, measure, 0, measure + 1, 0, n -> n.getIndex() == index);
 		var noteCount = notes.size();
 		if (noteCount == 0) {
@@ -483,21 +559,42 @@ public class BmsStandardSaver extends BmsSaver {
 	/**
 	 * BMS上の値を文字列表現に変換する。
 	 * @param value 変換対象の値
+	 * @param intc 設定された基数に応じた整数オブジェクト
 	 * @param type 変換対象の値のデータ型
 	 * @return 文字列表現に変換された値
 	 */
-	private static String bmsValueToString(Object value, BmsType type) {
-		if (type.equals(BmsType.INTEGER) || type.equals(BmsType.STRING) || type.isArrayType()) {
+	private static String bmsValueToString(Object value, BmsInt intc, BmsType type) {
+		if (type.isIntegerType() || type.isStringType() || type.isArrayType()) {
 			return value.toString();
-		} else if (type.equals(BmsType.NUMERIC)) {
+		} else if (type.isFloatType()) {
 			var num = (double)value;
 			return Utility.hasDecimal(num) ? BigDecimal.valueOf(num).toPlainString() : String.format("%.0f", num);
-		} else if (type.equals(BmsType.BASE16)) {
+		} else if (type.isBase16Type()) {
 			return BmsInt.to16s((int)(long)value);
-		} else if (type.equals(BmsType.BASE36)) {
+		} else if (type.isBase36Type()) {
 			return BmsInt.to36s((int)(long)value);
+		} else if (type.isBase62Type()) {
+			return BmsInt.to62s((int)(long)value);
+		} else if (type.isSelectableBaseType()) {
+			return intc.tos((int)(long)value);
+		} else if (type.isSelectableArrayType()) {
+			return selectableArrayToString((BmsArray)value, intc);
 		} else {
 			return value.toString();
+		}
+	}
+
+	/**
+	 * 基数選択数値配列型の基数変換を伴う文字列化
+	 * @param array 文字列化対象の配列
+	 * @param intc 設定された基数に応じた整数オブジェクト
+	 * @return 文字列表現に変換された配列
+	 */
+	private static String selectableArrayToString(BmsArray array, BmsInt intc) {
+		if (array.getBase() == intc.base()) {
+			return array.toString();
+		} else {
+			return array.stream().map(intc::tos).collect(Collectors.joining());
 		}
 	}
 
@@ -589,9 +686,46 @@ public class BmsStandardSaver extends BmsSaver {
 	 * @throws BmsCompatException 標準フォーマットとの互換性がない
 	 */
 	private static void checkContentCompatible(BmsContent content) throws BmsCompatException {
+		var intc = getIntClass(content);
+		checkMetaCompatible(content, intc);
 		checkMeasureCountCompatible(content);
-		checkIndexedMetaCompatible(content);
-		checkNoteValueCompatible(content);
+		checkTimelineCompatible(content, intc);
+	}
+
+	/**
+	 * メタ情報の互換性チェック
+	 * @param content BMSコンテンツ
+	 * @param intc 設定された基数に応じた整数オブジェクト
+	 * @throws BmsCompatException メタ情報の一部が標準フォーマットと互換性がない
+	 */
+	private static void checkMetaCompatible(BmsContent content, BmsInt intc) throws BmsCompatException {
+		var msg = new StringBuilder();
+		content.metas().filter(BmsMetaElement::isNormalType).filter(BmsMetaElement::isContain).forEach(m -> {
+			if (msg.length() > 0) {
+				// 既に互換性エラーを検出済みの場合はこれ以上チェックしない
+				return;
+			}
+			if (m.getType().isSelectableBaseType() && !intc.within((int)m.getValueAsLong())) {
+				// 設定された基数の最大値より大きい値を持つ基数選択数値型のメタ情報がある
+				var value = m.getValueAsLong();
+				msg.append(String.format("%s: Max is %d, but was %d", m.getName(), intc.max(), value));
+				return;
+			}
+			if (m.getType().isSelectableArrayType() && (m.getValueAsArray().getBase() > intc.base())) {
+				// 設定された基数より大きい配列基数を持つ基数選択数値配列型のメタ情報がある
+				var base = m.getValueAsArray().getBase();
+				msg.append(String.format("%s: Max base is %d, but was %d", m.getName(), intc.max(), base));
+				return;
+			}
+			if (m.isIndexedUnit() && !intc.within(m.getIndex())) {
+				// 設定された基数の最大値より大きい値の索引付きメタ情報のインデックス値を検出した
+				msg.append(String.format("%s: Max index is %d, but had %d", m.getName(), intc.max(), m.getIndex()));
+				return;
+			}
+		});
+		if (msg.length() > 0) {
+			throw new BmsCompatException(msg.toString());
+		}
 	}
 
 	/**
@@ -609,56 +743,52 @@ public class BmsStandardSaver extends BmsSaver {
 	}
 
 	/**
-	 * 索引付きメタ情報の互換性チェック
+	 * タイムライン要素の互換性チェック
 	 * @param content BMSコンテンツ
-	 * @throws BmsCompatException 索引付きメタ情報のインデックス値に標準フォーマットで表現可能な範囲を超過しているものがある
+	 * @param intc 設定された基数に応じた整数オブジェクト
+	 * @throws BmsCompatException タイムライン要素の一部が標準フォーマットと互換性がない
 	 */
-	private static void checkIndexedMetaCompatible(BmsContent content) throws BmsCompatException {
-		// 索引付きメタ情報のインデックス値が上限を超過しているかをチェックする
-		var indexedMetas = content.getSpec().getMetas().stream()
-				.filter(m -> m.getUnit() == BmsUnit.INDEXED)
-				.map(m -> m.getName())
-				.collect(Collectors.toList());
-		for (var metaName : indexedMetas) {
-			// 索引付きメタ情報が1件でも存在すれば、インデックス値の最大値をチェックする
-			if (content.getIndexedMetaCount(metaName) > 0) {
-				var max = content.getIndexedMetas(metaName).keySet().stream().max(Comparator.naturalOrder()).orElse(0);
-				if (max > META_INDEX_MAX) {
-					var msg = String.format("In '%s', incompatible index '%d'", metaName.toUpperCase(), max);
-					throw new BmsCompatException(msg);
+	private static void checkTimelineCompatible(BmsContent content, BmsInt intc) throws BmsCompatException {
+		var msg = new StringBuilder();
+		content.timeline().forEach(t -> {
+			if (t.isMeasureLineElement() || t.isUserChannel() || (msg.length() > 0)) {
+				// 小節線、ユーザーチャンネル、または既に互換性エラーを検出済みの場合はこれ以上チェックしない
+				return;
+			}
+			var type = content.getSpec().getChannel(t.getChannel()).getType();
+			if (t.isMeasureValueElement() && type.isSelectableBaseType() && !intc.within((int)t.getValueAsLong())) {
+				// 設定された基数の最大値より大きい値を持つ基数選択数値型の小節データがある
+				msg.append(String.format("Measure %d channel %d: Max is %d, but was %d",
+						t.getMeasure(), t.getChannel(), intc.max(), t.getValueAsLong()));
+				return;
+			}
+			if (t.isNoteElement()) {
+				var myIntc = type.isSelectableArrayType() ? intc : BmsInt.of(type.getBase());
+				var value = (int)t.getValueAsLong();
+				if (!myIntc.within(value)) {
+					// 設定された基数の最大値より大きい値を持つノートがある
+					msg.append(String.format("Measure %d tick %s channel %d: Max note value is %d, but had %d",
+							t.getMeasure(), t.getTick(), t.getChannel(), myIntc.max(), value));
+					return;
 				}
 			}
+		});
+		if (msg.length() > 0) {
+			throw new BmsCompatException(msg.toString());
 		}
 	}
 
 	/**
-	 * ノートの値の互換性チェック
+	 * 設定された基数に応じた整数オブジェクト取得
 	 * @param content BMSコンテンツ
-	 * @throws BmsCompatException ノートの値に標準フォーマットで表現可能な範囲を超過しているものがある
+	 * @return 整数オブジェクト
 	 */
-	private static void checkNoteValueCompatible(BmsContent content) throws BmsCompatException {
-		// 仕様チャンネルの配列データの値に上限を超過しているものがあるかをチェックする
-		var measureCount = content.getMeasureCount();
-		var arrayChannels = content.getSpec().getChannels().stream()
-				.filter(c -> c.isArrayType())
-				.collect(Collectors.toMap(c -> BmsInt.box(c.getNumber()), c -> c));
-		for (var measure = 0; measure < measureCount; measure++) {
-			for (var e : arrayChannels.entrySet()) {
-				var number = e.getKey().intValue();
-				if (content.getChannelDataCount(number, measure) > 0) {
-					// ノートが存在する小節・チャンネルの全ノートの値が上限を超過していないかチェックする
-					var cFrom = number;
-					var cTo = number + 1;
-					var mFrom = measure;
-					var mTo = measure + 1;
-					var t = (e.getValue().getType() == BmsType.ARRAY36) ? TESTER_OVERFLOW_A36 : TESTER_OVERFLOW_A16;
-					var count = content.countNotes(cFrom, cTo, mFrom, 0.0, mTo, 0.0, t);
-					if (count > 0) {
-						var msg = String.format("In '#%03d%s', incompatible note value", measure, BmsInt.to36s(number));
-						throw new BmsCompatException(msg);
-					}
-				}
-			}
+	private static BmsInt getIntClass(BmsContent content) {
+		var intc = BmsInt.of(BmsSpec.BASE_DEFAULT);
+		var bcMeta = content.getSpec().getBaseChangerMeta();
+		if (bcMeta != null) {
+			intc = BmsInt.of(((Long)content.getSingleMeta(bcMeta.getName())).intValue());
 		}
+		return intc;
 	}
 }

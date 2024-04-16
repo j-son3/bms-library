@@ -481,63 +481,63 @@ public class BeMusicChannel {
 	/** チャンネル番号：2Pロングノートオブジェ35 */
 	public static final int NUM_LONG_2P_35 = ch("6Z");
 	/** チャンネル番号：1P地雷オブジェ1 */
-	public static final int NUM_LANDMINE_1P_01 = ch("D1");
+	public static final int NUM_MINE_1P_01 = ch("D1");
 	/** チャンネル番号：1P地雷オブジェ2 */
-	public static final int NUM_LANDMINE_1P_02 = ch("D2");
+	public static final int NUM_MINE_1P_02 = ch("D2");
 	/** チャンネル番号：1P地雷オブジェ3 */
-	public static final int NUM_LANDMINE_1P_03 = ch("D3");
+	public static final int NUM_MINE_1P_03 = ch("D3");
 	/** チャンネル番号：1P地雷オブジェ4 */
-	public static final int NUM_LANDMINE_1P_04 = ch("D4");
+	public static final int NUM_MINE_1P_04 = ch("D4");
 	/** チャンネル番号：1P地雷オブジェ5 */
-	public static final int NUM_LANDMINE_1P_05 = ch("D5");
+	public static final int NUM_MINE_1P_05 = ch("D5");
 	/** チャンネル番号：1P地雷オブジェ6 */
-	public static final int NUM_LANDMINE_1P_06 = ch("D6");
+	public static final int NUM_MINE_1P_06 = ch("D6");
 	/** チャンネル番号：1P地雷オブジェ7 */
-	public static final int NUM_LANDMINE_1P_07 = ch("D7");
+	public static final int NUM_MINE_1P_07 = ch("D7");
 	/** チャンネル番号：1P地雷オブジェ8 */
-	public static final int NUM_LANDMINE_1P_08 = ch("D8");
+	public static final int NUM_MINE_1P_08 = ch("D8");
 	/** チャンネル番号：1P地雷オブジェ9 */
-	public static final int NUM_LANDMINE_1P_09 = ch("D9");
+	public static final int NUM_MINE_1P_09 = ch("D9");
 	/** チャンネル番号：2P地雷オブジェ1 */
-	public static final int NUM_LANDMINE_2P_01 = ch("E1");
+	public static final int NUM_MINE_2P_01 = ch("E1");
 	/** チャンネル番号：2P地雷オブジェ2 */
-	public static final int NUM_LANDMINE_2P_02 = ch("E2");
+	public static final int NUM_MINE_2P_02 = ch("E2");
 	/** チャンネル番号：2P地雷オブジェ3 */
-	public static final int NUM_LANDMINE_2P_03 = ch("E3");
+	public static final int NUM_MINE_2P_03 = ch("E3");
 	/** チャンネル番号：2P地雷オブジェ4 */
-	public static final int NUM_LANDMINE_2P_04 = ch("E4");
+	public static final int NUM_MINE_2P_04 = ch("E4");
 	/** チャンネル番号：2P地雷オブジェ5 */
-	public static final int NUM_LANDMINE_2P_05 = ch("E5");
+	public static final int NUM_MINE_2P_05 = ch("E5");
 	/** チャンネル番号：2P地雷オブジェ6 */
-	public static final int NUM_LANDMINE_2P_06 = ch("E6");
+	public static final int NUM_MINE_2P_06 = ch("E6");
 	/** チャンネル番号：2P地雷オブジェ7 */
-	public static final int NUM_LANDMINE_2P_07 = ch("E7");
+	public static final int NUM_MINE_2P_07 = ch("E7");
 	/** チャンネル番号：2P地雷オブジェ8 */
-	public static final int NUM_LANDMINE_2P_08 = ch("E8");
+	public static final int NUM_MINE_2P_08 = ch("E8");
 	/** チャンネル番号：2P地雷オブジェ9 */
-	public static final int NUM_LANDMINE_2P_09 = ch("E9");
+	public static final int NUM_MINE_2P_09 = ch("E9");
 
 	/**
 	 * BGM
 	 * <table>
 	 * <caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>01</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#WAV #WAV}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>NO</td></tr>
 	 * <tr><th style="text-align:left;">説明</th>
-	 * <td>指定位置で音声の再生を指示します。このチャンネルは1小節に複数の定義を持つことが出来ます。</td></tr>
+	 * <td>指定位置で音声の再生を指示します。このチャンネルは1小節に複数の定義を持つことができます。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel BGM = new BmsChannel(NUM_BGM, BmsType.ARRAY36, "#wav", "", true, false);
+	public static final BmsChannel BGM = new BmsChannel(NUM_BGM, BmsType.ARRAY, "#wav", "", true, false);
 	/**
 	 * 小節長変更
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>02</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>NUMERIC</td></tr>
-	 * <tr><th style="text-align:left;">参照先</th><td>無し</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>FLOAT</td></tr>
+	 * <tr><th style="text-align:left;">参照先</th><td>なし</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>1</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
@@ -545,18 +545,18 @@ public class BeMusicChannel {
 	 * <td>定義した小節の長さを変更します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel LENGTH = new BmsChannel(NUM_LENGTH, BmsType.NUMERIC, null, "1.0", false, true);
+	public static final BmsChannel LENGTH = new BmsChannel(NUM_LENGTH, BmsType.FLOAT, null, "1.0", false, true);
 	/**
 	 * BPM変更(旧式)
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>03</td></tr>
 	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY16</td></tr>
-	 * <tr><th style="text-align:left;">参照先</th><td>無し</td></tr>
+	 * <tr><th style="text-align:left;">参照先</th><td>なし</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
 	 * <tr><th style="text-align:left;">説明</th>
-	 * <td>指定位置でBPMの変更を行います。このチャンネルではBPMを1～255の範囲でしか変更出来ません。</td></tr>
+	 * <td>指定位置でBPMの変更を行います。このチャンネルではBPMを1～255の範囲でしか変更できません。</td></tr>
 	 * </table>
 	 */
 	public static final BmsChannel BPM_LEGACY = new BmsChannel(NUM_BPM_LEGACY, BmsType.ARRAY16, null, "", false, true);
@@ -564,7 +564,7 @@ public class BeMusicChannel {
 	 * BGA
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>04</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#BMP #BMP}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -573,13 +573,13 @@ public class BeMusicChannel {
 	 * <td>指定位置で画像を表示します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel BGA = new BmsChannel(NUM_BGA, BmsType.ARRAY36, "#bmp", "", false, false);
+	public static final BmsChannel BGA = new BmsChannel(NUM_BGA, BmsType.ARRAY, "#bmp", "", false, false);
 	/**
 	 * Extended Object
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>05</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
-	 * <tr><th style="text-align:left;">参照先</th><td>無し</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
+	 * <tr><th style="text-align:left;">参照先</th><td>なし</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>NO</td></tr>
@@ -587,12 +587,12 @@ public class BeMusicChannel {
 	 * <td>プレイ画面のUIカスタマイズを行います。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel EXT_OBJ = new BmsChannel(NUM_EXT_OBJ, BmsType.ARRAY36, null, "", false, false);
+	public static final BmsChannel EXT_OBJ = new BmsChannel(NUM_EXT_OBJ, BmsType.ARRAY, null, "", false, false);
 	/**
 	 * BGA(ミスレイヤー)
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>06</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#BMP #BMP}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -601,12 +601,12 @@ public class BeMusicChannel {
 	 * <td>ミス時に表示される画像を指定します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel BGA_MISS = new BmsChannel(NUM_BGA_MISS, BmsType.ARRAY36, "#bmp", "", false, false);
+	public static final BmsChannel BGA_MISS = new BmsChannel(NUM_BGA_MISS, BmsType.ARRAY, "#bmp", "", false, false);
 	/**
 	 * BGA LAYER
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>07</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#BMP #BMP}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -615,12 +615,12 @@ public class BeMusicChannel {
 	 * <td>{@link #BGA}の上に表示する画像を指定します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel BGA_LAYER = new BmsChannel(NUM_BGA_LAYER, BmsType.ARRAY36, "#bmp", "", false, false);
+	public static final BmsChannel BGA_LAYER = new BmsChannel(NUM_BGA_LAYER, BmsType.ARRAY, "#bmp", "", false, false);
 	/**
 	 * BPM変更
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>08</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#BPM #BPM}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -629,12 +629,12 @@ public class BeMusicChannel {
 	 * <td>指定位置でBPMの変更を行います。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel BPM = new BmsChannel(NUM_BPM, BmsType.ARRAY36, "#bpm", "", false, true);
+	public static final BmsChannel BPM = new BmsChannel(NUM_BPM, BmsType.ARRAY, "#bpm", "", false, true);
 	/**
 	 * 譜面停止
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>09</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#STOP #STOP}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -643,12 +643,12 @@ public class BeMusicChannel {
 	 * <td>指定位置で譜面を一時停止します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel STOP = new BmsChannel(NUM_STOP, BmsType.ARRAY36, "#stop", "", false, true);
+	public static final BmsChannel STOP = new BmsChannel(NUM_STOP, BmsType.ARRAY, "#stop", "", false, true);
 	/**
 	 * BGA LAYER2
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>0A</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#BMP #BMP}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -657,13 +657,13 @@ public class BeMusicChannel {
 	 * <td>{@link #BGA_LAYER}の上に表示する画像を指定します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel BGA_LAYER2 = new BmsChannel(NUM_BGA_LAYER2, BmsType.ARRAY36, "#bmp", "", false, false);
+	public static final BmsChannel BGA_LAYER2 = new BmsChannel(NUM_BGA_LAYER2, BmsType.ARRAY, "#bmp", "", false, false);
 	/**
 	 * BGA不透明度
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>0B</td></tr>
 	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY16</td></tr>
-	 * <tr><th style="text-align:left;">参照先</th><td>無し</td></tr>
+	 * <tr><th style="text-align:left;">参照先</th><td>なし</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>NO</td></tr>
@@ -677,7 +677,7 @@ public class BeMusicChannel {
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>0C</td></tr>
 	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY16</td></tr>
-	 * <tr><th style="text-align:left;">参照先</th><td>無し</td></tr>
+	 * <tr><th style="text-align:left;">参照先</th><td>なし</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>NO</td></tr>
@@ -691,7 +691,7 @@ public class BeMusicChannel {
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>0D</td></tr>
 	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY16</td></tr>
-	 * <tr><th style="text-align:left;">参照先</th><td>無し</td></tr>
+	 * <tr><th style="text-align:left;">参照先</th><td>なし</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>NO</td></tr>
@@ -705,7 +705,7 @@ public class BeMusicChannel {
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>0E</td></tr>
 	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY16</td></tr>
-	 * <tr><th style="text-align:left;">参照先</th><td>無し</td></tr>
+	 * <tr><th style="text-align:left;">参照先</th><td>なし</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>NO</td></tr>
@@ -719,7 +719,7 @@ public class BeMusicChannel {
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>97</td></tr>
 	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY16</td></tr>
-	 * <tr><th style="text-align:left;">参照先</th><td>無し</td></tr>
+	 * <tr><th style="text-align:left;">参照先</th><td>なし</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>NO</td></tr>
@@ -733,7 +733,7 @@ public class BeMusicChannel {
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>98</td></tr>
 	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY16</td></tr>
-	 * <tr><th style="text-align:left;">参照先</th><td>無し</td></tr>
+	 * <tr><th style="text-align:left;">参照先</th><td>なし</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>NO</td></tr>
@@ -746,7 +746,7 @@ public class BeMusicChannel {
 	 * テキスト表示
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>99</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#TEXT #TEXT}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -755,12 +755,12 @@ public class BeMusicChannel {
 	 * <td>表示するテキストを指定します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel TEXT = new BmsChannel(NUM_TEXT, BmsType.ARRAY36, "#text", "", false, false);
+	public static final BmsChannel TEXT = new BmsChannel(NUM_TEXT, BmsType.ARRAY, "#text", "", false, false);
 	/**
 	 * 判定ランク変更
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>A0</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#EXRANK #EXRANK}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -769,12 +769,12 @@ public class BeMusicChannel {
 	 * <td>指定位置で判定ランクを変更します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel JUDGE = new BmsChannel(NUM_JUDGE, BmsType.ARRAY36, "#exrank", "", false, true);
+	public static final BmsChannel JUDGE = new BmsChannel(NUM_JUDGE, BmsType.ARRAY, "#exrank", "", false, true);
 	/**
 	 * BGA aRGB
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>A1</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#ARGB #ARGB}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -783,12 +783,12 @@ public class BeMusicChannel {
 	 * <td>BGAに適用するARGBの値を指定します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel BGA_BASE_ARGB = new BmsChannel(NUM_BGA_BASE_ARGB, BmsType.ARRAY36, "#argb", "", false, false);
+	public static final BmsChannel BGA_BASE_ARGB = new BmsChannel(NUM_BGA_BASE_ARGB, BmsType.ARRAY, "#argb", "", false, false);
 	/**
 	 * BGA LAYER aRGB
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>A2</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#ARGB #ARGB}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -797,12 +797,12 @@ public class BeMusicChannel {
 	 * <td>BGA LAYERに適用するARGBの値を指定します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel BGA_LAYER_ARGB = new BmsChannel(NUM_BGA_LAYER_ARGB, BmsType.ARRAY36, "#argb", "", false, false);
+	public static final BmsChannel BGA_LAYER_ARGB = new BmsChannel(NUM_BGA_LAYER_ARGB, BmsType.ARRAY, "#argb", "", false, false);
 	/**
 	 * BGA LAYER2 aRGB
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>A3</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#ARGB #ARGB}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -811,12 +811,12 @@ public class BeMusicChannel {
 	 * <td>BGA LAYER2に適用するARGBの値を指定します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel BGA_LAYER2_ARGB = new BmsChannel(NUM_BGA_LAYER2_ARGB, BmsType.ARRAY36, "#argb", "", false, false);
+	public static final BmsChannel BGA_LAYER2_ARGB = new BmsChannel(NUM_BGA_LAYER2_ARGB, BmsType.ARRAY, "#argb", "", false, false);
 	/**
 	 * BGA(ミスレイヤー) aRGB
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>A4</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#ARGB #ARGB}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -825,12 +825,12 @@ public class BeMusicChannel {
 	 * <td>BGA(ミスレイヤー)に適用するARGBの値を指定します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel BGA_MISS_ARGB = new BmsChannel(NUM_BGA_MISS_ARGB, BmsType.ARRAY36, "#argb", "", false, false);
+	public static final BmsChannel BGA_MISS_ARGB = new BmsChannel(NUM_BGA_MISS_ARGB, BmsType.ARRAY, "#argb", "", false, false);
 	/**
 	 * キーバインドLAYERアニメーション
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>A5</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#SWBGA #SWBGA}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -839,12 +839,12 @@ public class BeMusicChannel {
 	 * <td>キー押下に反応するイメージシーケンスの指定を行います。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel BGA_KEYBOUND = new BmsChannel(NUM_BGA_KEYBOUND, BmsType.ARRAY36, "#swbga", "", false, false);
+	public static final BmsChannel BGA_KEYBOUND = new BmsChannel(NUM_BGA_KEYBOUND, BmsType.ARRAY, "#swbga", "", false, false);
 	/**
 	 * プレイオプション変更
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>A6</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#CHANGEOPTION #CHANGEOPTION}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -853,12 +853,12 @@ public class BeMusicChannel {
 	 * <td>プレイオプションの変更を指定します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel OPTION = new BmsChannel(NUM_OPTION, BmsType.ARRAY36, "#changeoption", "", false, true);
+	public static final BmsChannel OPTION = new BmsChannel(NUM_OPTION, BmsType.ARRAY, "#changeoption", "", false, true);
 	/**
 	 * スクロール速度変更
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>SC</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#SCROLL}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -867,13 +867,13 @@ public class BeMusicChannel {
 	 * <td>譜面のスクロール速度変更を指定します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel SCROLL = new BmsChannel(NUM_SCROLL, BmsType.ARRAY36, "#scroll", "", false, true);
+	public static final BmsChannel SCROLL = new BmsChannel(NUM_SCROLL, BmsType.ARRAY, "#scroll", "", false, true);
 
 	/**
 	 * 1P可視オブジェ
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>11～1Z</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#WAV #WAV}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -882,182 +882,182 @@ public class BeMusicChannel {
 	 * <td>1Pのプレイ可能なノートを表します。チャンネルの配列に00以外の値を指定すると、その位置にノートを配置し、値に割り当てられた音声を再生します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel VISIBLE_1P_01 = new BmsChannel(NUM_VISIBLE_1P_01, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_01 = new BmsChannel(NUM_VISIBLE_1P_01, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_02 = new BmsChannel(NUM_VISIBLE_1P_02, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_02 = new BmsChannel(NUM_VISIBLE_1P_02, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_03 = new BmsChannel(NUM_VISIBLE_1P_03, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_03 = new BmsChannel(NUM_VISIBLE_1P_03, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_04 = new BmsChannel(NUM_VISIBLE_1P_04, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_04 = new BmsChannel(NUM_VISIBLE_1P_04, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_05 = new BmsChannel(NUM_VISIBLE_1P_05, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_05 = new BmsChannel(NUM_VISIBLE_1P_05, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_06 = new BmsChannel(NUM_VISIBLE_1P_06, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_06 = new BmsChannel(NUM_VISIBLE_1P_06, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_07 = new BmsChannel(NUM_VISIBLE_1P_07, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_07 = new BmsChannel(NUM_VISIBLE_1P_07, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_08 = new BmsChannel(NUM_VISIBLE_1P_08, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_08 = new BmsChannel(NUM_VISIBLE_1P_08, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_09 = new BmsChannel(NUM_VISIBLE_1P_09, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_09 = new BmsChannel(NUM_VISIBLE_1P_09, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_10 = new BmsChannel(NUM_VISIBLE_1P_10, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_10 = new BmsChannel(NUM_VISIBLE_1P_10, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_11 = new BmsChannel(NUM_VISIBLE_1P_11, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_11 = new BmsChannel(NUM_VISIBLE_1P_11, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_12 = new BmsChannel(NUM_VISIBLE_1P_12, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_12 = new BmsChannel(NUM_VISIBLE_1P_12, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_13 = new BmsChannel(NUM_VISIBLE_1P_13, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_13 = new BmsChannel(NUM_VISIBLE_1P_13, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_14 = new BmsChannel(NUM_VISIBLE_1P_14, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_14 = new BmsChannel(NUM_VISIBLE_1P_14, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_15 = new BmsChannel(NUM_VISIBLE_1P_15, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_15 = new BmsChannel(NUM_VISIBLE_1P_15, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_16 = new BmsChannel(NUM_VISIBLE_1P_16, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_16 = new BmsChannel(NUM_VISIBLE_1P_16, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_17 = new BmsChannel(NUM_VISIBLE_1P_17, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_17 = new BmsChannel(NUM_VISIBLE_1P_17, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_18 = new BmsChannel(NUM_VISIBLE_1P_18, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_18 = new BmsChannel(NUM_VISIBLE_1P_18, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_19 = new BmsChannel(NUM_VISIBLE_1P_19, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_19 = new BmsChannel(NUM_VISIBLE_1P_19, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_20 = new BmsChannel(NUM_VISIBLE_1P_20, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_20 = new BmsChannel(NUM_VISIBLE_1P_20, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_21 = new BmsChannel(NUM_VISIBLE_1P_21, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_21 = new BmsChannel(NUM_VISIBLE_1P_21, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_22 = new BmsChannel(NUM_VISIBLE_1P_22, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_22 = new BmsChannel(NUM_VISIBLE_1P_22, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_23 = new BmsChannel(NUM_VISIBLE_1P_23, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_23 = new BmsChannel(NUM_VISIBLE_1P_23, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_24 = new BmsChannel(NUM_VISIBLE_1P_24, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_24 = new BmsChannel(NUM_VISIBLE_1P_24, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_25 = new BmsChannel(NUM_VISIBLE_1P_25, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_25 = new BmsChannel(NUM_VISIBLE_1P_25, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_26 = new BmsChannel(NUM_VISIBLE_1P_26, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_26 = new BmsChannel(NUM_VISIBLE_1P_26, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_27 = new BmsChannel(NUM_VISIBLE_1P_27, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_27 = new BmsChannel(NUM_VISIBLE_1P_27, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_28 = new BmsChannel(NUM_VISIBLE_1P_28, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_28 = new BmsChannel(NUM_VISIBLE_1P_28, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_29 = new BmsChannel(NUM_VISIBLE_1P_29, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_29 = new BmsChannel(NUM_VISIBLE_1P_29, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_30 = new BmsChannel(NUM_VISIBLE_1P_30, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_30 = new BmsChannel(NUM_VISIBLE_1P_30, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_31 = new BmsChannel(NUM_VISIBLE_1P_31, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_31 = new BmsChannel(NUM_VISIBLE_1P_31, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_32 = new BmsChannel(NUM_VISIBLE_1P_32, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_32 = new BmsChannel(NUM_VISIBLE_1P_32, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_33 = new BmsChannel(NUM_VISIBLE_1P_33, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_33 = new BmsChannel(NUM_VISIBLE_1P_33, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_34 = new BmsChannel(NUM_VISIBLE_1P_34, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_34 = new BmsChannel(NUM_VISIBLE_1P_34, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 1P可視オブジェ
 	 * @see #VISIBLE_1P_01
 	 */
-	public static final BmsChannel VISIBLE_1P_35 = new BmsChannel(NUM_VISIBLE_1P_35, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_1P_35 = new BmsChannel(NUM_VISIBLE_1P_35, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>21～2Z</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#WAV #WAV}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -1068,177 +1068,177 @@ public class BeMusicChannel {
 	 * その判定は、{@link BeMusicMeta#PLAYER #PLAYER}にどの値が指定されているかは関係ありません。</p></td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel VISIBLE_2P_01 = new BmsChannel(NUM_VISIBLE_2P_01, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_01 = new BmsChannel(NUM_VISIBLE_2P_01, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_02 = new BmsChannel(NUM_VISIBLE_2P_02, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_02 = new BmsChannel(NUM_VISIBLE_2P_02, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_03 = new BmsChannel(NUM_VISIBLE_2P_03, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_03 = new BmsChannel(NUM_VISIBLE_2P_03, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_04 = new BmsChannel(NUM_VISIBLE_2P_04, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_04 = new BmsChannel(NUM_VISIBLE_2P_04, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_05 = new BmsChannel(NUM_VISIBLE_2P_05, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_05 = new BmsChannel(NUM_VISIBLE_2P_05, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_06 = new BmsChannel(NUM_VISIBLE_2P_06, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_06 = new BmsChannel(NUM_VISIBLE_2P_06, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_07 = new BmsChannel(NUM_VISIBLE_2P_07, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_07 = new BmsChannel(NUM_VISIBLE_2P_07, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_08 = new BmsChannel(NUM_VISIBLE_2P_08, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_08 = new BmsChannel(NUM_VISIBLE_2P_08, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_09 = new BmsChannel(NUM_VISIBLE_2P_09, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_09 = new BmsChannel(NUM_VISIBLE_2P_09, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_10 = new BmsChannel(NUM_VISIBLE_2P_10, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_10 = new BmsChannel(NUM_VISIBLE_2P_10, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_11 = new BmsChannel(NUM_VISIBLE_2P_11, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_11 = new BmsChannel(NUM_VISIBLE_2P_11, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_12 = new BmsChannel(NUM_VISIBLE_2P_12, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_12 = new BmsChannel(NUM_VISIBLE_2P_12, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_13 = new BmsChannel(NUM_VISIBLE_2P_13, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_13 = new BmsChannel(NUM_VISIBLE_2P_13, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_14 = new BmsChannel(NUM_VISIBLE_2P_14, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_14 = new BmsChannel(NUM_VISIBLE_2P_14, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_15 = new BmsChannel(NUM_VISIBLE_2P_15, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_15 = new BmsChannel(NUM_VISIBLE_2P_15, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_16 = new BmsChannel(NUM_VISIBLE_2P_16, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_16 = new BmsChannel(NUM_VISIBLE_2P_16, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_17 = new BmsChannel(NUM_VISIBLE_2P_17, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_17 = new BmsChannel(NUM_VISIBLE_2P_17, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_18 = new BmsChannel(NUM_VISIBLE_2P_18, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_18 = new BmsChannel(NUM_VISIBLE_2P_18, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_19 = new BmsChannel(NUM_VISIBLE_2P_19, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_19 = new BmsChannel(NUM_VISIBLE_2P_19, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_20 = new BmsChannel(NUM_VISIBLE_2P_20, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_20 = new BmsChannel(NUM_VISIBLE_2P_20, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_21 = new BmsChannel(NUM_VISIBLE_2P_21, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_21 = new BmsChannel(NUM_VISIBLE_2P_21, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_22 = new BmsChannel(NUM_VISIBLE_2P_22, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_22 = new BmsChannel(NUM_VISIBLE_2P_22, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_23 = new BmsChannel(NUM_VISIBLE_2P_23, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_23 = new BmsChannel(NUM_VISIBLE_2P_23, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_24 = new BmsChannel(NUM_VISIBLE_2P_24, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_24 = new BmsChannel(NUM_VISIBLE_2P_24, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_25 = new BmsChannel(NUM_VISIBLE_2P_25, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_25 = new BmsChannel(NUM_VISIBLE_2P_25, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_26 = new BmsChannel(NUM_VISIBLE_2P_26, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_26 = new BmsChannel(NUM_VISIBLE_2P_26, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_27 = new BmsChannel(NUM_VISIBLE_2P_27, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_27 = new BmsChannel(NUM_VISIBLE_2P_27, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_28 = new BmsChannel(NUM_VISIBLE_2P_28, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_28 = new BmsChannel(NUM_VISIBLE_2P_28, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_29 = new BmsChannel(NUM_VISIBLE_2P_29, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_29 = new BmsChannel(NUM_VISIBLE_2P_29, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_30 = new BmsChannel(NUM_VISIBLE_2P_30, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_30 = new BmsChannel(NUM_VISIBLE_2P_30, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_31 = new BmsChannel(NUM_VISIBLE_2P_31, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_31 = new BmsChannel(NUM_VISIBLE_2P_31, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_32 = new BmsChannel(NUM_VISIBLE_2P_32, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_32 = new BmsChannel(NUM_VISIBLE_2P_32, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_33 = new BmsChannel(NUM_VISIBLE_2P_33, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_33 = new BmsChannel(NUM_VISIBLE_2P_33, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_34 = new BmsChannel(NUM_VISIBLE_2P_34, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_34 = new BmsChannel(NUM_VISIBLE_2P_34, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 2P可視オブジェ
 	 * @see #VISIBLE_2P_01
 	 */
-	public static final BmsChannel VISIBLE_2P_35 = new BmsChannel(NUM_VISIBLE_2P_35, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel VISIBLE_2P_35 = new BmsChannel(NUM_VISIBLE_2P_35, BmsType.ARRAY, "#wav", "", false, true);
 
 	/** 1P可視オブジェリスト */
 	static final BmsChannel[] VISIBLE_1P_CHANNELS = {
@@ -1262,7 +1262,7 @@ public class BeMusicChannel {
 	 * 不可視オブジェ
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>31～3Z, 41～4Z</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#WAV #WAV}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -1271,352 +1271,352 @@ public class BeMusicChannel {
 	 * <td>プレイ不可能なノートを表します。チャンネルの配列に00以外の値を指定すると、その位置にノートを配置し、値に割り当てられた音声を再生します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel INVISIBLE_1P_01 = new BmsChannel(NUM_INVISIBLE_1P_01, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_01 = new BmsChannel(NUM_INVISIBLE_1P_01, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_02 = new BmsChannel(NUM_INVISIBLE_1P_02, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_02 = new BmsChannel(NUM_INVISIBLE_1P_02, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_03 = new BmsChannel(NUM_INVISIBLE_1P_03, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_03 = new BmsChannel(NUM_INVISIBLE_1P_03, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_04 = new BmsChannel(NUM_INVISIBLE_1P_04, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_04 = new BmsChannel(NUM_INVISIBLE_1P_04, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_05 = new BmsChannel(NUM_INVISIBLE_1P_05, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_05 = new BmsChannel(NUM_INVISIBLE_1P_05, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_06 = new BmsChannel(NUM_INVISIBLE_1P_06, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_06 = new BmsChannel(NUM_INVISIBLE_1P_06, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_07 = new BmsChannel(NUM_INVISIBLE_1P_07, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_07 = new BmsChannel(NUM_INVISIBLE_1P_07, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_08 = new BmsChannel(NUM_INVISIBLE_1P_08, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_08 = new BmsChannel(NUM_INVISIBLE_1P_08, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_09 = new BmsChannel(NUM_INVISIBLE_1P_09, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_09 = new BmsChannel(NUM_INVISIBLE_1P_09, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_10 = new BmsChannel(NUM_INVISIBLE_1P_10, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_10 = new BmsChannel(NUM_INVISIBLE_1P_10, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_11 = new BmsChannel(NUM_INVISIBLE_1P_11, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_11 = new BmsChannel(NUM_INVISIBLE_1P_11, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_12 = new BmsChannel(NUM_INVISIBLE_1P_12, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_12 = new BmsChannel(NUM_INVISIBLE_1P_12, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_13 = new BmsChannel(NUM_INVISIBLE_1P_13, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_13 = new BmsChannel(NUM_INVISIBLE_1P_13, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_14 = new BmsChannel(NUM_INVISIBLE_1P_14, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_14 = new BmsChannel(NUM_INVISIBLE_1P_14, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_15 = new BmsChannel(NUM_INVISIBLE_1P_15, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_15 = new BmsChannel(NUM_INVISIBLE_1P_15, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_16 = new BmsChannel(NUM_INVISIBLE_1P_16, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_16 = new BmsChannel(NUM_INVISIBLE_1P_16, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_17 = new BmsChannel(NUM_INVISIBLE_1P_17, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_17 = new BmsChannel(NUM_INVISIBLE_1P_17, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_18 = new BmsChannel(NUM_INVISIBLE_1P_18, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_18 = new BmsChannel(NUM_INVISIBLE_1P_18, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_19 = new BmsChannel(NUM_INVISIBLE_1P_19, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_19 = new BmsChannel(NUM_INVISIBLE_1P_19, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_20 = new BmsChannel(NUM_INVISIBLE_1P_20, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_20 = new BmsChannel(NUM_INVISIBLE_1P_20, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_21 = new BmsChannel(NUM_INVISIBLE_1P_21, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_21 = new BmsChannel(NUM_INVISIBLE_1P_21, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_22 = new BmsChannel(NUM_INVISIBLE_1P_22, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_22 = new BmsChannel(NUM_INVISIBLE_1P_22, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_23 = new BmsChannel(NUM_INVISIBLE_1P_23, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_23 = new BmsChannel(NUM_INVISIBLE_1P_23, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_24 = new BmsChannel(NUM_INVISIBLE_1P_24, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_24 = new BmsChannel(NUM_INVISIBLE_1P_24, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_25 = new BmsChannel(NUM_INVISIBLE_1P_25, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_25 = new BmsChannel(NUM_INVISIBLE_1P_25, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_26 = new BmsChannel(NUM_INVISIBLE_1P_26, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_26 = new BmsChannel(NUM_INVISIBLE_1P_26, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_27 = new BmsChannel(NUM_INVISIBLE_1P_27, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_27 = new BmsChannel(NUM_INVISIBLE_1P_27, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_28 = new BmsChannel(NUM_INVISIBLE_1P_28, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_28 = new BmsChannel(NUM_INVISIBLE_1P_28, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_29 = new BmsChannel(NUM_INVISIBLE_1P_29, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_29 = new BmsChannel(NUM_INVISIBLE_1P_29, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_30 = new BmsChannel(NUM_INVISIBLE_1P_30, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_30 = new BmsChannel(NUM_INVISIBLE_1P_30, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_31 = new BmsChannel(NUM_INVISIBLE_1P_31, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_31 = new BmsChannel(NUM_INVISIBLE_1P_31, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_32 = new BmsChannel(NUM_INVISIBLE_1P_32, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_32 = new BmsChannel(NUM_INVISIBLE_1P_32, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_33 = new BmsChannel(NUM_INVISIBLE_1P_33, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_33 = new BmsChannel(NUM_INVISIBLE_1P_33, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_34 = new BmsChannel(NUM_INVISIBLE_1P_34, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_34 = new BmsChannel(NUM_INVISIBLE_1P_34, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_1P_35 = new BmsChannel(NUM_INVISIBLE_1P_35, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_1P_35 = new BmsChannel(NUM_INVISIBLE_1P_35, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_01 = new BmsChannel(NUM_INVISIBLE_2P_01, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_01 = new BmsChannel(NUM_INVISIBLE_2P_01, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_02 = new BmsChannel(NUM_INVISIBLE_2P_02, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_02 = new BmsChannel(NUM_INVISIBLE_2P_02, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_03 = new BmsChannel(NUM_INVISIBLE_2P_03, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_03 = new BmsChannel(NUM_INVISIBLE_2P_03, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_04 = new BmsChannel(NUM_INVISIBLE_2P_04, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_04 = new BmsChannel(NUM_INVISIBLE_2P_04, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_05 = new BmsChannel(NUM_INVISIBLE_2P_05, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_05 = new BmsChannel(NUM_INVISIBLE_2P_05, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_06 = new BmsChannel(NUM_INVISIBLE_2P_06, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_06 = new BmsChannel(NUM_INVISIBLE_2P_06, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_07 = new BmsChannel(NUM_INVISIBLE_2P_07, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_07 = new BmsChannel(NUM_INVISIBLE_2P_07, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_08 = new BmsChannel(NUM_INVISIBLE_2P_08, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_08 = new BmsChannel(NUM_INVISIBLE_2P_08, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_09 = new BmsChannel(NUM_INVISIBLE_2P_09, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_09 = new BmsChannel(NUM_INVISIBLE_2P_09, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_10 = new BmsChannel(NUM_INVISIBLE_2P_10, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_10 = new BmsChannel(NUM_INVISIBLE_2P_10, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_11 = new BmsChannel(NUM_INVISIBLE_2P_11, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_11 = new BmsChannel(NUM_INVISIBLE_2P_11, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_12 = new BmsChannel(NUM_INVISIBLE_2P_12, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_12 = new BmsChannel(NUM_INVISIBLE_2P_12, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_13 = new BmsChannel(NUM_INVISIBLE_2P_13, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_13 = new BmsChannel(NUM_INVISIBLE_2P_13, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_14 = new BmsChannel(NUM_INVISIBLE_2P_14, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_14 = new BmsChannel(NUM_INVISIBLE_2P_14, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_15 = new BmsChannel(NUM_INVISIBLE_2P_15, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_15 = new BmsChannel(NUM_INVISIBLE_2P_15, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_16 = new BmsChannel(NUM_INVISIBLE_2P_16, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_16 = new BmsChannel(NUM_INVISIBLE_2P_16, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_17 = new BmsChannel(NUM_INVISIBLE_2P_17, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_17 = new BmsChannel(NUM_INVISIBLE_2P_17, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_18 = new BmsChannel(NUM_INVISIBLE_2P_18, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_18 = new BmsChannel(NUM_INVISIBLE_2P_18, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_19 = new BmsChannel(NUM_INVISIBLE_2P_19, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_19 = new BmsChannel(NUM_INVISIBLE_2P_19, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_20 = new BmsChannel(NUM_INVISIBLE_2P_20, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_20 = new BmsChannel(NUM_INVISIBLE_2P_20, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_21 = new BmsChannel(NUM_INVISIBLE_2P_21, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_21 = new BmsChannel(NUM_INVISIBLE_2P_21, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_22 = new BmsChannel(NUM_INVISIBLE_2P_22, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_22 = new BmsChannel(NUM_INVISIBLE_2P_22, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_23 = new BmsChannel(NUM_INVISIBLE_2P_23, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_23 = new BmsChannel(NUM_INVISIBLE_2P_23, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_24 = new BmsChannel(NUM_INVISIBLE_2P_24, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_24 = new BmsChannel(NUM_INVISIBLE_2P_24, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_25 = new BmsChannel(NUM_INVISIBLE_2P_25, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_25 = new BmsChannel(NUM_INVISIBLE_2P_25, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_26 = new BmsChannel(NUM_INVISIBLE_2P_26, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_26 = new BmsChannel(NUM_INVISIBLE_2P_26, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_27 = new BmsChannel(NUM_INVISIBLE_2P_27, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_27 = new BmsChannel(NUM_INVISIBLE_2P_27, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_28 = new BmsChannel(NUM_INVISIBLE_2P_28, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_28 = new BmsChannel(NUM_INVISIBLE_2P_28, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_29 = new BmsChannel(NUM_INVISIBLE_2P_29, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_29 = new BmsChannel(NUM_INVISIBLE_2P_29, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_30 = new BmsChannel(NUM_INVISIBLE_2P_30, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_30 = new BmsChannel(NUM_INVISIBLE_2P_30, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_31 = new BmsChannel(NUM_INVISIBLE_2P_31, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_31 = new BmsChannel(NUM_INVISIBLE_2P_31, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_32 = new BmsChannel(NUM_INVISIBLE_2P_32, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_32 = new BmsChannel(NUM_INVISIBLE_2P_32, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_33 = new BmsChannel(NUM_INVISIBLE_2P_33, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_33 = new BmsChannel(NUM_INVISIBLE_2P_33, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_34 = new BmsChannel(NUM_INVISIBLE_2P_34, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_34 = new BmsChannel(NUM_INVISIBLE_2P_34, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * 不可視オブジェ
 	 * @see #INVISIBLE_1P_01
 	 */
-	public static final BmsChannel INVISIBLE_2P_35 = new BmsChannel(NUM_INVISIBLE_2P_35, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel INVISIBLE_2P_35 = new BmsChannel(NUM_INVISIBLE_2P_35, BmsType.ARRAY, "#wav", "", false, true);
 
 	/** 不可視オブジェリスト */
 	static final BmsChannel[] INVISIBLE_CHANNELS = {
@@ -1638,7 +1638,7 @@ public class BeMusicChannel {
 	 * ロングノートオブジェ
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>51～5Z, 61～6Z</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
 	 * <tr><th style="text-align:left;">参照先</th><td>{@link BeMusicMeta#WAV #WAV}</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
@@ -1647,352 +1647,352 @@ public class BeMusicChannel {
 	 * <td>MGQ形式のロングノートを表します。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel LONG_1P_01 = new BmsChannel(NUM_LONG_1P_01, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_01 = new BmsChannel(NUM_LONG_1P_01, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_02 = new BmsChannel(NUM_LONG_1P_02, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_02 = new BmsChannel(NUM_LONG_1P_02, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_03 = new BmsChannel(NUM_LONG_1P_03, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_03 = new BmsChannel(NUM_LONG_1P_03, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_04 = new BmsChannel(NUM_LONG_1P_04, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_04 = new BmsChannel(NUM_LONG_1P_04, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_05 = new BmsChannel(NUM_LONG_1P_05, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_05 = new BmsChannel(NUM_LONG_1P_05, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_06 = new BmsChannel(NUM_LONG_1P_06, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_06 = new BmsChannel(NUM_LONG_1P_06, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_07 = new BmsChannel(NUM_LONG_1P_07, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_07 = new BmsChannel(NUM_LONG_1P_07, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_08 = new BmsChannel(NUM_LONG_1P_08, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_08 = new BmsChannel(NUM_LONG_1P_08, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_09 = new BmsChannel(NUM_LONG_1P_09, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_09 = new BmsChannel(NUM_LONG_1P_09, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_10 = new BmsChannel(NUM_LONG_1P_10, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_10 = new BmsChannel(NUM_LONG_1P_10, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_11 = new BmsChannel(NUM_LONG_1P_11, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_11 = new BmsChannel(NUM_LONG_1P_11, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_12 = new BmsChannel(NUM_LONG_1P_12, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_12 = new BmsChannel(NUM_LONG_1P_12, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_13 = new BmsChannel(NUM_LONG_1P_13, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_13 = new BmsChannel(NUM_LONG_1P_13, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_14 = new BmsChannel(NUM_LONG_1P_14, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_14 = new BmsChannel(NUM_LONG_1P_14, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_15 = new BmsChannel(NUM_LONG_1P_15, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_15 = new BmsChannel(NUM_LONG_1P_15, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_16 = new BmsChannel(NUM_LONG_1P_16, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_16 = new BmsChannel(NUM_LONG_1P_16, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_17 = new BmsChannel(NUM_LONG_1P_17, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_17 = new BmsChannel(NUM_LONG_1P_17, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_18 = new BmsChannel(NUM_LONG_1P_18, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_18 = new BmsChannel(NUM_LONG_1P_18, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_19 = new BmsChannel(NUM_LONG_1P_19, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_19 = new BmsChannel(NUM_LONG_1P_19, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_20 = new BmsChannel(NUM_LONG_1P_20, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_20 = new BmsChannel(NUM_LONG_1P_20, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_21 = new BmsChannel(NUM_LONG_1P_21, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_21 = new BmsChannel(NUM_LONG_1P_21, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_22 = new BmsChannel(NUM_LONG_1P_22, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_22 = new BmsChannel(NUM_LONG_1P_22, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_23 = new BmsChannel(NUM_LONG_1P_23, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_23 = new BmsChannel(NUM_LONG_1P_23, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_24 = new BmsChannel(NUM_LONG_1P_24, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_24 = new BmsChannel(NUM_LONG_1P_24, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_25 = new BmsChannel(NUM_LONG_1P_25, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_25 = new BmsChannel(NUM_LONG_1P_25, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_26 = new BmsChannel(NUM_LONG_1P_26, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_26 = new BmsChannel(NUM_LONG_1P_26, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_27 = new BmsChannel(NUM_LONG_1P_27, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_27 = new BmsChannel(NUM_LONG_1P_27, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_28 = new BmsChannel(NUM_LONG_1P_28, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_28 = new BmsChannel(NUM_LONG_1P_28, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_29 = new BmsChannel(NUM_LONG_1P_29, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_29 = new BmsChannel(NUM_LONG_1P_29, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_30 = new BmsChannel(NUM_LONG_1P_30, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_30 = new BmsChannel(NUM_LONG_1P_30, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_31 = new BmsChannel(NUM_LONG_1P_31, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_31 = new BmsChannel(NUM_LONG_1P_31, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_32 = new BmsChannel(NUM_LONG_1P_32, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_32 = new BmsChannel(NUM_LONG_1P_32, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_33 = new BmsChannel(NUM_LONG_1P_33, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_33 = new BmsChannel(NUM_LONG_1P_33, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_34 = new BmsChannel(NUM_LONG_1P_34, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_34 = new BmsChannel(NUM_LONG_1P_34, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_1P_35 = new BmsChannel(NUM_LONG_1P_35, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_1P_35 = new BmsChannel(NUM_LONG_1P_35, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_01 = new BmsChannel(NUM_LONG_2P_01, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_01 = new BmsChannel(NUM_LONG_2P_01, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_02 = new BmsChannel(NUM_LONG_2P_02, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_02 = new BmsChannel(NUM_LONG_2P_02, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_03 = new BmsChannel(NUM_LONG_2P_03, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_03 = new BmsChannel(NUM_LONG_2P_03, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_04 = new BmsChannel(NUM_LONG_2P_04, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_04 = new BmsChannel(NUM_LONG_2P_04, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_05 = new BmsChannel(NUM_LONG_2P_05, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_05 = new BmsChannel(NUM_LONG_2P_05, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_06 = new BmsChannel(NUM_LONG_2P_06, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_06 = new BmsChannel(NUM_LONG_2P_06, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_07 = new BmsChannel(NUM_LONG_2P_07, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_07 = new BmsChannel(NUM_LONG_2P_07, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_08 = new BmsChannel(NUM_LONG_2P_08, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_08 = new BmsChannel(NUM_LONG_2P_08, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_09 = new BmsChannel(NUM_LONG_2P_09, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_09 = new BmsChannel(NUM_LONG_2P_09, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_10 = new BmsChannel(NUM_LONG_2P_10, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_10 = new BmsChannel(NUM_LONG_2P_10, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_11 = new BmsChannel(NUM_LONG_2P_11, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_11 = new BmsChannel(NUM_LONG_2P_11, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_12 = new BmsChannel(NUM_LONG_2P_12, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_12 = new BmsChannel(NUM_LONG_2P_12, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_13 = new BmsChannel(NUM_LONG_2P_13, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_13 = new BmsChannel(NUM_LONG_2P_13, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_14 = new BmsChannel(NUM_LONG_2P_14, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_14 = new BmsChannel(NUM_LONG_2P_14, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_15 = new BmsChannel(NUM_LONG_2P_15, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_15 = new BmsChannel(NUM_LONG_2P_15, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_16 = new BmsChannel(NUM_LONG_2P_16, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_16 = new BmsChannel(NUM_LONG_2P_16, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_17 = new BmsChannel(NUM_LONG_2P_17, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_17 = new BmsChannel(NUM_LONG_2P_17, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_18 = new BmsChannel(NUM_LONG_2P_18, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_18 = new BmsChannel(NUM_LONG_2P_18, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_19 = new BmsChannel(NUM_LONG_2P_19, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_19 = new BmsChannel(NUM_LONG_2P_19, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_20 = new BmsChannel(NUM_LONG_2P_20, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_20 = new BmsChannel(NUM_LONG_2P_20, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_21 = new BmsChannel(NUM_LONG_2P_21, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_21 = new BmsChannel(NUM_LONG_2P_21, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_22 = new BmsChannel(NUM_LONG_2P_22, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_22 = new BmsChannel(NUM_LONG_2P_22, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_23 = new BmsChannel(NUM_LONG_2P_23, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_23 = new BmsChannel(NUM_LONG_2P_23, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_24 = new BmsChannel(NUM_LONG_2P_24, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_24 = new BmsChannel(NUM_LONG_2P_24, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_25 = new BmsChannel(NUM_LONG_2P_25, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_25 = new BmsChannel(NUM_LONG_2P_25, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_26 = new BmsChannel(NUM_LONG_2P_26, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_26 = new BmsChannel(NUM_LONG_2P_26, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_27 = new BmsChannel(NUM_LONG_2P_27, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_27 = new BmsChannel(NUM_LONG_2P_27, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_28 = new BmsChannel(NUM_LONG_2P_28, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_28 = new BmsChannel(NUM_LONG_2P_28, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_29 = new BmsChannel(NUM_LONG_2P_29, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_29 = new BmsChannel(NUM_LONG_2P_29, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_30 = new BmsChannel(NUM_LONG_2P_30, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_30 = new BmsChannel(NUM_LONG_2P_30, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_31 = new BmsChannel(NUM_LONG_2P_31, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_31 = new BmsChannel(NUM_LONG_2P_31, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_32 = new BmsChannel(NUM_LONG_2P_32, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_32 = new BmsChannel(NUM_LONG_2P_32, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_33 = new BmsChannel(NUM_LONG_2P_33, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_33 = new BmsChannel(NUM_LONG_2P_33, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_34 = new BmsChannel(NUM_LONG_2P_34, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_34 = new BmsChannel(NUM_LONG_2P_34, BmsType.ARRAY, "#wav", "", false, true);
 	/**
 	 * ロングノートオブジェ
 	 * @see #LONG_1P_01
 	 */
-	public static final BmsChannel LONG_2P_35 = new BmsChannel(NUM_LONG_2P_35, BmsType.ARRAY36, "#wav", "", false, true);
+	public static final BmsChannel LONG_2P_35 = new BmsChannel(NUM_LONG_2P_35, BmsType.ARRAY, "#wav", "", false, true);
 
 	/** ロングノートオブジェリスト */
 	static final BmsChannel[] LONG_CHANNELS = {
@@ -2012,8 +2012,8 @@ public class BeMusicChannel {
 	 * 地雷オブジェ
 	 * <table><caption>&nbsp;</caption>
 	 * <tr><th style="text-align:left;">番号</th><td>D1～D9, E1～E9</td></tr>
-	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY36</td></tr>
-	 * <tr><th style="text-align:left;">参照先</th><td>無し</td></tr>
+	 * <tr><th style="text-align:left;">データ型</th><td>ARRAY</td></tr>
+	 * <tr><th style="text-align:left;">参照先</th><td>なし</td></tr>
 	 * <tr><th style="text-align:left;">初期値</th><td>""</td></tr>
 	 * <tr><th style="text-align:left;">複数データ</th><td>NO</td></tr>
 	 * <tr><th style="text-align:left;">同一性チェック</th><td>YES</td></tr>
@@ -2021,99 +2021,99 @@ public class BeMusicChannel {
 	 * <td>地雷ノートを表します。当チャンネルの定義はノート数にはカウントされません。</td></tr>
 	 * </table>
 	 */
-	public static final BmsChannel LANDMINE_1P_01 = new BmsChannel(NUM_LANDMINE_1P_01, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_1P_01 = new BmsChannel(NUM_MINE_1P_01, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_1P_02 = new BmsChannel(NUM_LANDMINE_1P_02, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_1P_02 = new BmsChannel(NUM_MINE_1P_02, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_1P_03 = new BmsChannel(NUM_LANDMINE_1P_03, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_1P_03 = new BmsChannel(NUM_MINE_1P_03, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_1P_04 = new BmsChannel(NUM_LANDMINE_1P_04, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_1P_04 = new BmsChannel(NUM_MINE_1P_04, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_1P_05 = new BmsChannel(NUM_LANDMINE_1P_05, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_1P_05 = new BmsChannel(NUM_MINE_1P_05, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_1P_06 = new BmsChannel(NUM_LANDMINE_1P_06, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_1P_06 = new BmsChannel(NUM_MINE_1P_06, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_1P_07 = new BmsChannel(NUM_LANDMINE_1P_07, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_1P_07 = new BmsChannel(NUM_MINE_1P_07, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_1P_08 = new BmsChannel(NUM_LANDMINE_1P_08, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_1P_08 = new BmsChannel(NUM_MINE_1P_08, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_1P_09 = new BmsChannel(NUM_LANDMINE_1P_09, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_1P_09 = new BmsChannel(NUM_MINE_1P_09, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_2P_01 = new BmsChannel(NUM_LANDMINE_2P_01, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_2P_01 = new BmsChannel(NUM_MINE_2P_01, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_2P_02 = new BmsChannel(NUM_LANDMINE_2P_02, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_2P_02 = new BmsChannel(NUM_MINE_2P_02, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_2P_03 = new BmsChannel(NUM_LANDMINE_2P_03, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_2P_03 = new BmsChannel(NUM_MINE_2P_03, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_2P_04 = new BmsChannel(NUM_LANDMINE_2P_04, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_2P_04 = new BmsChannel(NUM_MINE_2P_04, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_2P_05 = new BmsChannel(NUM_LANDMINE_2P_05, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_2P_05 = new BmsChannel(NUM_MINE_2P_05, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_2P_06 = new BmsChannel(NUM_LANDMINE_2P_06, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_2P_06 = new BmsChannel(NUM_MINE_2P_06, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_2P_07 = new BmsChannel(NUM_LANDMINE_2P_07, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_2P_07 = new BmsChannel(NUM_MINE_2P_07, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_2P_08 = new BmsChannel(NUM_LANDMINE_2P_08, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_2P_08 = new BmsChannel(NUM_MINE_2P_08, BmsType.ARRAY, null, "", false, true);
 	/**
 	 * 地雷オブジェ
-	 * @see #LANDMINE_1P_01
+	 * @see #MINE_1P_01
 	 */
-	public static final BmsChannel LANDMINE_2P_09 = new BmsChannel(NUM_LANDMINE_2P_09, BmsType.ARRAY36, null, "", false, true);
+	public static final BmsChannel MINE_2P_09 = new BmsChannel(NUM_MINE_2P_09, BmsType.ARRAY, null, "", false, true);
 
 	/** 地雷オブジェリスト */
-	static final BmsChannel[] LANDMINE_CHANNELS = {
-			LANDMINE_1P_01, LANDMINE_1P_02, LANDMINE_1P_03, LANDMINE_1P_04, LANDMINE_1P_05,
-			LANDMINE_1P_06, LANDMINE_1P_07, LANDMINE_1P_08, LANDMINE_1P_09,
-			LANDMINE_2P_01, LANDMINE_2P_02, LANDMINE_2P_03, LANDMINE_2P_04, LANDMINE_2P_05,
-			LANDMINE_2P_06, LANDMINE_2P_07, LANDMINE_2P_08, LANDMINE_2P_09,
+	static final BmsChannel[] MINE_CHANNELS = {
+			MINE_1P_01, MINE_1P_02, MINE_1P_03, MINE_1P_04, MINE_1P_05,
+			MINE_1P_06, MINE_1P_07, MINE_1P_08, MINE_1P_09,
+			MINE_2P_01, MINE_2P_02, MINE_2P_03, MINE_2P_04, MINE_2P_05,
+			MINE_2P_06, MINE_2P_07, MINE_2P_08, MINE_2P_09,
 	};
 
 	/**

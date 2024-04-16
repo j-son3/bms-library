@@ -1,5 +1,7 @@
 package com.lmt.lib.bms;
 
+import com.lmt.lib.bms.parse.BmsTestResult;
+
 /**
  * BMSコンテンツ読み込み処理を制御するためのハンドラです。
  *
@@ -11,89 +13,7 @@ package com.lmt.lib.bms;
  * 個々のアプリケーションは自身の実現したい仕様に基づき、必要な振る舞いのみを変更してください。
  * 変更可能な振る舞いについては各メソッドのドキュメントを参照してください。</p>
  */
-public interface BmsLoadHandler extends BmsContent.Creator, BmsNote.Creator {
-	/**
-	 * BMS宣言、メタ情報、チャンネルデータ、およびBMSコンテンツの検査結果を示す列挙です。<br>
-	 * 当列挙型は以下のメソッドの戻り値として使用します。
-	 * <ul>
-	 * <li>BMS宣言の検査：{@link BmsLoadHandler#testDeclaration(String, String)}</li>
-	 * <li>メタ情報の検査：{@link BmsLoadHandler#testMeta(BmsMeta, int, Object)}</li>
-	 * <li>チャンネルデータの検査：{@link BmsLoadHandler#testChannel(BmsChannel, int, int, Object)}</li>
-	 * <li>BMSコンテンツの検査：{@link BmsLoadHandler#testContent(BmsContent)}</li>
-	 * </ul>
-	 */
-	public static class TestResult {
-		/** 検査に合格したことを示す値です。 */
-		public static final int RESULT_OK = 0;
-		/** 検査に失敗したことを示す値です。 */
-		public static final int RESULT_FAIL = 1;
-		/** 検査した要素を読み飛ばすことを示す値です。 */
-		public static final int RESULT_THROUGH = 2;
-
-		/**
-		 * 検査に合格したことを示します。<br>
-		 * この値を返すと、当該要素はBMSコンテンツの一部として取り込まれます。
-		 */
-		public static final TestResult OK = new TestResult(RESULT_OK, null);
-
-		/**
-		 * 検査に失敗したことを示します。<br>
-		 * この値を返すと当該要素は破棄され、{@link #parseError}が呼ばれます。
-		 */
-		public static final TestResult FAIL = new TestResult(RESULT_FAIL, null);
-
-		/**
-		 * 検査した要素を読み飛ばすことを示します。<br>
-		 * この値を返すと当該要素は破棄され、BMSコンテンツには取り込まれません。
-		 */
-		public static final TestResult THROUGH = new TestResult(RESULT_THROUGH, null);
-
-		/** 検査結果 */
-		private int mResult;
-		/** メッセージ */
-		private String mMessage;
-
-		/**
-		 * コンストラクタ
-		 * @param result 検査結果
-		 * @param message メッセージ
-		 */
-		private TestResult(int result, String message) {
-			mResult = result;
-			mMessage = message;
-		}
-
-		/**
-		 * 検査結果を取得します。
-		 * <p>この値が示すのは {@link #RESULT_OK}, {@link #RESULT_FAIL}, {@link #RESULT_THROUGH} のいずれかです。</p>
-		 * @return 検査結果の値
-		 */
-		public final int getResult() {
-			return mResult;
-		}
-
-		/**
-		 * メッセージを取得します。
-		 * <p>検査結果が {@link #RESULT_FAIL} になった場合に読み込みハンドラが検査失敗理由等を通知したい場合に
-		 * 用いることを想定しています。検査失敗以外の結果ではメッセージを参照する機会がないためnullとなります。</p>
-		 * @return メッセージ
-		 */
-		public final String getMessage() {
-			return mMessage;
-		}
-
-		/**
-		 * メッセージ付きの検査失敗を生成します。
-		 * <p>読み込みハンドラが検査失敗理由等を通知したい場合に当メソッドを用いてメッセージ付きの検査失敗を
-		 * 生成することができます。標準の検査失敗オブジェクト({@link #FAIL})はメッセージを保有していません。</p>
-		 * @param message 検査失敗に付加したいメッセージ
-		 * @return 引数で指定したメッセージを持つ検査失敗オブジェクト
-		 */
-		public static TestResult fail(String message) {
-			return new TestResult(RESULT_FAIL, message);
-		}
-	}
-
+public interface BmsLoadHandler {
 	/**
 	 * BMSコンテンツオブジェクトを生成します。
 	 *
@@ -107,7 +27,6 @@ public interface BmsLoadHandler extends BmsContent.Creator, BmsNote.Creator {
 	 * @param spec BMS仕様
 	 * @return BMSコンテンツオブジェクト
 	 */
-	@Override
 	default BmsContent createContent(BmsSpec spec) {
 		return new BmsContent(spec);
 	}
@@ -130,7 +49,6 @@ public interface BmsLoadHandler extends BmsContent.Creator, BmsNote.Creator {
 	 *
 	 * @return ノートオブジェクト
 	 */
-	@Override
 	default BmsNote createNote() {
 		return new BmsNote();
 	}
@@ -139,7 +57,7 @@ public interface BmsLoadHandler extends BmsContent.Creator, BmsNote.Creator {
 	 * {@link BmsLoader}の読み込み処理にて読み込みが開始された時に一度だけ呼び出されます。
 	 *
 	 * <p>当メソッドは1個のBMSの読み込みが開始される度に、アプリケーション固有の何らかの初期化処理を行いたい場合を想定して
-	 * 用意されています。そのような事情が無い場合は何も行う必要はありません。</p>
+	 * 用意されています。そのような事情がない場合は何も行う必要はありません。</p>
 	 *
 	 * <p>当メソッドで例外をスローすると、後の処理で呼ばれる検査メソッドは一切呼ばれず、スローされた例外を内包した
 	 * {@link BmsException}がスローされます。</p>
@@ -185,11 +103,11 @@ public interface BmsLoadHandler extends BmsContent.Creator, BmsNote.Creator {
 	 *
 	 * @param key キー(NOT null保証)
 	 * @param value 値(NOT null保証)
-	 * @return {@link TestResult}参照
-	 * @see TestResult
+	 * @return {@link BmsTestResult}参照
+	 * @see BmsTestResult
 	 */
-	default TestResult testDeclaration(String key, String value) {
-		return TestResult.OK;
+	default BmsTestResult testDeclaration(String key, String value) {
+		return BmsTestResult.OK;
 	}
 
 	/**
@@ -201,32 +119,32 @@ public interface BmsLoadHandler extends BmsContent.Creator, BmsNote.Creator {
 	 *
 	 * <p>解析されたメタ情報の検査結果は戻り値でBMSローダに報告します。</p>
 	 *
-	 * <p>BMS仕様に無いメタ情報を検出しても当メソッドは呼び出されず、直接{@link #parseError}が呼び出されます。</p>
+	 * <p>BMS仕様にないメタ情報を検出しても当メソッドは呼び出されず、直接{@link #parseError}が呼び出されます。</p>
 	 *
 	 * <p>当メソッドで例外をスローした場合、当該例外を内包した{@link BmsException}がスローされます。</p>
 	 *
 	 * @param meta メタ情報
 	 * @param index インデックス
 	 * @param value 解析後の値。データ型は当該メタ情報のデータ型に依存します。
-	 * @return {@link TestResult}参照
+	 * @return {@link BmsTestResult}参照
 	 * @see BmsMeta
 	 * @see BmsType
-	 * @see TestResult
+	 * @see BmsTestResult
 	 */
-	default TestResult testMeta(BmsMeta meta, int index, Object value) {
-		return TestResult.OK;
+	default BmsTestResult testMeta(BmsMeta meta, int index, Object value) {
+		return BmsTestResult.OK;
 	}
 
 	/**
-	 * 1個のチャンネルデータを解析した時に呼び出されます。
+	 * 1個のタイムライン要素を解析した時に呼び出されます。
 	 *
 	 * <p>当メソッドが呼び出される契機は、BMS仕様に定義のあるチャンネルが正常に解析された後です。デフォルトの動作では
-	 * BMS仕様に準拠したチャンネルデータは全てBMSコンテンツ内に記録されます。アプリケーションが個々のチャンネルデータに対して
+	 * BMS仕様に準拠したタイムライン要素は全てBMSコンテンツ内に記録されます。アプリケーションが個々のタイムライン要素に対して
 	 * 固有の検査を行う必要がある場合は当メソッドで検査処理を実装してください。</p>
 	 *
-	 * <p>解析されたチャンネルデータの検査結果は戻り値でBMSローダに報告します。</p>
+	 * <p>解析されたタイムライン要素の検査結果は戻り値でBMSローダに報告します。</p>
 	 *
-	 * <p>BMS仕様に無いチャンネルを検出しても当メソッドは呼び出されず、直接{@link #parseError}が呼び出されます。</p>
+	 * <p>BMS仕様にないチャンネルを検出しても当メソッドは呼び出されず、直接{@link #parseError}が呼び出されます。</p>
 	 *
 	 * <p>当メソッドで例外をスローした場合、当該例外を内包した{@link BmsException}がスローされます。</p>
 	 *
@@ -234,13 +152,13 @@ public interface BmsLoadHandler extends BmsContent.Creator, BmsNote.Creator {
 	 * @param index チャンネルインデックス
 	 * @param measure 小節番号
 	 * @param value チャンネルの値。データ型は当該チャンネルのデータ型に依存します。
-	 * @return {@link TestResult}参照
+	 * @return {@link BmsTestResult}参照
 	 * @see BmsChannel
 	 * @see BmsType
-	 * @see TestResult
+	 * @see BmsTestResult
 	 */
-	default TestResult testChannel(BmsChannel channel, int index, int measure, Object value) {
-		return TestResult.OK;
+	default BmsTestResult testChannel(BmsChannel channel, int index, int measure, Object value) {
+		return BmsTestResult.OK;
 	}
 
 	/**
@@ -254,14 +172,14 @@ public interface BmsLoadHandler extends BmsContent.Creator, BmsNote.Creator {
 	 * <p>当メソッドの引数で渡されるBMSコンテンツは編集しても構いません。ただし、当メソッドを抜ける前に必ず
 	 * {@link BmsContent#endEdit()}を実行して編集モードを完了させてください。編集モードのまま処理を終了すると
 	 * BMSコンテンツの読み込み処理失敗と判定されてしまいます。</p>
-	 * <p>当メソッドから返す検査結果に{@link TestResult#RESULT_FAIL}を設定するとBMSコンテンツ読み込みは失敗します。
+	 * <p>当メソッドから返す検査結果に{@link BmsTestResult#RESULT_FAIL}を設定するとBMSコンテンツ読み込みは失敗します。
 	 * それ以外の検査結果は全て読み込み成功と判定されます。</p>
 	 * <p>当メソッドで例外をスローした場合、当該例外を内包した{@link BmsException}がスローされます。</p>
-	 * <p>当メソッドの既定の動作では{@link TestResult#OK}を返します。</p>
+	 * <p>当メソッドの既定の動作では{@link BmsTestResult#OK}を返します。</p>
 	 * @param content 読み込みの完了したBMSコンテンツ
 	 * @return 検査結果
 	 */
-	default TestResult testContent(BmsContent content) {
-		return TestResult.OK;
+	default BmsTestResult testContent(BmsContent content) {
+		return BmsTestResult.OK;
 	}
 }

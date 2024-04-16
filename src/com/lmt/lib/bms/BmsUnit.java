@@ -9,7 +9,7 @@ package com.lmt.lib.bms;
  */
 public enum BmsUnit {
 	/**
-	 * 単一メタ情報
+	 * 単体メタ情報
 	 * <p>1つのメタ情報につき1つのデータのみを保有できる構成です。最も単純かつ一般的な構成です。</p>
 	 */
 	SINGLE,
