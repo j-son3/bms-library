@@ -1,0 +1,113 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.lmt</groupId>
+  <artifactId>blt-view</artifactId>
+  <version>1.0.0</version>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+  <build>
+    <sourceDirectory>src/main</sourceDirectory>
+    <plugins>
+      <!-- maven-compiler-pluginの設定 -->
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <release>17</release>
+        </configuration>
+      </plugin>
+
+      <!-- maven-jar-pluginの設定 -->
+      <!-- main()が実装されたクラスを指定するために使用する -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.lmt.app.blt.View</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- maven-dependency-plugin -->
+      <!-- チュートリアルプログラムが依存する全てのファイルを収集するために使用する -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <!-- 依存ファイルは全てここに収集する -->
+              <outputDirectory>${project.build.directory}/jars</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- maven-resources-pluginの設定 -->
+      <!-- ビルド済みのチュートリアルプログラムのコピーに使用する -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>copy-jar-to-dependency</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <!-- コピー先ディレクトリ -->
+              <outputDirectory>${project.build.directory}/jars</outputDirectory>
+              <resources>
+                <resource>
+                  <!-- コピー対象のチュートリアルプログラムのJARファイル -->
+                  <directory>${project.build.directory}</directory>
+                  <includes>
+                    <include>${project.artifactId}-${project.version}.jar</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+  <dependencies>
+    <!-- BMS Library -->
+    <dependency>
+      <groupId>com.lmt</groupId>
+      <artifactId>bms-library</artifactId>
+      <version>0.8.0</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx -->
+    <!-- libGDXはサウンド再生で使用する -->
+    <dependency>
+      <groupId>com.badlogicgames.gdx</groupId>
+      <artifactId>gdx</artifactId>
+      <version>1.12.1</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-backend-lwjgl3 -->
+    <dependency>
+      <groupId>com.badlogicgames.gdx</groupId>
+      <artifactId>gdx-backend-lwjgl3</artifactId>
+      <version>1.12.1</version>
+    </dependency>
+  </dependencies>
+</project>
