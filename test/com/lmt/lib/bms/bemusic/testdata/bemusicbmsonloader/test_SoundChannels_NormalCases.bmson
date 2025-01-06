@@ -1,0 +1,105 @@
+{
+	"version": "1.0.0",
+	"info": {
+		"title": "",
+		"subtitle": "",
+		"artist": "",
+		"subartists": [],
+		"genre": "",
+		"mode_hint": "beat-14k",
+		"chart_name": "",
+		"level": 1,
+		"init_bpm": 100,
+		"judge_rank": 80,
+		"total": 300,
+		"title_image": "",
+		"back_image": "",
+		"eyecatch_image": "",
+		"banner_image": "",
+		"preview_music": "",
+		"ln_type": 1,
+		"resolution": 240
+	},
+	"lines": [
+		{ "y": 960 },
+		{ "y": 1920 }
+	],
+	"bpm_events": [],
+	"scroll_events": [],
+	"stop_events": [],
+	"sound_channels": [
+		{
+			"name": "1.wav",
+			"notes": [
+				{ "x": 1, "y": 0, "l": 0, "c": false },
+				{ "x": 1, "y": 240, "l": 0, "c": false },
+				{ "x": 1, "y": 480, "l": 0, "c": false },
+				{ "x": 1, "y": 720, "l": 0, "c": false },
+				{ "x": 15, "y": 960, "l": 0, "c": false },
+				{ "x": 15, "y": 1200, "l": 0, "c": false },
+				{ "x": 15, "y": 1440, "l": 0, "c": false },
+				{ "x": 15, "y": 1680, "l": 0, "c": false }
+			]
+		},
+		{
+			"name": "2.wav",
+			"notes": [
+				{ "x": 6, "y": 240, "l": 0, "c": false },
+				{ "x": 7, "y": 300, "l": 0, "c": false },
+				{ "x": 6, "y": 360, "l": 0, "c": false },
+				{ "x": 4, "y": 480, "l": 0, "c": false },
+				{ "x": 2, "y": 720, "l": 0, "c": false },
+				{ "x": 12, "y": 960, "l": 240, "c": false },
+				{ "x": 10, "y": 1200, "l": 240, "c": false },
+				{ "x": 12, "y": 1440, "l": 240, "c": false },
+				{ "x": 10, "y": 1680, "l": 240, "c": false }
+			]
+		},
+		{
+			"name": "3.wav",
+			"notes": [
+				{ "x": 9, "y": 240, "l": 0, "c": false },
+				{ "x": 11, "y": 480, "l": 0, "c": false },
+				{ "x": 13, "y": 720, "l": 0, "c": false },
+				{ "x": 1, "y": 960, "l": 0, "c": false },
+				{ "x": 5, "y": 1080, "l": 0, "c": false },
+				{ "x": 2, "y": 1200, "l": 0, "c": false },
+				{ "x": 6, "y": 1320, "l": 0, "c": false },
+				{ "x": 3, "y": 1440, "l": 480, "c": false }
+			]
+		},
+		{
+			"name": "4.wav",
+			"notes": [
+				{ "x": 16, "y": 0, "l": 0, "c": false },
+				{ "x": 8, "y": 960, "l": 0, "c": false },
+				{ "x": 8, "y": 1920, "l": 0, "c": false },
+				{ "x": 16, "y": 1920, "l": 0, "c": false }
+			]
+		},
+		{
+			"name": "5.wav",
+			"notes": [
+				{ "x": 0, "y": 0, "l": 0, "c": false },
+				{ "x": 0, "y": 480, "l": 0, "c": false },
+				{ "x": 0, "y": 960, "l": 0, "c": false },
+				{ "x": 0, "y": 1440, "l": 0, "c": false },
+			]
+		},
+		{
+			"name": "6.wav",
+			"notes": [
+				{ "x": null, "y": 240, "l": 0, "c": false },
+				{ "x": null, "y": 960, "l": 0, "c": false },
+			]
+		}
+	],
+	"mine_channels": [],
+	"key_channels": [],
+	"bga": {
+		"bga_header": [],
+		"bga_events": [],
+		"layer_events": [],
+		"poor_events": []
+	}
+}

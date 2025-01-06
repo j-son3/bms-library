@@ -1,0 +1,34 @@
+{
+	"info": {
+		"title": "",
+		"subtitle": "",
+		"artist": "",
+		"subartists": [],
+		"genre": "",
+		"mode_hint": "beat-7k",
+		"chart_name": "",
+		"level": 1,
+		"init_bpm": 100,
+		"judge_rank": 80,
+		"total": 300,
+		"title_image": "",
+		"back_image": "",
+		"eyecatch_image": "",
+		"banner_image": "",
+		"preview_music": "",
+		"resolution": 240
+	},
+	"lines": [],
+	"bpm_events": [],
+	"scroll_events": [],
+	"stop_events": [],
+	"sound_channels": [],
+	"mine_channels": [],
+	"key_channels": [],
+	"bga": {
+		"bga_header": [],
+		"bga_events": [],
+		"layer_events": [],
+		"poor_events": []
+	}
+}

@@ -1,0 +1,28 @@
+
+*---------------------- HEADER FIELD
+
+#PLAYER 1
+#GENRE 
+#TITLE LNモード時、長押し終了後規定時間後に長押し開始があっても「通常」になること(SP)
+#ARTIST J-SON3
+#BPM 120
+#PLAYLEVEL 
+#RANK 3
+
+
+#LNOBJ 02
+
+
+
+*---------------------- EXPANSION FIELD
+#LNMODE 1
+
+
+*---------------------- MAIN DATA FIELD
+
+
+#00016:0100000201000002
+
+#00116:01
+
+

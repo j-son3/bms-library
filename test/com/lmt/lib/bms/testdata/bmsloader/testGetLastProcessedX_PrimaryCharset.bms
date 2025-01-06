@@ -1,0 +1,2 @@
+; ローダに指定した優先文字セットで読み込むと charset=優先文字セット, hasBom=false になること
+#TITLE Test BMS

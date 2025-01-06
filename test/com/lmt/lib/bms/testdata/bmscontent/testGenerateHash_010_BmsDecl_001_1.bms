@@ -1,0 +1,2 @@
+;?bms encoding="MS932" key1="value1"
+; BMS宣言の内容が異なってもハッシュ値が変化しないこと（encoding）

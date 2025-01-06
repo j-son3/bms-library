@@ -1,0 +1,28 @@
+;?bms encoding="windows-31j" s_value="string" a_value="{1,2,3}" n_value="100"
+
+; Channel data definition
+; These channel data for Unit test by JUnit.
+#00001:1000
+#00006:1199AAFF
+#00101:2000
+#00102:1111.999
+#00202:2222.888
+#00203:English
+#00206:0033007700BB00EE
+#00301:3000
+#00303:ì˙ñ{åÍ
+#00304:AD
+#00307:33AAMMXX
+#00402:3333.777
+#00404:BE
+#00405:XA
+#00406:000000000000001100000000000000FF
+#00407:004400BB00PP00YY
+#00503:ÅîÅêÅì
+#00505:YB
+#00507:00000000000000RR00000000000000ZZ
+#00604:CF
+#00705:ZC
+
+; This is the footer comment
+; This comment should be written on the last line.

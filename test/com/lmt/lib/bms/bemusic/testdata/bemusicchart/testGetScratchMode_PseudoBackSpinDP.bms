@@ -1,0 +1,28 @@
+
+*---------------------- HEADER FIELD
+
+#PLAYER 3
+#GENRE 
+#TITLE LNモード時、長押し終了後規定時間以内に通常スクラッチがあれば「Back-Spin」になること(DP)
+#ARTIST J-SON3
+#BPM 120
+#PLAYLEVEL 
+#RANK 3
+
+
+#LNOBJ 02
+
+
+
+*---------------------- EXPANSION FIELD
+#LNMODE 1
+
+
+*---------------------- MAIN DATA FIELD
+
+
+#00026:00000000010000000000000201000000
+
+#00126:01
+
+

@@ -1,0 +1,49 @@
+{
+	"version": "1.0.0",
+	"info": {
+		"title": "",
+		"subtitle": "",
+		"artist": "",
+		"subartists": [],
+		"genre": "",
+		"mode_hint": "beat-7k",
+		"chart_name": "",
+		"level": 1,
+		"init_bpm": 100,
+		"judge_rank": 80,
+		"total": 300,
+		"title_image": "",
+		"back_image": "",
+		"eyecatch_image": "",
+		"banner_image": "",
+		"preview_music": "",
+		"ln_type": 1,
+		"resolution": 240
+	},
+	"lines": [
+		{ "y": 960 },
+		{ "y": 1920 },
+		{ "y": 2640 },
+		{ "y": 3600 },
+		{ "y": 4560 }
+	],
+	"bpm_events": [],
+	"scroll_events": [
+		{ "y": 0, "rate": 1.5 },
+		{ "y": 480, "rate": 1.8 },
+		{ "y": 2400, "rate": 1.5 },
+		{ "y": 2640, "rate": 1.501 },
+		{ "y": 3360, "rate": 3.0 },
+		{ "y": 4560, "rate": 1.0 }
+	],
+	"stop_events": [],
+	"sound_channels": [],
+	"mine_channels": [],
+	"key_channels": [],
+	"bga": {
+		"bga_header": [],
+		"bga_events": [],
+		"layer_events": [],
+		"poor_events": []
+	}
+}

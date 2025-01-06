@@ -1,0 +1,28 @@
+
+*---------------------- HEADER FIELD
+
+#PLAYER 3
+#GENRE 
+#TITLE CNモード時、長押しがあれば「Back-Spin」になること(DP)a
+#ARTIST J-SON3
+#BPM 120
+#PLAYLEVEL 
+#RANK 3
+
+
+#LNOBJ 02
+
+
+
+*---------------------- EXPANSION FIELD
+#LNMODE 2
+
+
+*---------------------- MAIN DATA FIELD
+
+
+#00026:01
+
+#00126:02
+
+

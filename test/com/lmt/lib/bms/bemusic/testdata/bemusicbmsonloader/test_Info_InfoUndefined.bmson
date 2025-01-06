@@ -1,0 +1,16 @@
+{
+	"version": "1.0.0",
+	"lines": [],
+	"bpm_events": [],
+	"scroll_events": [],
+	"stop_events": [],
+	"sound_channels": [],
+	"mine_channels": [],
+	"key_channels": [],
+	"bga": {
+		"bga_header": [],
+		"bga_events": [],
+		"layer_events": [],
+		"poor_events": []
+	}
+}

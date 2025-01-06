@@ -1,0 +1,2 @@
+; 文字セット未指定、デフォルト優先文字セットで読み込むと charset=デフォルト優先文字セット, hasBom=false になること
+#TITLE Test BMS

@@ -1,0 +1,28 @@
+
+*---------------------- HEADER FIELD
+
+#PLAYER 3
+#GENRE 
+#TITLE LNモード時、長押し終了後規定時間以内に長押し開始があれば「Multi-Spin」になること(DP)
+#ARTIST J-SON3
+#BPM 120
+#PLAYLEVEL 
+#RANK 3
+
+
+#LNOBJ 02
+
+
+
+*---------------------- EXPANSION FIELD
+#LNMODE 1
+
+
+*---------------------- MAIN DATA FIELD
+
+
+#00026:01000000000000020100000000000002
+
+#00126:01
+
+

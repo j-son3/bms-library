@@ -1,0 +1,2 @@
+﻿; BOM付きUTF-8を読み込むと charset=UTF-8, hasBom=true になること
+#TITLE Test BMS

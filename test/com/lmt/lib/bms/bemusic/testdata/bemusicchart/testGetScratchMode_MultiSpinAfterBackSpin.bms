@@ -1,0 +1,30 @@
+
+*---------------------- HEADER FIELD
+
+#PLAYER 1
+#GENRE 
+#TITLE LNモード時、「Multi-Spin」検出後に「Back-Spin」を検出しても「Multi-Spin」であること
+#ARTIST J-SON3
+#BPM 120
+#PLAYLEVEL 
+#RANK 3
+
+
+#LNOBJ 02
+
+
+
+*---------------------- EXPANSION FIELD
+#LNMODE 1
+
+
+*---------------------- MAIN DATA FIELD
+
+
+#00016:01000000000000020100000000000002
+
+#00116:00000000000000000100000000000002
+
+#00216:01
+
+

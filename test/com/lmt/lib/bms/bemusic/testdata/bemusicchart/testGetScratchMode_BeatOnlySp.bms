@@ -1,0 +1,24 @@
+
+*---------------------- HEADER FIELD
+
+#PLAYER 1
+#GENRE 
+#TITLE 通常スクラッチのみの譜面では「通常」になること(SP)
+#ARTIST J-SON3
+#BPM 120
+#PLAYLEVEL 
+#RANK 3
+
+
+#LNTYPE 1
+
+
+
+*---------------------- MAIN DATA FIELD
+
+
+#00016:01010101
+
+#00116:0101010001010100
+
+

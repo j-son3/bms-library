@@ -1,0 +1,24 @@
+;?bms encoding="UTF-8" mykey1="value1" mykey2="value2"
+
+;
+; Meta definition
+;
+#GENRE Test
+#TITLE My Song
+#ARTIST NoName
+#BPM 160
+#SINTEGER 500
+#MSTRING Text 1
+#MSTRING Text 2
+#IFLOAT0A 10.25
+#IFLOATM0 7.89
+#IFLOATZZ 370.65
+
+;
+; Channel definition
+;
+#00001:1200
+#00007:11
+#00107:00220022
+#00307:3333000044440000
+#99903:This is the last measure

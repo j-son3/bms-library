@@ -1,0 +1,3 @@
+; メタ情報：複数：値が異なるとハッシュ値が変化すること（STRING）
+#MSTR String1
+#MSTR Strong2

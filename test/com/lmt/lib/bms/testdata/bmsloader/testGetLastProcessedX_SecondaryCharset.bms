@@ -1,0 +1,2 @@
+; ローダに指定した2番目の文字セットで読み込むと charset=2番目の文字セット, hasBom=false になること
+#TITLE Test BMS

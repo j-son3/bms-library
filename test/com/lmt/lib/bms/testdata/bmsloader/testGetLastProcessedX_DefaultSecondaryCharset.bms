@@ -1,0 +1,2 @@
+; 文字セット未指定、デフォルト2番目文字セットで読み込むと charset=デフォルト2番目文字セット, hasBom=false になること
+#TITLE Test BMS

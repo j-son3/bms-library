@@ -1,0 +1,62 @@
+{
+	"version": "1.0.0",
+	"info": {
+		"title": "",
+		"subtitle": "",
+		"artist": "",
+		"subartists": [],
+		"genre": "",
+		"mode_hint": "beat-14k",
+		"chart_name": "",
+		"level": 1,
+		"init_bpm": 100,
+		"judge_rank": 80,
+		"total": 300,
+		"title_image": "",
+		"back_image": "",
+		"eyecatch_image": "",
+		"banner_image": "",
+		"preview_music": "",
+		"ln_type": 1,
+		"resolution": 240
+	},
+	"lines": [
+		{ "y": 960 },
+		{ "y": 1920 },
+		{ "y": 2880 }
+	],
+	"bpm_events": [],
+	"scroll_events": [],
+	"stop_events": [],
+	"sound_channels": [
+		{
+			"name": "a.wav",
+			"notes": [
+				{ "x": 1, "y": 0, "l": 480, "c": false },
+				{ "x": 2, "y": 60, "l": 480, "c": false },
+				{ "x": 3, "y": 120, "l": 480, "c": false },
+				{ "x": 4, "y": 180, "l": 480, "c": false },
+				{ "x": 5, "y": 240, "l": 480, "c": false },
+				{ "x": 6, "y": 300, "l": 480, "c": false },
+				{ "x": 7, "y": 360, "l": 480, "c": false },
+				{ "x": 8, "y": 420, "l": 480, "c": false },
+				{ "x": 9, "y": 480, "l": 1440, "c": false },
+				{ "x": 10, "y": 540, "l": 1440, "c": false },
+				{ "x": 11, "y": 600, "l": 1440, "c": false },
+				{ "x": 12, "y": 660, "l": 1440, "c": false },
+				{ "x": 13, "y": 720, "l": 1440, "c": false },
+				{ "x": 14, "y": 780, "l": 1440, "c": false },
+				{ "x": 15, "y": 840, "l": 1440, "c": false },
+				{ "x": 16, "y": 900, "l": 1440, "c": false }
+			]
+		}
+	],
+	"mine_channels": [],
+	"key_channels": [],
+	"bga": {
+		"bga_header": [],
+		"bga_events": [],
+		"layer_events": [],
+		"poor_events": []
+	}
+}
