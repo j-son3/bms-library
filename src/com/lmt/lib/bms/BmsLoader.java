@@ -78,6 +78,7 @@ import com.lmt.lib.bms.parse.BmsTimelineParsed;
  *
  * @see BmsLoadHandler
  * @see BmsScriptError
+ * @since 0.0.1
  */
 public abstract class BmsLoader {
 	/** デコード用バッファサイズ */
@@ -252,6 +253,7 @@ public abstract class BmsLoader {
 	 * <p>標準フォーマット用ローダとは{@link BmsStandardLoader}を指します。それ以外のローダは常にfalseを返します。</p>
 	 * @return ローダが標準フォーマット用の場合に限りtrue
 	 * @see BmsStandardLoader
+	 * @since 0.8.0
 	 */
 	public final boolean isStandard() {
 		return mIsStandard;
@@ -260,6 +262,7 @@ public abstract class BmsLoader {
 	/**
 	 * このローダへの入力データがバイナリフォーマットかどうかを返します。
 	 * @return 入力データがバイナリフォーマットの場合true
+	 * @since 0.8.0
 	 */
 	public final boolean isBinaryFormat() {
 		return mIsBinaryFormat;
@@ -280,6 +283,7 @@ public abstract class BmsLoader {
 	 * @return 最後に読み込んだBMSコンテンツで使用した文字セット、またはnull
 	 * @see #setCharsets(Charset...)
 	 * @see BmsLibrary#setDefaultCharsets(Charset...)
+	 * @since 0.8.0
 	 */
 	public final Charset getLastProcessedCharset() {
 		return mLastProcessedCharset;
@@ -299,6 +303,7 @@ public abstract class BmsLoader {
 	 * false を返します。</p>
 	 * <p>読み込み処理の途中で例外がスローされるとBOMの有無の更新は行われません。</p>
 	 * @return 最後に読み込んだBMSコンテンツにBOMが含まれていた場合true
+	 * @since 0.8.0
 	 */
 	public final boolean getLastProcessedHasBom() {
 		return mLastProcessedHasBom;
@@ -351,6 +356,7 @@ public abstract class BmsLoader {
 	 * @see #setIgnoreUnknownMeta(boolean)
 	 * @see #setIgnoreUnknownChannel(boolean)
 	 * @see #setIgnoreWrongData(boolean)
+	 * @since 0.7.0
 	 */
 	public final BmsLoader setStrictly(boolean strictly) {
 		return this
@@ -412,6 +418,7 @@ public abstract class BmsLoader {
 	 * <p>デフォルトではこの設定は「許可」になっています。</p>
 	 * @param isAllow 再定義の許可有無
 	 * @return このオブジェクトのインスタンス
+	 * @since 0.2.0
 	 */
 	public final BmsLoader setAllowRedefine(boolean isAllow) {
 		mIsAllowRedefine = isAllow;
@@ -474,6 +481,7 @@ public abstract class BmsLoader {
 	 * <p>デフォルトではこの設定は「無効」になっています。</p>
 	 * @param isSkip タイムラインの読み込みをスキップするかどうか
 	 * @return このオブジェクトのインスタンス
+	 * @since 0.4.0
 	 */
 	public final BmsLoader setSkipReadTimeline(boolean isSkip) {
 		mIsSkipReadTimeline = isSkip;
@@ -493,6 +501,7 @@ public abstract class BmsLoader {
 	 * @return このオブジェクトのインスタンス
 	 * @exception NullPointerException charsetsにnullが含まれている
 	 * @see BmsLibrary#setDefaultCharsets(Charset...)
+	 * @since 0.7.0
 	 */
 	public final BmsLoader setCharsets(Charset...charsets) {
 		mCharsets = Stream.of(charsets)

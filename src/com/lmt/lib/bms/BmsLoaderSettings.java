@@ -9,6 +9,7 @@ package com.lmt.lib.bms;
  *
  * @see BmsLoader
  * @see BmsLoadHandler
+ * @since 0.1.0
  */
 public interface BmsLoaderSettings {
 	/**

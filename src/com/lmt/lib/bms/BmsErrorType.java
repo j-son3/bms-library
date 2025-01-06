@@ -4,6 +4,8 @@ import com.lmt.lib.bms.parse.BmsTestResult;
 
 /**
  * BMS読み込み時に発生するエラーの種別を表します。
+ *
+ * @since 0.4.0
  */
 public enum BmsErrorType {
 	/**

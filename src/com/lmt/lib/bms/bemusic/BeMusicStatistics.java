@@ -44,6 +44,7 @@ import com.lmt.lib.bms.internal.deltasystem.Ds;
  *
  * @see BeMusicStatisticsBuilder
  * @see BeMusicTimeSpan
+ * @since 0.1.0
  */
 public class BeMusicStatistics {
 	/** 期間統計情報リスト */
@@ -372,6 +373,7 @@ public class BeMusicStatistics {
 	 * <p>どのレーティング値も算出しなかった場合、当メソッドはnullを返します。譜面統計情報オブジェクトがレーティング値を
 	 * 算出しているかどうかが定かではない場合には必ずnullチェックを行うようにしてください。</p>
 	 * @return Delta Systemのアルゴリズムバージョン
+	 * @since 0.5.0
 	 */
 	public final String getRatingAlgorithmVersion() {
 		return mDsAlgoVer;
@@ -393,9 +395,26 @@ public class BeMusicStatistics {
 	 * <p>Delta Systemのレーティング値は整数値で返されますが、実際にユーザーにプレゼンテーションする際には
 	 * 返されたレーティング値を100で除算し小数点第2位までを示すことを想定しています。プレゼンテーション用に
 	 * 文字列を生成する際は{@link BeMusicRatingType#toString(int)}を使用してください。</p>
+	 * <p>レーティング値取得の対応状況は以下のようになっています。</p>
+	 * <table><caption>&nbsp;</caption>
+	 * <tr>
+	 * <td>0.5.0&nbsp;</td>
+	 * <td>シングルプレー譜面の {@link BeMusicRatingType#COMPLEX COMPLEX}, {@link BeMusicRatingType#POWER POWER},
+	 * {@link BeMusicRatingType#RHYTHM RHYTHM} のみ対応</td>
+	 * </tr>
+	 * <tr>
+	 * <td>0.6.0 - 0.8.0&nbsp;</td>
+	 * <td>シングルプレー譜面の {@link BeMusicRatingType#DELTA DELTA} を除く全ての譜面傾向に対応</td>
+	 * </tr>
+	 * <tr>
+	 * <td>0.9.0以降&nbsp;</td>
+	 * <td>シングル・ダブルプレー譜面の {@link BeMusicRatingType#DELTA DELTA} を除く全ての譜面傾向に対応</td>
+	 * </tr>
+	 * </table>
 	 * @param ratingType レーティング種別
 	 * @return Delta Systemによって算出されたレーティング値
 	 * @exception NullPointerException ratingTypeがnull
+	 * @since 0.5.0
 	 */
 	public final int getRating(BeMusicRatingType ratingType) {
 		assertArgNotNull(ratingType, "ratingType");
@@ -426,6 +445,7 @@ public class BeMusicStatistics {
 	 * 算出しているかどうかが定かではない場合には必ずnullチェックを行うようにしてください。</p>
 	 * <p>当メソッドが扱うレーティング種別には{@link BeMusicRatingType#DELTA}は含まれないことに注意してください。</p>
 	 * @return レーティング値が最も大きいレーティング種別
+	 * @since 0.5.0
 	 */
 	public final BeMusicRatingType getPrimaryTendency() {
 		return mPrimaryTendency;
@@ -449,6 +469,7 @@ public class BeMusicStatistics {
 	 * 算出しているかどうかが定かではない場合には必ずnullチェックを行うようにしてください。</p>
 	 * <p>当メソッドが扱うレーティング種別には{@link BeMusicRatingType#DELTA}は含まれないことに注意してください。</p>
 	 * @return レーティング値が2番目に大きいレーティング種別
+	 * @since 0.5.0
 	 */
 	public final BeMusicRatingType getSecondaryTendency() {
 		return mSecondaryTendency;
@@ -503,6 +524,7 @@ public class BeMusicStatistics {
 	 * 1.15-R<br>
 	 * 上記の例ではアルゴリズムバージョン 1 が 15回更新され、ユーザーレビュー中であることを示します。</p>
 	 * @return Delta Systemのアルゴリズムバージョン
+	 * @since 0.7.0
 	 */
 	public static String getDeltaSystemVersion() {
 		var ver = String.format("%d.%d-%c%s",

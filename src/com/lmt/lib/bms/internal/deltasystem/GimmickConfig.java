@@ -73,7 +73,7 @@ class GimmickConfig extends RatingConfig {
 			40.0, 1.0, 0.0, 0.12, 0.24, 0.35, 0.45, 0.54, 0.63, 0.7, 0.75, 0.8, 0.835, 0.865, 0.895, 0.915, 0.93, 0.95, 0.965, 0.975, 0.988, 1.0);
 	/** 譜面停止範囲の効果範囲率から最終評価点計算用の係数を算出する補間関数 */
 	LinearInterpolateFunction stopIpfnEffectiveRange = LinearInterpolateFunction.create(
-			1.0, 1.0, 0.0, 0.1, 0.2, 0.28, 0.34, 0.405, 0.465, 0.52, 0.57, 0.615, 0.66, 0.71, 0.755, 0.8, 0.84, 0.88, 0.92, 0.95, 0.975, 1.0);
+			1.0, 1.0, 0.0, 0.06, 0.15, 0.26, 0.37, 0.46, 0.53, 0.6, 0.65, 0.7, 0.75, 0.79, 0.82, 0.855, 0.88, 0.91, 0.935, 0.96, 0.98, 1.0);
 	/** 譜面停止の最終評価点からGIMMICK値を算出する補間関数 */
 	LinearInterpolateFunction stopIpfnGimmick = LinearInterpolateFunction.create(
 			1.0, 20000.0, 0.0, 0.07, 0.14, 0.21, 0.285, 0.35, 0.42, 0.485, 0.55, 0.61, 0.66, 0.71, 0.765, 0.81, 0.855, 0.89, 0.92, 0.95, 0.975, 1.0);
@@ -83,10 +83,8 @@ class GimmickConfig extends RatingConfig {
 	double stopInfluenceTimeAfter = 1.0;
 	/** 譜面停止の視覚効果を認知できる最小の譜面停止時間(この値より短い停止時間は譜面停止と認定せず評価点に含めない) */
 	double stopMinEffectiveStopTime = 0.017;
-	/** 譜面停止対応難易度評価点、譜面停止影響範囲率評価点のうち低いほうの評価点の影響度 */
-	double stopInfluenceLowScore = 0.38;
-	/** 譜面停止対応難易度評価点、譜面停止影響範囲率評価点のうち高いほうの評価点の影響度 */
-	double stopInfluenceHighScore = 0.7;
+	/** 譜面停止の対応難易度の評価点への反映係数(この値が大きいほど評価点への反映度が「減少」する) */
+	double stopInfluenceDifficultyValue = 8.0;
 
 	// ----- 地雷に関する設定値 -----
 	/** 操作可能ノートから地雷までの時間差分から地雷回避難易度計算用の係数を算出する補間関数 */
@@ -159,8 +157,7 @@ class GimmickConfig extends RatingConfig {
 		stopInfluenceTimeStop = loader.numeric("stop.influence_time_stop", stopInfluenceTimeStop);
 		stopInfluenceTimeAfter = loader.numeric("stop.influence_time_after", stopInfluenceTimeAfter);
 		stopMinEffectiveStopTime = loader.numeric("stop.min_effective_stop_time", stopMinEffectiveStopTime);
-		stopInfluenceLowScore = loader.numeric("stop.influence_low_score", stopInfluenceLowScore);
-		stopInfluenceHighScore = loader.numeric("stop.influence_high_score", stopInfluenceHighScore);
+		stopInfluenceDifficultyValue = loader.numeric("stop.influence_difficulty_value", stopInfluenceDifficultyValue);
 		// 地雷に関する設定値
 		mineIpfnMineDistance = loader.ipfnLinear("mine.ipfn_mine_distance", mineIpfnMineDistance);
 		mineIpfnMineDamage = loader.ipfnLinear("mine.ipfn_mine_damage", mineIpfnMineDamage);
@@ -208,8 +205,7 @@ class GimmickConfig extends RatingConfig {
 		Ds.debug("    stopInfluenceTimeStop: %s", stopInfluenceTimeStop);
 		Ds.debug("    stopInfluenceTimeAfter: %s", stopInfluenceTimeAfter);
 		Ds.debug("    stopMinEffectiveStopTime: %s", stopMinEffectiveStopTime);
-		Ds.debug("    stopInfluenceLowScore: %s", stopInfluenceLowScore);
-		Ds.debug("    stopInfluenceHighScore: %s", stopInfluenceHighScore);
+		Ds.debug("    stopInfluenceDifficultyValue: %s", stopInfluenceDifficultyValue);
 		Ds.debug("  }");
 		Ds.debug("  mine: {");
 		Ds.debug("    mineIpfnMineDistance: %s", mineIpfnMineDistance);

@@ -58,6 +58,8 @@ import java.util.function.Consumer;
  * <p>当クラスではシーケンサの各種動作状況を検知するためのイベントが用意されています。
  * 「on」で始まる名前のメソッドがイベント通知が行われるメソッドです。これらのメソッドは必ず {@link #loop(boolean)},
  * {@link #update()} を呼び出したスレッドから呼び出されることに留意してください。</p>
+ *
+ * @since 0.8.0
  */
 public abstract class BeMusicSequencer {
 	/** 当クラスが提唱するループ待機時間の規定値(秒) */

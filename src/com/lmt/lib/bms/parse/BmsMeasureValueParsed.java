@@ -4,6 +4,8 @@ package com.lmt.lib.bms.parse;
  * BMSの入力元から解析された小節データを表す要素データクラスです。
  *
  * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+ *
+ * @since 0.8.0
  */
 public class BmsMeasureValueParsed extends BmsTimelineParsed {
 	/** 小節データの値の文字列表現 */

@@ -12,6 +12,8 @@ import java.util.stream.Stream;
  * 当列挙型によってモードごとに異なる情報・振る舞いを管理します。</p>
  *
  * <p>ロングノートモードはメタ情報 {@link BeMusicMeta#LNMODE} の値を設定することで変更できます。</p>
+ *
+ * @since 0.3.0
  */
 public enum BeMusicLongNoteMode {
 	/**

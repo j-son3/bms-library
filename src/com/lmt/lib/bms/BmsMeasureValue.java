@@ -7,6 +7,7 @@ package com.lmt.lib.bms;
  * 小節データは原則として非nullであり、値を取得する時にnullが返ることはありません。</p>
  *
  * @see BmsTimelineElement
+ * @since 0.8.0
  */
 public class BmsMeasureValue extends BmsTimelineElement {
 	/** 小節データの値 */

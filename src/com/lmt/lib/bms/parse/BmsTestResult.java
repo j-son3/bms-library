@@ -15,6 +15,8 @@ import com.lmt.lib.bms.BmsScriptError;
  * <li>タイムライン要素の検査：{@link BmsLoadHandler#testChannel(BmsChannel, int, int, Object)}</li>
  * <li>BMSコンテンツの検査：{@link BmsLoadHandler#testContent(BmsContent)}</li>
  * </ul>
+ *
+ * @since 0.8.0
  */
 public class BmsTestResult {
 	/** 検査に合格したことを示す値です。 */

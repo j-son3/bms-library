@@ -13,6 +13,7 @@ import static com.lmt.lib.bms.internal.Assertion.*;
  * <p>また、当クラスは{@link BmsChannel}が継承します。</p>
  *
  * @see BmsChannel
+ * @since 0.0.1
  */
 public class BmsChannelKey implements Comparable<BmsChannelKey> {
 	/** チャンネル番号 */

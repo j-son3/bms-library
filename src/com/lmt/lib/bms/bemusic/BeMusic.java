@@ -17,6 +17,8 @@ import com.lmt.lib.bms.BmsStandardLoader;
  * <p>当クラスはBe-Musicに関する最上位レベルのAPI、および定数値などの情報を集約する目的で存在します。
  * 提供される機能はBe-Music関連アプリケーションを素早く作成するために必要なものになっており、
  * 同時にBe-Musicサブセットの機能を理解するために最適な情報が揃っています。</p>
+ *
+ * @since 0.7.0
  */
 public class BeMusic {
 	/**

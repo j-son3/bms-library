@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.lmt.lib.bms.bemusic.BeMusicDevice;
+import com.lmt.lib.bms.bemusic.BeMusicLane;
 import com.lmt.lib.bms.bemusic.BeMusicPoint;
 import com.lmt.lib.bms.bemusic.BeMusicRatingType;
 import com.lmt.lib.bms.internal.MutableInt;
@@ -13,34 +14,6 @@ import com.lmt.lib.bms.internal.MutableInt;
  * 譜面傾向「RHYTHM」の分析処理クラス
  */
 public class RhythmAnalyzer extends RatingAnalyzer {
-	/** タイムライン評価点データ */
-	private static class TimelineScore {
-		/** 評価対象のサイド */
-		RhythmElement.Side side;
-		/** リズム変化回数 */
-		int changeCount;
-		/** リズム変化率(回/秒) */
-		double changePerSec;
-		/** 要操作時間 */
-		double movementTime;
-		/** 要操作時間率(演奏時間に対する要操作時間の比率) */
-		double movementRate;
-		/** リズム範囲評価点 */
-		double scoreRange;
-		/** リズム変化頻度(回/秒)による評価点補正倍率 */
-		double ratioChange;
-		/** 最終評価点 */
-		double score;
-
-		/** {@inheritDoc} */
-		@Override
-		public String toString() {
-			return String.format(
-					"%s = change:{ count=%d, perSec=%.2f}, movement:{ time=%.2f, rate=%.2f }, score:{ range=%.4f, ratioChange=%.4f, final=%.4f }",
-					side, changeCount, changePerSec, movementTime, movementRate, scoreRange, ratioChange, score);
-		}
-	}
-
 	/**
 	 * コンストラクタ
 	 */
@@ -50,10 +23,10 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 
 	/** {@inheritDoc} */
 	@Override
-	protected void compute(DsContext cxt) {
+	protected void compute(DsContext ctx) {
 		// プレーモードに応じた左側・右側のフィルタリングメソッドを設定する
 		Predicate<RhythmElement> filterL, filterR;
-		if (!cxt.dpMode) {
+		if (!ctx.dpMode) {
 			// シングルプレー
 			filterL = RhythmAnalyzer::filterSpLeft;
 			filterR = RhythmAnalyzer::filterSpRight;
@@ -68,18 +41,18 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 		// 要素オブジェクトの主体は「全体の要素リスト」にあるものをベースとする。
 		// 要するに左側・右側の要素リストは全体の要素リストの参照であるため、左右の要素リストに対する変更は
 		// 全て全体の要素リストに反映されることになる。
-		var elemsAll = RatingElement.listElements(cxt, RhythmElement::new, BeMusicPoint::hasMovementNote);
+		var elemsAll = Ds.listElements(ctx, RhythmElement::new, BeMusicPoint::hasMovementNote);
 		var elemsL = elemsAll.stream().filter(filterL).collect(Collectors.toList());
 		var elemsR = elemsAll.stream().filter(filterR).collect(Collectors.toList());
 		if (elemsAll.isEmpty()) {
 			// 操作可能ノートが1個もない空譜面は0点とする
 			Ds.debug("No rhythm because empty score.");
-			cxt.stat.setRating(getRatingType(), 0);
+			ctx.stat.setRating(getRatingType(), 0);
 			return;
 		} else if (elemsAll.size() < 2) {
 			// 楽曲位置が2点未満だとリズムもへったくれもないでしょw
 			Ds.debug("No rhythm in this song.");
-			cxt.stat.setRating(getRatingType(), 1);
+			ctx.stat.setRating(getRatingType(), 1);
 			return;
 		} else {
 			// Do nothing
@@ -89,63 +62,31 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 		// 最終評価点は各評価点を既定の重み付けで配分される
 		var config = RhythmConfig.getInstance();
 		var totalTime = elemsAll.get(elemsAll.size() - 1).getTime();
-		var scoreAll = computeTimeline(cxt, elemsAll, totalTime, RhythmElement.Side.ALL);
-		var scoreL = computeTimeline(cxt, elemsL, totalTime, RhythmElement.Side.LEFT);
-		var scoreR = computeTimeline(cxt, elemsR, totalTime, RhythmElement.Side.RIGHT);
-		var orgAll = scoreAll.score * config.influenceAllSide;
-		var orgL = scoreL.score * config.influenceLeftSide;
-		var orgR = scoreR.score * config.influenceRightSide;
-		var timePtRange = RatingElement.computeTimeOfPointRange(elemsAll);
-		var rhythmOrg = computeRatingValue(orgAll + orgL + orgR, timePtRange, 1.0);
-		var rhythm = (int)config.ipfnRhythm.compute(rhythmOrg);
+		var scoreAll = computeTimeline(new Rhythm.Context(totalTime, Rhythm.Side.ALL), elemsAll);
+		var scoreL = computeTimeline(new Rhythm.Context(totalTime, Rhythm.Side.LEFT), elemsL);
+		var scoreR = computeTimeline(new Rhythm.Context(totalTime, Rhythm.Side.RIGHT), elemsR);
+		var orgAll = scoreAll.score * config.influenceAllSide(ctx);
+		var orgL = scoreL.score * config.influenceLeftSide(ctx);
+		var orgR = scoreR.score * config.influenceRightSide(ctx);
+		var timePtRange = Ds.computeTimeOfPointRange(elemsAll);
+		var rhythmOrg = Ds.computeRatingValue(orgAll + orgL + orgR, timePtRange, 1.0);
+		var rhythm = Math.max((int)config.ipfnRhythm.compute(rhythmOrg), 1);
 
 		// デバッグ出力する
-		debugOut(cxt, rhythmOrg, rhythm, elemsAll, scoreAll, scoreL, scoreR, totalTime);
+		debugOut(ctx, rhythm, elemsAll, rhythmOrg, scoreAll, scoreL, scoreR, totalTime);
 
 		// 最終結果を設定する
-		cxt.stat.setRating(getRatingType(), rhythm);
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	protected void dumpSummary(DsContext cxt, double org, int rating, Object...values) {
-		var sb = new StringBuilder();
-		var sa = (TimelineScore)values[0];
-		var sl = (TimelineScore)values[1];
-		var sr = (TimelineScore)values[2];
-		sb.append(cxt.header.getComment());
-		sb.append("\t").append(String.format("%s %s", cxt.header.getTitle(), cxt.header.getSubTitle()).strip());
-		sb.append(String.format("\t%d\t%.2f", sa.changeCount, sa.changePerSec));
-		sb.append(String.format("\t%.1f\t%.1f\t%.3f", values[3], sa.movementTime, sa.movementRate));
-		sb.append(String.format("\t%.4f\t%.4f\t%.4f", sa.scoreRange, sa.ratioChange, sa.score));
-		sb.append(String.format("\t%.4f\t%.4f\t%.4f", sl.scoreRange, sl.ratioChange, sl.score));
-		sb.append(String.format("\t%.4f\t%.4f\t%.4f", sr.scoreRange, sr.ratioChange, sr.score));
-		sb.append(String.format("\t%.4f", org));
-		sb.append(String.format("\t%.2f", getRatingType().toValue(rating)));
-		Ds.debug(sb);
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	protected void dumpDetail(DsContext cxt, double org, int rating, List<? extends RatingElement> elems,
-			Object...values) {
-		super.dumpDetail(cxt, org, rating, elems, values);
-		Ds.debug(values[0]);
-		Ds.debug(values[1]);
-		Ds.debug(values[2]);
+		ctx.stat.setRating(getRatingType(), rhythm);
 	}
 
 	/**
 	 * 指定サイドでのタイムライン分析メイン処理
-	 * @param cxt コンテキスト
+	 * @param rc RHYTHM用コンテキスト
 	 * @param elems 要素リスト
-	 * @param totalTime 演奏時間
-	 * @param side 分析対象サイド
-	 * @return 評価点データ
+	 * @return 分析結果データ
 	 */
-	private TimelineScore computeTimeline(
-			DsContext cxt, List<RhythmElement> elems, double totalTime, RhythmElement.Side side) {
-		var config = RhythmConfig.getInstance();
+	private Rhythm.Score computeTimeline(Rhythm.Context rc, List<RhythmElement> elems) {
+		var config = rc.config;
 		var countElem = elems.size();
 		var lastIndexElem = countElem - 1;
 
@@ -208,7 +149,7 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 			curPr.lastElement = elems.get(lastIndex);
 			curPr.pulseTimeSec = pulseTimeSec;
 			curPr.rangeTime = curPr.lastElement.getTime() - curPr.firstElement.getTime();
-			curPr.rangeRate = Math.max((curPr.rangeTime / totalTime), config.minRangeRate);
+			curPr.rangeRate = Math.max((curPr.rangeTime / rc.totalTime), config.minRangeRate);
 			movementTime += curPr.rangeTime;
 
 			// グループ化した範囲全体へ範囲オブジェクトを登録し、平均密度を算出する
@@ -216,7 +157,7 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 			var sumNotes = 0;
 			for (var k = i; k <= lastIndex; k++) {
 				var elemTmp = elems.get(k);
-				elemTmp.setPulseRange(side, curPr);
+				elemTmp.setPulseRange(rc.side, curPr);
 				sumNotes += elemTmp.getPoint().getNoteCount();
 			}
 			var decayTime = config.densityDecayTime;
@@ -235,8 +176,8 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 		}
 
 		// 同一リズムのリピート回数を検出する
-		var firstElem = elems.stream().filter(e -> e.getPulseRange(side) != null).findFirst().orElse(null);
-		var firstPr = (firstElem == null) ? null : firstElem.getPulseRange(side);
+		var firstElem = elems.stream().filter(e -> e.getPulseRange(rc.side) != null).findFirst().orElse(null);
+		var firstPr = (firstElem == null) ? null : firstElem.getPulseRange(rc.side);
 		for (var pr = firstPr; pr != null;) {
 			// リズム範囲のパターン数が多いリピートから先に検出しようとする
 			// 仮にパターン数が多いことでリピート数が少なかったとしても、パターン数が多いほうを優先する
@@ -277,7 +218,7 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 		// 同一リズムリピートによる個別リズム範囲評価点の修正を行いつつ、リズム範囲評価点を計算する
 		var adjustRate = config.adjustPatternRepeatRate;
 		var maxPatternCount = config.maxPatternRepeatCount;
-		var firstPr2 = elems.isEmpty() ? null : elems.get(0).getPulseRange(side);
+		var firstPr2 = elems.isEmpty() ? null : elems.get(0).getPulseRange(rc.side);
 		for (var pr = firstPr2; pr != null; pr = pr.nextRange) {
 			var repeat = pr.repeat;
 			var adjust = 1.0 - (repeat.hasRepeat() ? adjustRate * (maxPatternCount - repeat.patternCount + 1) : 0.0);
@@ -299,16 +240,79 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 		}
 
 		// 各種評価点を計算する
-		var tl = new TimelineScore();
-		tl.side = side;
+		var tl = new Rhythm.Score();
+		tl.side = rc.side;
 		tl.changeCount = changeCount;
-		tl.changePerSec = changeCount / totalTime;
+		tl.changePerSec = changeCount / rc.totalTime;
 		tl.movementTime = movementTime;
-		tl.movementRate = movementTime / totalTime;
+		tl.movementRate = movementTime / rc.totalTime;
 		tl.scoreRange = summarizer.summary();
 		tl.ratioChange = config.ipfnChangeRate.compute(tl.changePerSec);
 		tl.score = tl.scoreRange * tl.ratioChange;
 		return tl;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void dumpSummarySp(DsContext ctx, int rating, Object...values) {
+		dumpSummaryCommon(ctx, (double)values[0], rating, values[1], values[2], values[3], values[4]);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void dumpSummaryDp(DsContext ctx, int rating, Object...values) {
+		dumpSummaryCommon(ctx, (double)values[0], rating, values[1], values[2], values[3], values[4]);
+	}
+
+	/**
+	 * サマリされたデバッグ情報の出力
+	 * @param ctx Delta System用コンテキスト
+	 * @param org 算出したレーティング値のオリジナル値
+	 * @param rating orgの値をレーティング種別ごとの値の範囲にスケーリングした最終評価点の値
+	 * @param values その他、デバッグ出力のために必要なオブジェクトのリスト
+	 */
+	private void dumpSummaryCommon(DsContext ctx, double org, int rating, Object...values) {
+		var sb = new StringBuilder();
+		var sa = (Rhythm.Score)values[0];
+		var sl = (Rhythm.Score)values[1];
+		var sr = (Rhythm.Score)values[2];
+		sb.append(ctx.header.getComment());
+		sb.append("\t").append(String.format("%s %s", ctx.header.getTitle(), ctx.header.getSubTitle()).strip());
+		sb.append(String.format("\t%d\t%.2f", sa.changeCount, sa.changePerSec));
+		sb.append(String.format("\t%.1f\t%.1f\t%.3f", values[3], sa.movementTime, sa.movementRate));
+		sb.append(String.format("\t%.4f\t%.4f\t%.4f", sa.scoreRange, sa.ratioChange, sa.score));
+		sb.append(String.format("\t%.4f\t%.4f\t%.4f", sl.scoreRange, sl.ratioChange, sl.score));
+		sb.append(String.format("\t%.4f\t%.4f\t%.4f", sr.scoreRange, sr.ratioChange, sr.score));
+		sb.append(String.format("\t%.4f", org));
+		sb.append(String.format("\t%.2f", getRatingType().toValue(rating)));
+		Ds.debug(sb);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void dumpDetailSp(DsContext ctx, int rating, List<? extends RatingElement> elems, Object...values) {
+		super.dumpDetailSp(ctx, rating, elems, values);
+		dumpDetailCommon(ctx, rating, elems, values[1], values[2], values[3]);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void dumpDetailDp(DsContext ctx, int rating, List<? extends RatingElement> elems, Object...values) {
+		super.dumpDetailDp(ctx, rating, elems, values);
+		dumpDetailCommon(ctx, rating, elems, values[1], values[2], values[3]);
+	}
+
+	/**
+	 * 詳細デバッグ情報の出力
+	 * @param ctx Delta System用コンテキスト
+	 * @param rating orgの値をレーティング種別ごとの値の範囲にスケーリングした最終評価点の値
+	 * @param elems レーティング要素リスト
+	 * @param values その他、デバッグ出力のために必要なオブジェクトのリスト
+	 */
+	private void dumpDetailCommon(DsContext ctx, int rating, List<? extends RatingElement> elems, Object...values) {
+		Ds.debug(values[0]);
+		Ds.debug(values[1]);
+		Ds.debug(values[2]);
 	}
 
 	/**
@@ -430,7 +434,7 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 	 * @return リズム分析対象楽曲位置の場合true
 	 */
 	private static boolean filterDpLeft(RhythmElement elem) {
-		return false; // TODO
+		return elem.getPoint().hasMovementNote(BeMusicLane.PRIMARY);
 	}
 
 	/**
@@ -439,6 +443,6 @@ public class RhythmAnalyzer extends RatingAnalyzer {
 	 * @return リズム分析対象楽曲位置の場合true
 	 */
 	private static boolean filterDpRight(RhythmElement elem) {
-		return false; // TODO
+		return elem.getPoint().hasMovementNote(BeMusicLane.SECONDARY);
 	}
 }

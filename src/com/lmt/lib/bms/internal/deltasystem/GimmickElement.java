@@ -1,6 +1,6 @@
 package com.lmt.lib.bms.internal.deltasystem;
 
-import com.lmt.lib.bms.bemusic.BeMusicDevice;
+import com.lmt.lib.bms.bemusic.BeMusicLane;
 import com.lmt.lib.bms.bemusic.BeMusicPoint;
 
 /**
@@ -12,10 +12,11 @@ class GimmickElement extends RatingElement {
 
 	/**
 	 * コンストラクタ
+	 * @param ctx コンテキスト
 	 * @param point 楽曲位置情報
 	 */
-	GimmickElement(BeMusicPoint point) {
-		super(point);
+	GimmickElement(DsContext ctx, BeMusicPoint point) {
+		super(ctx, point);
 	}
 
 	/**
@@ -36,32 +37,55 @@ class GimmickElement extends RatingElement {
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printData(int pos) {
-		var s = String.format("   |%.3f|%s %s %s %s %s %s %s %s|%s",
+	protected void printSpData(int pos) {
+		var s = String.format("   |%.3f|%s|%s",
 				getTimeDelta(),
-				getNoteTypeString(BeMusicDevice.SCRATCH1), getNoteTypeString(BeMusicDevice.SWITCH11),
-				getNoteTypeString(BeMusicDevice.SWITCH12), getNoteTypeString(BeMusicDevice.SWITCH13),
-				getNoteTypeString(BeMusicDevice.SWITCH14), getNoteTypeString(BeMusicDevice.SWITCH15),
-				getNoteTypeString(BeMusicDevice.SWITCH16), getNoteTypeString(BeMusicDevice.SWITCH17),
+				makeNotesString(BeMusicLane.PRIMARY),
 				makePrintString(pos));
 		Ds.debug(s);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printMeasure() {
-		var m = getMeasure();
+	protected void printDpData(int pos) {
+		var s = String.format("   |%.3f|%s| |%s|%s",
+				getTimeDelta(),
+				makeNotesString(BeMusicLane.PRIMARY),
+				makeNotesString(BeMusicLane.SECONDARY),
+				makePrintString(pos));
+		Ds.debug(s);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void printSpMeasure(int m) {
 		Ds.debug("%3d+-----+---------------------------------------+------+-----+----------+----+--------+------+------+-------+------+------+------+", m);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printHeader() {
+	protected void printDpMeasure(int m) {
+		Ds.debug("%3d+-----+-------------------------------| |-------------------------------|------+-----+----------+----+--------+------+------+-------+------+------+------|", m);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void printSpHeader() {
 		Ds.debug("---+-----+----+----+----+----+----+----+----+----+--------------------------------------------+---------------------+-------------+");
 		Ds.debug("   |     |    |    |    |    |    |    |    |    |                CHANGE-SPEED                |        STOP         |    MINE     |");
 		Ds.debug("   |     |    |    |    |    |    |    |    |    +------+-----+----------+----+--------+------+-------+------+------+------+------+");
 		Ds.debug("M  |DELTA|SCR1|SW1 |SW2 |SW3 |SW4 |SW5 |SW6 |SW7 |RANGE |NOTES|SPEED     |GEAR|IDEALITY|SCORE |RANGE  |TIME  |SCORE |RANGE |SCORE |");
 		Ds.debug("---+-----+----+----+----+----+----+----+----+----+------+-----+----------+----+--------+------+-------+------+------+------+------+");
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void printDpHeader() {
+		Ds.debug("---+-----+-------------------------------+-+-------------------------------+--------------------------------------------+---------------------+-------------+");
+		Ds.debug("   |     |             LEFT              | |            RIGHT              |                CHANGE-SPEED                |        STOP         |    MINE     |");
+		Ds.debug("   |     +---+---+---+---+---+---+---+---+ +---+---+---+---+---+---+---+---+------+-----+----------+----+--------+------+-------+------+------+------+------+");
+		Ds.debug("M  |DELTA|SC1|SW1|SW2|SW3|SW4|SW5|SW6|SW7| |SW1|SW2|SW3|SW4|SW5|SW6|SW7|SC2|RANGE |NOTES|SPEED     |GEAR|IDEALITY|SCORE |RANGE  |TIME  |SCORE |RANGE |SCORE |");
+		Ds.debug("---+-----+---+---+---+---+---+---+---+---+-+---+---+---+---+---+---+---+---+------+-----+----------+----+--------+------+-------+------+------+------+------+");
 	}
 
 	/**

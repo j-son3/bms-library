@@ -6,6 +6,8 @@ import java.util.List;
  * BMSの入力元から解析されたノートを表す要素データクラスです。
  *
  * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+ *
+ * @since 0.8.0
  */
 public class BmsNoteParsed extends BmsTimelineParsed {
 	/** 配列データ(2文字の16, 36, 62進数値の羅列文字列) */

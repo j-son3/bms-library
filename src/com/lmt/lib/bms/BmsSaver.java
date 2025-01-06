@@ -14,6 +14,8 @@ import java.nio.file.Path;
  * <p>当クラスではBMSコンテンツの内容を外部データとして出力する機能を提供します。
  * 外部データはファイル等の何らかの形式で記録されていることを想定しています。
  * {@link java.io.OutputStream}による出力が可能であれば、どのような媒体でもBMSコンテンツを書き出すことができます。</p>
+ *
+ * @since 0.0.1
  */
 public abstract class BmsSaver {
 	/**

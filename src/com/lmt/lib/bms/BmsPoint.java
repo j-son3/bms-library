@@ -11,6 +11,7 @@ import static com.lmt.lib.bms.internal.Assertion.*;
  * 楽曲位置を各APIの入力値として使用すると、APIによっては例外をスローすることがありますので取り扱いには注意してください。</p>
  *
  * @see BmsAt
+ * @since 0.0.1
  */
 public class BmsPoint implements BmsAt, Comparable<BmsAt> {
 	/** タイムライン上で有効な最も小さい楽曲位置 */

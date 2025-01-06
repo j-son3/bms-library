@@ -3,9 +3,6 @@ package com.lmt.lib.bms;
 import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -63,6 +60,7 @@ import java.util.stream.Stream;
  * @see BmsContent [BmsContent] BMS仕様に基づいて生成されたBMSコンテンツの詳細についての説明
  * @see BmsLoader [BmsLoader] BMS仕様に基づいて外部データからBMSコンテンツを読み込む方法についての説明
  * @see BmsSaver [BmsSaver] BMSコンテンツを外部データに書き込む方法についての説明
+ * @since 0.0.1
  */
 public final class BmsSpec {
 	/** BMS定義で初期BPMが未定義の場合に使用されるデフォルトのBPM */
@@ -328,6 +326,7 @@ public final class BmsSpec {
 	 * リストの先頭に格納されます。ソートキーが同一のメタ情報は、BMS仕様に先に登録したものが先に格納されます。</p>
 	 * @param includeObject メタ情報のリストに任意型メタ情報を含むかどうか
 	 * @return メタ情報のリスト
+	 * @since 0.8.0
 	 */
 	public final List<BmsMeta> getMetas(boolean includeObject) {
 		return (includeObject ? metas() : metas().filter(m -> !m.isObjectType())).collect(Collectors.toList());
@@ -338,6 +337,7 @@ public final class BmsSpec {
 	 * <p>走査する順番は設定されたソートキーで決定され、ソートキーの小さいメタ情報が先に登場します。
 	 * ソートキーが同一のメタ情報は、BMS仕様に先に登録したものが先に登場します。</p>
 	 * @return メタ情報を走査するストリーム
+	 * @since 0.8.0
 	 */
 	public final Stream<BmsMeta> metas() {
 		return mOrderedMetas.stream();
@@ -376,6 +376,7 @@ public final class BmsSpec {
 	 * <p>リストへの格納順は、チャンネル番号の若いチャンネルが先になります。</p>
 	 * @param includeUser チャンネルのリストにユーザーチャンネルを含むかどうか
 	 * @return チャンネルのリスト
+	 * @since 0.8.0
 	 */
 	public final List<BmsChannel> getChannels(boolean includeUser) {
 		return (includeUser ? channels() : channels().filter(BmsChannel::isSpec)).collect(Collectors.toList());
@@ -385,6 +386,7 @@ public final class BmsSpec {
 	 * チャンネルを走査するストリームを返します。
 	 * <p>チャンネル番号の若いチャンネルが先に登場します。</p>
 	 * @return チャンネルを走査するストリーム
+	 * @since 0.8.0
 	 */
 	public final Stream<BmsChannel> channels() {
 		return mOrderedChannels.stream();
@@ -402,6 +404,7 @@ public final class BmsSpec {
 	 * 基数選択メタ情報を取得します。
 	 * <p>基数選択メタ情報が未設定の場合、nullを返します。</p>
 	 * @return 基数選択メタ情報、またはnull
+	 * @since 0.8.0
 	 */
 	public final BmsMeta getBaseChangerMeta() {
 		return mBaseChangerMeta;
@@ -410,6 +413,7 @@ public final class BmsSpec {
 	/**
 	 * 基数選択メタ情報が設定されているかを取得します。
 	 * @return 基数選択メタ情報が設定されていればtrue
+	 * @since 0.8.0
 	 */
 	public final boolean hasBaseChanger() {
 		return mBaseChangerMeta != null;
@@ -530,68 +534,84 @@ public final class BmsSpec {
 	}
 
 	/**
-	 * BMS仕様の内容からハッシュ値を計算し、結果を返します。
-	 * <p>ハッシュ値の計算に使用する情報ソースは、全ての任意型({@link BmsType#OBJECT})ではないメタ情報、および
-	 * 全ての仕様チャンネルです。小節長変更・BPM変更・譜面停止チャンネルの設定や、メタ情報の登録順もハッシュ値を
-	 * 計算する要素となります。</p>
-	 * <p>上記のように、BMS仕様の作成手順、作成内容の全ての要素がハッシュ値を決定する要素となることから、BMS仕様を生成する
-	 * データ内容が少しでも変更された場合、別のハッシュ値が返却されることになります。そのため、当メソッドで返却されるハッシュ値は
-	 * データフォーマットを解析する処理が変更されていないことを確認するためのセキュリティ対策として用いることを想定しています。</p>
-	 * <p>唯一、任意型メタ情報・ユーザーチャンネルについてはどのような内容をどのような順番で登録したとしてもハッシュ値には
-	 * 影響しません。これは、BMS仕様が変更されなくてもアプリケーションが更新される場合(※)があることを考慮するためです。
-	 * (例えばアプリケーションのバグフィックスなどが挙げられます)</p>
-	 * <p>※任意型メタ情報、ユーザーチャンネルはアプリケーション向けに割り当てられる情報のため、アプリケーション独自の都合で
-	 * 追加・変更・削除される可能性が高い。</p>
-	 * @return BMS仕様から算出されたハッシュ値
+	 * BMS仕様の内容からハッシュ値を生成し、結果を返します。
+	 * <p>ハッシュ値の生成に使用する情報ソースは、全ての任意型({@link BmsType#OBJECT})ではないメタ情報、
+	 * および全ての仕様チャンネルです。小節長変更・BPM変更・譜面停止チャンネルの設定や、
+	 * メタ情報の登録順もハッシュ値を生成する要素となります。</p>
+	 * <p>上記のように、BMS仕様の生成手順、生成内容の全ての要素がハッシュ値を決定する要素となることから、
+	 * BMS仕様を生成するデータ内容が少しでも変更された場合、異なるハッシュ値が生成されることになります。
+	 * そのため、当メソッドで生成されるハッシュ値はデータフォーマットを解析する処理が変更されていないことを
+	 * 確認するためのセキュリティ対策として用いることを想定しています。</p>
+	 * <p>唯一、任意型メタ情報・ユーザーチャンネルについてはどのような内容をどのような順番で登録したとしても、
+	 * ハッシュ値には影響しません。これは、BMS仕様が変更されなくてもアプリケーションが更新される場合(※)
+	 * があることを考慮するためです。(例えばアプリケーションのバグフィックスなどが挙げられます)</p>
+	 * <p>※任意型メタ情報、ユーザーチャンネルはアプリケーション向けに割り当てられる情報のため、
+	 * アプリケーション独自の都合で追加・変更・削除される可能性が高い。</p>
+	 * <p><strong>当メソッドはバージョン0.9.0以前から使用できますが、0.9.0以降と以前でハッシュ値の互換性がありません。
+	 * 0.9.0以降のハッシュ値が正式版となります。</strong></p>
+	 * @return BMS仕様から生成されたハッシュ値
+	 * @since 0.9.0
 	 */
 	public final byte[] generateHash() {
-		// ハッシュ値計算用データ
-		var data = new StringBuilder(2048);
+		return generateHashSeed().toHash();
+	}
 
-		// メタ情報を計算する
-		data.append("META");
+	/**
+	 * BMS仕様のハッシュ値生成
+	 * @return BMS仕様のハッシュ値
+	 */
+	HashSeed generateHashSeed() {
+		var seed = new HashSeed();
+		seed.beginObject(false);
+
+		// メタ情報を書き出す
+		seed.beginArray("metas", false);
 		var metas = getMetas();
-		var metaCount = metas.size();
-		for (int i = 0; i < metaCount; i++) {
-			appendMetaToHashData(i, metas.get(i), data);
+		for (var meta : metas) {
+			seed.beginObject(false)
+					.put("n", meta.getName())
+					.put("u", meta.getUnit().shortName)
+					.put("t", meta.getType().getShortName())
+					.put("d", meta.getType(), meta.getDefaultValue())
+					.put("q", meta.isUniqueness())
+					.endObject();
 		}
+		seed.endArray();
 
-		// チャンネルを計算する
-		data.append("CHANNEL");
+		// チャンネルを書き出す
+		seed.beginArray("channels", false);
 		var channels = getChannels();
-		var channelCount = channels.size();
-		for (int i = 0; i < channelCount; i++) {
-			appendChannelToHashData(i, channels.get(i), data);
+		for (var channel : channels) {
+			seed.beginObject(false)
+					.put("n", BmsInt.to36s(channel.getNumber()))
+					.put("t", channel.getType().getShortName())
+					.put("r", channel.getRef())
+					.put("d", channel.getType(), channel.getDefaultValue())
+					.put("m", channel.isMultiple())
+					.put("q", channel.isUniqueness())
+					.endObject();
 		}
+		seed.endArray();
 
-		// 小節長変更チャンネルを計算する
-		data.append("LENGTH");
-		appendChannelToHashData(0, getLengthChannel(), data);
+		// 小節長変更チャンネルを書き出す
+		seed.put("length", (mLengthChannel == null) ? null : BmsInt.to36s(mLengthChannel.getNumber()));
 
-		// BPM変更チャンネルを計算する
-		data.append("BPM");
-		channelCount = mBpmChannels.length;
-		for (var i = 0; i < channelCount; i++) {
-			appendChannelToHashData(i, mBpmChannels[i], data);
+		// BPM変更チャンネルを書き出す
+		seed.beginArray("bpms", false);
+		for (var bpm : mBpmChannels) {
+			seed.put(BmsInt.to36s(bpm.getNumber()));
 		}
+		seed.endArray();
 
-		// 譜面停止チャンネルを計算する
-		data.append("STOP");
-		channelCount = mStopChannels.length;
-		for (var i = 0; i < channelCount; i++) {
-			appendChannelToHashData(i, mStopChannels[i], data);
+		// 譜面停止チャンネルを書き出す
+		seed.beginArray("stops", false);
+		for (var stop : mStopChannels) {
+			seed.put(BmsInt.to36s(stop.getNumber()));
 		}
+		seed.endArray();
 
-		// 生成したハッシュ値計算用データはUTF-16からUTF-8へ変換し、それをハッシュ生成用のインプットとする
-		try {
-			// ハッシュ値を生成する
-			var hashInput = data.toString().getBytes(StandardCharsets.UTF_8);
-			var msgDigest = MessageDigest.getInstance("SHA-1");
-			return msgDigest.digest(hashInput);
-		} catch (NoSuchAlgorithmException e) {
-			// 想定しない
-			return new byte[0];
-		}
+		seed.endObject();
+		return seed;
 	}
 
 	/**
@@ -779,85 +799,5 @@ public final class BmsSpec {
 	static double computeTickCount(double length, boolean normalize) {
 		var tickCount = TICK_COUNT_DEFAULT * length;
 		return normalize ? Math.round(Math.max(1.0, tickCount)) : tickCount;
-	}
-
-	/**
-	 * ハッシュ値計算用データにメタ情報を追記する。
-	 * @param index 0から開始のインデックス値
-	 * @param meta 追記するメタ情報
-	 * @param out 追記先StringBuilder
-	 */
-	private static void appendMetaToHashData(int index, BmsMeta meta, StringBuilder out) {
-		String tmp;
-
-		// メタ情報の名称：文字列をそのまま用いる
-		tmp = meta.getName();
-		out.append(tmp);
-
-		// 構成単位：列挙型の名称文字列を用いる
-		tmp = meta.getUnit().name();
-		out.append(tmp);
-
-		// データ型：データ型の名称文字列を用いる
-		tmp = meta.getType().getName();
-		out.append(tmp);
-
-		// 初期値：メタ情報生成時に指定された文字列表現を用いる
-		tmp = meta.getDefaultValueString();
-		out.append(tmp);
-
-		// 並び順：インデックス値を文字列に変換した値を用いる
-		tmp = Integer.toString(index);
-		out.append(tmp);
-
-		// 同一性チェック有無："0"または"1"
-		tmp = meta.isUniqueness() ? "1" : "0";
-		out.append(tmp);
-	}
-
-	/**
-	 * ハッシュ値計算用データにチャンネルを追記する。
-	 * @param index 0から開始のインデックス値
-	 * @param channel 追記するチャンネル
-	 * @param out 追記先StringBuilder
-	 */
-	private static void appendChannelToHashData(int index, BmsChannel channel, StringBuilder out) {
-		if (channel == null) {
-			return;
-		}
-
-		String tmp;
-
-		// インデックス値：整数値をそのまま文字列に変換したものを使用する
-		tmp = Integer.toString(index);
-		out.append(tmp);
-
-		// チャンネル番号：整数値をそのまま文字列に変換したものを使用する
-		tmp = Integer.toString(channel.getNumber());
-		out.append(tmp);
-
-		// データ型：データ型の名称文字列を用いる
-		tmp = channel.getType().getName();
-		out.append(tmp);
-
-		// 参照先メタ情報名称："REF" + 名称文字列 を使用する
-		tmp = "REF";
-		out.append(tmp);
-		tmp = channel.getRef();
-		if (tmp != null) {
-			out.append(tmp);
-		}
-
-		// 初期値：チャンネル生成時に指定された文字列表現を使用する
-		tmp = channel.getDefaultValueString();
-		out.append(tmp);
-
-		// 複数データ保有可否："0"または"1"
-		tmp = channel.isMultiple() ? "1" : "0";
-		out.append(tmp);
-
-		// 同一性チェック有無："0"または"1"
-		tmp = channel.isUniqueness() ? "1" : "0";
-		out.append(tmp);
 	}
 }

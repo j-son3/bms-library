@@ -33,6 +33,7 @@ import java.util.TreeMap;
  * @see BmsMeta
  * @see BmsChannel
  * @see BmsSpec
+ * @since 0.0.1
  */
 public final class BmsSpecBuilder {
 	/** 単体メタ情報一式 */
@@ -224,6 +225,7 @@ public final class BmsSpecBuilder {
 	 * @param name 基数選択メタ情報のメタ情報名称
 	 * @return BMS仕様ビルダーオブジェクトのインスタンス
 	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @since 0.8.0
 	 */
 	public final BmsSpecBuilder setBaseChangerMeta(String name) {
 		assertIsNotCreated();

@@ -1,8 +1,7 @@
 package com.lmt.lib.bms.internal.deltasystem;
 
-import java.util.List;
-
 import com.lmt.lib.bms.bemusic.BeMusicDevice;
+import com.lmt.lib.bms.bemusic.BeMusicLane;
 import com.lmt.lib.bms.bemusic.BeMusicPoint;
 
 /**
@@ -14,10 +13,11 @@ class HoldingElement extends RatingElement {
 
 	/**
 	 * コンストラクタ
+	 * @param ctx コンテキスト
 	 * @param point 楽曲位置情報
 	 */
-	HoldingElement(BeMusicPoint point) {
-		super(point);
+	HoldingElement(DsContext ctx, BeMusicPoint point) {
+		super(ctx, point);
 	}
 
 	/**
@@ -38,27 +38,40 @@ class HoldingElement extends RatingElement {
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printData(int pos) {
-		var s = String.format("   |%.3f|%s %s %s %s %s %s %s %s|%s",
+	protected void printSpData(int pos) {
+		var s = String.format("   |%.3f|%s|%s",
 				getTimeDelta(),
-				getNoteTypeString(BeMusicDevice.SCRATCH1), getNoteTypeString(BeMusicDevice.SWITCH11),
-				getNoteTypeString(BeMusicDevice.SWITCH12), getNoteTypeString(BeMusicDevice.SWITCH13),
-				getNoteTypeString(BeMusicDevice.SWITCH14), getNoteTypeString(BeMusicDevice.SWITCH15),
-				getNoteTypeString(BeMusicDevice.SWITCH16), getNoteTypeString(BeMusicDevice.SWITCH17),
-				makePrintString(pos, DEVS));
+				makeNotesString(BeMusicLane.PRIMARY),
+				makePrintString(pos));
 		Ds.debug(s);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printMeasure() {
-		var m = getMeasure();
+	protected void printDpData(int pos) {
+		var s = String.format("   |%.3f|%s| |%s|%s",
+				getTimeDelta(),
+				makeNotesString(BeMusicLane.PRIMARY),
+				makeNotesString(BeMusicLane.SECONDARY),
+				makePrintString(pos));
+		Ds.debug(s);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void printSpMeasure(int m) {
 		Ds.debug("%3d+-----+---------------------------------------+-----+------+-----++-----+-----+-----+-----+-----+-----+-----+-----+", m);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printHeader() {
+	protected void printDpMeasure(int m) {
+		Ds.debug("%3d+-----|-------------------------------| |-------------------------------|-----+------+-----++-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----|", m);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void printSpHeader() {
 		Ds.debug("---+-----+----+----+----+----+----+----+----+----+------------------++-----------------------------------------------+");
 		Ds.debug("   |     |    |    |    |    |    |    |    |    |       RANGE      ||                  NOTE-SCORE                   |");
 		Ds.debug("   |     |    |    |    |    |    |    |    |    +-----+------+-----++-----+-----+-----+-----+-----+-----+-----+-----+");
@@ -66,16 +79,29 @@ class HoldingElement extends RatingElement {
 		Ds.debug("---+-----+----+----+----+----+----+----+----+----+-----+------+-----++-----+-----+-----+-----+-----+-----+-----+-----+");
 	}
 
+	/** {@inheritDoc} */
+	@Override
+	protected void printDpHeader() {
+		Ds.debug("---------+-------------------------------+-+-------------------------------+------------------++-----------------------------------------------------------------------------------------------+");
+		Ds.debug("         |             LEFT              | |              RIGHT            |                  ||                                          NOTE-SCORE                                           |");
+		Ds.debug("---+-----+---+---+---+---+---+---+---+---+-+---+---+---+---+---+---+---+---+       RANGE      |+-----------------------------------------------+-----------------------------------------------+");
+		Ds.debug("   |     |   |   |   |   |   |   |   |   | |   |   |   |   |   |   |   |   |                  ||                    PRIMARY                    |                   SECONDARY                   |");
+		Ds.debug("   |     |   |   |   |   |   |   |   |   | |   |   |   |   |   |   |   |   |-----+------+-----++-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+");
+		Ds.debug("M  |DELTA|SC1|SW1|SW2|SW3|SW4|SW5|SW6|SW7| |SW1|SW2|SW3|SW4|SW5|SW6|SW7|SC2|POS  |TIME  |NOTES||SCR1 |SW1-1|SW1-2|SW1-3|SW1-4|SW1-5|SW1-6|SW1-7|SW2-1|SW2-2|SW2-3|SW2-4|SW2-5|SW2-6|SW2-7|SCR2 |");
+		Ds.debug("---+-----+---+---+---+---+---+---+---+---+-+---+---+---+---+---+---+---+---+-----+------+-----++-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+");
+	}
+
 	/**
 	 * 長押し範囲データの文字列表現生成
 	 * @param pos 要素リストのインデックス
-	 * @param devs 入力デバイスリスト
 	 * @return スクラッチ範囲データの文字列表現
 	 */
-	private String makePrintString(int pos, List<BeMusicDevice> devs) {
+	private String makePrintString(int pos) {
 		// 長押しの範囲外は空白
 		if (mRange == null) {
-			return "     |      |     ||     |     |     |     |     |     |     |     |";
+			final var emptySp = "     |      |     ||     |     |     |     |     |     |     |     |";
+			final var emptyDp = "     |      |     ||     |     |     |     |     |     |     |     |     |     |     |     |     |     |     |     |";
+			return getContext().dpMode ? emptyDp : emptySp;
 		}
 
 		// 長押し範囲の文字列を生成する
@@ -97,8 +123,10 @@ class HoldingElement extends RatingElement {
 		}
 
 		// ノート評価点
-		for (var dev : devs) {
-			var score = mRange.getNoteScore(pos, dev);
+		var devs = getContext().dpMode ? BeMusicDevice.orderedByDpList() : BeMusicDevice.orderedBySpLeftList();
+		var devsCount = devs.size();
+		for (var iDev = 0; iDev < devsCount; iDev++) {
+			var score = mRange.getNoteScore(pos, devs.get(iDev));
 			if (score == null) {
 				sb.append("     |");
 			} else {

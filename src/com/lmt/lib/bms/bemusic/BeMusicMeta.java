@@ -32,6 +32,8 @@ import com.lmt.lib.bms.BmsUnit;
  * <p>※Be-Musicが正式に対応していなくても、BMSコンテンツ内に定義値は格納されています。ただし、それらの定義値に
  * アクセスするには{@link BmsContent}が提供する低レベルAPIを使用する必要があります。「ライブラリが対応している」
  * というのは、当該メタ情報にアクセスするためのAPIをBe-Musicサブセットが用意していることを示します。</p>
+ *
+ * @since 0.0.1
  */
 public class BeMusicMeta {
 	/**
@@ -45,6 +47,7 @@ public class BeMusicMeta {
 	 * <tr><th style="text-align:left;">説明</th>
 	 * <td>BMS標準フォーマットにおいてヘッダのインデックス値、配列データの基数を表します。</td></tr>
 	 * </table>
+	 * @since 0.8.0
 	 */
 	public static final BmsMeta BASE = BmsMeta.single("#base", BmsType.INTEGER, "36", 0, true);
 	/**
@@ -206,6 +209,7 @@ public class BeMusicMeta {
 	 * 標準フォーマットではこのメタ情報はBMSの仕様としての規定はありませんが、{@link BmsStandardSaver}
 	 * を通してBMSコンテンツを保存すると当メタ情報の内容が出力されます。</td></tr>
 	 * </table>
+	 * @since 0.7.0
 	 */
 	public static final BmsMeta CHARTNAME = BmsMeta.single("#chartname", BmsType.STRING, "", 0, false);
 	/**
@@ -352,6 +356,7 @@ public class BeMusicMeta {
 	 * 標準フォーマットではこのメタ情報はBMSの仕様としての規定はありませんが、{@link BmsStandardSaver}
 	 * を通してBMSコンテンツを保存すると当メタ情報の内容が出力されます。</td></tr>
 	 * </table>
+	 * @since 0.7.0
 	 */
 	public static final BmsMeta EYECATCH = BmsMeta.single("#eyecatch", BmsType.STRING, "", 0, false);
 	/**
@@ -365,6 +370,7 @@ public class BeMusicMeta {
 	 * <tr><th style="text-align:left;">説明</th>
 	 * <td>楽曲のプレビュー音源のファイルパスを表します。</td></tr>
 	 * </table>
+	 * @since 0.2.0
 	 */
 	public static final BmsMeta PREVIEW = BmsMeta.single("#preview", BmsType.STRING, "", 0, false);
 	/**
@@ -561,6 +567,7 @@ public class BeMusicMeta {
 	 * <tr><th style="text-align:left;">説明</th>
 	 * <td>ロングノートの種類を表します。</td></tr>
 	 * </table>
+	 * @since 0.2.0
 	 */
 	public static final BmsMeta LNMODE = BmsMeta.single("#lnmode", BmsType.INTEGER, "1", 0, true);
 	/**
@@ -680,6 +687,7 @@ public class BeMusicMeta {
 	 * <td>直前の乱数終了を表します。この定義はBMSライブラリではBMSコンテンツ読み込みエラー回避のためだけに存在し、
 	 * 定義しても何の作用もありません。ただし、#IFブロック内で使用するとエラーになります。</td></tr>
 	 * </table>
+	 * @since 0.3.0
 	 */
 	public static final BmsMeta ENDRANDOM = BmsMeta.single("#endrandom", BmsType.STRING, "", 1, false);
 	/**
@@ -862,6 +870,7 @@ public class BeMusicMeta {
 	 * <tr><th style="text-align:left;">説明</th>
 	 * <td>譜面のスクロール速度(倍率)を表します。</td></tr>
 	 * </table>
+	 * @since 0.2.0
 	 */
 	public static final BmsMeta SCROLL = BmsMeta.indexed("#scroll", BmsType.FLOAT, "1", 0, true);
 	/**
@@ -961,6 +970,7 @@ public class BeMusicMeta {
 	 * @exception IllegalStateException BMSコンテンツが編集モードではない
 	 * @exception IllegalArgumentException baseがnull, 16, 36, 62以外
 	 * @see #BASE
+	 * @since 0.8.0
 	 */
 	public static void setBase(BmsContent content, Integer base) {
 		content.setSingleMeta(BeMusicMeta.BASE.getName(), base);
@@ -972,6 +982,7 @@ public class BeMusicMeta {
 	 * @return #BASEの値
 	 * @exception NullPointerException contentがnull
 	 * @see #BASE
+	 * @since 0.8.0
 	 */
 	public static int getBase(BmsContent content) {
 		return ((Long)content.getSingleMeta(BeMusicMeta.BASE.getName())).intValue();
@@ -1166,6 +1177,7 @@ public class BeMusicMeta {
 	 * @exception NullPointerException contentがnull
 	 * @exception IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #DEFEXRANK
+	 * @since 0.7.0
 	 */
 	public static void setDefExRank(BmsContent content, Double defExRank) {
 		content.setSingleMeta(BeMusicMeta.DEFEXRANK.getName(), defExRank);
@@ -1177,6 +1189,7 @@ public class BeMusicMeta {
 	 * @return #DEFEXRANKの値
 	 * @exception NullPointerException contentがnull
 	 * @see #DEFEXRANK
+	 * @since 0.7.0
 	 */
 	public static double getDefExRank(BmsContent content) {
 		return (double)content.getSingleMeta(BeMusicMeta.DEFEXRANK.getName());
@@ -1212,6 +1225,7 @@ public class BeMusicMeta {
 	 * @exception NullPointerException contentがnull
 	 * @exception IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #COMMENT
+	 * @since 0.5.0
 	 */
 	public static void setComment(BmsContent content, String comment) {
 		content.setSingleMeta(BeMusicMeta.COMMENT.getName(), comment);
@@ -1223,6 +1237,7 @@ public class BeMusicMeta {
 	 * @return #COMMENTの値
 	 * @exception NullPointerException contentがnull
 	 * @see #COMMENT
+	 * @since 0.5.0
 	 */
 	public static String getComment(BmsContent content) {
 		return (String)content.getSingleMeta(BeMusicMeta.COMMENT.getName());
@@ -1304,6 +1319,7 @@ public class BeMusicMeta {
 	 * @exception NullPointerException contentがnull
 	 * @exception IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #EYECATCH
+	 * @since 0.7.0
 	 */
 	public static void setEyecatch(BmsContent content, String eyecatch) {
 		content.setSingleMeta(BeMusicMeta.EYECATCH.getName(), eyecatch);
@@ -1315,6 +1331,7 @@ public class BeMusicMeta {
 	 * @return #EYECATCHの値
 	 * @exception NullPointerException contentがnull
 	 * @see #EYECATCH
+	 * @since 0.7.0
 	 */
 	public static String getEyecatch(BmsContent content) {
 		return content.getSingleMeta(BeMusicMeta.EYECATCH.getName());
@@ -1327,6 +1344,7 @@ public class BeMusicMeta {
 	 * @exception NullPointerException contentがnull
 	 * @exception IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #PREVIEW
+	 * @since 0.2.0
 	 */
 	public static void setPreview(BmsContent content, String preview) {
 		content.setSingleMeta(BeMusicMeta.PREVIEW.getName(), preview);
@@ -1338,6 +1356,7 @@ public class BeMusicMeta {
 	 * @return #PREVIEWの値
 	 * @exception NullPointerException contentがnull
 	 * @see #PREVIEW
+	 * @since 0.2.0
 	 */
 	public static String getPreview(BmsContent content) {
 		return content.getSingleMeta(BeMusicMeta.PREVIEW.getName());
@@ -1408,6 +1427,7 @@ public class BeMusicMeta {
 	 * @exception NullPointerException contentがnull
 	 * @exception IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #CHARTNAME
+	 * @since 0.7.0
 	 */
 	public static void setChartName(BmsContent content, String chartName) {
 		content.setSingleMeta(BeMusicMeta.CHARTNAME.getName(), chartName);
@@ -1419,6 +1439,7 @@ public class BeMusicMeta {
 	 * @return #CHARTNAMEの値
 	 * @exception NullPointerException contentがnull
 	 * @see #CHARTNAME
+	 * @since 0.7.0
 	 */
 	public static String getChartName(BmsContent content) {
 		return content.getSingleMeta(BeMusicMeta.CHARTNAME.getName());
@@ -1469,6 +1490,7 @@ public class BeMusicMeta {
 	 * @exception NullPointerException contentがnull
 	 * @exception IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #LNMODE
+	 * @since 0.3.0
 	 */
 	public static void setLnMode(BmsContent content, BeMusicLongNoteMode lnMode) {
 		content.setSingleMeta(BeMusicMeta.LNMODE.getName(), (lnMode == null) ? null : lnMode.getNativeValue());
@@ -1480,6 +1502,7 @@ public class BeMusicMeta {
 	 * @return #LNMODEの値
 	 * @exception NullPointerException contentがnull
 	 * @see #LNMODE
+	 * @since 0.3.0
 	 */
 	public static BeMusicLongNoteMode getLnMode(BmsContent content) {
 		return BeMusicLongNoteMode.fromNative((long)content.getSingleMeta(BeMusicMeta.LNMODE.getName()));

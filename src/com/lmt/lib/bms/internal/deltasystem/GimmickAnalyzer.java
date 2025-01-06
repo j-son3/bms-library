@@ -9,8 +9,6 @@ import java.util.TreeMap;
 import java.util.function.Predicate;
 
 import com.lmt.lib.bms.BmsSpec;
-import com.lmt.lib.bms.bemusic.BeMusicDevice;
-import com.lmt.lib.bms.bemusic.BeMusicLane;
 import com.lmt.lib.bms.bemusic.BeMusicNoteType;
 import com.lmt.lib.bms.bemusic.BeMusicRatingType;
 import com.lmt.lib.bms.internal.Utility;
@@ -28,81 +26,70 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 	/** 地雷有無判定関数 */
 	private static final Predicate<GimmickElement> FN_HAS_MINE = e -> e.getPoint().hasMine();
 
-	/** コンテキスト */
-	private DsContext mCxt;
-	/** 分析対象入力デバイスリスト */
-	private List<BeMusicDevice> mDevs;
-	/** 運指 */
-	private Fingering mFingering;
-	/** コンフィグ */
-	private GimmickConfig mConfig;
-
 	/**
 	 * コンストラクタ
 	 */
 	public GimmickAnalyzer() {
 		super(BeMusicRatingType.GIMMICK);
-		clearContext();
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void compute(DsContext cxt) {
-		var score = new GimmickScore();
-		if (!cxt.chart.hasGimmick()) {
+	protected void compute(DsContext ctx) {
+		var score = new Gimmick.Score();
+		if (!ctx.chart.hasGimmick()) {
 			// ギミックとなる要素を含まない場合は何もしない
-			debugOut(cxt, 0.0, score.gimmick, Collections.emptyList(), score);
+			debugOut(ctx, score.gimmick, Collections.emptyList(), score);
 		} else {
-			// 何らかのギミックを含む場合にのみ詳細分析を行う
-			setupContext(cxt);
-
 			// 動作がある、またはギミック要素のある楽曲位置を特定し、その楽曲位置に対する要素のリストを構築する
-			var elems = RatingElement.listElements(cxt, GimmickElement::new, p -> p.hasMovementNote() || p.hasGimmick());
+			var elems = Ds.listElements(ctx, GimmickElement::new, p -> p.hasMovementNote() || p.hasGimmick());
+			var gc = new Gimmick.Context(ctx, elems);
 
 			// 速度変更ごとの範囲を解析する
-			var speeds = parseSpeedRange(elems);
-			for (var range : speeds) {
+			var speeds = parseSpeedRange(gc);
+			var countSpeeds = speeds.size();
+			for (var iSpeed = 0; iSpeed < countSpeeds; iSpeed++) {
+				var range = speeds.get(iSpeed);
 				for (var i = range.first; i <= range.last; i++) {
 					elems.get(i).setRange(range);
 				}
 			}
 
 			// 譜面停止の範囲を解析する
-			if (cxt.chart.hasStop()) {
-				speeds.forEach(r -> r.stopMap = parseStopRange(elems, r.first, r.last + 1));
+			if (ctx.chart.hasStop()) {
+				speeds.forEach(r -> r.stopMap = parseStopRange(gc, r.first, r.last + 1));
 			}
 
 			// 地雷の範囲を解析する
-			if (cxt.chart.hasMine()) {
-				speeds.forEach(r -> r.mineMap = parseMineRange(elems, r.first, r.last + 1));
+			if (ctx.chart.hasMine()) {
+				speeds.forEach(r -> r.mineMap = parseMineRange(gc, r.first, r.last + 1));
 			}
 
 			// 解析結果を評価し最終評価点を計算する
-			evaluate(elems, score);
+			evaluate(gc, score);
 
 			// デバッグ出力
-			debugOut(cxt, 0.0, score.gimmick, elems, score);
-
-			clearContext();
+			debugOut(ctx, score.gimmick, elems, score);
 		}
 
-		cxt.stat.setRating(getRatingType(), score.gimmick);
+		ctx.stat.setRating(getRatingType(), score.gimmick);
 	}
 
 	/**
 	 * 速度変更範囲を解析する
-	 * @param elems 要素データリスト
+	 * @param gc GIMMICK用コンテキスト
 	 * @return 速度変更範囲リスト
 	 */
-	private List<GimmickRange.Speed> parseSpeedRange(List<GimmickElement> elems) {
+	private List<GimmickRange.Speed> parseSpeedRange(Gimmick.Context gc) {
 		// スクロール速度/BPM変更がない譜面では、譜面全体を唯一の範囲とする
-		if (!mCxt.chart.hasChangeSpeed()) {
+		var elems = gc.elems;
+		if (!gc.ctx.chart.hasChangeSpeed()) {
 			return List.of(new GimmickRange.Speed(
 					0, (elems.size() - 1),
-					Utility.indexOf(elems, FN_HAS_MOVEMENT),
-					Utility.lastIndexOf(elems, FN_HAS_MOVEMENT),
-					mCxt.chart.getNoteCount(),
-					new TreeMap<>(Map.of(0, mCxt.header.getInitialBpm()))));
+					Utility.indexOf(gc.elems, FN_HAS_MOVEMENT),
+					Utility.lastIndexOf(gc.elems, FN_HAS_MOVEMENT),
+					gc.ctx.chart.getNoteCount(),
+					new TreeMap<>(Map.of(0, gc.ctx.header.getInitialBpm()))));
 		}
 
 		// 先頭の速度変更パート～ノート操作パート～次範囲までの空白パートを1範囲とする範囲リストを構築する
@@ -153,7 +140,9 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 		RatingRange.link(speeds);
 
 		// 範囲ごとのノート数を計算する
-		for (var range : speeds) {
+		var countSpeeds = speeds.size();
+		for (var iSpeed = 0; iSpeed < countSpeeds; iSpeed++) {
+			var range = speeds.get(iSpeed);
 			if (range.hasMovement()) {
 				for (var i = range.firstMovement; i <= range.lastMovement; i++) {
 					range.numNotes += elems.get(i).getPoint().getNoteCount();
@@ -173,8 +162,8 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 			var speedMax = Math.max(Math.abs(curSpeed), Math.abs(range.speed));
 			var speedMin = Math.min(Math.abs(curSpeed), Math.abs(range.speed));
 			var changeRate = (speedMax / Math.max(speedMin, BmsSpec.BPM_MIN)) - 1.0;
-			if ((changeRate <= mConfig.speedGearChangeDeltaPer) ||
-					(range.numMovementPoint() <= mConfig.speedGearChangeEndurePts)) {
+			if ((changeRate <= gc.config.speedGearChangeDeltaPer) ||
+					(range.numMovementPoint() <= gc.config.speedGearChangeEndurePts)) {
 				// 速度が前の速度からあまり変化しない、または我慢可能な楽曲位置数ならギアチェンを行わない
 				range.ideality = changeRate;
 				range.gearChange = false;
@@ -191,12 +180,13 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 
 	/**
 	 * 譜面停止範囲を解析する
-	 * @param elems 要素データリスト
+	 * @param gc GIMMICK用コンテキスト
 	 * @param start 解析開始位置
 	 * @param end 解析終了位置(この位置を含まない)
 	 * @return 譜面停止範囲マップ(要素データリストインデックスで昇順ソート)
 	 */
-	private TreeMap<Integer, GimmickRange.Stop> parseStopRange(List<GimmickElement> elems, int start, int end) {
+	private TreeMap<Integer, GimmickRange.Stop> parseStopRange(Gimmick.Context gc, int start, int end) {
+		var elems = gc.elems;
 		var stops = new TreeMap<Integer, GimmickRange.Stop>();
 		var stpFirst = Utility.indexOf(elems, start, end, FN_HAS_STOP);
 		while (stpFirst != -1) {
@@ -212,8 +202,8 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 					if (stpPos < influFirst) {
 						// 次の操作可能ノートより手前で、且つその位置までの時間が長い場合は影響なし範囲への登録となる
 						var stopTime = elems.get(stpPos).getPoint().getStop();
-						var distance = RatingElement.timeDelta(elems, stpPos, influFirst) - stopTime;
-						if (distance <= mConfig.stopInfluenceTimeStop) { break; }
+						var distance = Ds.timeDelta(elems, stpPos, influFirst) - stopTime;
+						if (distance <= gc.config.stopInfluenceTimeStop) { break; }
 					} else {
 						// 譜面停止位置が次の操作可能ノート以降の場合は影響なし範囲の検出を終了する
 						break;
@@ -247,7 +237,7 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 				if (rangeInflu != null) {
 					var expandLast = true;
 					var e = elems.get(rangeInflu.lastStopPos());
-					var influenceTimeLast = e.getTime() + e.getPoint().getStop() + mConfig.stopInfluenceTimeAfter;
+					var influenceTimeLast = e.getTime() + e.getPoint().getStop() + gc.config.stopInfluenceTimeAfter;
 					for (var i = rangeInflu.firstInfluence; i < end; i++) {
 						// 最後の譜面停止の影響範囲外になったら終了
 						var p = elems.get(i).getPoint();
@@ -291,13 +281,14 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 
 	/**
 	 * 地雷範囲を解析する
-	 * @param elems 要素データリスト
+	 * @param gc GIMMICK用コンテキスト
 	 * @param start 解析開始位置
 	 * @param end 解析終了位置(この位置を含まない)
 	 * @return 地雷範囲マップ(要素データリストインデックスで昇順ソート)
 	 */
-	private TreeMap<Integer, GimmickRange.MineGroup> parseMineRange(List<GimmickElement> elems, int start, int end) {
+	private TreeMap<Integer, GimmickRange.MineGroup> parseMineRange(Gimmick.Context gc, int start, int end) {
 		// 検出対象範囲内に地雷が含まれない場合は空リストを返す
+		var elems = gc.elems;
 		var mineFirst = Utility.indexOf(elems, start, end, FN_HAS_MINE);
 		if (mineFirst == -1) {
 			return new TreeMap<Integer, GimmickRange.MineGroup>();
@@ -308,14 +299,14 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 
 		// 操作可能ノートのある楽曲位置ごとに、地雷の影響がある範囲を解析する
 		var mines = new TreeMap<Integer, GimmickRange.Mine>();
-		var timeMine = mConfig.mineInfluenceTime;
+		var timeMine = gc.config.mineInfluenceTime;
 		var mvPos = mineFirst;
 		while ((mvPos = Utility.indexOf(elems, mvPos, mineLast + 1, FN_HAS_MOVEMENT)) != -1) {
 			var hasMine = elems.get(mvPos).getPoint().hasMine();
 
 			// 楽曲位置手前の地雷範囲を解析する
 			var rangeFirst = mvPos;
-			for (var i = mvPos - 1; (i >= mineFirst) && (RatingElement.timeDelta(elems, i, mvPos) <= timeMine); i--) {
+			for (var i = mvPos - 1; (i >= mineFirst) && (Ds.timeDelta(elems, i, mvPos) <= timeMine); i--) {
 				if (elems.get(i).getPoint().hasMine()) {
 					rangeFirst = i;
 					hasMine = true;
@@ -324,7 +315,7 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 
 			// 楽曲位置以後の地雷範囲を解析する
 			var rangeLast = mvPos;
-			for (var i = mvPos + 1; (i <= mineLast) && (RatingElement.timeDelta(elems, mvPos, i) <= timeMine); i++) {
+			for (var i = mvPos + 1; (i <= mineLast) && (Ds.timeDelta(elems, mvPos, i) <= timeMine); i++) {
 				if (elems.get(i).getPoint().hasMine()) {
 					rangeLast = i;
 					hasMine = true;
@@ -380,7 +371,9 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 
 			// 操作可能ノートに干渉しない地雷の範囲をマージする
 			if (minesEmpty != null) {
-				for (var mine : minesEmpty) {
+				var countMines = minesEmpty.size();
+				for (var iMine = 0; iMine < countMines; iMine++) {
+					var mine = minesEmpty.get(iMine);
 					mines.put(mine.first, mine);
 				}
 			}
@@ -411,42 +404,43 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 
 	/**
 	 * GIMMICK評価処理
-	 * @param elems 要素データリスト
+	 * @param gc GIMMICK用コンテキスト
 	 * @param outScore 評価結果
 	 */
-	private void evaluate(List<GimmickElement> elems, GimmickScore outScore) {
-		outScore.playTime = RatingElement.computeTimeOfPointRange(elems);
-		outScore.totalNotes = mCxt.chart.getNoteCount();
+	private void evaluate(Gimmick.Context gc, Gimmick.Score outScore) {
+		outScore.playTime = Ds.computeTimeOfPointRange(gc.elems);
+		outScore.totalNotes = gc.ctx.chart.getNoteCount();
 
 		// 速度変更を評価する
-		evaluateSpeed(elems, outScore);
+		evaluateSpeed(gc, outScore);
 
 		// 譜面停止を評価する
-		if (mCxt.chart.hasStop()) {
-			evaluateStop(elems, outScore);
+		if (gc.ctx.chart.hasStop()) {
+			evaluateStop(gc, outScore);
 		}
 
 		// 地雷を評価する
-		if (mCxt.chart.hasMine()) {
-			evaluateMine(elems, outScore);
+		if (gc.ctx.chart.hasMine()) {
+			evaluateMine(gc, outScore);
 		}
 
 		// それぞれの評価点から最終評価点を計算する
 		var scores = new double[] { outScore.speedScore, outScore.stopScore, outScore.mineScore };
 		Arrays.sort(scores);
 		outScore.gimmick = Math.min(getRatingType().getMax(), (int)(
-				(scores[2] * mConfig.commonInfluencePrimaryScore) +
-				(scores[1] * mConfig.commonInfluenceSecondaryScore) +
-				(scores[0] * mConfig.commonInfluenceTertiaryScore)));
+				(scores[2] * gc.config.commonInfluencePrimaryScore) +
+				(scores[1] * gc.config.commonInfluenceSecondaryScore) +
+				(scores[0] * gc.config.commonInfluenceTertiaryScore)));
 	}
 
 	/**
 	 * 速度変更の評価
-	 * @param elems 要素データリスト
+	 * @param gc GIMMICK用コンテキスト
 	 * @param outScore 評価結果(速度変更の結果を更新する)
 	 */
-	private void evaluateSpeed(List<GimmickElement> elems, GimmickScore outScore) {
+	private void evaluateSpeed(Gimmick.Context gc, Gimmick.Score outScore) {
 		//if (true) { return; } // ***** FOR DEBUG *****
+		var elems = gc.elems;
 		var numRange = 0;
 		var numPerceived = 0;
 		var numGearChange = 0;
@@ -459,8 +453,8 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 
 			// 速度変化知覚回数を計算する
 			var nowSpeed = range.speed;
-			var perceiveFromPrev = (Math.abs(nowSpeed - prevSpeed) >= mConfig.speedMinPerceive);
-			var perceiveFromCur = (Math.abs(nowSpeed - curSpeed) >= mConfig.speedMinPerceive);
+			var perceiveFromPrev = (Math.abs(nowSpeed - prevSpeed) >= gc.config.speedMinPerceive);
+			var perceiveFromCur = (Math.abs(nowSpeed - curSpeed) >= gc.config.speedMinPerceive);
 			if (perceiveFromPrev || perceiveFromCur) {
 				// 速度変化を知覚した
 				curSpeed = nowSpeed;
@@ -473,23 +467,23 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 				var timeBeforeGearChange = range.timeBeforeGearChange(elems);
 				var timeGearChange = range.timeGearChange(elems);
 				var densityRange = range.numNotes / range.time(elems);
-				var densityGearChange = range.computeGearChangeDensity(elems, mConfig.speedGearChangeDensityTime);
+				var densityGearChange = range.computeGearChangeDensity(elems, gc.config.speedGearChangeDensityTime);
 				var densityAvg = (densityRange + densityGearChange) / 2.0;
-				var value1 = mConfig.speedIpfnGcBefore.compute(timeBeforeGearChange);
-				var value2 = mConfig.speedIpfnGcTime.compute(timeGearChange);
-				var value3 = mConfig.speedIpfnGcDensity.compute(densityAvg);
+				var value1 = gc.config.speedIpfnGcBefore.compute(timeBeforeGearChange);
+				var value2 = gc.config.speedIpfnGcTime.compute(timeGearChange);
+				var value3 = gc.config.speedIpfnGcDensity.compute(densityAvg);
 				range.scoreGearChange = value1 * value2 * value3;
 				numGearChange++;
 			}
 
 			// 速度変更範囲対応難易度を計算する
-			var rangeDifficulty = mConfig.speedIpfnIdeality.compute(range.ideality);
+			var rangeDifficulty = gc.config.speedIpfnIdeality.compute(range.ideality);
 			if (range.isReverseScroll()) {
-				rangeDifficulty += mConfig.speedReverseScrollAddDifficulty;
+				rangeDifficulty += gc.config.speedReverseScrollAddDifficulty;
 			}
 
 			// 速度変更範囲評価点を計算する
-			var rateAdjust = Math.min(1.0, mConfig.speedMaxEvaluateTime / range.time(elems));
+			var rateAdjust = Math.min(1.0, gc.config.speedMaxEvaluateTime / range.time(elems));
 			var noteRate = (double)range.numNotes / outScore.totalNotes;
 			range.score = (range.scoreGearChange + rangeDifficulty) * (noteRate * rateAdjust);
 			scoreRangeSum += range.score;
@@ -499,38 +493,39 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 
 		// 計算結果を集計する
 		var changeRate = numPerceived / outScore.playTime;
-		var changeRateValue = mConfig.speedIpfnChgRate.compute(changeRate);
-		var reqDensity = Math.max(0.001, mConfig.speedIpfnCrAdjust.compute(changeRateValue));
-		var avgDensity = mCxt.chart.getNoteCount() / outScore.playTime;
-		var changeRateAdjust = Math.min(1.0, Math.max(mConfig.speedMinChangeRateAdjust, avgDensity / reqDensity));
+		var changeRateValue = gc.config.speedIpfnChgRate.compute(changeRate);
+		var reqDensity = Math.max(0.001, gc.config.speedIpfnCrAdjust.compute(changeRateValue));
+		var avgDensity = gc.ctx.chart.getNoteCount() / outScore.playTime;
+		var changeRateAdjust = Math.min(1.0, Math.max(gc.config.speedMinChangeRateAdjust, avgDensity / reqDensity));
 		var scoreChangeRate = changeRateValue * changeRateAdjust;
 		var scoreHigh = 0.0;
 		var scoreLow = 0.0;
 		if (scoreRangeSum > scoreChangeRate) {
 			// 速度変更範囲評価点のほうが高い
-			scoreHigh = scoreRangeSum * mConfig.speedInfluenceHighScore;
-			scoreLow = scoreChangeRate * mConfig.speedInfluenceLowScore;
+			scoreHigh = scoreRangeSum * gc.config.speedInfluenceHighScore;
+			scoreLow = scoreChangeRate * gc.config.speedInfluenceLowScore;
 		} else {
 			// 速度変化頻度評価点のほうが高い
-			scoreHigh = scoreChangeRate * mConfig.speedInfluenceHighScore;
-			scoreLow = scoreRangeSum * mConfig.speedInfluenceLowScore;
+			scoreHigh = scoreChangeRate * gc.config.speedInfluenceHighScore;
+			scoreLow = scoreRangeSum * gc.config.speedInfluenceLowScore;
 		}
 		outScore.speedNumRange = numRange;
 		outScore.speedNumChangePerceived = numPerceived;
 		outScore.speedNumChangeGear = numGearChange;
 		outScore.speedScoreRangeSum = scoreRangeSum;
 		outScore.speedScoreChgRate = scoreChangeRate;
-		outScore.speedScoreOrg = computeRatingValue(scoreHigh + scoreLow, outScore.playTime, 1.0);
-		outScore.speedScore = (int)mConfig.speedIpfnGimmick.compute(outScore.speedScoreOrg);
+		outScore.speedScoreOrg = Ds.computeRatingValue(scoreHigh + scoreLow, outScore.playTime, 1.0);
+		outScore.speedScore = (int)gc.config.speedIpfnGimmick.compute(outScore.speedScoreOrg);
 	}
 
 	/**
 	 * 譜面停止の評価
-	 * @param elems 要素データリスト
+	 * @param gc GIMMICK用コンテキスト
 	 * @param outScore 評価結果(譜面停止の結果を更新する)
 	 */
-	private void evaluateStop(List<GimmickElement> elems, GimmickScore outScore) {
+	private void evaluateStop(Gimmick.Context gc, Gimmick.Score outScore) {
 		//if (true) { return; } // ***** FOR DEBUG *****
+		var elems = gc.elems;
 		var numRange = 0;
 		var numEffective = 0;
 		var areaTime = 0.0;
@@ -547,19 +542,19 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 					for (var entry : stop.stops.entrySet()) {
 						var stopIndex = entry.getKey();
 						var stopTime = entry.getValue();
-						var timeDelta = RatingElement.timeDelta(elems, stopIndex, stop.firstInfluence) - stopTime;
-						var value1 = mConfig.stopIpfnStopEffective.compute(timeDelta);
-						var value2 = mConfig.stopIpfnStopTime.compute(stopTime);
+						var timeDelta = Ds.timeDelta(elems, stopIndex, stop.firstInfluence) - stopTime;
+						var value1 = gc.config.stopIpfnStopEffective.compute(timeDelta);
+						var value2 = gc.config.stopIpfnStopTime.compute(stopTime);
 						stopDifficulty += (value1 * value2);
 					}
 
 					// 譜面停止解除後のノート平均密度から評価点計算用の係数を算出する
 					var avgDensity = stop.computeInfluenceDensity(elems);
-					var densityValue = mConfig.stopIpfnAfterDensity.compute(avgDensity);
+					var densityValue = gc.config.stopIpfnAfterDensity.compute(avgDensity);
 
 					// 譜面停止範囲影響率評価点を計算する
 					rangeScore = stopDifficulty * densityValue;
-					areaTime += stop.computeEffectiveRangeTime(elems, mConfig.stopMinEffectiveStopTime);
+					areaTime += stop.computeEffectiveRangeTime(elems, gc.config.stopMinEffectiveStopTime);
 					numEffective++;
 				}
 
@@ -572,40 +567,31 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 
 		// 計算結果を集計する
 		var scoreRange = stopSummary.summary();
-		var scoreArea = mConfig.stopIpfnEffectiveRange.compute(areaTime / outScore.playTime);
-		var scoreHigh = 0.0;
-		var scoreLow = 0.0;
-		if (scoreRange > scoreArea) {
-			// 譜面停止対応難易度評価点のほうが高い
-			scoreHigh = scoreRange * mConfig.stopInfluenceHighScore;
-			scoreLow = scoreArea * mConfig.stopInfluenceLowScore;
-		} else {
-			// 譜面停止影響範囲率評価点のほうが高い
-			scoreHigh = scoreArea * mConfig.stopInfluenceHighScore;
-			scoreLow = scoreRange * mConfig.stopInfluenceLowScore;
-		}
+		var influenceDifficultyRatio = 1.0 + (scoreRange / gc.config.stopInfluenceDifficultyValue);
+		var scoreArea = gc.config.stopIpfnEffectiveRange.compute(areaTime / outScore.playTime);
 		outScore.stopNumRange = numRange;
 		outScore.stopNumEffective = numEffective;
 		outScore.stopSummary = stopSummary;
 		outScore.stopAreaTime = areaTime;
 		outScore.stopScoreRange = scoreRange;
 		outScore.stopScoreArea = scoreArea;
-		outScore.stopScoreOrg = computeRatingValue(scoreHigh + scoreLow, outScore.playTime, 1.0);
-		outScore.stopScore = (int)mConfig.stopIpfnGimmick.compute(outScore.stopScoreOrg);
+		outScore.stopScoreOrg = Ds.computeRatingValue(scoreArea * influenceDifficultyRatio, outScore.playTime, 1.0);
+		outScore.stopScore = (int)gc.config.stopIpfnGimmick.compute(outScore.stopScoreOrg);
 	}
 
 	/**
 	 * 地雷の評価
-	 * @param elems 要素データリスト
+	 * @param gc GIMMICK用コンテキスト
 	 * @param outScore 評価結果(地雷の評価結果を更新する)
 	 */
-	private void evaluateMine(List<GimmickElement> elems, GimmickScore outScore) {
+	private void evaluateMine(Gimmick.Context gc, Gimmick.Score outScore) {
 		//if (true) { return; } // ***** FOR DEBUG *****
-		var layout = mCxt.layout;
+		var elems = gc.elems;
+		var layout = gc.ctx.layout;
 		var numRange = 0;
 		var numEffective = 0;
 		var effectiveTime = 0.0;
-		var mineSummary = new ScoreSummarizer(mConfig.mineSaturateRangeScore);
+		var mineSummary = new ScoreSummarizer(gc.config.mineSaturateRangeScore);
 		var topRange = elems.get(0).getRange();
 		for (var speed = topRange; speed != null; speed = speed.next) {
 			for (var mineGrp : speed.mineMap.values()) {
@@ -615,21 +601,27 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 						// 地雷範囲内に操作可能ノートがある場合は地雷の配置による操作難易度を計算する
 						var score = 0.0;
 						var mvTime = elems.get(mine.movement).getTime();
-						for (var dev : mDevs) {
-							var finger = mFingering.getFinger(dev);
-							var resists = mFingering.getResists(finger);
+						var countDevs = gc.devs.size();
+						for (var iDev = 0; iDev < countDevs; iDev++) {
+							var dev = gc.devs.get(iDev);
+							var finger = gc.fingering.getFinger(dev);
+							var resists = gc.fingering.getResists(finger);
 							for (var resist : resists) {
+								var devResists = gc.fingering.getDevices(resist.getFinger());
+								var countDevResists = devResists.size();
 								for (var i = mine.first; i <= mine.last; i++) {
-									var devResist = layout.get(mFingering.getDevice(resist.getFinger()));
-									var p = elems.get(i).getPoint();
-									if (p.getVisibleNoteType(devResist) == BeMusicNoteType.MINE) {
-										// 操作可能ノートと地雷の距離から、加算する評価点を計算する
-										var mineDamage = p.getVisibleValue(devResist);
-										var mineTime = p.getTime();
-										var distance = Math.abs(mvTime - mineTime);
-										var distanceValue = mConfig.mineIpfnMineDistance.compute(distance);
-										var damageValue = mConfig.mineIpfnMineDamage.compute(mineDamage);
-										score += (distanceValue * damageValue * resist.getValue());
+									for (var iDevResist = 0; iDevResist < countDevResists; iDevResist++) {
+										var devResist = layout.get(devResists.get(iDevResist));
+										var p = elems.get(i).getPoint();
+										if (p.getVisibleNoteType(devResist) == BeMusicNoteType.MINE) {
+											// 操作可能ノートと地雷の距離から、加算する評価点を計算する
+											var mineDamage = p.getVisibleValue(devResist);
+											var mineTime = p.getTime();
+											var distance = Math.abs(mvTime - mineTime);
+											var distanceValue = gc.config.mineIpfnMineDistance.compute(distance);
+											var damageValue = gc.config.mineIpfnMineDamage.compute(mineDamage);
+											score += (distanceValue * damageValue * resist.getValue());
+										}
 									}
 								}
 							}
@@ -651,17 +643,17 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 
 		// 計算結果を集計する
 		var scoreRange = mineSummary.summary();
-		var scoreEffective = mConfig.mineIpfnEffectiveRange.compute(effectiveTime / outScore.playTime);
+		var scoreEffective = gc.config.mineIpfnEffectiveRange.compute(effectiveTime / outScore.playTime);
 		var scoreHigh = 0.0;
 		var scoreLow = 0.0;
 		if (scoreRange > scoreEffective) {
 			// 地雷回避難易度のほうが高い
-			scoreHigh = scoreRange * mConfig.mineInfluenceHighScore;
-			scoreLow = scoreEffective * mConfig.mineInfluenceLowScore;
+			scoreHigh = scoreRange * gc.config.mineInfluenceHighScore;
+			scoreLow = scoreEffective * gc.config.mineInfluenceLowScore;
 		} else {
 			// 地雷影響範囲率評価点のほうが高い
-			scoreHigh = scoreEffective * mConfig.mineInfluenceHighScore;
-			scoreLow = scoreRange * mConfig.mineInfluenceLowScore;
+			scoreHigh = scoreEffective * gc.config.mineInfluenceHighScore;
+			scoreLow = scoreRange * gc.config.mineInfluenceLowScore;
 		}
 		outScore.mineNumRange = numRange;
 		outScore.mineNumEffective = numEffective;
@@ -669,17 +661,32 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 		outScore.mineEffectiveTime = effectiveTime;
 		outScore.mineScoreRange = scoreRange;
 		outScore.mineScoreEffective = scoreEffective;
-		outScore.mineScoreOrg = computeRatingValue(scoreHigh + scoreLow, outScore.playTime, 1.0);
-		outScore.mineScore = (int)mConfig.mineIpfnGimmick.compute(outScore.mineScoreOrg);
+		outScore.mineScoreOrg = Ds.computeRatingValue(scoreHigh + scoreLow, outScore.playTime, 1.0);
+		outScore.mineScore = (int)gc.config.mineIpfnGimmick.compute(outScore.mineScoreOrg);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void dumpSummary(DsContext cxt, double org, int rating, Object... values) {
+	protected void dumpSummarySp(DsContext ctx, int rating, Object...values) {
+		dumpSummaryCommon(ctx, rating, (Gimmick.Score)values[0]);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void dumpSummaryDp(DsContext ctx, int rating, Object...values) {
+		dumpSummaryCommon(ctx, rating, (Gimmick.Score)values[0]);
+	}
+
+	/**
+	 * サマリされたデバッグ情報出力の共通処理
+	 * @param ctx Delta System用コンテキスト
+	 * @param rating レーティング値
+	 * @param s 分析結果データ
+	 */
+	private void dumpSummaryCommon(DsContext ctx, int rating, Gimmick.Score s) {
 		var sb = new StringBuilder();
-		var s = (GimmickScore)values[0];
-		sb.append(cxt.header.getComment());
-		sb.append("\t").append(String.format("%s %s", cxt.header.getTitle(), cxt.header.getSubTitle()).strip());
+		sb.append(ctx.header.getComment());
+		sb.append("\t").append(String.format("%s %s", ctx.header.getTitle(), ctx.header.getSubTitle()).strip());
 		sb.append("\t").append(s.totalNotes);
 		sb.append("\t").append(String.format("%.2f", s.playTime));
 		// [SPEED]
@@ -707,16 +714,29 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 		sb.append("\t").append(String.format("%.4f", s.mineScoreOrg));
 		sb.append("\t").append(String.format("%.2f", getRatingType().toValue(s.mineScore)));
 		// [GIMMICK]
-		sb.append("\t").append(String.format("%.2f", getRatingType().toValue(s.gimmick)));
+		sb.append("\t").append(String.format("%.2f", getRatingType().toValue(rating)));
 		Ds.debug(sb);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void dumpDetail(DsContext cxt, double org, int rating, List<? extends RatingElement> elems,
-			Object... values) {
-		super.dumpDetail(cxt, org, rating, elems, values);
-		var s = (GimmickScore)values[0];
+	protected void dumpDetailSp(DsContext ctx, int rating, List<? extends RatingElement> elems, Object...values) {
+		super.dumpDetailSp(ctx, rating, elems, values);
+		dumpDetailCommon((Gimmick.Score)values[0]);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void dumpDetailDp(DsContext ctx, int rating, List<? extends RatingElement> elems, Object...values) {
+		super.dumpDetailDp(ctx, rating, elems, values);
+		dumpDetailCommon((Gimmick.Score)values[0]);
+	}
+
+	/**
+	 * 詳細デバッグ情報出力の共通処理
+	 * @param s 評価結果データ
+	 */
+	private void dumpDetailCommon(Gimmick.Score s) {
 		Ds.debug("[SPEED]");
 		Ds.debug("  numRange=%d", s.speedNumRange);
 		Ds.debug("  numPerceived=%d", s.speedNumChangePerceived);
@@ -740,26 +760,5 @@ public class GimmickAnalyzer extends RatingAnalyzer {
 		Ds.debug("  scoreRange=%.4f", s.mineScoreRange);
 		Ds.debug("  scoreEffective=%.4f", s.mineScoreEffective);
 		Ds.debug("  result=%.2f (Org=%.4f)", s.mineScore, s.mineScoreOrg);
-	}
-
-	/**
-	 * 分析用データのセットアップ
-	 * @param cxt コンテキスト
-	 */
-	private void setupContext(DsContext cxt) {
-		mCxt = cxt;
-		mDevs = BeMusicDevice.getDevices(BeMusicLane.PRIMARY); // TODO DPモードに対応する
-		mFingering = Fingering.SP_MINE; // TODO DPモードに対応する
-		mConfig = GimmickConfig.getInstance();
-	}
-
-	/**
-	 * 分析用データのクリア
-	 */
-	private void clearContext() {
-		mCxt = null;
-		mDevs = null;
-		mFingering = null;
-		mConfig = null;
 	}
 }

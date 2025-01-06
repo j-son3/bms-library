@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import com.lmt.lib.bms.bemusic.BeMusicDevice;
+import com.lmt.lib.bms.bemusic.BeMusicLane;
 import com.lmt.lib.bms.bemusic.BeMusicNoteType;
 import com.lmt.lib.bms.bemusic.BeMusicPoint;
 import com.lmt.lib.bms.bemusic.BeMusicRatingType;
@@ -13,6 +14,20 @@ import com.lmt.lib.bms.bemusic.BeMusicRatingType;
  * 譜面傾向「COMPLEX」の分析処理クラス
  */
 public class ComplexAnalyzer extends RatingAnalyzer {
+	/** レーンごとの評価情報 */
+	private static class LaneScore {
+		/** 楽曲位置総合評価点のサマリ */
+		ScoreSummarizer summarizer;
+		/** 操作を伴う楽曲位置の数 */
+		int numMovement;
+		/** 楽曲位置の最初と最後の時間差分(演奏時間) */
+		double timePtRange;
+		/** 最終評価点の補正倍率 */
+		double customRatio;
+		/** レーンの最終評価点 */
+		double complexOrg;
+	}
+
 	/**
 	 * コンストラクタ
 	 */
@@ -22,40 +37,82 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 
 	/** {@inheritDoc} */
 	@Override
-	protected void compute(DsContext cxt) {
+	protected void compute(DsContext ctx) {
 		// 操作変化のある楽曲位置のみを抽出し、その楽曲位置のみで要素リストを構築する
 		// (操作変化のない要素のみの楽曲位置は当譜面傾向ではノイズとなるため除去する)
-		var elems = RatingElement.listElements(cxt, ComplexElement::new, BeMusicPoint::hasMovementNote);
-		var countElem = elems.size();
-		if (countElem == 0) {
-			cxt.stat.setRating(getRatingType(), 0);
+		var elems = Ds.listElements(ctx, ComplexElement::new, BeMusicPoint::hasMovementNote);
+		if (elems.isEmpty()) {
+			ctx.stat.setRating(getRatingType(), 0);
 			return;
 		}
 
+		// レーンごとにレーティング値を算出する
+		var config = ComplexConfig.getInstance();
+		var complex = 0;
+		if (ctx.dpMode) {
+			// ダブルプレーの場合、左右レーン両方を評価する
+			var lsp = computeLane(ctx, BeMusicLane.PRIMARY, elems);
+			var lss = computeLane(ctx, BeMusicLane.SECONDARY, elems);
+
+			// 楽曲位置数が偏った譜面での最終評価点の調整を行う
+			var influences = Ds.adjustInfluenceForDp(
+					lsp.numMovement,
+					lss.numMovement,
+					config.dpInfluenceScoreHigh,
+					config.dpInfluenceScoreLow,
+					config.dpAdjustInfluenceRate,
+					config.dpAdjustInfluenceMaxStrength);
+
+			// 最終評価点を合成し、レーティング値を算出する
+			var scOrg = Ds.mergeValue(lsp.complexOrg, lss.complexOrg, influences[0], influences[1]);
+			complex = Math.max((int)config.ipfnDpComplex.compute(scOrg), 1);
+			debugOut(ctx, complex, elems, scOrg, lsp, lss);
+		} else {
+			// シングルプレーの場合、主レーンのみレーティング値を算出する
+			var ls = computeLane(ctx, BeMusicLane.PRIMARY, elems);
+			complex = Math.max((int)config.ipfnComplex.compute(ls.complexOrg), 1);
+			debugOut(ctx, complex, elems, ls.complexOrg, ls);
+		}
+
+		// 最終結果を設定する
+		ctx.stat.setRating(getRatingType(), complex);
+	}
+
+	/**
+	 * 指定レーンの評価
+	 * @param ctx Delta System用コンテキスト
+	 * @param lane レーン
+	 * @param elems レーティング要素リスト
+	 * @return レーン評価情報
+	 */
+	private LaneScore computeLane(DsContext ctx, BeMusicLane lane, List<ComplexElement> elems) {
 		// 楽曲位置ごとの評価点を計算する
 		// 「楽曲位置複雑度評価点」は、同一楽曲位置上でのノートの配置状況から複雑さを数値化したもの。
 		// 「後方複雑度評価点」は、後方の楽曲位置複雑度評価点から当該楽曲位置の総合評価点に加算する点数。
 		var config = ComplexConfig.getInstance();
-		var basicScore = ComplexBasicScore.getInstance();
+		var deductionHoldRatio = config.deductionHold(ctx);
+		var deductionLnTailRatio = config.deductionLnTail(ctx);
+		var deductionMineRatio = config.deductionMine(ctx);
+		var basicScore = ComplexBasicScore.getInstance(ctx);
 		var ntypeFounds = new int[BeMusicDevice.COUNT];
-		var devs = BeMusicDevice.orderedBySpLeftList();
+		var devs = DsContext.orderedDevices(lane);
+		var countMovement = 0;
 		var countDev = devs.size();
-		var scoreMin = Double.MAX_VALUE;
-		var scoreMax = Double.MIN_VALUE;
+		var countElem = elems.size();
 		for (var i = 0; i < countElem; i++) {
 			var elem = elems.get(i);
-			var curPoint = elem.getPoint();
 			var curTime = elem.getTime();
 
 			// 楽曲位置のノート分析を行い、各分析結果を楽曲位置要素として記録する
 			// 入力デバイスレイアウトの左から右へ走査し、評価点の元となる要素を算出する
 			// 一部、計算済みの要素は楽曲位置情報からデータを取り出すのみとなる
-			var basic = basicScore.get(elem);
+			var basic = basicScore.get(lane, elem);
 			var prevVe = true;
 			var prevVeSwNo = -1;
 			var prevVeNtype = (BeMusicNoteType)null;
-			var visualEffectCount = curPoint.getVisualEffectCount();
-			var mineCount = curPoint.getMineCount();
+			var hasMovement = false;
+			var visualEffectCount = 0;
+			var mineCount = 0;
 			var holdingCount = 0;
 			var lnTailCount = 0;
 			var noteTypeCount = 0;
@@ -74,6 +131,9 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 					curVeSwNo = dev.getSwitchNumber();
 					curVeNtype = ntype;
 					ntypeFounds[ntype.getId()] = 1;
+					hasMovement = hasMovement || ntype.hasMovement();
+					visualEffectCount++;
+					mineCount += (ntype == BeMusicNoteType.MINE) ? 1 : 0;
 					holdingCount += ntype.isHolding() ? 1 : 0;
 					lnTailCount += ntype.isLongNoteTail() ? 1 : 0;
 					var changeColor = computeChangeColor(prevVeSwNo, curVeSwNo);
@@ -88,26 +148,37 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 				prevVe = veffect;
 			}
 			noteTypeCount = (int)IntStream.of(ntypeFounds).filter(n -> n > 0).count();
-			elem.setVisualEffectCount(visualEffectCount);
-			elem.setNoteTypeCount(noteTypeCount);
-			elem.setHoldingCount(holdingCount);
-			elem.setMineCount(mineCount);
-			elem.setSpaceCount(spaceCount);
-			elem.setChangeColorCount(changeColorCount);
-			elem.setChangeNoteTypeCount(changeNoteTypeCount);
+
+			var data = new ComplexElement.Data();
+			elem.setData(lane, data);  // 後続処理を行わない場合があるので予め要素データの参照を設定しておく
+			if (!hasMovement) {
+				// 操作を伴わない楽曲位置の場合、当該楽曲位置の楽曲位置複雑度評価点は0とし以降の処理は省略する
+				// ※シングルプレーでこの分岐に入ることはない。ダブルプレーで反対レーンのみ視覚効果がある場合を想定。
+				continue;
+			}
+
+			countMovement++;
+			data.hasMovement = hasMovement;
+			data.numVisual = (byte)visualEffectCount;
+			data.numType = (byte)noteTypeCount;
+			data.numHold = (byte)holdingCount;
+			data.numMine = (byte)mineCount;
+			data.numSpace = (byte)spaceCount;
+			data.numChgColor = (byte)changeColorCount;
+			data.numChgType = (byte)changeNoteTypeCount;
 
 			// 楽曲位置要素から「楽曲位置複雑度評価点」を計算する
-			var deductionHolding = (holdingCount / 8.0) * config.deductionHold;
-			var deductionLnTail = (lnTailCount / 8.0) * config.deductionLnTail;
-			var deductionMine = (mineCount / 8.0) * config.deductionMine;
-			var deduction = 1.0 - (deductionHolding + deductionLnTail + deductionMine);
+			var deductionHolding = (holdingCount / 8.0) * deductionHoldRatio;
+			var deductionLnTail = (lnTailCount / 8.0) * deductionLnTailRatio;
+			var deductionMine = (mineCount / 8.0) * deductionMineRatio;
+			var deduction = Math.max(1.0 - (deductionHolding + deductionLnTail + deductionMine), 0.0);
 			var ratioNtype1 = ((noteTypeCount - 1.0) / 4.0) * config.typeCountRate;
 			var ratioNtype2 = (changeNoteTypeCount / 7.0) * config.typeChangeRate;
 			var ratioNtype = 1.0 + ratioNtype1 + ratioNtype2;
 			var ratioPtReduce = config.ipfnPtReduce.compute(elem.getTimeDelta());
 			var scorePointOrg = basic * ratioNtype * ratioPtReduce * deduction;
 			var scorePoint = config.ipfnBasic.compute(scorePointOrg);
-			elem.setPointScore(scorePoint);
+			data.pointScore = (float)scorePoint;
 
 			// 「後方複雑度評価点」を計算する
 			// 規定範囲の楽曲位置の配置が複雑であるほど、配置が詰まっているほど高評価となるようにする
@@ -115,6 +186,10 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 			var firstBwIndex = i - 1;
 			for (var j = firstBwIndex; (j >= 0) && ((curTime - elems.get(j).getTime()) <= config.timeRangeBwRef); j--) {
 				var prev = elems.get(j);
+				var prevData = prev.getData(lane);
+				if (!prevData.hasMovement) {
+					continue;  // 操作を伴わない楽曲位置は無視する(DPのみを想定)
+				}
 
 				// 現在楽曲位置との差分を出す
 				var diffCount = 0;
@@ -131,56 +206,92 @@ public class ComplexAnalyzer extends RatingAnalyzer {
 				}
 
 				// 後方複雑度評価点を算出し、設定する
-				if (!prev.isSameBackwardPattern()) {
+				if (!prevData.sameBackwardPattern) {
 					var ratioByTime = config.ipfnBwRef.compute(curTime - prev.getTime());
 					var ratioByDiff = Math.max(config.minBwRatioPatternDelta, ((double)diffCount / countDev));
-					var scoreBw = prev.getPointScore() * ratioByDiff * ratioByTime;
-					elem.putBackwardScore(scoreBw);
+					var scoreBw = prevData.pointScore * ratioByDiff * ratioByTime;
+					data.backwardScore += (float)scoreBw;
+					data.backwardScoreCount++;
 				}
 			}
-			elem.setSameBackwardPattern(sameBackward);
-
-			// 集計した各種情報を基にして「総合複雑度評価点」を計算する
-			var scoreTotal = elem.getTotalScore();
-			scoreMin = Math.min(scoreMin, scoreTotal);
-			scoreMax = Math.max(scoreMax, scoreTotal);
+			data.sameBackwardPattern = sameBackward;
 		}
 
 		// 最終評価点を計算する
-		var summarizer = new ScoreSummarizer(config.satulateTotalScore, elems, ComplexElement::getTotalScore);
-		var timePtRange = RatingElement.computeTimeOfPointRange(elems);
-		var customRatio = elems.size() / (double)config.leastPoints;
-		var complexOrg = computeRatingValue(summarizer.summary(), timePtRange, customRatio);
-		var complex = (int)config.ipfnComplex.compute(complexOrg);
+		var ls = new LaneScore();
+		ls.summarizer = new ScoreSummarizer(config.satulateTotalScore, elems, e -> e.getData(lane).hasMovement,
+				e -> e.getTotalScore(lane));
+		ls.numMovement = countMovement;
+		ls.timePtRange = Ds.computeTimeOfPointRange(elems);
+		ls.customRatio = countMovement / (double)(config.leastPoints / (ctx.dpMode ? 2 : 1));
+		ls.complexOrg = Ds.computeRatingValue(ls.summarizer.summary(), ls.timePtRange, ls.customRatio);
 
-		// デバッグ出力する
-		debugOut(cxt, complexOrg, complex, elems, summarizer, timePtRange, customRatio);
-
-		// 最終結果を設定する
-		cxt.stat.setRating(getRatingType(), complex);
+		return ls;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void dumpSummary(DsContext cxt, double org, int rating, Object...values) {
+	protected void dumpSummarySp(DsContext ctx, int rating, Object...values) {
+		dumpSummaryCommon(ctx, (double)values[0], rating, values[1]);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void dumpSummaryDp(DsContext ctx, int rating, Object...values) {
+		dumpSummaryCommon(ctx, (double)values[0], rating, values[1], values[2]);
+	}
+
+	/**
+	 * サマリされたデバッグ情報の出力共通処理
+	 * @param ctx Delta System用コンテキスト
+	 * @param org 算出したレーティング値のオリジナル値
+	 * @param rating orgの値をレーティング種別ごとの値の範囲にスケーリングした最終評価点の値
+	 * @param values その他、デバッグ出力のために必要なオブジェクトのリスト
+	 */
+	private void dumpSummaryCommon(DsContext ctx, double org, int rating, Object...values) {
 		var sb = new StringBuilder();
-		sb.append(cxt.header.getComment());
-		sb.append("\t").append(String.format("%s %s", cxt.header.getTitle(), cxt.header.getSubTitle()).strip());
-		sb.append("\t").append(values[0]);
-		sb.append(String.format("\t%.4f", org));
+		sb.append(ctx.header.getComment());
+		sb.append("\t").append(String.format("%s %s", ctx.header.getTitle(), ctx.header.getSubTitle()).strip());
+		for (var i = 0; i < values.length; i++) {
+			var ls = (LaneScore)values[i];
+			sb.append("\t").append(ls.summarizer);
+			sb.append(String.format("\t%.4f", ls.complexOrg));
+		}
+		if (ctx.dpMode) {
+			sb.append(String.format("\t%.4f", org));
+		}
 		sb.append(String.format("\t%.2f", getRatingType().toValue(rating)));
 		Ds.debug(sb);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void dumpDetail(DsContext cxt, double org, int rating, List<? extends RatingElement> elems,
-			Object... values) {
-		super.dumpDetail(cxt, org, rating, elems, values);
-		var summarizer = (ScoreSummarizer)values[0];
-		Ds.debug("SCORE=(%s, Summary=%.4f)", summarizer, summarizer.summary());
-		Ds.debug("TIME=%.2f", values[1]);
-		Ds.debug("CUSTOM=%.4f", values[2]);
+	protected void dumpDetailSp(DsContext ctx, int rating, List<? extends RatingElement> elems, Object... values) {
+		super.dumpDetailSp(ctx, rating, elems, values);
+		dumpDetailCommon(values[1]);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void dumpDetailDp(DsContext ctx, int rating, List<? extends RatingElement> elems, Object... values) {
+		super.dumpDetailDp(ctx, rating, elems, values);
+		dumpDetailCommon(values[1], values[2]);
+	}
+
+	/**
+	 * 詳細デバッグ情報出力の共通処理
+	 * @param values レーンごとの評価情報
+	 */
+	private void dumpDetailCommon(Object... values) {
+		for (var i = 0; i < values.length; i++) {
+			var ls = (LaneScore)values[i];
+			Ds.debug("--- %s ---", (i == 0) ? "PRIMARY" : "SECONDARY");
+			Ds.debug("SUMMARY=(%s, Result=%.4f)", ls.summarizer, ls.summarizer.summary());
+			Ds.debug("MOVEMENT=%d", ls.numMovement);
+			Ds.debug("TIME=%.2f", ls.timePtRange);
+			Ds.debug("CUSTOM=%.4f", ls.customRatio);
+			Ds.debug("SCORE=%.4f", ls.complexOrg);
+		}
 	}
 
 	/**

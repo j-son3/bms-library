@@ -2,6 +2,8 @@ package com.lmt.lib.bms;
 
 /**
  * BMS宣言の名前と値のセットです。
+ *
+ * @since 0.8.0
  */
 public class BmsDeclarationElement {
 	/** BMS宣言の名前 */

@@ -29,6 +29,8 @@ import com.lmt.lib.bms.internal.Utility;
  *
  * <p>当クラスを通してBMSコンテンツを外部データ出力すると、一般的なBMS仕様に基づく形式となります。
  * 具体的な出力内容については{@link #onWrite(BmsContent, OutputStream)}を参照してください。</p>
+ *
+ * @since 0.7.0
  */
 public class BmsStandardSaver extends BmsSaver {
 	/** 配列データの最大分解能デフォルト値 */
@@ -69,6 +71,7 @@ public class BmsStandardSaver extends BmsSaver {
 	 * @return 最後に書き込んだBMSコンテンツで使用した文字セット、またはnull
 	 * @see #setCharsets(Charset...)
 	 * @see BmsLibrary#setDefaultCharsets(Charset...)
+	 * @since 0.8.0
 	 */
 	public final Charset getLastProcessedCharset() {
 		return mLastProcessedCharset;
@@ -181,6 +184,7 @@ public class BmsStandardSaver extends BmsSaver {
 	 * <p>デフォルトではこの設定は無効になっています。</p>
 	 * @param addBom BOMを付加するかどうか
 	 * @return このオブジェクトのインスタンス
+	 * @since 0.8.0
 	 */
 	public final BmsStandardSaver setAddBom(boolean addBom) {
 		mAddBom = addBom;
@@ -207,6 +211,7 @@ public class BmsStandardSaver extends BmsSaver {
 	 * @return 標準フォーマットとの互換性があればtrue、そうでなければfalse
 	 * @exception NullPointerException contentがnull
 	 * @exception IllegalArgumentException contentが編集モード
+	 * @since 0.8.0
 	 */
 	public static boolean isCompatible(BmsContent content) {
 		assertArgNotNull(content, "content");
@@ -318,7 +323,7 @@ public class BmsStandardSaver extends BmsSaver {
 				break;
 			case INDEXED:  // 索引付きメタ情報
 				content.getIndexedMetas(name).forEach((i, v) -> {
-					String index = BmsInt.to36s(i);
+					String index = intc.tos(i);
 					String value = bmsValueToString(v, intc, type);
 					pw.println(String.format("%s%s %s", outName, index, value));
 				});

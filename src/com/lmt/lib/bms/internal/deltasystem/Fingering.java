@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -76,41 +77,83 @@ enum Fingering {
 			"7, 7:1.00, 6:0.20, 5:0.10, 9:0.20",
 			"9, 9:1.00, 6:0.05, 5:0.10, 7:0.20"),
 
-	/** 左片手 */
-	LEFT_HAND('L', Collections.emptyMap(), Collections.emptyMap()),
+	/** ダブルプレー用片手：POWER値計算に使用する */
+	DP_DEFAULT(
+			'd',
+			"4332110 ",
+			"5667889 ",
+			"4, 0:0.10, 1:0.10, 2:0.50, 3:1.30, 4:0.00",
+			"3, 0:0.10, 1:0.20, 2:0.80, 3:1.70, 4:1.30",
+			"2, 0:0.40, 1:0.50, 2:0.00, 3:0.80, 4:0.50",
+			"1, 0:0.20, 1:0.70, 2:0.50, 3:0.20, 4:0.10",
+			"0, 0:0.00, 1:0.20, 2:0.40, 3:0.10, 4:0.10",
+			"5, 5:0.00, 6:0.20, 7:0.40, 8:0.10, 9:0.10",
+			"6, 5:0.20, 6:0.70, 7:0.50, 8:0.20, 9:0.10",
+			"7, 5:0.40, 6:0.50, 7:0.00, 8:0.80, 9:0.50",
+			"8, 5:0.10, 6:0.20, 7:0.80, 8:1.70, 9:1.30",
+			"9, 5:0.10, 6:0.10, 7:0.50, 8:1.30, 9:0.00"),
 
-	/** DP左レーンスクラッチ */
-	LEFT_SCRATCH('R', Collections.emptyMap(), Collections.emptyMap()),
+	/** ダブルプレー用スクラッチ：POWER値計算に使用する */
+	DP_SCRATCH(
+			's',
+			"01021104",
+			"56675659",
+			"4, 0:1.80, 1:2.00, 2:2.50, 3:3.00, 4:0.00",
+			"3, 0:0.00, 1:0.00, 2:0.00, 3:0.00, 4:3.00",
+			"2, 0:0.50, 1:0.40, 2:0.00, 3:0.00, 4:2.50",
+			"1, 0:1.90, 1:1.50, 2:0.40, 3:0.00, 4:2.00",
+			"0, 0:0.00, 1:1.90, 2:0.50, 3:0.00, 4:1.80",
+			"5, 5:0.00, 6:1.90, 7:0.50, 8:0.00, 9:1.80",
+			"6, 5:1.90, 6:1.50, 7:0.40, 8:0.00, 9:2.00",
+			"7, 5:0.50, 6:0.40, 7:0.00, 8:0.00, 9:2.50",
+			"8, 5:0.00, 6:0.00, 7:0.00, 8:0.00, 9:3.00",
+			"9, 5:1.80, 6:2.00, 7:2.50, 8:3.00, 9:0.00"),
 
-	/** 右片手 */
-	RIGHT_HAND('<', Collections.emptyMap(), Collections.emptyMap()),
+	/** HOLDING算出用(DP)：12467をホームポジションとし、HOLDING向けに調整された抵抗値を定義する */
+	DP_HOLDING(
+			'h',
+			"43321104",
+			"56678899",
+			"4, 0:0.16, 1:0.20, 2:0.29, 3:0.28, 4:0.50",
+			"3, 0:0.11, 1:0.16, 2:0.30, 3:0.39, 4:0.28",
+			"2, 0:0.05, 1:0.23, 2:0.00, 3:0.30, 4:0.29",
+			"1, 0:0.19, 1:0.30, 2:0.23, 3:0.16, 4:0.20",
+			"0, 0:0.00, 1:0.19, 2:0.05, 3:0.11, 4:0.16",
+			"5, 5:0.00, 6:0.19, 7:0.05, 8:0.11, 9:0.16",
+			"6, 5:0.19, 6:0.30, 7:0.23, 8:0.16, 9:0.20",
+			"7, 5:0.05, 6:0.23, 7:0.00, 8:0.30, 9:0.29",
+			"8, 5:0.11, 6:0.16, 7:0.30, 8:0.39, 9:0.28",
+			"9, 5:0.16, 6:0.20, 7:0.29, 8:0.28, 9:0.50"),
 
-	/** DP右レーンスクラッチ */
-	RIGHT_SCRATCH('>', Collections.emptyMap(), Collections.emptyMap());
-
-	/** インデックスによる運指のテーブル */
-	private static final Fingering[] TABLE = {
-			SP_DEFAULT, SP_SCRATCH, SP_HOLDING, LEFT_HAND, LEFT_SCRATCH, RIGHT_HAND, RIGHT_SCRATCH,
-	};
+	/** GIMMICKの地雷(DP用) */
+	DP_MINE(
+			'm',
+			"43321104",
+			"56678899",
+			"4, 0:0.00, 1:0.03, 2:0.15, 3:0.25, 4:0.50",
+			"3, 0:0.01, 1:0.02, 2:0.20, 3:0.50, 4:0.25",
+			"2, 0:0.05, 1:0.20, 2:1.00, 3:0.20, 4:0.15",
+			"1, 0:0.05, 1:0.50, 2:0.20, 3:0.02, 4:0.03",
+			"0, 0:1.00, 1:0.05, 2:0.05, 3:0.01, 4:0.00",
+			"5, 5:1.00, 6:0.05, 7:0.05, 8:0.01, 9:0.00",
+			"6, 5:0.05, 6:0.50, 7:0.20, 8:0.02, 9:0.03",
+			"7, 5:0.05, 6:0.20, 7:1.00, 8:0.20, 9:0.15",
+			"8, 5:0.01, 6:0.02, 7:0.20, 8:0.50, 9:0.25",
+			"9, 5:0.00, 6:0.03, 7:0.15, 8:0.25, 9:0.50"),
+	;
 
 	/** 運指の1文字表現 */
 	private char mChar;
-	/** 指と入力デバイスのマッピングテーブル */
-	private BeMusicDevice[] mDevicesFromFinger;
+	/** 指と入力デバイス一覧のマッピングテーブル */
+	private List<List<BeMusicDevice>> mDevicesMappedByFinger;
 	/** 指と入力デバイスのマッピングテーブル(左手のみ) */
-	private BeMusicDevice[] mDevicesLeftHand;
+	private List<BeMusicDevice> mDevicesLeftHand;
 	/** 指と入力デバイスのマッピングテーブル(右手のみ) */
-	private BeMusicDevice[] mDevicesRightHand;
+	private List<BeMusicDevice> mDevicesRightHand;
 	/** 入力デバイスと指のマッピングテーブル */
 	private Finger[] mFingersFromDevice;
-	/** 入力デバイスと指のマッピングテーブル(左手のみ) */
-	private Finger[] mFingersLeftHand;
-	/** 入力デバイスと指のマッピングテーブル(右手のみ) */
-	private Finger[] mFingersRightHand;
 	/** 指同士の抵抗データテーブル */
 	private Resist[][] mResistTable;
-	/** 手ごとに指が入力デバイスにマッピングされた数 */
-	private int[] mFingerCountPerHand = new int[Hand.COUNT];
 
 	/**
 	 * コンストラクタ
@@ -146,8 +189,8 @@ enum Fingering {
 	 */
 	private void initialize(char ch, Map<BeMusicDevice, Finger> fingerMap, Map<Finger, Resist[]> resistMap) {
 		mChar = ch;
-		mDevicesFromFinger = new BeMusicDevice[Finger.COUNT];
 		mFingersFromDevice = new Finger[BeMusicDevice.COUNT];
+		var devsMapFng = new ArrayList<List<BeMusicDevice>>(Collections.nCopies(Finger.COUNT, null));
 		var devsL = new ArrayList<BeMusicDevice>();
 		var devsR = new ArrayList<BeMusicDevice>();
 		var fngsL = new ArrayList<Finger>();
@@ -156,9 +199,17 @@ enum Fingering {
 			var device = e.getKey();
 			var finger = e.getValue();
 			var hand = finger.getHand();
-			mDevicesFromFinger[finger.getIndex()] = device;
 			mFingersFromDevice[device.getIndex()] = finger;
-			mFingerCountPerHand[hand.getIndex()]++;
+
+			// 担当指ごとの入力デバイスリストを編集する
+			var devsFng = devsMapFng.get(finger.getIndex());
+			if (devsFng == null) {
+				devsFng = new ArrayList<>();
+				devsMapFng.set(finger.getIndex(), devsFng);
+			}
+			devsFng.add(device);
+
+			// 手ごとのリストを編集する
 			if (hand.isLeft()) {
 				devsL.add(device);
 				fngsL.add(finger);
@@ -167,16 +218,12 @@ enum Fingering {
 				fngsR.add(finger);
 			}
 		}
-		mDevicesLeftHand = devsL.toArray(BeMusicDevice[]::new);
-		mDevicesRightHand = devsR.toArray(BeMusicDevice[]::new);
-		mFingersLeftHand = fngsL.toArray(Finger[]::new);
-		mFingersRightHand = fngsR.toArray(Finger[]::new);
-
-		// 要素のソート処理
-		Arrays.sort(mDevicesLeftHand, (l, r) -> Integer.compare(l.getIndex(), r.getIndex()));
-		Arrays.sort(mDevicesRightHand, (l, r) -> Integer.compare(l.getIndex(), r.getIndex()));
-		Arrays.sort(mFingersLeftHand, (l, r) -> Integer.compare(l.getIndex(), r.getIndex()));
-		Arrays.sort(mFingersRightHand, (l, r) -> Integer.compare(l.getIndex(), r.getIndex()));
+		mDevicesMappedByFinger = devsMapFng.stream()
+				.map(d -> Optional.ofNullable(d).orElse(Collections.emptyList())).collect(Collectors.toList());
+		devsL.sort((l, r) -> Integer.compare(l.getIndex(), r.getIndex()));
+		devsR.sort((l, r) -> Integer.compare(l.getIndex(), r.getIndex()));
+		mDevicesLeftHand = Collections.unmodifiableList(devsL);
+		mDevicesRightHand = Collections.unmodifiableList(devsR);
 
 		// 抵抗情報マップを構築する
 		var emptyResists = new Resist[0];
@@ -193,15 +240,6 @@ enum Fingering {
 	 */
 	final char getChar() {
 		return mChar;
-	}
-
-	/**
-	 * 指定指に対応する入力デバイス取得
-	 * @param finger 指
-	 * @return 対応する入力デバイス
-	 */
-	final BeMusicDevice getDevice(Finger finger) {
-		return mDevicesFromFinger[finger.getIndex()];
 	}
 
 	/**
@@ -223,39 +261,21 @@ enum Fingering {
 	}
 
 	/**
-	 * 指定手の指が入力デバイスにアサインされた数取得
-	 * @param hand 手
-	 * @return 指が入力デバイスにアサインされた数
-	 */
-	final int getFingerCount(Hand hand) {
-		return mFingerCountPerHand[hand.getIndex()];
-	}
-
-	/**
-	 * 指定手の指のうち入力デバイスにアサインされた指取得
-	 * @param hand 手
-	 * @return 入力デバイスにアサインされた指一覧
-	 */
-	final Finger[] getFingers(Hand hand) {
-		return hand.isLeft() ? mFingersLeftHand : mFingersRightHand;
-	}
-
-	/**
 	 * 指定手が担当する入力デバイス取得
 	 * @param hand 手
 	 * @return 担当する入力デバイス一覧
 	 */
-	final BeMusicDevice[] getDevices(Hand hand) {
+	final List<BeMusicDevice> getDevices(Hand hand) {
 		return hand.isLeft() ? mDevicesLeftHand : mDevicesRightHand;
 	}
 
 	/**
-	 * インデックスから運指取得
-	 * @param index インデックス
-	 * @return 運指
+	 * 指定指が担当する入力デバイス取得
+	 * @param finger 指
+	 * @return 担当する入力デバイス一覧
 	 */
-	static Fingering fromIndex(int index) {
-		return TABLE[index];
+	final List<BeMusicDevice> getDevices(Finger finger) {
+		return mDevicesMappedByFinger.get(finger.getIndex());
 	}
 
 	/**
@@ -304,9 +324,7 @@ enum Fingering {
 	 */
 	static void print() {
 		Ds.debug("fingerings: {");
-		//Stream.of(TABLE).forEach(f -> Ds.debug(f.toString(1)));
-		Ds.debug(SP_DEFAULT.toString(1));
-		Ds.debug(SP_SCRATCH.toString(1));
+		Stream.of(values()).forEach(f -> Ds.debug(f.toString(1)));
 		Ds.debug("}");
 	}
 
@@ -354,7 +372,7 @@ enum Fingering {
 	private static void parseResist(Map<Finger, Resist[]> map, String def) {
 		// 定義内容を解析する
 		final var REX_RESIST = "( *, *(\\d):(\\d+\\.\\d+))";
-		final var REX_ALL = String.format("^(\\d)%s%s?%s?%s?$", REX_RESIST, REX_RESIST, REX_RESIST, REX_RESIST);
+		final var REX_ALL = String.format("^(\\d)%s%s?%s?%s?%s?$", REX_RESIST, REX_RESIST, REX_RESIST, REX_RESIST, REX_RESIST);
 		var matcher = Pattern.compile(REX_ALL).matcher(def);
 		if (!matcher.matches()) {
 			var msg = String.format("Resist format error: '%s'", def);

@@ -35,12 +35,18 @@ class RhythmConfig extends RatingConfig {
 	/** リズム範囲のノート密度の評価点影響係数：リズムを刻むのに地力を必要とする際の影響度を示す */
 	double influenceDensity = 1.1;
 
-	/** タイムライン全体の最終評価点影響係数 */
-	double influenceAllSide = 0.84;
-	/** タイムライン左サイドの最終評価点影響係数 */
-	double influenceLeftSide = 0.11;
-	/** タイムライン右サイドの最終評価点影響係数 */
-	double influenceRightSide = 0.07;
+	/** タイムライン全体の最終評価点影響係数(SP) */
+	double spInfluenceAllSide = 0.84;
+	/** タイムライン左サイドの最終評価点影響係数(SP) */
+	double spInfluenceLeftSide = 0.11;
+	/** タイムライン右サイドの最終評価点影響係数(SP) */
+	double spInfluenceRightSide = 0.07;
+	/** レーン全体の最終評価点影響係数(DP) */
+	double dpInfluenceAllSide = 0.82;
+	/** 左レーンの最終評価点影響係数(DP) */
+	double dpInfluenceLeftSide = 0.10;
+	/** 右レーンの最終評価点影響係数(DP) */
+	double dpInfluenceRightSide = 0.10;
 
 	/** 同一楽曲位置と認識する時間のズレ幅 */
 	double acceptableTimeDelta = 0.0167;
@@ -76,6 +82,33 @@ class RhythmConfig extends RatingConfig {
 		setup();
 	}
 
+	/**
+	 * タイムライン全体の最終評価点影響係数取得
+	 * @param ctx Delta System用コンテキスト
+	 * @return タイムライン全体の最終評価点影響係数
+	 */
+	final double influenceAllSide(DsContext ctx) {
+		return ctx.dpMode ? this.dpInfluenceAllSide : this.spInfluenceAllSide;
+	}
+
+	/**
+	 * タイムライン左サイドの最終評価点影響係数取得
+	 * @param ctx Delta System用コンテキスト
+	 * @return タイムライン左サイドの最終評価点影響係数
+	 */
+	final double influenceLeftSide(DsContext ctx) {
+		return ctx.dpMode ? this.dpInfluenceLeftSide : this.spInfluenceLeftSide;
+	}
+
+	/**
+	 * タイムライン右サイドの最終評価点影響係数取得
+	 * @param ctx Delta System用コンテキスト
+	 * @return タイムライン右サイドの最終評価点影響係数
+	 */
+	final double influenceRightSide(DsContext ctx) {
+		return ctx.dpMode ? this.dpInfluenceRightSide : this.spInfluenceRightSide;
+	}
+
 	/** {@inheritDoc} */
 	@Override
 	void load(Properties config) {
@@ -87,9 +120,12 @@ class RhythmConfig extends RatingConfig {
 		ipfnRhythm = loader.ipfnLinear("ipfn_rhythm", ipfnRhythm);
 		influenceInterval = loader.numeric("influence_interval", influenceInterval);
 		influenceDensity = loader.numeric("influence_density", influenceDensity);
-		influenceAllSide = loader.numeric("influence_all_side", influenceAllSide);
-		influenceLeftSide = loader.numeric("influence_left_side", influenceLeftSide);
-		influenceRightSide = loader.numeric("influence_right_side", influenceRightSide);
+		spInfluenceAllSide = loader.numeric("sp_influence_all_side", spInfluenceAllSide);
+		spInfluenceLeftSide = loader.numeric("sp_influence_left_side", spInfluenceLeftSide);
+		spInfluenceRightSide = loader.numeric("sp_influence_right_side", spInfluenceRightSide);
+		dpInfluenceAllSide = loader.numeric("dp_influence_all_side", dpInfluenceAllSide);
+		dpInfluenceLeftSide = loader.numeric("dp_influence_left_side", dpInfluenceLeftSide);
+		dpInfluenceRightSide = loader.numeric("dp_influence_right_side", dpInfluenceRightSide);
 		acceptableTimeDelta = loader.numeric("acceptable_time_delta", acceptableTimeDelta);
 		minRangeRate = loader.numeric("min_range_rate", minRangeRate);
 		densityDecayTime = loader.numeric("density_decay_time", densityDecayTime);
@@ -111,9 +147,12 @@ class RhythmConfig extends RatingConfig {
 		Ds.debug("  ipfnRhythm: %s", ipfnRhythm);
 		Ds.debug("  influenceInterval: %s", influenceInterval);
 		Ds.debug("  influenceDensity: %s", influenceDensity);
-		Ds.debug("  influenceAllSide: %s", influenceAllSide);
-		Ds.debug("  influenceLeftSide: %s", influenceLeftSide);
-		Ds.debug("  influenceRightSide: %s", influenceRightSide);
+		Ds.debug("  spInfluenceAllSide: %s", spInfluenceAllSide);
+		Ds.debug("  spInfluenceLeftSide: %s", spInfluenceLeftSide);
+		Ds.debug("  spInfluenceRightSide: %s", spInfluenceRightSide);
+		Ds.debug("  dpInfluenceAllSide: %s", dpInfluenceAllSide);
+		Ds.debug("  dpInfluenceLeftSide: %s", dpInfluenceLeftSide);
+		Ds.debug("  dpInfluenceRightSide: %s", dpInfluenceRightSide);
 		Ds.debug("  acceptableTimeDelta: %s", acceptableTimeDelta);
 		Ds.debug("  minRangeRate: %s", minRangeRate);
 		Ds.debug("  densityDecayTime: %s", densityDecayTime);

@@ -53,6 +53,8 @@ import static com.lmt.lib.bms.internal.Assertion.*;
  * <li>初期値はnullでなければいけません。</li>
  * <li>同一性チェックをONにすることはできません。</li>
  * </ul>
+ *
+ * @since 0.0.1
  */
 public final class BmsChannel extends BmsChannelKey {
 	/** チャンネルのデータ型 */
@@ -134,6 +136,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}
 	 * @exception IllegalArgumentException データ型が値型の時、refがnullではない
 	 * @exception IllegalArgumentException defaultValueがtypeのテストに失敗した
+	 * @since 0.7.0
 	 */
 	public static BmsChannel spec(int number, BmsType type, String ref, String defaultValue, boolean multiple,
 			boolean uniqueness) {

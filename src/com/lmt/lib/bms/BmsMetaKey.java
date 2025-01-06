@@ -9,6 +9,8 @@ import java.util.Objects;
  *
  * <p>メタ情報を一意に特定するには、「名称」と「構成単位({@link BmsUnit})」を必要とします。メタ情報には、名称が同じで構成単位が
  * 異なるものが一部存在するからです。</p>
+ *
+ * @since 0.0.1
  */
 public class BmsMetaKey {
 	/** メタ情報の名称(先頭の#,%を含み、小文字で表現された文字列) */
@@ -77,6 +79,7 @@ public class BmsMetaKey {
 	 * メタ情報の構成単位が単体であるかどうかを取得します。
 	 * <p>当メソッドは {@link #getUnit()} == {@link BmsUnit#SINGLE} と等価です。</p>
 	 * @return 構成単位が単体であればtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isSingleUnit() {
 		return mUnit == BmsUnit.SINGLE;
@@ -86,6 +89,7 @@ public class BmsMetaKey {
 	 * メタ情報の構成単位が複数であるかどうかを取得します。
 	 * <p>当メソッドは {@link #getUnit()} == {@link BmsUnit#MULTIPLE} と等価です。</p>
 	 * @return 構成単位が複数であればtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isMultipleUnit() {
 		return mUnit == BmsUnit.MULTIPLE;
@@ -95,6 +99,7 @@ public class BmsMetaKey {
 	 * メタ情報の構成単位が索引付きであるかどうかを取得します。
 	 * <p>当メソッドは {@link #getUnit()} == {@link BmsUnit#INDEXED} と等価です。</p>
 	 * @return 構成単位が索引付きであればtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isIndexedUnit() {
 		return mUnit == BmsUnit.INDEXED;

@@ -12,6 +12,8 @@ import java.util.Objects;
  * 刻み位置の場合{@link BmsSpec#TICK_MIN}～{@link BmsSpec#TICK_MAX}となります。ただし、刻み位置の範囲は小節番号が示す
  * 小節の長さに依存しますので、現実的な最大値は{@link BmsSpec#TICK_MAX}よりも遥かに小さい値になります。
  * 多くのBMSコンテンツでは、小節における刻み位置の最大値は概ね{@link BmsSpec#TICK_COUNT_DEFAULT}前後となります。</p>
+ *
+ * @since 0.0.1
  */
 public interface BmsAt {
 	/**

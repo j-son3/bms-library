@@ -14,6 +14,7 @@ package com.lmt.lib.bms.bemusic;
  * 生成されることを想定しているため、BMSライブラリユーザーが独自でインスタンスを生成することは考慮されていません。</p>
  *
  * @see BeMusicStatistics
+ * @since 0.1.0
  */
 public class BeMusicTimeSpan {
 	/** 期間統計情報の最小長(秒単位) */

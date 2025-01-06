@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.lmt.lib.bms.BmsContent;
@@ -39,6 +40,8 @@ import com.lmt.lib.bms.BmsSpec;
  * <p>アプリケーション側で収集するヘッダ情報を拡張したい場合は当クラスを継承し、{@link #onCreate(BmsContent, int)}を
  * オーバーライドすることでそれが可能になります。先述のメソッド内で{@link BmsContent}から希望するメタ情報を
  * 抽出してください。</p>
+ *
+ * @since 0.0.1
  */
 public class BeMusicHeader {
 	/**
@@ -207,6 +210,7 @@ public class BeMusicHeader {
 	/**
 	 * #BASEを取得します。
 	 * @return #BASEの値
+	 * @since 0.8.0
 	 */
 	public final int getBase() {
 		return mBase;
@@ -292,6 +296,7 @@ public class BeMusicHeader {
 	/**
 	 * #CHARTNAMEを取得します。
 	 * @return #CHARTNAMEの値
+	 * @since 0.7.0
 	 */
 	public final String getChartName() {
 		return mChartName;
@@ -326,6 +331,7 @@ public class BeMusicHeader {
 	 * #DEFEXRANKを取得します。
 	 * <p>ヘッダに定義されていなかった場合、nullを返します。</p>
 	 * @return #DEFEXRANKの値、またはnull
+	 * @since 0.7.0
 	 */
 	public final Double getDefExRank() {
 		return mDefExRank;
@@ -342,6 +348,7 @@ public class BeMusicHeader {
 	/**
 	 * #COMMENTを取得します。
 	 * @return #COMMENTの値
+	 * @since 0.5.0
 	 */
 	public final String getComment() {
 		return mComment;
@@ -374,6 +381,7 @@ public class BeMusicHeader {
 	/**
 	 * #EYECATCHを取得します。
 	 * @return #EYECATCHの値
+	 * @since 0.7.0
 	 */
 	public final String getEyecatch() {
 		return mEyecatch;
@@ -382,6 +390,7 @@ public class BeMusicHeader {
 	/**
 	 * #PREVIEWを取得します。
 	 * @return #PREVIEWの値
+	 * @since 0.2.0
 	 */
 	public final String getPreview() {
 		return mPreview;
@@ -398,6 +407,7 @@ public class BeMusicHeader {
 	/**
 	 * #LNMODEを取得します。
 	 * @return #LNMODEの値
+	 * @since 0.3.0
 	 */
 	public final BeMusicLongNoteMode getLnMode() {
 		return mLnMode;
@@ -430,6 +440,7 @@ public class BeMusicHeader {
 
 	/**
 	 * #WAVを全て取得します。
+	 * <p>返されるマップは読み取り専用です。</p>
 	 * @return メタ情報インデックスでマップされた#WAVの値
 	 */
 	public final Map<Integer, String> getWavs() {
@@ -447,6 +458,7 @@ public class BeMusicHeader {
 
 	/**
 	 * #BMPを全て取得します。
+	 * <p>返されるマップは読み取り専用です。</p>
 	 * @return メタ情報インデックスでマップされた#BMPの値
 	 */
 	public final Map<Integer, String> getBmps() {
@@ -465,6 +477,7 @@ public class BeMusicHeader {
 
 	/**
 	 * #BPMを全て取得します。
+	 * <p>返されるマップは読み取り専用です。</p>
 	 * @return メタ情報インデックスでマップされた#BPMの値
 	 */
 	public final Map<Integer, Double> getBpms() {
@@ -483,6 +496,7 @@ public class BeMusicHeader {
 
 	/**
 	 * #STOPを全て取得します。
+	 * <p>返されるマップは読み取り専用です。</p>
 	 * @return メタ情報インデックスでマップされた#STOPの値
 	 */
 	public final Map<Integer, Double> getStops() {
@@ -501,6 +515,7 @@ public class BeMusicHeader {
 
 	/**
 	 * #SCROLLを全て取得します。
+	 * <p>返されるマップは読み取り専用です。</p>
 	 * @return メタ情報インデックスでマップされた#SCROLLの値
 	 */
 	public final Map<Integer, Double> getScrolls() {
@@ -518,6 +533,7 @@ public class BeMusicHeader {
 
 	/**
 	 * #TEXTを全て取得します。
+	 * <p>返されるマップは読み取り専用です。</p>
 	 * @return メタ情報インデックスでマップされた#TEXTの値
 	 */
 	public final Map<Integer, String> getTexts() {
@@ -530,6 +546,7 @@ public class BeMusicHeader {
 	 * @param content BMSコンテンツ
 	 * @return ヘッダ定義オブジェクト
 	 * @exception NullPointerException contentがnull
+	 * @since 0.8.0
 	 */
 	public static BeMusicHeader of(BmsContent content) {
 		return new BeMusicHeader(content);
@@ -542,6 +559,7 @@ public class BeMusicHeader {
 	 * @param flags ヘッダ定義収集フラグ
 	 * @return ヘッダ定義オブジェクト
 	 * @exception NullPointerException contentがnull
+	 * @since 0.8.0
 	 */
 	public static BeMusicHeader of(BmsContent content, int flags) {
 		return new BeMusicHeader(content, flags);
@@ -558,6 +576,7 @@ public class BeMusicHeader {
 	 * @exception NullPointerException creatorがnull
 	 * @exception NullPointerException creatorがnullを返した
 	 * @see #of(BmsContent, int, Supplier)
+	 * @since 0.8.0
 	 */
 	public static <H extends BeMusicHeader> H of(BmsContent content, Supplier<H> creator) {
 		return of(content, ALL, creator);
@@ -577,6 +596,7 @@ public class BeMusicHeader {
 	 * @exception NullPointerException creatorがnull
 	 * @exception NullPointerException creatorがnullを返した
 	 * @see #onCreate(BmsContent, int)
+	 * @since 0.8.0
 	 */
 	public static <H extends BeMusicHeader> H of(BmsContent content, int flags, Supplier<H> creator) {
 		assertArgNotNull(content, "content");
@@ -623,15 +643,30 @@ public class BeMusicHeader {
 		mEmail = BeMusicMeta.getEmail(content);
 
 		// 取得フラグによって取得有無を決定するメタ情報
-		mWavs = ((flags & WAV) == 0) ? Collections.emptyMap() : BeMusicMeta.getWavs(content);
-		mBmps = ((flags & BMP) == 0) ? Collections.emptyMap() : BeMusicMeta.getBmps(content);
-		mBpms = ((flags & BPM) == 0) ? Collections.emptyMap() : BeMusicMeta.getBpms(content);
-		mStops = ((flags & STOP) == 0) ? Collections.emptyMap() : BeMusicMeta.getStops(content);
-		mScrolls = ((flags & SCROLL) == 0) ? Collections.emptyMap() : BeMusicMeta.getScrolls(content);
-		mTexts = ((flags & TEXT) == 0) ? Collections.emptyMap() : BeMusicMeta.getTexts(content);
+		mWavs = collectMetas(flags, WAV, content, BeMusicMeta::getWavs);
+		mBmps = collectMetas(flags, BMP, content, BeMusicMeta::getBmps);
+		mBpms = collectMetas(flags, BPM, content, BeMusicMeta::getBpms);
+		mStops = collectMetas(flags, STOP, content, BeMusicMeta::getStops);
+		mScrolls = collectMetas(flags, SCROLL, content, BeMusicMeta::getScrolls);
+		mTexts = collectMetas(flags, TEXT, content, BeMusicMeta::getTexts);
 
 		// 拡張情報取得用処理を実行する
 		onCreate(content, flags);
+	}
+
+	/**
+	 * 索引付きメタ情報収集
+	 * <p>マップは外部へ直接参照させるため、読み取り専用マップとして生成する。</p>
+	 * @param <V> マップの値
+	 * @param flags 取得フラグ
+	 * @param mask フラグのマスク値
+	 * @param content BMSコンテンツ
+	 * @param collector メタ情報収集メソッド
+	 * @return 読み取り専用のメタ情報マップ。取得フラグのビットが立っていない場合は空マップ。
+	 */
+	private static <V> Map<Integer, V> collectMetas(int flags, int mask, BmsContent content,
+			Function<BmsContent, Map<Integer, V>> collector) {
+		return ((flags & mask) == 0) ? Collections.emptyMap() : Collections.unmodifiableMap(collector.apply(content));
 	}
 
 	/**

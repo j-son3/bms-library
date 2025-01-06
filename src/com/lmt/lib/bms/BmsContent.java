@@ -2,11 +2,6 @@ package com.lmt.lib.bms;
 
 import static com.lmt.lib.bms.internal.Assertion.*;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -21,6 +16,8 @@ import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.lmt.lib.bms.internal.Utility;
 
 /**
  * 1個のBMSデータを表すBMSライブラリのメインオブジェクトです。
@@ -172,6 +169,8 @@ import java.util.stream.Stream;
  * また、BMSコンテンツを扱うアプリケーションの特性上、同時に複数の画像や音声データがメモリ上に展開されることが予想されます。
  * そのため、複数のBMSコンテンツをメモリ上に展開することはアプリケーションの省メモリ設計の観点から推奨されません。
  * BMSコンテンツから必要な情報を取り出した後は速やかにオブジェクトを破棄してください。</p>
+ *
+ * @since 0.0.1
  */
 public class BmsContent {
 	/** BMS宣言のキー名書式の正規表現パターン */
@@ -271,6 +270,7 @@ public class BmsContent {
 	 * @param src コピー元BMSコンテンツ
 	 * @exception NullPointerException srcがnull
 	 * @exception IllegalArgumentException srcが編集モード
+	 * @since 0.8.0
 	 */
 	public BmsContent(BmsContent src) {
 		this(src, null, null, null, null);
@@ -311,6 +311,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException ノートの変換で、小節の刻み位置がマイナス値または当該小節の刻み数以上
 	 * @exception IllegalArgumentException ノートの変換で、ノートの値に0を指定した
 	 * @exception IllegalArgumentException ノートの変換で、ノートの値に{@link BmsSpec#VALUE_MIN}未満または{@link BmsSpec#VALUE_MAX}超過の値を指定した
+	 * @since 0.8.0
 	 */
 	public BmsContent(BmsContent src,
 			Function<BmsDeclarationElement, String> cnvDecl, Function<BmsMetaElement, Object> cnvMeta,
@@ -404,6 +405,7 @@ public class BmsContent {
 	 * @param declaration 追加対象のBMS宣言
 	 * @exception IllegalStateException 動作モードが編集モードではない
 	 * @exception NullPointerException declarationがnull
+	 * @since 0.8.0
 	 */
 	public final void putDeclaration(BmsDeclarationElement declaration) {
 		assertIsEditMode();
@@ -462,6 +464,7 @@ public class BmsContent {
 	/**
 	 * BMSコンテンツに登録されたBMS宣言を登録順に走査するストリームを返します。
 	 * @return BMS宣言を走査するストリーム
+	 * @since 0.8.0
 	 */
 	public final Stream<BmsDeclarationElement> declarations() {
 		return mBmsDeclarations.values().stream();
@@ -617,6 +620,7 @@ public class BmsContent {
 	 * @exception IllegalStateException 動作モードが編集モードではない
 	 * @exception NullPointerException metaがnull
 	 * @exception ClassCastException メタ情報の値が設定先メタ情報のデータ型に変換できない
+	 * @since 0.8.0
 	 */
 	public final void putMeta(BmsMetaElement meta) {
 		assertArgNotNull(meta, "meta");
@@ -982,6 +986,7 @@ public class BmsContent {
 	 * また、走査を行っている最中に編集モードに遷移してメタ情報を更新した場合、走査中の結果がどのようになるかは未定義です。</p>
 	 * @return メタ情報を走査するストリーム
 	 * @exception IllegalStateException 動作モードが編集モード
+	 * @since 0.8.0
 	 */
 	public final Stream<BmsMetaElement> metas() {
 		return mMetas.metas();
@@ -997,6 +1002,7 @@ public class BmsContent {
 	 * また、走査を行っている最中に編集モードに遷移して単体メタ情報を更新した場合、走査中の結果がどのようになるかは未定義です。</p>
 	 * @return 単体メタ情報を走査するストリーム
 	 * @exception IllegalStateException 動作モードが編集モード
+	 * @since 0.8.0
 	 */
 	public final Stream<BmsMetaElement> singleMetas() {
 		return mMetas.singleMetas();
@@ -1014,6 +1020,7 @@ public class BmsContent {
 	 * また、走査を行っている最中に編集モードに遷移して複数メタ情報を更新した場合、走査中の結果がどのようになるかは未定義です。</p>
 	 * @return 複数メタ情報を走査するストリーム
 	 * @exception IllegalStateException 動作モードが編集モード
+	 * @since 0.8.0
 	 */
 	public final Stream<BmsMetaElement> multipleMetas() {
 		return mMetas.multipleMetas();
@@ -1032,6 +1039,7 @@ public class BmsContent {
 	 * @exception IllegalStateException 動作モードが編集モード
 	 * @exception NullPointerException nameがnull
 	 * @exception IllegalArgumentException nameに該当する複数メタ情報がBMS仕様に存在しない
+	 * @since 0.8.0
 	 */
 	public final Stream<BmsMetaElement> multipleMetas(String name) {
 		return mMetas.multipleMetas(name);
@@ -1049,6 +1057,7 @@ public class BmsContent {
 	 * また、走査を行っている最中に編集モードに遷移して索引付きメタ情報を更新した場合、走査中の結果がどのようになるかは未定義です。</p>
 	 * @return 索引付きメタ情報を走査するストリーム
 	 * @exception IllegalStateException 動作モードが編集モード
+	 * @since 0.8.0
 	 */
 	public final Stream<BmsMetaElement> indexedMetas() {
 		return mMetas.indexedMetas();
@@ -1067,6 +1076,7 @@ public class BmsContent {
 	 * @exception IllegalStateException 動作モードが編集モード
 	 * @exception NullPointerException nameがnull
 	 * @exception IllegalArgumentException nameに該当する索引付きメタ情報がBMS仕様に存在しない
+	 * @since 0.8.0
 	 */
 	public final Stream<BmsMetaElement> indexedMetas(String name) {
 		return mMetas.indexedMetas(name);
@@ -1211,6 +1221,7 @@ public class BmsContent {
 	 * @param editor 編集を行うエディタ関数
 	 * @exception IllegalStateException 動作モードが参照モードではない
 	 * @exception NullPointerException editorがnull
+	 * @since 0.8.0
 	 */
 	public final void edit(Runnable editor) {
 		assertIsReferenceMode();
@@ -2582,6 +2593,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
 	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
 	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 * @since 0.1.0
 	 */
 	public final Stream<BmsTimelineElement> timeline(BmsAt at) {
 		assertArgNotNull(at, "at");
@@ -2601,6 +2613,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
 	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
 	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 * @since 0.1.0
 	 */
 	public final Stream<BmsTimelineElement> timeline(int measure, double tick) {
 		return mTlAccessor.timeline(measure, tick);
@@ -2614,6 +2627,7 @@ public class BmsContent {
 	 * <p>当メソッドが返すストリームは、タイムライン全体から全チャンネルのタイムライン要素を列挙します。
 	 * ストリームの利用方法についてはJavaリファレンスのストリームAPI(java.util.stream)を参照してください。</p>
 	 * @return タイムライン全体を操作するストリーム
+	 * @since 0.1.0
 	 */
 	public final Stream<BmsTimelineElement> timeline() {
 		return mTlAccessor.timeline(BmsSpec.MEASURE_MIN, BmsSpec.TICK_MIN, mTlAccessor.getCount(), BmsSpec.TICK_MIN);
@@ -2634,6 +2648,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 走査終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
 	 * @exception IllegalArgumentException 走査開始/終了楽曲位置の楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
 	 * @exception IllegalArgumentException atEndがatBeginと同じまたは手前の楽曲位置を示している
+	 * @since 0.1.0
 	 */
 	public final Stream<BmsTimelineElement> timeline(BmsAt atBegin, BmsAt atEnd) {
 		assertArgNotNull(atBegin, "atBegin");
@@ -2661,6 +2676,7 @@ public class BmsContent {
 	 * @exception IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
 	 * @exception IllegalArgumentException 走査開始/終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
 	 * @exception IllegalArgumentException 走査終了楽曲位置が走査開始楽曲位置と同じまたは手前の楽曲位置を示している
+	 * @since 0.1.0
 	 */
 	public final Stream<BmsTimelineElement> timeline(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
 		return mTlAccessor.timeline(measureBegin, tickBegin, measureEnd, tickEnd);
@@ -2680,6 +2696,7 @@ public class BmsContent {
 	 * @exception NullPointerException timelineがnull
 	 * @see #setMeasureValue(int, int, int, Object)
 	 * @see #putNote(int, int, int, double, int, Supplier)
+	 * @since 0.8.0
 	 */
 	public final void putTimeline(BmsTimelineElement timeline) {
 		mTlAccessor.putTimeline(timeline);
@@ -2732,43 +2749,209 @@ public class BmsContent {
 	}
 
 	/**
-	 * BMSコンテンツの内容からハッシュ値を計算し、結果を返します。
-	 * <p>当メソッドの目的は「プレーに影響する変更が行われたかどうかを検出すること」にあります。この目的を果たすために、BMSコンテンツの基準となる
-	 * BMS仕様に登録されたメタ情報とチャンネルは「同一性チェックを行うかどうか」の情報を保有しています。同一性チェックを行うメタ情報・チャンネルの
-	 * データ内容をハッシュ値計算の要素として抽出し、その要素からハッシュ値を計算します。</p>
-	 * <p>プレーに影響しない(とBMS仕様で定められた)情報は、どのように修正されてもハッシュ値が変化することはありません。例えば、譜面には
-	 * 直接関係のないバックグラウンドアニメーションなどは後から差し替えてもハッシュ値が変化する(別の譜面として認識される)べきではありません。
-	 * このように、制作者側に対してプレーする譜面以外の箇所に対して後から更新する自由度が割り当てられます。</p>
-	 * <p>逆に、全く同じタイトル、アーティスト、BPM等でも、プレー可能なチャンネルのノートを移動するような修正が加えられた場合当然ながら別譜面と
-	 * 認識されるべきであり、そのような情報が「同一性チェック対象の情報」となり得ることになります。</p>
-	 * <p>当メソッドの処理には時間がかかります。また、処理中は多くのメモリ領域を使用することになるため、何度も呼び出すとアプリケーションの
-	 * パフォーマンスが大幅に低下する可能性があります。当メソッドの呼び出し回数は極力減らすようアプリケーションを設計してください。</p>
-	 * @return BMSコンテンツから算出されたハッシュ値
+	 * BMSコンテンツの内容からハッシュ値を生成し、結果を返します。
+	 * <p>当メソッドの目的は「プレーに影響する変更が行われたかどうかを検出すること」にあります。
+	 * この目的を果たすために、BMSコンテンツの基準となるBMS仕様に登録されたメタ情報とチャンネルは
+	 * 「同一性チェックを行うかどうか」の情報を保有しています。
+	 * 同一性チェックを行うメタ情報・チャンネルのデータをハッシュ値の入力データとして抽出しハッシュ値を計算します。</p>
+	 * <p>プレーに影響しない(とBMS仕様で定められた)情報は、どのように変更されてもハッシュ値が変化することはありません。
+	 * 例えば、プレーする譜面に直接関係のないバックグラウンドアニメーションなどは後から差し替えてもハッシュ値が変化する
+	 * (別の譜面として認識される) べきではありません。
+	 * この仕組みにより制作者側に対してプレーする譜面以外の箇所に対する更新の自由度が与えられます。</p>
+	 * <p>逆に、全く同じタイトル、アーティスト、BPM等でも、プレーに関わるノートを移動するような修正が加えられた場合、
+	 * 別譜面であると検知されるべきであり、そのような情報が「同一性チェック対象の情報」となり得ることになります。</p>
+	 *
+	 * <strong>BMS仕様の改変検知</strong>
+	 * <p>includeSpec を true にするとBMSコンテンツの内容に変化がなくてもBMS仕様が改変された時にハッシュ値が変化します。
+	 * これによりBMS仕様に僅かでも変更が加わると改変が検知されるので、譜面のプレー内容の一貫性が強力に保証されます。
+	 * ただし、BMS仕様が完全な後方互換性を保ったまま仕様拡張された場合でも改変が検知されるデメリットがあるので、
+	 * アプリケーション側の仕様を十分に検討したうえで本オプションの有無を決定してください。</p>
+	 * <p>当オプションを false にするとBMS仕様へのメタ情報・チャンネル追加に対しては寛容的になりますが、
+	 * 既存のメタ情報・チャンネルの仕様を変更すると非常に高い確率でBMSコンテンツとしての改変が検知されます。
+	 * よって、既存のメタ情報・チャンネルの仕様を変更した場合、
+	 * 当オプションに関わらず原則として改変が検知されるものと考えて差し支えありません。</p>
+	 *
+	 * <strong>メタ情報・タイムラインの改変検知</strong>
+	 * <p>ハッシュ値を生成するにあたり、入力データとしてメタ情報またはタイムライン、
+	 * 或いはその両方を入力データとして使用するかを決定することができます。includeMetas, includeTimeline
+	 * はそれぞれの情報を含めるかどうかを決定するために指定します。ただし、両方を false にすることはできません。</p>
+	 *
+	 * <p>当メソッドの処理には時間がかかります。また、処理中は多くのメモリ領域を使用する可能性があるため、
+	 * 何度も呼び出すとアプリケーションのパフォーマンスが大幅に低下する危険性があります。
+	 * 当メソッドの呼び出し回数は極力減らすようアプリケーションを設計してください。</p>
+	 * @param includeSpec BMS仕様を含めるかどうか
+	 * @param includeMetas メタ情報を含めるかどうか
+	 * @param includeTimeline タイムラインを含めるかどうか
+	 * @return このBMSコンテンツのハッシュ値
 	 * @exception IllegalStateException 動作モードが参照モードではない
+	 * @exception IllegalArgumentException includeMetas と includeTimeline の両方が false
+	 * @since 0.9.0
 	 */
-	public final byte[] generateHash() {
-		assertIsReferenceMode();
-
-		// ハッシュ値計算用データを生成する
-		var hashInput = createHashSeed().getBytes(StandardCharsets.UTF_8);
-
-		// ハッシュ値を生成する
-		try {
-			var msgDigest = MessageDigest.getInstance("SHA-1");
-			return msgDigest.digest(hashInput);
-		} catch (NoSuchAlgorithmException e) {
-			// MessageDigestオブジェクト生成失敗は想定しない
-			return new byte[0];
-		}
+	public final byte[] generateHash(boolean includeSpec, boolean includeMetas, boolean includeTimeline) {
+		return generateHashSeed(includeSpec, includeMetas, includeTimeline).toHash();
 	}
 
 	/**
-	 * ハッシュ値計算用データを出力する。
-	 * @param os 出力先ストリーム
+	 * BMSコンテンツの内容からハッシュ値を生成し、結果を返します。
+	 * <p>当メソッドは generateHash(true, true, true) と等価です。</p>
+	 * <p><strong>当メソッドはバージョン0.9.0以前から使用できますが、0.9.0以降と以前でハッシュ値の互換性がありません。
+	 * 0.9.0以降のハッシュ値が正式版となります。</strong></p>
+	 * @return このBMSコンテンツのハッシュ値
+	 * @exception IllegalStateException 動作モードが参照モードではない
+	 * @see #generateHash(boolean, boolean, boolean)
+	 * @since 0.9.0
 	 */
-	final void printHashSeed(OutputStream os) {
-		var ps = (os instanceof PrintStream) ? (PrintStream) os : new PrintStream(os);
-		ps.println(createHashSeed());
+	public final byte[] generateHash() {
+		return generateHashSeed(true, true, true).toHash();
+	}
+
+	/**
+	 * BMSコンテンツのハッシュ値出力用入力データ生成
+	 * @param includeSpec BMS仕様を含めるかどうか
+	 * @param includeMetas メタ情報を含めるかどうか
+	 * @param includeTimeline タイムラインを含めるかどうか
+	 * @return ハッシュ値出力用の入力データ
+	 * @exception IllegalStateException 動作モードが参照モードではない
+	 * @exception IllegalArgumentException includeMetas と includeTimeline の両方が false
+	 */
+	HashSeed generateHashSeed(boolean includeSpec, boolean includeMetas, boolean includeTimeline) {
+		assertArg(includeMetas || includeTimeline, "Must include metas or timeline");
+		assertIsReferenceMode();
+
+		var seed = new HashSeed();
+		seed.beginObject(false);
+		if (includeSpec) { editHashSeedForSpec(seed); }
+		if (includeMetas) { editHashSeedForMetas(seed); }
+		if (includeTimeline) { editHashSeedForTimeline(seed); }
+		seed.endObject();
+
+		return seed;
+	}
+
+	/**
+	 * BMS仕様のハッシュ値出力用入力データ編集
+	 * @param seed ハッシュ値出力用入力データ
+	 */
+	private void editHashSeedForSpec(HashSeed seed) {
+		var hash = mSpec.generateHash();
+		seed.put("spec", Utility.byteArrayToString(hash));
+	}
+
+	/**
+	 * メタ情報のハッシュ値出力用入力データ編集
+	 * @param seed ハッシュ値出力用入力データ
+	 */
+	private void editHashSeedForMetas(HashSeed seed) {
+		// メタ情報の書き出し開始
+		seed.beginObject("metas", false);
+
+		// 同一性チェックONの全メタ情報を、ソートキー昇順(キーが同じ場合はBMS仕様への追加が先のもの)で書き出す
+		var metas = mSpec.metas().filter(BmsMeta::isUniqueness).collect(Collectors.toList());
+		for (var meta : metas) {
+			// 値が未設定(複数・索引付きの場合は0件)のメタ情報は入力データに書き出さない
+			var name = meta.getName();
+			var unit = meta.getUnit();
+			var type = meta.getType();
+			if (!mMetas.containsMeta(name, unit)) {
+				continue;
+			}
+
+			// メタ情報1件の書き出し開始
+			seed.beginObject(String.format("%s:%s", name, unit.shortName), false)
+					.put("t", type.getShortName())
+					.beginArray("d", false);
+
+			// 構成単位ごとに処理を振り分ける
+			if (unit == BmsUnit.SINGLE) {
+				// 単体メタ情報
+				seed.beginObject(false)
+						.put("i", 0)
+						.put("v", type, mMetas.getSingleMeta(name))
+						.endObject();
+			} else if (unit == BmsUnit.MULTIPLE) {
+				// 複数メタ情報
+				var values = mMetas.getMultipleMetas(name);
+				var count = values.size();
+				for (var i = 0; i < count; i++) {
+					seed.beginObject(false)
+							.put("i", i)
+							.put("v", type, values.get(i))
+							.endObject();
+				}
+			} else if (unit == BmsUnit.INDEXED) {
+				// 索引付きメタ情報
+				for (var entry : mMetas.getIndexedMetas(name).entrySet()) {
+					seed.beginObject(false)
+							.put("i", entry.getKey())
+							.put("v", type, entry.getValue())
+							.endObject();
+				}
+			} else {
+				// Don't care
+			}
+
+			// メタ情報1件の書き出し終了
+			seed.endArray().endObject();
+		}
+
+		// メタ情報の書き出し終了
+		seed.endObject();
+	}
+
+	/**
+	 * タイムラインのハッシュ値出力用入力データ編集
+	 * @param seed ハッシュ値出力用入力データ
+	 */
+	private void editHashSeedForTimeline(HashSeed seed) {
+		// タイムラインの書き出し開始
+		seed.beginObject("timeline", false);
+
+		// 同一性チェックONの全チャンネルをチャンネル番号昇順で書き出す
+		var channels = mSpec.channels().filter(BmsChannel::isUniqueness).collect(Collectors.toList());
+		var measureCount = mTlAccessor.getCount();
+		var notes = new ArrayList<BmsNote>();
+		for (var channel : channels) {
+			var chNum = channel.getNumber();
+			var chType = channel.getType();
+			seed.beginObject(String.format("%s:%s", BmsInt.to36s(chNum), chType.getShortName()), true);
+			if (channel.isValueType()) {
+				// 値型の場合
+				// "<CH番号>:<型>": { "<小節番号>": [ データ, ... ], ... }
+				for (var m = 0; m < measureCount; m++) {
+					seed.beginArray(String.valueOf(m), true);
+					var dataCount = mTlAccessor.getChannelDataCount(chNum, m);
+					for (var d = 0; d < dataCount; d++) {
+						seed.put(chType, mTlAccessor.getValue(chNum, d, m, null, false));
+					}
+					seed.endArray();
+				}
+			} else if (channel.isArrayType()) {
+				// 配列型の場合
+				// "<CH番号>:<型>": { "<小節番号>": [ [ { "t": <刻み位置>, "v": <値> }, ... ], ... ], ... }
+				for (var m = 0; m < measureCount; m++) {
+					seed.beginArray(String.valueOf(m), true);
+					var dataCount = mTlAccessor.getChannelDataCount(chNum, m);
+					for (var d = 0; d < dataCount; d++) {
+						seed.beginArray(false);
+						mTlAccessor.listNotes(chNum, d, m, notes);
+						for (var n : notes) {
+							seed.beginObject(false)
+									.put("t", n.getTick())
+									.put("v", n.getValue())
+									.endObject();
+						}
+						seed.endArray();
+					}
+					seed.endArray();
+				}
+			} else {
+				// Don't care
+			}
+			seed.endObject();
+		}
+
+		// タイムラインの書き出し終了
+		seed.endObject();
 	}
 
 	/**
@@ -2783,134 +2966,6 @@ public class BmsContent {
 
 		// BPM変更と譜面停止の統計情報を収集する
 		collectBpmStopStatistics();
-	}
-
-	/**
-	 * ハッシュ値計算用データを生成する
-	 * @return ハッシュ値計算用データ
-	 */
-	private String createHashSeed() {
-		// ハッシュ値計算用データ
-		var data = new StringBuilder(1024 * 256);
-		data.append("BMS");
-
-		// 同一性チェック対象のメタ情報からハッシュ値計算用データを収集する
-		data.append("META");
-		var metas = mSpec.metas().filter(BmsMeta::isUniqueness).collect(Collectors.toList());
-		for (var meta : metas) {
-			// 構成単位ごとに処理を振り分ける
-			var name = meta.getName();
-			var unit = meta.getUnit();
-			if (unit == BmsUnit.SINGLE) {
-				// 単体メタ情報
-				if (mMetas.containsSingleMeta(name)) {
-					data.append("S");
-					data.append(name);
-					data.append("V");
-					data.append(mMetas.getSingleMeta(name).toString());
-				}
-			} else if (unit == BmsUnit.MULTIPLE) {
-				// 複数メタ情報
-				var values = mMetas.getMultipleMetas(name);
-				var count = values.size();
-				if (count > 0) {
-					data.append("M");
-					data.append(name);
-					data.append("C");
-					data.append(String.valueOf(count));
-					for (var i = 0; i < count; i++) {
-						data.append("I");
-						data.append(String.valueOf(i));
-						data.append("V");
-						data.append(values.get(i).toString());
-					}
-				}
-			} else if (unit == BmsUnit.INDEXED) {
-				// 索引付きメタ情報
-				var entries = mMetas.getIndexedMetas(name);
-				if (entries.size() > 0) {
-					data.append("I");
-					data.append(name);
-					data.append("C");
-					data.append(String.valueOf(entries.size()));
-					for (var entry : entries.entrySet()) {
-						data.append("K");
-						data.append(entry.getKey().toString());
-						data.append("V");
-						data.append(entry.getValue().toString());
-					}
-				}
-			} else {
-				// 想定しない
-			}
-		}
-
-		// 同一性チェック対象のチャンネルを収集する
-		var channels = mSpec.channels().filter(BmsChannel::isUniqueness).collect(Collectors.toList());
-
-		// 同一性チェック対象のチャンネルからハッシュ値計算用データを収集する
-		data.append("CHANNEL");
-		var notes = new ArrayList<BmsNote>();
-		var measureCount = mTlAccessor.getCount();
-		for (var channel : channels) {
-			// データ型による分岐
-			var chNum = channel.getNumber();
-			var outChno = false;
-			if (channel.isValueType()) {
-				// 値型の場合
-				for (var measure = 0; measure < measureCount; measure++) {
-					var dataCount = mTlAccessor.getChannelDataCount(chNum, measure);
-					if (dataCount > 0) {
-						// 追記するのは、その小節にデータが存在する場合のみ
-						if (!outChno) {
-							outChno = true;
-							data.append(String.format("C%d", chNum));
-						}
-						data.append("M");
-						data.append(String.valueOf(measure));
-						for (var index = 0; index < dataCount; index++) {
-							// データを追記する
-							data.append("I");
-							data.append(String.valueOf(index));
-							data.append("V");
-							data.append(mTlAccessor.getValue(chNum, index, measure, null, false).toString());
-						}
-					}
-				}
-			} else if (channel.isArrayType()) {
-				// 配列型の場合
-				for (var measure = 0; measure < measureCount; measure++) {
-					var dataCount = mTlAccessor.getChannelDataCount(chNum, measure);
-					if (dataCount > 0) {
-						// 追記するのは、その小節にデータが存在する場合のみ
-						if (!outChno) {
-							outChno = true;
-							data.append(String.format("C%d", chNum));
-						}
-						data.append("M");
-						data.append(String.valueOf(measure));
-						for (var index = 0; index < dataCount; index++) {
-							// データを追記する
-							data.append("I");
-							data.append(String.valueOf(index));
-							data.append("V");
-							mTlAccessor.listNotes(chNum, index, measure, notes);
-							for (var note : notes) {
-								data.append("N");
-								data.append("T");
-								data.append(String.valueOf(note.getTick()));
-								data.append("V");
-								data.append(String.valueOf(note.getValue()));
-							}
-						}
-					}
-				}
-			} else {
-				// データ型不明のケースは想定しない
-			}
-		}
-
-		return data.toString();
 	}
 
 	/**

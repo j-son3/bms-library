@@ -17,6 +17,7 @@ import java.util.Objects;
  *
  * @see BmsAt
  * @see BmsChx
+ * @since 0.1.0
  */
 public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	/** 小節番号 */

@@ -2,6 +2,8 @@ package com.lmt.lib.bms;
 
 /**
  * BMSコンテンツの入出力処理においてデータ互換性に関する問題が発生したことを表す例外です。
+ *
+ * @since 0.7.0
  */
 public class BmsCompatException extends BmsException {
 	/**

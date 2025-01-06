@@ -2,13 +2,24 @@ package com.lmt.lib.bms.bemusic;
 
 /**
  * Delta Systemのレーティング値に関連する定数値と静的メソッドをまとめたクラスです。
+ *
+ * @since 0.5.0
  */
 public class BeMusicRatings {
-	/** {@link BeMusicRatingType#DELTA}のレーティング値の最小値 */
+	/**
+	 * {@link BeMusicRatingType#DELTA}のレーティング値の最小値
+	 * @since 0.8.0
+	 */
 	public static final int DELTA_ZERO = 0;
-	/** {@link BeMusicRatingType#DELTA}のレーティング値の最大値 */
+	/**
+	 * {@link BeMusicRatingType#DELTA}のレーティング値の最大値
+	 * @since 0.8.0
+	 */
 	public static final int DELTA_MAX = 1600;
-	/** 譜面傾向のレーティング値の最小値 */
+	/**
+	 * 譜面傾向のレーティング値の最小値
+	 * @since 0.8.0
+	 */
 	public static final int TENDENCY_MIN = 0;
 	/** 譜面傾向のレーティング値の最大値 */
 	public static final int TENDENCY_MAX = 20000;
@@ -29,6 +40,7 @@ public class BeMusicRatings {
 	 * 有効範囲内に丸められた値のdouble型の値を返します。</p>
 	 * @param rating 譜面傾向のレーティング値
 	 * @return double型に変換された譜面傾向レーティング値
+	 * @since 0.8.0
 	 */
 	public static double tendencyAsDouble(int rating) {
 		rating = Math.max(TENDENCY_MIN, Math.min(TENDENCY_MAX, rating));
@@ -42,6 +54,7 @@ public class BeMusicRatings {
 	 * @param rating 譜面傾向のレーティング値
 	 * @param moreStringify レーティング値が特定の状態を示す場合の特殊な文字列変換を行うかどうか
 	 * @return ユーザープレゼンテーションに推奨される形式の譜面傾向の文字列
+	 * @since 0.8.0
 	 */
 	public static String tendencyAsString(int rating, boolean moreStringify) {
 		if (moreStringify && ((rating < TENDENCY_MIN) || (rating > TENDENCY_MAX))) {
@@ -60,6 +73,7 @@ public class BeMusicRatings {
 	 * 有効範囲内に丸められた値のdouble型の値を返します。</p>
 	 * @param rating クリア難易度のレーティング値
 	 * @return double型に変換されたクリア難易度レーティング値
+	 * @since 0.8.0
 	 */
 	public static double deltaAsDouble(int rating) {
 		rating = Math.max(DELTA_ZERO, Math.min(DELTA_MAX, rating));
@@ -79,6 +93,7 @@ public class BeMusicRatings {
 	 * @param rating クリア難易度のレーティング値
 	 * @param moreStringify レーティング値が特定の状態を示す場合の特殊な文字列変換を行うかどうか
 	 * @return ユーザープレゼンテーションに推奨される形式のクリア難易度の文字列
+	 * @since 0.8.0
 	 */
 	public static String deltaAsString(int rating, boolean moreStringify) {
 		if (moreStringify) {

@@ -89,7 +89,7 @@ abstract class RatingRange<R> {
 	 * @return 範囲データの時間
 	 */
 	final double time(List<? extends RatingElement> elems) {
-		return RatingElement.timeDelta(elems, first, last);
+		return Ds.timeDelta(elems, first, last);
 	}
 
 	/**

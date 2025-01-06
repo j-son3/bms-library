@@ -32,7 +32,7 @@ class HoldingRange {
 	HoldingRange(List<HoldingElement> elems, int first, int last) {
 		this.first = first;
 		this.last = last;
-		this.time = RatingElement.timeDelta(elems, first, last);
+		this.time = Ds.timeDelta(elems, first, last);
 	}
 
 	/**

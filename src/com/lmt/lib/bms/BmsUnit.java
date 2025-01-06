@@ -5,21 +5,22 @@ package com.lmt.lib.bms;
  *
  * <p>構成単位とは、メタ情報に登録したデータがどのような方式で管理されるかを表します。</p>
  *
- * @see BmsMeta [BmsMeta] メタ情報
+ * @see BmsMeta
+ * @since 0.0.1
  */
 public enum BmsUnit {
 	/**
 	 * 単体メタ情報
 	 * <p>1つのメタ情報につき1つのデータのみを保有できる構成です。最も単純かつ一般的な構成です。</p>
 	 */
-	SINGLE,
+	SINGLE("s"),
 
 	/**
 	 * 複数メタ情報
 	 * <p>1つのメタ情報に複数のデータを保有できる構成です。多くの情報を1つのメタ情報に登録できますが、
 	 * その分構造が複雑になりBMS仕様の複雑化を招きますので多用は避けるべきです。</p>
 	 */
-	MULTIPLE,
+	MULTIPLE("m"),
 
 	/**
 	 * 索引付きメタ情報
@@ -30,5 +31,16 @@ public enum BmsUnit {
 	 *
 	 * <p>この構成単位は「複数メタ情報」よりも更に複雑な構成であるため、上述した用途以外での使用は推奨されません。</p>
 	 */
-	INDEXED,
+	INDEXED("i");
+
+	/** 短い名称 */
+	final String shortName;
+
+	/**
+	 * コンストラクタ
+	 * @param shortName 短い名称
+	 */
+	private BmsUnit(String shortName) {
+		this.shortName = shortName;
+	}
 }

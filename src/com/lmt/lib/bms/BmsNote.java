@@ -12,6 +12,7 @@ import java.util.function.Supplier;
  * BMSライブラリの外部から情報の変更が加えられることを想定していません。</p>
  *
  * @see BmsTimelineElement
+ * @since 0.0.1
  */
 public class BmsNote extends BmsTimelineElement {
 	/** デフォルトのノートオブジェクト生成器。 */
@@ -118,6 +119,7 @@ public class BmsNote extends BmsTimelineElement {
 	 * @param value ノートの値
 	 * @return 入力引数の各情報を設定した新しいノートオブジェクト
 	 * @exception NullPointerException addressがnull
+	 * @since 0.8.0
 	 */
 	public final BmsNote newNote(BmsAddress address, int value) {
 		assertArgNotNull(address, "address");
@@ -134,6 +136,7 @@ public class BmsNote extends BmsTimelineElement {
 	 * @param tick 小節の刻み位置
 	 * @param value ノートの値
 	 * @return 入力引数の各情報を設定した新しいノートオブジェクト
+	 * @since 0.8.0
 	 */
 	public final BmsNote newNote(int channel, int index, int measure, double tick, int value) {
 		var newNote = onNewInstance();

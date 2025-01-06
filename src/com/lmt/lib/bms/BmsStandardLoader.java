@@ -58,6 +58,8 @@ import com.lmt.lib.bms.parse.BmsSource;
  * #01002:1.5
  * #0880A:00AB00CD00EF00GH
  * #123ZZ:String data channel</pre>
+ *
+ * @since 0.7.0
  */
 public class BmsStandardLoader extends BmsLoader {
 	/** 解析フェーズ：BMS宣言読み取り中 */

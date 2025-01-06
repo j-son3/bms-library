@@ -19,6 +19,8 @@ import com.lmt.lib.bms.BmsSpecBuilder;
  *
  * <p>当クラスの役割は、ライブラリの利用者が希望する形式でのBe-Music用BMS仕様({@link BmsSpec})を提供すること、
  * またはそのBMS仕様を用いて一般的なBMSファイル読み込み機能を提供することにあります。</p>
+ *
+ * @since 0.0.1
  */
 public class BeMusicSpec {
 	/** Be-MusicのBMS仕様バージョン(V1)を表します。 */
@@ -163,8 +165,8 @@ public class BeMusicSpec {
 				.addChannel(BeMusicChannel.BGA_KEYBOUND)
 				.addChannel(BeMusicChannel.OPTION)
 				.addChannel(BeMusicChannel.SCROLL);
-		for (var c : BeMusicChannel.VISIBLE_1P_CHANNELS) { builder.addChannel(c); }
-		for (var c : BeMusicChannel.VISIBLE_2P_CHANNELS) { builder.addChannel(c); }
+		for (var c : BeMusicChannel.VISIBLE_CHANNELS_PRIMARY) { builder.addChannel(c); }
+		for (var c : BeMusicChannel.VISIBLE_CHANNELS_SECONDARY) { builder.addChannel(c); }
 		for (var c : BeMusicChannel.INVISIBLE_CHANNELS) { builder.addChannel(c); }
 		for (var c : BeMusicChannel.LONG_CHANNELS) { builder.addChannel(c); }
 		for (var c : BeMusicChannel.MINE_CHANNELS) { builder.addChannel(c); }
@@ -200,6 +202,7 @@ public class BeMusicSpec {
 	 * @exception NullPointerException userChannelsのコレクション内にnullが含まれていた
 	 * @exception IllegalArgumentException objectMetasのコレクション内に任意型以外のメタ情報が含まれていた
 	 * @exception IllegalArgumentException userChannelsのコレクション内に仕様チャンネルが含まれていた
+	 * @since 0.7.0
 	 */
 	public static BmsSpec createLatest(Collection<BmsMeta> objectMetas, Collection<BmsChannel> userChannels) {
 		return create(

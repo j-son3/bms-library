@@ -23,6 +23,7 @@ import com.lmt.lib.bms.internal.deltasystem.StatisticsAccessor;
  *
  * @see BeMusicStatistics
  * @see BeMusicTimeSpan
+ * @since 0.1.0
  */
 public class BeMusicStatisticsBuilder {
 	/** 楽曲のヘッダ情報 */
@@ -68,6 +69,7 @@ public class BeMusicStatisticsBuilder {
 	 * {@link #BeMusicStatisticsBuilder(BeMusicHeader, BeMusicChart)} を使用することを推奨します。</p>
 	 * @param content BMSコンテンツ
 	 * @exception NullPointerException contentがnull
+	 * @since 0.8.0
 	 */
 	public BeMusicStatisticsBuilder(BmsContent content) {
 		assertArgNotNull(content, "content");
@@ -132,6 +134,7 @@ public class BeMusicStatisticsBuilder {
 	 * @param ratingTypes レーティング種別一覧(一度に複数の種別を指定可能)
 	 * @return このオブジェクトのインスタンス
 	 * @see BeMusicRatingType
+	 * @since 0.5.0
 	 */
 	public final BeMusicStatisticsBuilder addRating(BeMusicRatingType...ratingTypes) {
 		Stream.of(ratingTypes).filter(r -> !Objects.isNull(r) && !mRatings.contains(r)).forEach(r -> mRatings.add(r));
@@ -148,6 +151,7 @@ public class BeMusicStatisticsBuilder {
 	 * @return このオブジェクトのインスタンス
 	 * @exception NullPointerException ratingTypesがnull
 	 * @see BeMusicRatingType
+	 * @since 0.8.0
 	 */
 	public final <C extends Collection<BeMusicRatingType>> BeMusicStatisticsBuilder addRating(C ratingTypes) {
 		assertArgNotNull(ratingTypes, "ratingTypes");
@@ -337,15 +341,10 @@ public class BeMusicStatisticsBuilder {
 		}
 
 		// ビルダーに要求のあった全てのレーティング値を計算し、統計情報に設定する
-		var cxt = new DsContext(mHeader, mChart, mLayout, new DsStatisticsAccessor(stat));
+		var ctx = new DsContext(mHeader, mChart, mLayout, new DsStatisticsAccessor(stat));
 		for (var ratingType : mRatings) {
-			// TODO ダブルプレーの分析に対応したら以下のif文を削除する。
-			if (cxt.dpMode) {
-				stat.setRating(ratingType, -1);
-				continue;
-			}
 			var analyzer = ratingType.createAnalyzer();
-			analyzer.rating(cxt);
+			analyzer.rating(ctx);
 		}
 
 		// 譜面の主傾向、副次傾向を設定する

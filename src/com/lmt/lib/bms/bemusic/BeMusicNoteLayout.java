@@ -15,6 +15,8 @@ import java.util.Random;
  * <p>当クラスでは、レーン内の各入力デバイスのアサインを仮想的に入れ替え、入れ替え後の入力デバイスにノートが
  * 割り当たっているように見せる役割を果たします。この機能を用いることで譜面のノートをデータ的に変更することなく
  * ノートの入れ替えを実現することが可能になります。</p>
+ *
+ * @since 0.1.0
  */
 public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	/** 主レーンにおける正規配置パターン */

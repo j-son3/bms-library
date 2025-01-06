@@ -179,6 +179,8 @@ import com.lmt.lib.bms.parse.BmsSource;
  * {@link BmsErrorType#WRONG_DATA}として処理されます。この制限事項の影響を受けるのは
  * "bpm_events", "scroll_events", "stop_events", "sound_channels", "key_channels", "bga_header" です。</li>
  * </ul>
+ *
+ * @since 0.7.0
  */
 public class BeMusicBmsonLoader extends BmsLoader {
 	/** bmsonローダで対応するバージョン一覧 */

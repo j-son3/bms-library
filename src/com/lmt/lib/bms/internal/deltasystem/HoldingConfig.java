@@ -42,13 +42,13 @@ class HoldingConfig extends RatingConfig {
 	double noteScoreBaseChargeOff = 0.01;
 
 	/** ノート評価点倍率：短押し */
-	double noteScoreRateBeat = 1.5;
-	/** ノート評価点倍率：長押し監視 */
-	double noteScoreRateLongOn = 1.0;
+	double noteScoreRateBeat = 1.55;
+	/** ノート評価点倍率：長押し開始 */
+	double noteScoreRateLongOn = 0.6;
 	/** ノート評価点倍率：長押し終了 */
-	double noteScoreRateLongOff = 0.4;
+	double noteScoreRateLongOff = 0.52;
 	/** ノート評価点倍率：長押し終了(CN/HCN) */
-	double noteScoreRateChargeOff = 0.5;
+	double noteScoreRateChargeOff = 0.62;
 
 	/** 抵抗値倍率：短押し */
 	double resistRateBeat = 0.2;
@@ -57,6 +57,8 @@ class HoldingConfig extends RatingConfig {
 	/** ノート評価点の飽和値 */
 	double satulateNoteScore = 1.3;
 
+	/** 1個の長押し範囲の最小秒数 */
+	double minRangeLength = 0.066;
 	/** 指の動作抵抗を受ける最大秒数 */
 	double maxResistRange;
 
@@ -135,6 +137,7 @@ class HoldingConfig extends RatingConfig {
 		resistRateBeat = loader.numeric("resist_rate_beat", resistRateBeat);
 		resistRateHolding = loader.numeric("resist_rate_holding", resistRateHolding);
 		satulateNoteScore = loader.numeric("satulate_note_score", satulateNoteScore);
+		minRangeLength = loader.numeric("min_range_length", minRangeLength);
 	}
 
 	/** {@inheritDoc} */
@@ -158,6 +161,7 @@ class HoldingConfig extends RatingConfig {
 		Ds.debug("  resistRateBeat: %s", resistRateBeat);
 		Ds.debug("  resistRateHolding: %s", resistRateHolding);
 		Ds.debug("  satulateNoteScore: %s", satulateNoteScore);
+		Ds.debug("  minRangeLength: %s", minRangeLength);
 		Ds.debug("  maxResistRange: %s", maxResistRange);
 		Ds.debug("}");
 	}

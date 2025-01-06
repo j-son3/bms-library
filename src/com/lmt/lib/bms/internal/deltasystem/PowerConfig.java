@@ -24,9 +24,12 @@ class PowerConfig extends RatingConfig {
 	/** 連続操作評価点計算用の補間関数 */
 	LinearInterpolateFunction ipfnRapidBeat = LinearInterpolateFunction.create(
 			0.5, 0.6, 1.0, 1.0, 1.0, 0.8, 0.59, 0.18, 0.135, 0.11, 0.085, 0.065, 0.05, 0.035, 0.02, 0.01, 0.008, 0.006, 0.004, 0.002, 0.0, 0.0);
-	/** 最終評価点計算用の補間関数 */
+	/** 最終評価点計算用の補間関数(SP) */
 	LinearInterpolateFunction ipfnPower = LinearInterpolateFunction.create(
 			0.25, 20000.0, 0.0, 0.03, 0.084, 0.155, 0.225, 0.31, 0.393, 0.5, 0.597, 0.665, 0.723, 0.77, 0.813, 0.85, 0.884, 0.91, 0.934, 0.953, 0.973, 1.0);
+	/** 最終評価点計算用の補間関数(DP) */
+	LinearInterpolateFunction ipfnDpPower = LinearInterpolateFunction.create(
+			0.25, 20000.0, 0.0, 0.05, 0.135, 0.22, 0.32, 0.42, 0.53, 0.63, 0.705, 0.755, 0.795, 0.835, 0.87, 0.9, 0.93, 0.955, 0.975, 0.99, 0.995, 1.0);
 	/** POWER値に対する平均密度の基準値を算出する補間関数 */
 	LinearInterpolateFunction ipfnAdjust = LinearInterpolateFunction.create(
 			20000.0, 28.0, 0.02, 0.12, 0.19, 0.25, 0.31, 0.39, 0.48, 0.62, 0.81, 1.0);
@@ -49,6 +52,17 @@ class PowerConfig extends RatingConfig {
 	double densityAcceptableRate = 0.19;
 	/** POWER値に対する平均密度が許容値を下回っていた場合、最大何%の下方修正を行うか */
 	double powerDownwardRate = 0.275;
+
+	/** 指が入力デバイスに固定されている時の抵抗値(DP) */
+	double dpResistHolding = 2.5;
+	/** ダブルプレーで、最終評価点が高い側のレーンの評価点影響度 */
+	double dpInfluenceScoreHigh = 0.93;
+	/** ダブルプレーで、最終評価点が低い側のレーンの評価点影響度 */
+	double dpInfluenceScoreLow = 0.64;
+	/** ダブルプレーで、評価点影響度の調整を実施する最小の最終評価点比率 */
+	double dpAdjustInfluenceRate = 0.25;
+	/** ダブルプレーで、評価点影響度の最大調整幅(ScoreHigh/Lowのどちらか以下の値にすること) */
+	double dpAdjustInfluenceMaxStrength = 0.55;
 
 	/** ノート評価点算出に使用される最大時間 */
 	double timeRangeNotes;
@@ -85,6 +99,7 @@ class PowerConfig extends RatingConfig {
 		ipfnDensity = loader.ipfnLinear("ipfn_density", ipfnDensity);
 		ipfnRapidBeat = loader.ipfnLinear("ipfn_rapid_beat", ipfnRapidBeat);
 		ipfnPower = loader.ipfnLinear("ipfn_power", ipfnPower);
+		ipfnDpPower = loader.ipfnLinear("ipfn_dp_power", ipfnDpPower);
 		ipfnAdjust = loader.ipfnLinear("ipfn_adjust", ipfnAdjust);
 
 		// 定数値
@@ -97,7 +112,11 @@ class PowerConfig extends RatingConfig {
 		adjustScoreAtScratch = loader.numeric("adjust_score_at_scratch", adjustScoreAtScratch);
 		densityAcceptableRate = loader.numeric("density_acceptable_rate", densityAcceptableRate);
 		powerDownwardRate = loader.numeric("power_downward_rate", powerDownwardRate);
-
+		dpResistHolding = loader.numeric("dp_resist_holding", dpResistHolding);
+		dpInfluenceScoreHigh = loader.numeric("dp_influence_score_high", dpInfluenceScoreHigh);
+		dpInfluenceScoreLow = loader.numeric("dp_influence_score_low", dpInfluenceScoreLow);
+		dpAdjustInfluenceRate = loader.numeric("dp_adjust_influence_rate", dpAdjustInfluenceRate);
+		dpAdjustInfluenceMaxStrength = loader.numeric("dp_adjust_influence_max_strength", dpAdjustInfluenceMaxStrength);
 		setup();
 	}
 
@@ -110,6 +129,7 @@ class PowerConfig extends RatingConfig {
 		Ds.debug("  ipfnDensity: %s", ipfnDensity);
 		Ds.debug("  ipfnRapidBeat: %s", ipfnRapidBeat);
 		Ds.debug("  ipfnPower: %s", ipfnPower);
+		Ds.debug("  ipfnDpPower: %s", ipfnDpPower);
 		Ds.debug("  ipfnAdjust: %s", ipfnAdjust);
 		Ds.debug("  satulateTotalScore: %s", satulateTotalScore);
 		Ds.debug("  leastPoints: %s", leastPoints);
@@ -120,6 +140,11 @@ class PowerConfig extends RatingConfig {
 		Ds.debug("  adjustScoreAtScratch: %s", adjustScoreAtScratch);
 		Ds.debug("  densityAcceptableRate: %s", densityAcceptableRate);
 		Ds.debug("  powerDownwardRate: %s", powerDownwardRate);
+		Ds.debug("  dpResistHolding: %s", dpResistHolding);
+		Ds.debug("  dpInfluenceScoreHigh: %s", dpInfluenceScoreHigh);
+		Ds.debug("  dpInfluenceScoreLow: %s", dpInfluenceScoreLow);
+		Ds.debug("  dpAdjustInfluenceRate: %s", dpAdjustInfluenceRate);
+		Ds.debug("  dpAdjustInfluenceMaxStrength: %s", dpAdjustInfluenceMaxStrength);
 		Ds.debug("  timeRangeNotes: %s", timeRangeNotes);
 		Ds.debug("  timeRangeResist: %s", timeRangeResist);
 		Ds.debug("  timeRangeDensity: %s", timeRangeDensity);

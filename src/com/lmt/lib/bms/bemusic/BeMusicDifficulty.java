@@ -2,7 +2,10 @@ package com.lmt.lib.bms.bemusic;
 
 /**
  * #DIFFICULTYの定義において、既知の値を示す列挙型です。
+ *
  * <p>この定義が示す文字列上の表記は、代表的なものを採用しています。</p>
+ *
+ * @since 0.0.1
  */
 public enum BeMusicDifficulty {
 	/** #DIFFICULTY 1 (BEGINNER)を示します。 */

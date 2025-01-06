@@ -11,10 +11,12 @@ import java.util.stream.Stream;
 
 /**
  * BMSライブラリに関する基本的な情報の設定・取得を行うためのクラスです。
+ *
+ * @since 0.7.0
  */
 public class BmsLibrary {
 	/** ライブラリ本体バージョン */
-	private static final String LIBRARY_VERSION = "0.8.0";
+	private static final String LIBRARY_VERSION = "0.9.0";
 
 	/**
 	 * デフォルトの文字セットリスト
@@ -37,6 +39,7 @@ public class BmsLibrary {
 	 * <p>当メソッドは {@link #getDefaultCharsets()}.get(0) と等価です。</p>
 	 * @return BMSライブラリが扱う最優先文字セット
 	 * @see #getDefaultCharsets()
+	 * @since 0.7.0
 	 */
 	public static Charset getPrimaryCharset() {
 		return sDefaultCharsets.get(0);
@@ -50,6 +53,7 @@ public class BmsLibrary {
 	 * <p>返されるリストは変更できません。</p>
 	 * @return 文字セットのリスト
 	 * @see #setDefaultCharsets(Charset...)
+	 * @since 0.7.0
 	 */
 	public static List<Charset> getDefaultCharsets() {
 		return sDefaultCharsets;
@@ -65,6 +69,7 @@ public class BmsLibrary {
 	 * @param charsets デフォルトの文字セット(複数指定可)
 	 * @exception IllegalArgumentException 文字セットが0件
 	 * @exception NullPointerException 文字セットにnullが含まれている
+	 * @since 0.7.0
 	 */
 	public static void setDefaultCharsets(Charset...charsets) {
 		// エラーチェック
@@ -80,6 +85,7 @@ public class BmsLibrary {
 
 	/**
 	 * BMSライブラリのロゴを標準出力に出力します。
+	 * @since 0.8.0
 	 */
 	public static void printLogo() {
 		printLogo(System.out);
@@ -89,6 +95,7 @@ public class BmsLibrary {
 	 * BMSライブラリのロゴを指定した出力ストリームに出力します。
 	 * @param ps ロゴの出力先ストリーム
 	 * @exception NullPointerException psがnull
+	 * @since 0.8.0
 	 */
 	public static void printLogo(PrintStream ps) {
 		assertArgNotNull(ps, "ps");

@@ -24,6 +24,8 @@ import com.lmt.lib.bms.internal.deltasystem.ScratchAnalyzer;
  *
  * <p>Delta Systemについては以下のリンクを参照してください。<br>
  * <a href="http://www.lm-t.com/content/bmslibrary/doc/deltasystem/">http://www.lm-t.com/content/bmslibrary/doc/deltasystem/</a></p>
+ *
+ * @since 0.5.0
  */
 public enum BeMusicRatingType {
 	/**

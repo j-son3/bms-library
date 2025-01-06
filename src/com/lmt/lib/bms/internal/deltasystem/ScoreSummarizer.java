@@ -5,6 +5,7 @@ import static com.lmt.lib.bms.internal.Assertion.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.IntStream;
 
@@ -75,11 +76,13 @@ class ScoreSummarizer {
 	 * @param <T> 要素データの型
 	 * @param satulate 評価点の最大値
 	 * @param elems 要素リスト
-	 * @param scoreGetter 評価点取得関数
+	 * @param filter 評価対象要素の選択関数
+	 * @param getter 評価点取得関数
 	 */
-	<T extends RatingElement> ScoreSummarizer(double satulate, Collection<T> elems, ToDoubleFunction<T> scoreGetter) {
+	<T extends RatingElement> ScoreSummarizer(double satulate, Collection<T> elems, Predicate<T> filter,
+			ToDoubleFunction<T> getter) {
 		this(satulate);
-		put(elems, scoreGetter);
+		put(elems, filter, getter);
 	}
 
 	/**
@@ -116,10 +119,11 @@ class ScoreSummarizer {
 	 * 指定要素リストの全評価点を投入
 	 * @param <T> 要素データの型
 	 * @param elems 要素リスト
-	 * @param scoreGetter 評価点取得関数
+	 * @param filter 評価対象要素の選択関数
+	 * @param getter 評価点取得関数
 	 */
-	final <T extends RatingElement> void put(Collection<T> elems, ToDoubleFunction<T> scoreGetter) {
-		elems.stream().forEach(e -> put(e.getTime(), scoreGetter.applyAsDouble(e)));
+	final <T extends RatingElement> void put(Collection<T> elems, Predicate<T> filter, ToDoubleFunction<T> getter) {
+		elems.stream().filter(filter).forEach(e -> put(e.getTime(), getter.applyAsDouble(e)));
 	}
 
 	/**
@@ -140,10 +144,11 @@ class ScoreSummarizer {
 		Arrays.fill(groupCounts, 0);
 		mScores.forEach(i -> groupCounts[i.groupIndex(mSatulate, GROUP_COUNT)]++);
 
+		var noItem = mScores.isEmpty();
 		var sb = new StringBuilder();
-		sb.append(String.format("%.4f", mScoreMin));
+		sb.append(String.format("%.4f", noItem ? 0.0 : mScoreMin));
 		IntStream.of(groupCounts).forEach(n -> sb.append('\t').append(n));
-		sb.append(String.format("\t%.4f", mScoreMax));
+		sb.append(String.format("\t%.4f", noItem ? 0.0 : mScoreMax));
 		return sb.toString();
 	}
 }

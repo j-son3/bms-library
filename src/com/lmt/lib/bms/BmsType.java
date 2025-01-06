@@ -16,6 +16,7 @@ import java.util.regex.PatternSyntaxException;
  *
  * @see BmsMeta
  * @see BmsChannel
+ * @since 0.0.1
  */
 public final class BmsType {
 	/** Integerから各データ型への変換処理 */
@@ -79,6 +80,7 @@ public final class BmsType {
 	public static final BmsType INTEGER = new BmsType(
 			TYPE_INTEGER,
 			"INTEGER",
+			"i",
 			"^[\\+\\-]?[0-9]+$",
 			10,
 			NTYPE_LONG,
@@ -95,6 +97,7 @@ public final class BmsType {
 	public static final BmsType FLOAT = new BmsType(
 			TYPE_FLOAT,
 			"FLOAT",
+			"f",
 			"^[\\+\\-]?[0-9]+(\\.[0-9]+)?([eE][\\+\\-]?[0-9]+)?$",
 			10,
 			NTYPE_DOUBLE,
@@ -108,6 +111,7 @@ public final class BmsType {
 	public static final BmsType STRING = new BmsType(
 			TYPE_STRING,
 			"STRING",
+			"s",
 			".*",
 			0,
 			NTYPE_STRING,
@@ -123,6 +127,7 @@ public final class BmsType {
 	public static final BmsType BASE16 = new BmsType(
 			TYPE_BASE16,
 			"BASE16",
+			"b16",
 			"^[a-fA-F0-9]{2}$",
 			16,
 			NTYPE_LONG,
@@ -138,6 +143,7 @@ public final class BmsType {
 	public static final BmsType BASE36 = new BmsType(
 			TYPE_BASE36,
 			"BASE36",
+			"b36",
 			"^[a-zA-Z0-9]{2}$",
 			36,
 			NTYPE_LONG,
@@ -149,10 +155,12 @@ public final class BmsType {
 	 * その範囲を超える数値は表現できません。</p>
 	 * <p>{@link #cast cast}によるデータ変換において、文字列から変換する際は基数が62になることに
 	 * 注意してください。例えば、変換元データが"80"の場合の出力はlong型の496Lになります。</p>
+	 * @since 0.8.0
 	 */
 	public static final BmsType BASE62 = new BmsType(
 			TYPE_BASE62,
 			"BASE62",
+			"b62",
 			"^[a-zA-Z0-9]{2}$",
 			62,
 			NTYPE_LONG,
@@ -165,10 +173,12 @@ public final class BmsType {
 	 * と異なる点は、BMSコンテンツまたはライブラリ利用者側の指定によって表現可能な値の範囲が変化する点にあります。</p>
 	 * <p>{@link #cast cast}によるデータ変換において、文字列から変換する際は基数が62になることに
 	 * 注意してください。例えば、変換元データが"80"の場合の出力はlong型の496Lになります。</p>
+	 * @since 0.8.0
 	 */
 	public static final BmsType BASE = new BmsType(
 			TYPE_BASE,
 			"BASE",
+			"b",
 			"^[a-zA-Z0-9]{2}$",
 			62,
 			NTYPE_LONG,
@@ -182,6 +192,7 @@ public final class BmsType {
 	public static final BmsType ARRAY16 = new BmsType(
 			TYPE_ARRAY16,
 			"ARRAY16",
+			"a16",
 			"^([a-fA-F0-9]{2})*$",
 			16,
 			NTYPE_ARRAY,
@@ -195,6 +206,7 @@ public final class BmsType {
 	public static final BmsType ARRAY36 = new BmsType(
 			TYPE_ARRAY36,
 			"ARRAY36",
+			"a36",
 			"^([a-zA-Z0-9]{2})*$",
 			36,
 			NTYPE_ARRAY,
@@ -204,10 +216,12 @@ public final class BmsType {
 	 * 62進数値配列型
 	 * <p>このデータ型は、0個以上の{@link #BASE62}型データを並べた配列です。内部的には
 	 * {@link BmsArray}として表現されます。</p>
+	 * @since 0.8.0
 	 */
 	public static final BmsType ARRAY62 = new BmsType(
 			TYPE_ARRAY62,
 			"ARRAY62",
+			"a62",
 			"^([a-zA-Z0-9]{2})*$",
 			62,
 			NTYPE_ARRAY,
@@ -217,10 +231,12 @@ public final class BmsType {
 	 * 基数選択数値配列型
 	 * <p>このデータ型は、0個以上の{@link #BASE}型データを並べた配列です。内部的には
 	 * {@link BmsArray}として表現されます。</p>
+	 * @since 0.8.0
 	 */
 	public static final BmsType ARRAY = new BmsType(
 			TYPE_ARRAY,
 			"ARRAY",
+			"a",
 			"^([a-zA-Z0-9]{2})*$",
 			62,
 			NTYPE_ARRAY,
@@ -234,6 +250,7 @@ public final class BmsType {
 	public static final BmsType OBJECT = new BmsType(
 			TYPE_OBJECT,
 			"OBJECT",
+			"o",
 			"^.*$",
 			0,
 			NTYPE_OBJECT,
@@ -249,13 +266,15 @@ public final class BmsType {
 	 * @exception PatternSyntaxException 正規表現の構文が無効である場合
 	 */
 	public static BmsType REGEX(String pattern) {
-		return new BmsType(TYPE_STRING, "REGEX", pattern, 0, NTYPE_STRING, null);
+		return new BmsType(TYPE_STRING, "REGEX", "re", pattern, 0, NTYPE_STRING, null);
 	}
 
 	/** データ型ID */
 	private int mTypeId;
 	/** データ型の名称 */
 	private String mName;
+	/** データ型の短い名称 */
+	private String mShortName;
 	/** 当該型が認識可能な書式の正規表現パターン */
 	private Pattern mPattern;
 	/** 基数 */
@@ -327,6 +346,7 @@ public final class BmsType {
 	 * コンストラクタ
 	 * @param typeId データ型ID
 	 * @param name データ型の名称
+	 * @param shortName データ型の短い名称
 	 * @param pattern 書式の正規表現パターン
 	 * @param base 基数
 	 * @param nativeType ネイティブデータ型
@@ -334,10 +354,12 @@ public final class BmsType {
 	 * @exception NullPointerException patternがnull
 	 * @exception PatternSyntaxException 表現の構文が無効である場合
 	 */
-	BmsType(int typeId, String name, String pattern, int base, int nativeType, Predicate<Number> rangeChecker) {
+	BmsType(int typeId, String name, String shortName, String pattern, int base, int nativeType,
+			Predicate<Number> rangeChecker) {
 		assertArgNotNull(pattern, "pattern");
 		mTypeId = typeId;
 		mName = name;
+		mShortName = shortName;
 		mPattern = Pattern.compile(pattern);
 		mBase = base;
 		mNativeType = nativeType;
@@ -415,6 +437,7 @@ public final class BmsType {
 	/**
 	 * BMSデータ型が整数型であるかどうかを取得します。
 	 * @return 整数型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isIntegerType() {
 		return mTypeId == TYPE_INTEGER;
@@ -423,6 +446,7 @@ public final class BmsType {
 	/**
 	 * BMSデータ型が実数型であるかどうかを取得します。
 	 * @return 実数型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isFloatType() {
 		return mTypeId == TYPE_FLOAT;
@@ -431,6 +455,7 @@ public final class BmsType {
 	/**
 	 * BMSデータ型が文字列型であるかどうかを取得します。
 	 * @return 文字列型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isStringType() {
 		return mTypeId == TYPE_STRING;
@@ -439,6 +464,7 @@ public final class BmsType {
 	/**
 	 * BMSデータ型が16進数値型であるかどうかを取得します。
 	 * @return 16進数値型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isBase16Type() {
 		return mTypeId == TYPE_BASE16;
@@ -447,6 +473,7 @@ public final class BmsType {
 	/**
 	 * BMSデータ型が36進数値型であるかどうかを取得します。
 	 * @return 36進数値型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isBase36Type() {
 		return mTypeId == TYPE_BASE36;
@@ -455,6 +482,7 @@ public final class BmsType {
 	/**
 	 * BMSデータ型が62進数値型であるかどうかを取得します。
 	 * @return 62進数値型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isBase62Type() {
 		return mTypeId == TYPE_BASE62;
@@ -463,6 +491,7 @@ public final class BmsType {
 	/**
 	 * BMSデータ型が16進数値配列型であるかどうかを取得します。
 	 * @return 16進数値配列型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isArray16Type() {
 		return mTypeId == TYPE_ARRAY16;
@@ -471,6 +500,7 @@ public final class BmsType {
 	/**
 	 * BMSデータ型が36進数値配列型であるかどうかを取得します。
 	 * @return 36進数値配列型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isArray36Type() {
 		return mTypeId == TYPE_ARRAY36;
@@ -479,6 +509,7 @@ public final class BmsType {
 	/**
 	 * BMSデータ型が62進数値配列型であるかどうかを取得します。
 	 * @return 62進数値配列型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isArray62Type() {
 		return mTypeId == TYPE_ARRAY62;
@@ -487,6 +518,7 @@ public final class BmsType {
 	/**
 	 * BMSデータ型が任意型であるかどうかを取得します。
 	 * @return 任意型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isObjectType() {
 		return mTypeId == TYPE_OBJECT;
@@ -496,6 +528,7 @@ public final class BmsType {
 	 * BMSデータ型が数値型であるかどうかを取得します。
 	 * <p>{@link #INTEGER} / {@link #FLOAT}が数値型に該当します。</p>
 	 * @return 数値型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isNumberType() {
 		return mIsNumberType;
@@ -505,6 +538,7 @@ public final class BmsType {
 	 * BMSデータ型が配列型であるかどうかを取得します。
 	 * <p>ネイティブデータ型が{@link #NTYPE_ARRAY NTYPE_ARRAY}を示すBMS型が該当します。</p>
 	 * @return 配列型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isArrayType() {
 		return mIsArrayType;
@@ -514,6 +548,7 @@ public final class BmsType {
 	 * BMSデータ型が値型であるかどうかを取得します。
 	 * <p>BMSデータ型における「値型」とは、「配列型」「任意型」ではないデータ型全てを示します。</p>
 	 * @return 値型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isValueType() {
 		return mIsValueType;
@@ -523,6 +558,7 @@ public final class BmsType {
 	 * BMSデータ型が基数選択数値型であるかどうかを取得します。
 	 * @return 基数選択数値型であればtrue
 	 * @see #BASE
+	 * @since 0.8.0
 	 */
 	public final boolean isSelectableBaseType() {
 		return mTypeId == TYPE_BASE;
@@ -532,6 +568,7 @@ public final class BmsType {
 	 * BMSデータ型が基数選択数値配列型であるかどうかを取得します。
 	 * @return 基数選択数値配列型であればtrue
 	 * @see #ARRAY
+	 * @since 0.8.0
 	 */
 	public final boolean isSelectableArrayType() {
 		return mTypeId == TYPE_ARRAY;
@@ -542,6 +579,7 @@ public final class BmsType {
 	 * @return 基数選択可能なデータ型であればtrue
 	 * @see #isSelectableBaseType()
 	 * @see #isSelectableArrayType()
+	 * @since 0.8.0
 	 */
 	public final boolean isSelectable() {
 		return isSelectableArrayType() || isSelectableBaseType();
@@ -552,6 +590,7 @@ public final class BmsType {
 	 * <p>通常型とは {@link #OBJECT} 以外の全てのデータ型が該当します。<br>
 	 * つまり、{@link #isObjectType()} とは常に逆の結果を返します。</p>
 	 * @return BMSデータ型が通常型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public final boolean isNormalType() {
 		return mTypeId != TYPE_OBJECT;
@@ -648,6 +687,14 @@ public final class BmsType {
 
 		// 変換成功
 		return result;
+	}
+
+	/**
+	 * データ型の短い名称取得
+	 * @return データ型の短い名称
+	 */
+	String getShortName() {
+		return mShortName;
 	}
 
 	/**

@@ -10,6 +10,7 @@ package com.lmt.lib.bms;
  * 呼び出し、{@link BmsError}の内容を参照してください。</p>
  *
  * @see BmsError
+ * @since 0.4.0
  */
 public class BmsLoadException extends BmsException {
 	/** エラーの原因になったBMS読み込みエラーの内容 */

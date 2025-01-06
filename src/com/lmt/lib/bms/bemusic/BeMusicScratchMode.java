@@ -12,6 +12,8 @@ import java.util.stream.Stream;
  * Be-Musicではロングノートと組み合わせて特殊な操作指示を必要とする配置が行われることがあります。
  * 当列挙型は体系的に名前の付いた配置内容を「スクラッチモード」として分類し、
  * プレイヤーにスクラッチの種別を通知することを目的としています。</p>
+ *
+ * @since 0.7.0
  */
 public enum BeMusicScratchMode {
 	/**

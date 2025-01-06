@@ -32,6 +32,8 @@ import com.lmt.lib.bms.BmsAt;
  * <li>楽曲位置に到達した時に表示されるべきテキスト</li>
  * <li>その他、ノートの数に関する情報、および各種情報の有無を表すフラグ</li>
  * </ul>
+ *
+ * @since 0.0.1
  */
 public class BeMusicPoint implements BmsAt {
 	/** 小節番号 */
@@ -44,6 +46,8 @@ public class BeMusicPoint implements BmsAt {
 	private PointProperty mProperty = PointProperty.DEFAULT;
 	/** ノート配列 */
 	private int[] mNotes;
+	/** 個数情報 */
+	private int mCount;
 	/** 各種情報 */
 	private int mInfo;
 
@@ -85,6 +89,19 @@ public class BeMusicPoint implements BmsAt {
 			{ HD, VC, VI, AL },  // 0x0f: 可視、不可視、BGA、BGM
 	};
 
+	// [個数情報]メモリレイアウト
+	// ------+-----+------------+---------------------------------------------
+	// Range | Bit | Mask       | Value
+	// ------+-----+------------+---------------------------------------------
+	// 00-03 |   4 | 0x0000000f | この楽曲位置の総ノート数(主レーン)
+	// 04-07 |   4 | 0x000000f0 | この楽曲位置の総ノート数(副レーン)
+	// 08-11 |   4 | 0x00000f00 | この楽曲位置のロングノート数(主レーン)
+	// 12-15 |   4 | 0x0000f000 | この楽曲位置のロングノート数(副レーン)
+	// 16-19 |   4 | 0x000f0000 | この楽曲位置の地雷オブジェ数(主レーン)
+	// 20-23 |   4 | 0x00f00000 | この楽曲位置の地雷オブジェ数(副レーン)
+	// 24-27 |   4 | 0x0f000000 | この楽曲位置の視覚効果を持つ可視オブジェの数(主レーン)
+	// 28-31 |   4 | 0xf0000000 | この楽曲位置の視覚効果を持つ可視オブジェの数(副レーン)
+	//
 	// [各種情報]メモリレイアウト
 	// ------+-----+------------+---------------------------------------------
 	// Range | Bit | Mask       | Value
@@ -93,18 +110,21 @@ public class BeMusicPoint implements BmsAt {
 	//    01 |   1 | 0x00000002 | 不可視オブジェ有無(0:なし, 1:あり)
 	//    02 |   1 | 0x00000004 | BGA有無(0:なし, 1:あり)
 	//    03 |   1 | 0x00000008 | BGM有無(0:なし, 1:あり)
-	// 04-08 |   5 | 0x000001f0 | この楽曲位置の総ノート数
-	// 09-13 |   5 | 0x00003e00 | この楽曲位置のロングノート数
-	// 14-18 |   5 | 0x0007c000 | この楽曲位置の地雷オブジェ数
-	// 19-23 |   5 | 0x00f80000 | この楽曲位置の視覚効果を持つ可視オブジェの数
-	//    24 |   1 | 0x01000000 | プレー可能ノート有無(0:なし, 1:あり)
-	//    25 |   1 | 0x02000000 | 操作を伴うノート有無(0:なし, 1:あり)
-	//    26 |   1 | 0x04000000 | 長押し継続ノート有無(0:なし, 1:あり)
-	//    27 |   1 | 0x08000000 | 長押し開始ノート有無(0:なし, 1:あり)
-	//    28 |   1 | 0x10000000 | 長押し終了ノート有無(0:なし, 1:あり)
-	//    29 |   1 | 0x20000000 | 長押し関連ノート有無(0:なし, 1:あり)
-	//    30 |   1 | 0x40000000 | 速度変化有無(0:なし, 1:あり)
-	//    31 |   1 | 0x80000000 | ギミック有無(0:なし, 1:あり)
+	//    04 |   1 | 0x00000010 | 速度変化有無(0:なし, 1:あり)
+	//    05 |   1 | 0x00000020 | ギミック有無(0:なし, 1:あり)
+	//    06 |   1 | 0x00000040 | プレー可能ノート有無(主レーン)(0:なし, 1:あり)
+	//    07 |   1 | 0x00000080 | プレー可能ノート有無(副レーン)(0:なし, 1:あり)
+	//    08 |   1 | 0x00000100 | 操作を伴うノート有無(主レーン)(0:なし, 1:あり)
+	//    09 |   1 | 0x00000200 | 操作を伴うノート有無(副レーン)(0:なし, 1:あり)
+	//    10 |   1 | 0x00000400 | 長押し継続ノート有無(主レーン)(0:なし, 1:あり)
+	//    11 |   1 | 0x00000800 | 長押し継続ノート有無(副レーン)(0:なし, 1:あり)
+	//    12 |   1 | 0x00001000 | 長押し開始ノート有無(主レーン)(0:なし, 1:あり)
+	//    13 |   1 | 0x00002000 | 長押し開始ノート有無(副レーン)(0:なし, 1:あり)
+	//    14 |   1 | 0x00004000 | 長押し終了ノート有無(主レーン)(0:なし, 1:あり)
+	//    15 |   1 | 0x00008000 | 長押し終了ノート有無(副レーン)(0:なし, 1:あり)
+	//    16 |   1 | 0x00010000 | 長押し関連ノート有無(主レーン)(0:なし, 1:あり)
+	//    17 |   1 | 0x00020000 | 長押し関連ノート有無(副レーン)(0:なし, 1:あり)
+	// 18-31 |  14 | 0xfffc0000 | 未使用
 	//
 	// [ノート配列]レイアウト
 	// ※左側が配列の先頭要素
@@ -254,6 +274,7 @@ public class BeMusicPoint implements BmsAt {
 		mTime = src.mTime;
 		mProperty = src.mProperty;
 		mNotes = src.mNotes;
+		mCount = src.mCount;
 		mInfo = src.mInfo;
 	}
 
@@ -335,7 +356,21 @@ public class BeMusicPoint implements BmsAt {
 	 * @return ノート数
 	 */
 	public final int getNoteCount() {
-		return (mInfo & 0x000001f0) >> 4;
+		return (mCount & 0x0000000f) + ((mCount & 0x000000f0) >> 4);
+	}
+
+	/**
+	 * この楽曲位置において指定したレーンのノート数を取得します。
+	 * <p>ノート数は、この楽曲位置に到達した時に操作するべき入力デバイスの数を表します。
+	 * どのノート種別でノート数をカウントするべきかは{@link BeMusicNoteType}を参照してください。</p>
+	 * @param lane レーン
+	 * @return ノート数
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public final int getNoteCount(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return (mCount >> (lane.getIndex() * 4)) & 0x0000000f;
 	}
 
 	/**
@@ -344,7 +379,20 @@ public class BeMusicPoint implements BmsAt {
 	 * @return ロングノート数
 	 */
 	public final int getLongNoteCount() {
-		return (mInfo & 0x00003e00) >> 9;
+		return ((mCount & 0x00000f00) >> 8) + ((mCount & 0x0000f000) >> 12);
+	}
+
+	/**
+	 * この楽曲位置において指定したレーンでロングノートが開始される数を取得します。
+	 * <p>厳密には{@link BeMusicNoteType#LONG_ON}の数を表します。</p>
+	 * @param lane レーン
+	 * @return ロングノート数
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public final int getLongNoteCount(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return (mCount >> (8 + (lane.getIndex() * 4))) & 0x0000000f;
 	}
 
 	/**
@@ -352,15 +400,40 @@ public class BeMusicPoint implements BmsAt {
 	 * @return 地雷オブジェの数
 	 */
 	public final int getMineCount() {
-		return (mInfo & 0x0007c000) >> 14;
+		return ((mCount & 0x000f0000) >> 16) + ((mCount & 0x00f00000) >> 20);
+	}
+
+	/**
+	 * この楽曲位置において指定レーンの地雷オブジェの数を取得します。
+	 * @param lane レーン
+	 * @return 地雷オブジェの数
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public final int getMineCount(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return (mCount >> (16 + (lane.getIndex() * 4))) & 0x0000000f;
 	}
 
 	/**
 	 * この楽曲位置において視覚効果を持つノートの数を取得します。
 	 * @return 視覚効果を持つノートの数
+	 * @since 0.5.0
 	 */
 	public final int getVisualEffectCount() {
-		return (mInfo & 0x00f80000) >> 19;
+		return ((mCount & 0x0f000000) >> 24) + ((mCount & 0xf0000000) >> 28);
+	}
+
+	/**
+	 * この楽曲位置において指定レーンで視覚効果を持つノートの数を取得します。
+	 * @param lane レーン
+	 * @return 視覚効果を持つノートの数
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public final int getVisualEffectCount(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return (mCount >> (24 + (lane.getIndex() * 4))) & 0x0000000f;
 	}
 
 	/**
@@ -385,7 +458,21 @@ public class BeMusicPoint implements BmsAt {
 	 * @return この楽曲位置に操作可能ノートが1つでもある場合にtrue
 	 */
 	public final boolean hasPlayableNote() {
-		return (mInfo & 0x01000000) != 0;
+		return (mInfo & 0x000000c0) != 0;
+	}
+
+	/**
+	 * この楽曲位置において指定レーンでの操作可能ノートの有無を取得します。
+	 * <p>「操作可能ノート」とは、視覚表示されるノートで{@link BeMusicNoteType#NONE}以外のものを指します。
+	 * この楽曲位置のいずれかの入力デバイスに1つでも操作可能ノートがあれば「あり」と見なされます。</p>
+	 * @param lane レーン
+	 * @return 操作可能ノートが1つでもある場合true
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public final boolean hasPlayableNote(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return (mInfo & (0x00000040 << lane.getIndex())) != 0;
 	}
 
 	/**
@@ -394,9 +481,25 @@ public class BeMusicPoint implements BmsAt {
 	 * この楽曲位置のいずれかの入力デバイスに1つでも何らかの操作を伴うノートがあれば「あり」と見なされます。</p>
 	 * @return この楽曲位置何らかの操作を伴うノートが1つでもある場合にtrue
 	 * @see BeMusicNoteType#hasMovement()
+	 * @since 0.5.0
 	 */
 	public final boolean hasMovementNote() {
-		return (mInfo & 0x02000000) != 0;
+		return (mInfo & 0x00000300) != 0;
+	}
+
+	/**
+	 * この楽曲位置において指定レーンで何らかの操作を伴うノートの有無を取得します。
+	 * <p>「何らかの操作を伴う」とは、{@link BeMusicNoteType#hasMovement()}がtrueを返すことを表します。
+	 * この楽曲位置のいずれかの入力デバイスに1つでも何らかの操作を伴うノートがあれば「あり」と見なされます。</p>
+	 * @param lane レーン
+	 * @return 何らかの操作を伴うノートが1つでもある場合true
+	 * @exception NullPointerException laneがnull
+	 * @see BeMusicNoteType#hasMovement()
+	 * @since 0.9.0
+	 */
+	public final boolean hasMovementNote(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return (mInfo & (0x00000100 << lane.getIndex())) != 0;
 	}
 
 	/**
@@ -404,9 +507,24 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>具体的には、{@link BeMusicNoteType#isHolding()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
 	 * @return この楽曲位置に長押し継続ノートが1つでもある場合にtrue
 	 * @see BeMusicNoteType#isHolding()
+	 * @since 0.6.0
 	 */
 	public final boolean hasHolding() {
-		return (mInfo & 0x04000000) != 0;
+		return (mInfo & 0x00000c00) != 0;
+	}
+
+	/**
+	 * この楽曲位置において指定レーンでの長押し継続ノートの有無を取得します。
+	 * <p>具体的には、{@link BeMusicNoteType#isHolding()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
+	 * @param lane レーン
+	 * @return 長押し継続ノートが1つでもある場合true
+	 * @exception NullPointerException laneがnull
+	 * @see BeMusicNoteType#isHolding()
+	 * @since 0.9.0
+	 */
+	public final boolean hasHolding(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return (mInfo & (0x00000400 << lane.getIndex())) != 0;
 	}
 
 	/**
@@ -414,29 +532,100 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>具体的には、{@link BeMusicNoteType#isLongNoteHead()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
 	 * @return この楽曲位置に長押し開始ノートが1つでもある場合にtrue
 	 * @see BeMusicNoteType#isLongNoteHead()
+	 * @since 0.6.0
 	 */
 	public final boolean hasLongNoteHead() {
-		return (mInfo & 0x08000000) != 0;
+		return (mInfo & 0x00003000) != 0;
 	}
 
 	/**
-	 * この楽曲位置での長押し終了ノートの有無を取得します。
+	 * この楽曲位置において指定レーンでの長押し開始ノートの有無を取得します。
+	 * <p>具体的には、{@link BeMusicNoteType#isLongNoteHead()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
+	 * @param lane レーン
+	 * @return 長押し開始ノートが1つでもある場合true
+	 * @exception NullPointerException laneがnull
+	 * @see BeMusicNoteType#isLongNoteHead()
+	 * @since 0.9.0
+	 */
+	public final boolean hasLongNoteHead(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return (mInfo & (0x00001000 << lane.getIndex())) != 0;
+	}
+
+	/**
+	 * この楽曲位置において長押し終了ノートの有無を取得します。
 	 * <p>具体的には、{@link BeMusicNoteType#isLongNoteTail()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
 	 * @return この楽曲位置に長押し終了ノートが1つでもある場合にtrue
 	 * @see BeMusicNoteType#isLongNoteTail()
+	 * @since 0.6.0
 	 */
 	public final boolean hasLongNoteTail() {
-		return (mInfo & 0x10000000) != 0;
+		return (mInfo & 0x0000c000) != 0;
 	}
 
 	/**
-	 * この楽曲位置での長押関連ノートの有無を取得します。
+	 * この楽曲位置において指定レーンでの長押し終了ノートの有無を取得します。
+	 * <p>具体的には、{@link BeMusicNoteType#isLongNoteTail()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
+	 * @param lane レーン
+	 * @return 長押し終了ノートが1つでもある場合true
+	 * @exception NullPointerException laneがnull
+	 * @see BeMusicNoteType#isLongNoteTail()
+	 * @since 0.9.0
+	 */
+	public final boolean hasLongNoteTail(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return (mInfo & (0x00004000 << lane.getIndex())) != 0;
+	}
+
+	/**
+	 * この楽曲位置において長押し関連ノートの有無を取得します。
 	 * <p>具体的には、{@link BeMusicNoteType#isLongNoteType()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
-	 * @return この楽曲位置に長押し終了ノートが1つでもある場合にtrue
+	 * @return この楽曲位置に長押し関連ノートが1つでもある場合にtrue
 	 * @see BeMusicNoteType#isLongNoteType()
+	 * @since 0.6.0
 	 */
 	public final boolean hasLongNoteType() {
-		return (mInfo & 0x20000000) != 0;
+		return (mInfo & 0x00030000) != 0;
+	}
+
+	/**
+	 * この楽曲位置において指定レーンでの長押関連ノートの有無を取得します。
+	 * <p>具体的には、{@link BeMusicNoteType#isLongNoteType()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
+	 * @param lane レーン
+	 * @return 長押し関連ノートが1つでもある場合true
+	 * @exception NullPointerException laneがnull
+	 * @see BeMusicNoteType#isLongNoteType()
+	 * @since 0.9.0
+	 */
+	public final boolean hasLongNoteType(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return (mInfo & (0x00010000 << lane.getIndex())) != 0;
+	}
+
+	/**
+	 * この楽曲位置の視覚効果を持つノートの有無を取得します。
+	 * <p>「視覚効果を持つ」とは、{@link BeMusicNoteType#hasVisualEffect()}がtrueを返すことを表します。
+	 * この楽曲位置のいずれかの入力デバイスに1つでも視覚効果を持つノートがあれば「あり」と見なされます。</p>
+	 * @return この楽曲位置に視覚効果を持つノートが1つでもある場合にtrue
+	 * @see BeMusicNoteType#hasVisualEffect()
+	 * @since 0.5.0
+	 */
+	public final boolean hasVisualEffect() {
+		return getVisualEffectCount() > 0;
+	}
+
+	/**
+	 * この楽曲位置において指定レーンで視覚効果を持つノートの有無を取得します。
+	 * <p>「視覚効果を持つ」とは、{@link BeMusicNoteType#hasVisualEffect()}がtrueを返すことを表します。
+	 * この楽曲位置のいずれかの入力デバイスに1つでも視覚効果を持つノートがあれば「あり」と見なされます。</p>
+	 * @param lane レーン
+	 * @return 視覚効果を持つノートが1つでもある場合true
+	 * @exception NullPointerException laneがnull
+	 * @see BeMusicNoteType#hasVisualEffect()
+	 * @since 0.9.0
+	 */
+	public final boolean hasVisualEffect(BeMusicLane lane) {
+		return getVisualEffectCount(lane) > 0;
 	}
 
 	/**
@@ -445,9 +634,10 @@ public class BeMusicPoint implements BmsAt {
 	 * @return この楽曲位置に速度変更がある場合にtrue
 	 * @see #hasBpm()
 	 * @see #hasScroll()
+	 * @since 0.6.0
 	 */
 	public final boolean hasChangeSpeed() {
-		return (mInfo & 0x40000000) != 0;
+		return (mInfo & 0x00000010) != 0;
 	}
 
 	/**
@@ -460,19 +650,10 @@ public class BeMusicPoint implements BmsAt {
 	 * @see #hasScroll()
 	 * @see #hasStop()
 	 * @see #hasMine()
+	 * @since 0.6.0
 	 */
 	public final boolean hasGimmick() {
-		return (mInfo & 0x80000000) != 0;
-	}
-
-	/**
-	 * この楽曲位置の視覚効果を持つノートの有無を取得します。
-	 * <p>「視覚効果を持つ」とは、{@link BeMusicNoteType#hasVisualEffect()}がtrueを返すことを表します。
-	 * この楽曲位置のいずれかの入力デバイスに1つでも視覚効果を持つノートがあれば「あり」と見なされます。</p>
-	 * @return この楽曲位置に視覚効果を持つノートが1つでもある場合にtrue
-	 */
-	public final boolean hasVisualEffect() {
-		return getVisualEffectCount() > 0;
+		return (mInfo & 0x00000020) != 0;
 	}
 
 	/**
@@ -493,6 +674,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return 現在のスクロール速度
 	 * @see BeMusicMeta#SCROLL
 	 * @see BeMusicChannel#SCROLL
+	 * @since 0.6.0
 	 */
 	public final double getCurrentScroll() {
 		return mProperty.scroll;
@@ -518,6 +700,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return 現在の譜面速度
 	 * @see #getCurrentBpm()
 	 * @see #getCurrentScroll()
+	 * @since 0.6.0
 	 */
 	public final double getCurrentSpeed() {
 		return getCurrentBpm() * getCurrentScroll();
@@ -638,6 +821,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return スクロール速度変更の指定がある場合true
 	 * @see BeMusicMeta#SCROLL
 	 * @see BeMusicChannel#SCROLL
+	 * @since 0.6.0
 	 */
 	public final boolean hasScroll() {
 		return mProperty.changeScroll;
@@ -668,6 +852,7 @@ public class BeMusicPoint implements BmsAt {
 	 * この楽曲位置に地雷オブジェが存在するかを判定します。
 	 * @return 地雷オブジェが存在する場合true
 	 * @see #getMineCount()
+	 * @since 0.6.0
 	 */
 	public final boolean hasMine() {
 		return (getMineCount() != 0);
@@ -714,11 +899,23 @@ public class BeMusicPoint implements BmsAt {
 	}
 
 	/**
+	 * この楽曲位置で表示するテキストが存在するかを判定します。
+	 * @return 表示するテキストが存在する場合true
+	 * @see BeMusicMeta#TEXT
+	 * @see BeMusicChannel#TEXT
+	 * @since 0.9.0
+	 */
+	public final boolean hasText() {
+		return !getText().isEmpty();
+	}
+
+	/**
 	 * 全ての可視オブジェのノートを列挙します。
 	 * <p>当メソッドは{@link #enumSounds(boolean, boolean, boolean, IntConsumer)}を以下のパラメータで呼び出します。</p>
 	 * <pre>enumSounds(true, false, false, action);</pre>
 	 * @param action ノート1個に対して何らかの処理を行う関数
 	 * @exception NullPointerException actionがnull
+	 * @since 0.8.0
 	 */
 	public final void enumVisibles(IntConsumer action) {
 		enumSounds(true, false, false, action);
@@ -730,6 +927,7 @@ public class BeMusicPoint implements BmsAt {
 	 * <pre>enumSounds(false, true, false, action);</pre>
 	 * @param action ノート1個に対して何らかの処理を行う関数
 	 * @exception NullPointerException actionがnull
+	 * @since 0.8.0
 	 */
 	public final void enumInvisibles(IntConsumer action) {
 		enumSounds(false, true, false, action);
@@ -741,6 +939,7 @@ public class BeMusicPoint implements BmsAt {
 	 * <pre>enumSounds(false, false, true, action);</pre>
 	 * @param action ノート1個に対して何らかの処理を行う関数
 	 * @exception NullPointerException actionがnull
+	 * @since 0.8.0
 	 */
 	public final void enumBgms(IntConsumer action) {
 		enumSounds(false, false, true, action);
@@ -752,6 +951,7 @@ public class BeMusicPoint implements BmsAt {
 	 * <pre>enumSounds(true, true, true, action);</pre>
 	 * @param action ノート1個に対して何らかの処理を行う関数
 	 * @exception NullPointerException actionがnull
+	 * @since 0.8.0
 	 */
 	public final void enumSounds(IntConsumer action) {
 		enumSounds(true, true, true, action);
@@ -772,6 +972,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @param action ノート1個に対して何らかの処理を行う関数
 	 * @exception NullPointerException actionがnull
 	 * @see BeMusicSound
+	 * @since 0.8.0
 	 */
 	public final void enumSounds(boolean visible, boolean invisible, boolean bgm, IntConsumer action) {
 		assertArgNotNull(action, "action");
@@ -793,6 +994,7 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>当メソッドは{@link #sounds(boolean, boolean, boolean)}を以下のパラメータで呼び出します。</p>
 	 * <pre>sounds(true, false, false);</pre>
 	 * @return 可視オブジェのノートを走査するストリーム
+	 * @since 0.8.0
 	 */
 	public final IntStream visibles() {
 		return sounds(true, false, false);
@@ -803,6 +1005,7 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>当メソッドは{@link #sounds(boolean, boolean, boolean)}を以下のパラメータで呼び出します。</p>
 	 * <pre>sounds(false, true, false);</pre>
 	 * @return 不可視オブジェのノートを走査するストリーム
+	 * @since 0.8.0
 	 */
 	public final IntStream invisibles() {
 		return sounds(false, true, false);
@@ -813,6 +1016,7 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>当メソッドは{@link #sounds(boolean, boolean, boolean)}を以下のパラメータで呼び出します。</p>
 	 * <pre>sounds(false, false, true);</pre>
 	 * @return BGMのノートを走査するストリーム
+	 * @since 0.8.0
 	 */
 	public final IntStream bgms() {
 		return sounds(false, false, true);
@@ -823,6 +1027,7 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>当メソッドは{@link #sounds(boolean, boolean, boolean)}を以下のパラメータで呼び出します。</p>
 	 * <pre>sounds(true, true, true);</pre>
 	 * @return 全てのサウンドに関連するノートを走査するストリーム
+	 * @since 0.8.0
 	 */
 	public final IntStream sounds() {
 		return sounds(true, true, true);
@@ -841,6 +1046,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @param invisible 不可視オブジェを列挙するかどうか
 	 * @param bgm BGMを列挙するかどうか
 	 * @return 選択された種類のノートを走査するストリーム
+	 * @since 0.8.0
 	 */
 	public final IntStream sounds(boolean visible, boolean invisible, boolean bgm) {
 		return StreamSupport.intStream(new SoundSpliterator(visible, invisible, bgm), false);
@@ -914,29 +1120,38 @@ public class BeMusicPoint implements BmsAt {
 
 		// ノート数をカウントして関連情報を生成する
 		// これらの情報は可視オブジェが存在しなければ常に全て0を示す
-		var noteCount = 0;
-		var lnCount = 0;
-		var mineCount = 0;
-		var veCount = 0;
+		mCount = 0;
 		var playable = 0;
 		var movement = 0;
 		var holding = 0;
 		var longNoteHead = 0;
 		var longNoteTail = 0;
 		var longNoteType = 0;
+		var hasMine = false;
 		if (hasVisible != 0) {
-			for (var i = 0; i < BeMusicDevice.COUNT; i++) {
-				var ntype = vt[i];
-				noteCount += (ntype.isCountNotes() ? 1 : 0);
-				lnCount += (((ntype.isLongNoteHead()) || (ntype.isCountNotes() && ntype.isLongNoteTail())) ? 1 : 0);
-				mineCount += ((ntype == BeMusicNoteType.MINE) ? 1 : 0);
-				veCount += (ntype.hasVisualEffect() ? 1 : 0);
-				playable |= ((ntype.isPlayable()) ? 1 : 0);
-				movement |= ((ntype.hasMovement()) ? 1 : 0);
-				holding |= ((ntype.isHolding()) ? 1 : 0);
-				longNoteHead |= (ntype.isLongNoteHead() ? 1 : 0);
-				longNoteTail |= (ntype.isLongNoteTail() ? 1 : 0);
-				longNoteType |= (ntype.isLongNoteType() ? 1 : 0);
+			for (var iLane = 0; iLane < BeMusicLane.COUNT; iLane++) {
+				var lane = BeMusicLane.fromIndex(iLane);
+				var countShift = iLane * 4;  // 副レーンの個数情報が上位ビットに位置して隣り合う
+				var hasBit = 1 << iLane;  // 主レーンが下位ビット、副レーンが上位ビットに位置して隣り合う
+				var noteCount = 0;
+				var lnCount = 0;
+				var mineCount = 0;
+				var veCount = 0;
+				for (var dev : BeMusicDevice.getDevices(lane)) {
+					var ntype = vt[dev.getIndex()];
+					noteCount += (ntype.isCountNotes() ? 1 : 0);
+					lnCount += (((ntype.isLongNoteHead()) || (ntype.isCountNotes() && ntype.isLongNoteTail())) ? 1 : 0);
+					mineCount += ((ntype == BeMusicNoteType.MINE) ? 1 : 0);
+					veCount += (ntype.hasVisualEffect() ? 1 : 0);
+					playable |= ((ntype.isPlayable()) ? hasBit : 0);
+					movement |= ((ntype.hasMovement()) ? hasBit : 0);
+					holding |= ((ntype.isHolding()) ? hasBit : 0);
+					longNoteHead |= (ntype.isLongNoteHead() ? hasBit : 0);
+					longNoteTail |= (ntype.isLongNoteTail() ? hasBit : 0);
+					longNoteType |= (ntype.isLongNoteType() ? hasBit : 0);
+				}
+				hasMine = hasMine || (mineCount > 0);
+				mCount |= ((noteCount | (lnCount << 8) | (mineCount << 16) | (veCount << 24)) << countShift);
 			}
 		}
 
@@ -944,12 +1159,11 @@ public class BeMusicPoint implements BmsAt {
 		var hasBpm = (property.bpm < 0.0);
 		var hasStop = (property.stop != 0.0);
 		var chgSpeed = (hasBpm || property.changeScroll) ? 1 : 0;
-		var gimmick = (hasBpm || property.changeScroll || hasStop || (mineCount > 0)) ? 1 : 0;
+		var gimmick = (hasBpm || property.changeScroll || hasStop || hasMine) ? 1 : 0;
 
 		// 各種情報の値を設定する
-		mInfo = noteBits | (noteCount << 4) | (lnCount << 9) | (mineCount << 14) | (veCount << 19) | (playable << 24) |
-				(movement << 25) | (holding << 26) | (longNoteHead << 27) | (longNoteTail << 28) | (longNoteType << 29) |
-				(chgSpeed << 30) | (gimmick << 31);
+		mInfo = noteBits | (chgSpeed << 4) | (gimmick << 5) | (playable << 6) | (movement << 8) |
+				(holding << 10) | (longNoteHead << 12) | (longNoteTail << 14) | (longNoteType << 16);
 
 		// 拡張情報初期化用のイベントを呼び出す
 		onCreate();

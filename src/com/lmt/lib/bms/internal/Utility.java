@@ -8,6 +8,9 @@ import java.util.function.ToIntFunction;
  * BMSライブラリ用の汎用処理クラス
  */
 public class Utility {
+	/** 16進文字テーブル */
+	private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
+
 	/**
 	 * テスターが真と判定する最初の要素を検索
 	 * @param <T> 比較対象の任意の型
@@ -256,5 +259,19 @@ public class Utility {
 		// (5 * tick) = time * (4 * bpm)
 		// tick = (4 * time * bpm) / 5
 		// tick = 0.8 * time * bpm ★
+	}
+
+	/**
+	 * バイト配列の文字列変換
+	 * @param bytes 変換対象のバイト配列
+	 * @return バイト配列の文字列表現
+	 */
+	public static String byteArrayToString(byte[] bytes) {
+		var sb = new StringBuilder(bytes.length * 2);
+		for (var b : bytes) {
+			sb.append(HEX_CHARS[(b >> 4) & 0x0f]);
+			sb.append(HEX_CHARS[b & 0x0f]);
+		}
+		return sb.toString();
 	}
 }

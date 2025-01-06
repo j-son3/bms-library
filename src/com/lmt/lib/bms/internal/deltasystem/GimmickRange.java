@@ -62,7 +62,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * @return ギアチェン対応猶予時間
 		 */
 		final double timeGearChange(List<GimmickElement> elems) {
-			return RatingElement.timeDelta(elems, changes.lastKey(), firstMovement);
+			return Ds.timeDelta(elems, changes.lastKey(), firstMovement);
 		}
 
 		/**
@@ -74,13 +74,13 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 			var indexGearChange = changes.lastKey();
 			if (!hasPrev()) {
 				// 先頭の速度変更範囲の場合はこの範囲の先頭からの時間
-				return RatingElement.timeDelta(elems, first, indexGearChange);
+				return Ds.timeDelta(elems, first, indexGearChange);
 			} else if (!prev.hasMovement()) {
 				// 前の速度変更範囲が操作可能ノートを含まない場合は前の速度範囲先頭からの時間
-				return RatingElement.timeDelta(elems, prev.first, indexGearChange);
+				return Ds.timeDelta(elems, prev.first, indexGearChange);
 			} else {
 				// 前の速度変更範囲の最終操作可能ノート位置からの時間
-				return RatingElement.timeDelta(elems, prev.lastMovement, indexGearChange);
+				return Ds.timeDelta(elems, prev.lastMovement, indexGearChange);
 			}
 		}
 
@@ -195,7 +195,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		final double computeInfluenceDensity(List<GimmickElement> elems) {
 			var density = 0.0;
 			if (hasInfluence()) {
-				var time = RatingElement.timeDelta(elems, firstInfluence, lastInfluence);
+				var time = Ds.timeDelta(elems, firstInfluence, lastInfluence);
 				density = (time == 0.0) ? notesInfluence : (notesInfluence / time);
 			}
 			return density;
@@ -218,7 +218,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 						break;
 					}
 				}
-				time = (effective == -1) ? 0.0 : RatingElement.timeDelta(elems, effective, last);
+				time = (effective == -1) ? 0.0 : Ds.timeDelta(elems, effective, last);
 			}
 			return time;
 		}

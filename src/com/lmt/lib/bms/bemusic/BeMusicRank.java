@@ -2,6 +2,8 @@ package com.lmt.lib.bms.bemusic;
 
 /**
  * #RANKの定義において、既知の値を示す列挙型です。
+ *
+ * @since 0.0.1
  */
 public enum BeMusicRank {
 	/** 判定ランクが4 (VERY EASY)であることを示します。 */

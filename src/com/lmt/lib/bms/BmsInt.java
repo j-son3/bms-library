@@ -23,6 +23,8 @@ import java.util.stream.IntStream;
  * <li>整数値の配列を16進、36進、62進の文字列に変換する</li>
  * <li>複数の16進、36進、62進の文字列を整数値の配列に変換する</li>
  * </ul>
+ *
+ * @since 0.0.1
  */
 public abstract class BmsInt {
 	/** 16進数値の変換処理クラス */
@@ -388,6 +390,7 @@ public abstract class BmsInt {
 	/**
 	 * 16進数の整数オブジェクトを取得します。
 	 * @return 16進数の整数オブジェクト
+	 * @since 0.8.0
 	 */
 	public static BmsInt base16() {
 		return BASE16_INT;
@@ -396,6 +399,7 @@ public abstract class BmsInt {
 	/**
 	 * 36進数の整数オブジェクトを取得します。
 	 * @return 36進数の整数オブジェクト
+	 * @since 0.8.0
 	 */
 	public static BmsInt base36() {
 		return BASE36_INT;
@@ -404,6 +408,7 @@ public abstract class BmsInt {
 	/**
 	 * 62進数の整数オブジェクトを取得します。
 	 * @return 62進数の整数オブジェクト
+	 * @since 0.8.0
 	 */
 	public static BmsInt base62() {
 		return BASE62_INT;
@@ -415,6 +420,7 @@ public abstract class BmsInt {
 	 * @param base 基数
 	 * @return 基数に該当する整数オブジェクト
 	 * @exception IllegalArgumentException baseが16, 36, 62以外
+	 * @since 0.8.0
 	 */
 	public static BmsInt of(int base) {
 		switch (base) {
@@ -435,6 +441,7 @@ public abstract class BmsInt {
 	 * 認識してください。</p>
 	 * <p>引数にfalseを指定すると統計が無効になり、統計情報がリセットされた後は統計情報の更新は行われません。</p>
 	 * @param diag 統計有無
+	 * @since 0.2.0
 	 */
 	public static void cacheStatistics(boolean diag) {
 		sCache.statistics(diag);
@@ -454,6 +461,7 @@ public abstract class BmsInt {
 	 * </ul>
 	 * <p>整数値キャッシュの統計が無効になっている場合、上記配列の各要素は全て0を示します。</p>
 	 * @return 整数値キャッシュヒットの統計情報集計結果スナップショット
+	 * @since 0.2.0
 	 */
 	public static long[] cacheSnapshotResult() {
 		return sCache.snapshot();
@@ -472,6 +480,7 @@ public abstract class BmsInt {
 	 * <p>当メソッドはどのような値を指定してもnullを返したり例外をスローすることはありません。</p>
 	 * @param n BOX化対象の値型整数値
 	 * @return BOX化された整数値オブジェクト
+	 * @since 0.2.0
 	 */
 	public static Integer box(int n) {
 		return sCache.get(n);
@@ -504,6 +513,7 @@ public abstract class BmsInt {
 	 * @param n 整数値
 	 * @return 2文字の62進文字列
 	 * @exception IllegalArgumentException nが0未満または3843超過
+	 * @since 0.8.0
 	 */
 	public static String to62s(int n) {
 		assertArgRange(n, 0, 3843, "n");
@@ -545,6 +555,7 @@ public abstract class BmsInt {
 	 * @exception NullPointerException sがnull
 	 * @exception IllegalArgumentException sの長さが2以外
 	 * @exception IllegalArgumentException sに変換不可能な文字がある
+	 * @since 0.8.0
 	 */
 	public static int to62i(String s) {
 		assertArgNotNull(s, "s");
@@ -605,6 +616,7 @@ public abstract class BmsInt {
 	 * @exception IllegalArgumentException countが0未満
 	 * @exception IndexOutOfBoundsException aの範囲外にアクセスした
 	 * @exception IllegalArgumentException a内の変換対象に0未満または3843超過の値がある
+	 * @since 0.8.0
 	 */
 	public static String to62sa(int[] a, int offset, int count) {
 		assertArgNotNull(a, "a");
@@ -666,6 +678,7 @@ public abstract class BmsInt {
 	 * @exception IllegalArgumentException countが0未満
 	 * @exception IndexOutOfBoundsException sの範囲外にアクセスした
 	 * @exception IllegalArgumentException sに変換不可能な文字がある
+	 * @since 0.8.0
 	 */
 	public static int[] to62ia(String s, int offset, int count) {
 		assertArgNotNull(s, "s");

@@ -17,6 +17,8 @@ package com.lmt.lib.bms;
  * <p><strong>ノート</strong><br>
  * 任意の楽曲位置に配置される情報です。配列型({@link BmsChannel#isArrayType()}がtrueを返す全てのチャンネルのデータ型)の
  * データが対象となります。</p>
+ *
+ * @since 0.8.0
  */
 public abstract class BmsTimelineElement extends BmsAddress {
 	/**

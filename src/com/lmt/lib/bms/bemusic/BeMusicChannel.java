@@ -1,5 +1,11 @@
 package com.lmt.lib.bms.bemusic;
 
+import static com.lmt.lib.bms.internal.Assertion.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.lmt.lib.bms.BmsChannel;
 import com.lmt.lib.bms.BmsType;
 
@@ -8,6 +14,8 @@ import com.lmt.lib.bms.BmsType;
  *
  * <p>当クラスは、Be-MusicのBMS仕様に含まれるチャンネルに関する定義のプレースホルダの役割を果たします。
  * そのため、インスタンスを生成することを想定していません。</p>
+ *
+ * @since 0.0.1
  */
 public class BeMusicChannel {
 	/** チャンネル番号：BGM */
@@ -58,7 +66,10 @@ public class BeMusicChannel {
 	public static final int NUM_BGA_KEYBOUND = ch("A5");
 	/** チャンネル番号：レイオプション変更 */
 	public static final int NUM_OPTION = ch("A6");
-	/** チャンネル番号：スクロール速度変更 */
+	/**
+	 * チャンネル番号：スクロール速度変更
+	 * @since 0.2.0
+	 */
 	public static final int NUM_SCROLL = ch("SC");
 	/** チャンネル番号：1P可視オブジェ1 */
 	public static final int NUM_VISIBLE_1P_01 = ch("11");
@@ -866,6 +877,7 @@ public class BeMusicChannel {
 	 * <tr><th style="text-align:left;">説明</th>
 	 * <td>譜面のスクロール速度変更を指定します。</td></tr>
 	 * </table>
+	 * @since 0.2.0
 	 */
 	public static final BmsChannel SCROLL = new BmsChannel(NUM_SCROLL, BmsType.ARRAY, "#scroll", "", false, true);
 
@@ -1240,23 +1252,25 @@ public class BeMusicChannel {
 	 */
 	public static final BmsChannel VISIBLE_2P_35 = new BmsChannel(NUM_VISIBLE_2P_35, BmsType.ARRAY, "#wav", "", false, true);
 
-	/** 1P可視オブジェリスト */
-	static final BmsChannel[] VISIBLE_1P_CHANNELS = {
+	/** 可視オブジェリスト(主レーン) */
+	static final BmsChannel[] VISIBLE_CHANNELS_PRIMARY = {
 			VISIBLE_1P_01, VISIBLE_1P_02, VISIBLE_1P_03, VISIBLE_1P_04, VISIBLE_1P_05, VISIBLE_1P_06, VISIBLE_1P_07,
 			VISIBLE_1P_08, VISIBLE_1P_09, VISIBLE_1P_10, VISIBLE_1P_11, VISIBLE_1P_12, VISIBLE_1P_13, VISIBLE_1P_14,
 			VISIBLE_1P_15, VISIBLE_1P_16, VISIBLE_1P_17, VISIBLE_1P_18, VISIBLE_1P_19, VISIBLE_1P_20, VISIBLE_1P_21,
 			VISIBLE_1P_22, VISIBLE_1P_23, VISIBLE_1P_24, VISIBLE_1P_25, VISIBLE_1P_26, VISIBLE_1P_27, VISIBLE_1P_28,
 			VISIBLE_1P_29, VISIBLE_1P_30, VISIBLE_1P_31, VISIBLE_1P_32, VISIBLE_1P_33, VISIBLE_1P_34, VISIBLE_1P_35,
 	};
-
-	/** 2P可視オブジェリスト */
-	static final BmsChannel[] VISIBLE_2P_CHANNELS = {
+	/** 可視オブジェリスト(副レーン) */
+	static final BmsChannel[] VISIBLE_CHANNELS_SECONDARY = {
 			VISIBLE_2P_01, VISIBLE_2P_02, VISIBLE_2P_03, VISIBLE_2P_04, VISIBLE_2P_05, VISIBLE_2P_06, VISIBLE_2P_07,
 			VISIBLE_2P_08, VISIBLE_2P_09, VISIBLE_2P_10, VISIBLE_2P_11, VISIBLE_2P_12, VISIBLE_2P_13, VISIBLE_2P_14,
 			VISIBLE_2P_15, VISIBLE_2P_16, VISIBLE_2P_17, VISIBLE_2P_18, VISIBLE_2P_19, VISIBLE_2P_20, VISIBLE_2P_21,
 			VISIBLE_2P_22, VISIBLE_2P_23, VISIBLE_2P_24, VISIBLE_2P_25, VISIBLE_2P_26, VISIBLE_2P_27, VISIBLE_2P_28,
 			VISIBLE_2P_29, VISIBLE_2P_30, VISIBLE_2P_31, VISIBLE_2P_32, VISIBLE_2P_33, VISIBLE_2P_34, VISIBLE_2P_35,
 	};
+	/** 可視オブジェリスト */
+	static final BmsChannel[] VISIBLE_CHANNELS = Stream.concat(
+			Stream.of(VISIBLE_CHANNELS_PRIMARY), Stream.of(VISIBLE_CHANNELS_SECONDARY)).toArray(BmsChannel[]::new);
 
 	/**
 	 * 不可視オブジェ
@@ -1618,14 +1632,17 @@ public class BeMusicChannel {
 	 */
 	public static final BmsChannel INVISIBLE_2P_35 = new BmsChannel(NUM_INVISIBLE_2P_35, BmsType.ARRAY, "#wav", "", false, true);
 
-	/** 不可視オブジェリスト */
-	static final BmsChannel[] INVISIBLE_CHANNELS = {
+	/** 不可視オブジェリスト(主レーン) */
+	static final BmsChannel[] INVISIBLE_CHANNELS_PRIMARY = {
 			INVISIBLE_1P_01, INVISIBLE_1P_02, INVISIBLE_1P_03, INVISIBLE_1P_04, INVISIBLE_1P_05, INVISIBLE_1P_06,
 			INVISIBLE_1P_07, INVISIBLE_1P_08, INVISIBLE_1P_09, INVISIBLE_1P_10, INVISIBLE_1P_11, INVISIBLE_1P_12,
 			INVISIBLE_1P_13, INVISIBLE_1P_14, INVISIBLE_1P_15, INVISIBLE_1P_16, INVISIBLE_1P_17, INVISIBLE_1P_18,
 			INVISIBLE_1P_19, INVISIBLE_1P_20, INVISIBLE_1P_21, INVISIBLE_1P_22, INVISIBLE_1P_23, INVISIBLE_1P_24,
 			INVISIBLE_1P_25, INVISIBLE_1P_26, INVISIBLE_1P_27, INVISIBLE_1P_28, INVISIBLE_1P_29, INVISIBLE_1P_30,
 			INVISIBLE_1P_31, INVISIBLE_1P_32, INVISIBLE_1P_33, INVISIBLE_1P_34, INVISIBLE_1P_35,
+	};
+	/** 不可視オブジェリスト(副レーン) */
+	static final BmsChannel[] INVISIBLE_CHANNELS_SECONDARY = {
 			INVISIBLE_2P_01, INVISIBLE_2P_02, INVISIBLE_2P_03, INVISIBLE_2P_04, INVISIBLE_2P_05, INVISIBLE_2P_06,
 			INVISIBLE_2P_07, INVISIBLE_2P_08, INVISIBLE_2P_09, INVISIBLE_2P_10, INVISIBLE_2P_11, INVISIBLE_2P_12,
 			INVISIBLE_2P_13, INVISIBLE_2P_14, INVISIBLE_2P_15, INVISIBLE_2P_16, INVISIBLE_2P_17, INVISIBLE_2P_18,
@@ -1633,6 +1650,9 @@ public class BeMusicChannel {
 			INVISIBLE_2P_25, INVISIBLE_2P_26, INVISIBLE_2P_27, INVISIBLE_2P_28, INVISIBLE_2P_29, INVISIBLE_2P_30,
 			INVISIBLE_2P_31, INVISIBLE_2P_32, INVISIBLE_2P_33, INVISIBLE_2P_34, INVISIBLE_2P_35,
 	};
+	/** 不可視オブジェリスト */
+	static final BmsChannel[] INVISIBLE_CHANNELS = Stream.concat(
+			Stream.of(INVISIBLE_CHANNELS_PRIMARY), Stream.of(INVISIBLE_CHANNELS_SECONDARY)).toArray(BmsChannel[]::new);
 
 	/**
 	 * ロングノートオブジェ
@@ -1994,19 +2014,25 @@ public class BeMusicChannel {
 	 */
 	public static final BmsChannel LONG_2P_35 = new BmsChannel(NUM_LONG_2P_35, BmsType.ARRAY, "#wav", "", false, true);
 
-	/** ロングノートオブジェリスト */
-	static final BmsChannel[] LONG_CHANNELS = {
+	/** ロングノートオブジェリスト(主レーン) */
+	static final BmsChannel[] LONG_CHANNELS_PRIMARY = {
 			LONG_1P_01, LONG_1P_02, LONG_1P_03, LONG_1P_04, LONG_1P_05, LONG_1P_06, LONG_1P_07,
 			LONG_1P_08, LONG_1P_09, LONG_1P_10, LONG_1P_11, LONG_1P_12, LONG_1P_13, LONG_1P_14,
 			LONG_1P_15, LONG_1P_16, LONG_1P_17, LONG_1P_18, LONG_1P_19, LONG_1P_20, LONG_1P_21,
 			LONG_1P_22, LONG_1P_23, LONG_1P_24, LONG_1P_25, LONG_1P_26, LONG_1P_27, LONG_1P_28,
 			LONG_1P_29, LONG_1P_30, LONG_1P_31, LONG_1P_32, LONG_1P_33, LONG_1P_34, LONG_1P_35,
+	};
+	/** ロングノートオブジェリスト(副レーン) */
+	static final BmsChannel[] LONG_CHANNELS_SECONDARY = {
 			LONG_2P_01, LONG_2P_02, LONG_2P_03, LONG_2P_04, LONG_2P_05, LONG_2P_06, LONG_2P_07,
 			LONG_2P_08, LONG_2P_09, LONG_2P_10, LONG_2P_11, LONG_2P_12, LONG_2P_13, LONG_2P_14,
 			LONG_2P_15, LONG_2P_16, LONG_2P_17, LONG_2P_18, LONG_2P_19, LONG_2P_20, LONG_2P_21,
 			LONG_2P_22, LONG_2P_23, LONG_2P_24, LONG_2P_25, LONG_2P_26, LONG_2P_27, LONG_2P_28,
 			LONG_2P_29, LONG_2P_30, LONG_2P_31, LONG_2P_32, LONG_2P_33, LONG_2P_34, LONG_2P_35,
 	};
+	/** ロングノートオブジェリスト */
+	static final BmsChannel[] LONG_CHANNELS = Stream.concat(
+			Stream.of(LONG_CHANNELS_PRIMARY), Stream.of(LONG_CHANNELS_SECONDARY)).toArray(BmsChannel[]::new);
 
 	/**
 	 * 地雷オブジェ
@@ -2108,13 +2134,157 @@ public class BeMusicChannel {
 	 */
 	public static final BmsChannel MINE_2P_09 = new BmsChannel(NUM_MINE_2P_09, BmsType.ARRAY, null, "", false, true);
 
-	/** 地雷オブジェリスト */
-	static final BmsChannel[] MINE_CHANNELS = {
+	/** 地雷オブジェリスト(主レーン) */
+	static final BmsChannel[] MINE_CHANNELS_PRIMARY = {
 			MINE_1P_01, MINE_1P_02, MINE_1P_03, MINE_1P_04, MINE_1P_05,
 			MINE_1P_06, MINE_1P_07, MINE_1P_08, MINE_1P_09,
+	};
+	/** 地雷オブジェリスト(副レーン) */
+	static final BmsChannel[] MINE_CHANNELS_SECONDARY = {
 			MINE_2P_01, MINE_2P_02, MINE_2P_03, MINE_2P_04, MINE_2P_05,
 			MINE_2P_06, MINE_2P_07, MINE_2P_08, MINE_2P_09,
 	};
+	/** 地雷オブジェリスト */
+	static final BmsChannel[] MINE_CHANNELS = Stream.concat(
+			Stream.of(MINE_CHANNELS_PRIMARY), Stream.of(MINE_CHANNELS_SECONDARY)).toArray(BmsChannel[]::new);
+
+	/**
+	 * 読み取り専用の主レーン可視オブジェリストです。
+	 * @since 0.9.0
+	 */
+	public static final List<BmsChannel> VISIBLES_PRIMARY = Stream.of(VISIBLE_CHANNELS_PRIMARY)
+			.collect(Collectors.toUnmodifiableList());
+	/**
+	 * 読み取り専用の副レーン可視オブジェリストです。
+	 * @since 0.9.0
+	 */
+	public static final List<BmsChannel> VISIBLES_SECONDARY = Stream.of(VISIBLE_CHANNELS_SECONDARY)
+			.collect(Collectors.toUnmodifiableList());
+	/**
+	 * 読み取り専用の可視オブジェリストです。
+	 * @since 0.9.0
+	 */
+	public static final List<BmsChannel> VISIBLES = Stream.of(VISIBLE_CHANNELS)
+			.collect(Collectors.toUnmodifiableList());
+	/**
+	 * 読み取り専用の主レーン不可視オブジェリストです。
+	 * @since 0.9.0
+	 */
+	public static final List<BmsChannel> INVISIBLES_PRIMARY = Stream.of(INVISIBLE_CHANNELS_PRIMARY)
+			.collect(Collectors.toUnmodifiableList());
+	/**
+	 * 読み取り専用の副レーン不可視オブジェリストです。
+	 * @since 0.9.0
+	 */
+	public static final List<BmsChannel> INVISIBLES_SECONDARY = Stream.of(INVISIBLE_CHANNELS_SECONDARY)
+			.collect(Collectors.toUnmodifiableList());
+	/**
+	 * 読み取り専用の不可視オブジェリストです。
+	 * @since 0.9.0
+	 */
+	public static final List<BmsChannel> INVISIBLES = Stream.of(INVISIBLE_CHANNELS)
+			.collect(Collectors.toUnmodifiableList());
+	/**
+	 * 読み取り専用の主レーンロングノートオブジェリストです。
+	 * @since 0.9.0
+	 */
+	public static final List<BmsChannel> LONGS_PRIMARY = Stream.of(LONG_CHANNELS_PRIMARY)
+			.collect(Collectors.toUnmodifiableList());
+	/**
+	 * 読み取り専用の副レーンロングノートオブジェリストです。
+	 * @since 0.9.0
+	 */
+	public static final List<BmsChannel> LONGS_SECONDARY = Stream.of(LONG_CHANNELS_SECONDARY)
+			.collect(Collectors.toUnmodifiableList());
+	/**
+	 * 読み取り専用のロングノートオブジェリストです。
+	 * @since 0.9.0
+	 */
+	public static final List<BmsChannel> LONGS = Stream.of(LONG_CHANNELS)
+			.collect(Collectors.toUnmodifiableList());
+	/**
+	 * 読み取り専用の主レーン地雷オブジェリストです。
+	 * @since 0.9.0
+	 */
+	public static final List<BmsChannel> MINES_PRIMARY = Stream.of(MINE_CHANNELS_PRIMARY)
+			.collect(Collectors.toUnmodifiableList());
+	/**
+	 * 読み取り専用の副レーン地雷オブジェリストです。
+	 * @since 0.9.0
+	 */
+	public static final List<BmsChannel> MINES_SECONDARY = Stream.of(MINE_CHANNELS_SECONDARY)
+			.collect(Collectors.toUnmodifiableList());
+	/**
+	 * 読み取り専用の地雷オブジェリストです。
+	 * @since 0.9.0
+	 */
+	public static final List<BmsChannel> MINES = Stream.of(MINE_CHANNELS)
+			.collect(Collectors.toUnmodifiableList());
+
+	/** 可視オブジェリスト(レーンインデックスでテーブル化) */
+	private static final List<List<BmsChannel>> VISIBLES_LANE = List.of(
+			VISIBLES_PRIMARY, VISIBLES_SECONDARY);
+	/** 不可視オブジェリスト(レーンインデックスでテーブル化) */
+	private static final List<List<BmsChannel>> INVISIBLES_LANE = List.of(
+			INVISIBLES_PRIMARY, INVISIBLES_SECONDARY);
+	/** ロングノートオブジェリスト(レーンインデックスでテーブル化) */
+	private static final List<List<BmsChannel>> LONGS_LANE = List.of(
+			LONGS_PRIMARY, LONGS_SECONDARY);
+	/** 地雷オブジェリスト(レーンインデックスでテーブル化) */
+	private static final List<List<BmsChannel>> MINES_LANE = List.of(
+			MINES_PRIMARY, MINES_SECONDARY);
+
+	/**
+	 * 指定したレーンの可視オブジェリストを取得します。
+	 * <p>取得したリストは読み取り専用です。</p>
+	 * @param lane レーン
+	 * @return レーンに対応した可視オブジェリスト
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public static List<BmsChannel> visibles(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return VISIBLES_LANE.get(lane.getIndex());
+	}
+
+	/**
+	 * 指定したレーンの不可視オブジェリストを取得します。
+	 * <p>取得したリストは読み取り専用です。</p>
+	 * @param lane レーン
+	 * @return レーンに対応した不可視オブジェリスト
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public static List<BmsChannel> invisibles(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return INVISIBLES_LANE.get(lane.getIndex());
+	}
+
+	/**
+	 * 指定したレーンのロングノートオブジェリストを取得します。
+	 * <p>取得したリストは読み取り専用です。</p>
+	 * @param lane レーン
+	 * @return レーンに対応したロングノートオブジェリスト
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public static List<BmsChannel> longs(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return LONGS_LANE.get(lane.getIndex());
+	}
+
+	/**
+	 * 指定したレーンの地雷オブジェリストを取得します。
+	 * <p>取得したリストは読み取り専用です。</p>
+	 * @param lane レーン
+	 * @return レーンに対応した地雷オブジェリスト
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public static List<BmsChannel> mines(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return MINES_LANE.get(lane.getIndex());
+	}
 
 	/**
 	 * チャンネル番号生成用の内部メソッド。

@@ -24,6 +24,7 @@ import com.lmt.lib.bms.BmsInt;
  *
  * @see BeMusicLane
  * @see BeMusicChannel
+ * @since 0.0.1
  */
 public enum BeMusicDevice {
 	/** スイッチ1-1 */
@@ -157,11 +158,20 @@ public enum BeMusicDevice {
 
 	/** Be Musicにおける入力デバイス数 */
 	public static final int COUNT = 16;
-	/** 1レーンあたりの入力デバイス数 */
+	/**
+	 * 1レーンあたりの入力デバイス数
+	 * @since 0.8.0
+	 */
 	public static final int COUNT_PER_LANE = 8;
-	/** {@link BeMusicLane#PRIMARY}の入力デバイスインデックスのベース値 */
+	/**
+	 * {@link BeMusicLane#PRIMARY}の入力デバイスインデックスのベース値
+	 * @since 0.8.0
+	 */
 	public static final int PRIMARY_BASE = 0;
-	/** {@link BeMusicLane#SECONDARY}の入力デバイスインデックスのベース値 */
+	/**
+	 * {@link BeMusicLane#SECONDARY}の入力デバイスインデックスのベース値
+	 * @since 0.8.0
+	 */
 	public static final int SECONDARY_BASE = 8;
 
 	/** スクラッチがスイッチの左側にある場合のシングルプレー用入力デバイスリスト */
@@ -316,6 +326,7 @@ public enum BeMusicDevice {
 	 * @return スイッチ番号
 	 * @see #isSwitch()
 	 * @see #isScratch()
+	 * @since 0.5.0
 	 */
 	public final int getSwitchNumber() {
 		return mSwitchNumber;
@@ -324,6 +335,7 @@ public enum BeMusicDevice {
 	/**
 	 * この入力デバイスがスイッチであるかを取得します。
 	 * @return この入力デバイスがスイッチであればtrue、それ以外はfalse
+	 * @since 0.5.0
 	 */
 	public final boolean isSwitch() {
 		return mSwitchNumber > 0;
@@ -332,6 +344,7 @@ public enum BeMusicDevice {
 	/**
 	 * この入力デバイスがスクラッチであるかを取得します。
 	 * @return この入力デバイスがスクラッチであればtrue、それ以外はfalse
+	 * @since 0.5.0
 	 */
 	public final boolean isScratch() {
 		return mSwitchNumber == 0;
@@ -341,6 +354,7 @@ public enum BeMusicDevice {
 	 * この入力デバイスが主レーンに配置されるかどうかを取得します。
 	 * @return 入力デバイスが主レーンに配置される場合はtrue、それ以外はfalse
 	 * @see BeMusicLane#PRIMARY
+	 * @since 0.8.0
 	 */
 	public final boolean isPrimary() {
 		return mLane == BeMusicLane.PRIMARY;
@@ -350,6 +364,7 @@ public enum BeMusicDevice {
 	 * この入力デバイス副レーンに配置されるかどうかを取得します。
 	 * @return 入力デバイスが副レーンに配置される場合はtrue、それ以外はfalse
 	 * @see BeMusicLane#SECONDARY
+	 * @since 0.8.0
 	 */
 	public final boolean isSecondary() {
 		return mLane == BeMusicLane.SECONDARY;
@@ -392,6 +407,7 @@ public enum BeMusicDevice {
 	 * nullを返します。</p>
 	 * @param channel チャンネル番号
 	 * @return チャンネル番号に対応する入力デバイス、またはnull
+	 * @since 0.8.0
 	 */
 	public static BeMusicDevice fromChannel(int channel) {
 		return DEVICES_MAP_BY_CHANNEL.get(BmsInt.box(channel));
@@ -400,6 +416,7 @@ public enum BeMusicDevice {
 	/**
 	 * 全ての入力デバイスを定義順に走査するストリームを返します。
 	 * @return 入力デバイスを定義順に走査するストリーム
+	 * @since 0.8.0
 	 */
 	public static Stream<BeMusicDevice> all() {
 		return Stream.of(DEVICES);
@@ -434,6 +451,7 @@ public enum BeMusicDevice {
 	 * 最初の8個は主レーン({@link BeMusicLane#PRIMARY})、残り8個が副レーン({@link BeMusicLane#SECONDARY})
 	 * の構成になっています。返されるリストは読み取り専用のため変更することはできません。</p>
 	 * @return 入力デバイスリスト
+	 * @since 0.8.0
 	 */
 	public static List<BeMusicDevice> orderedByDpList() {
 		return DEVICES_DP;
@@ -460,6 +478,7 @@ public enum BeMusicDevice {
 	 * @see #PRIMARY_BASE
 	 * @see #SECONDARY_BASE
 	 * @exception NullPointerException laneがnull
+	 * @since 0.8.0
 	 */
 	public static int getBaseIndex(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
@@ -472,6 +491,7 @@ public enum BeMusicDevice {
 	 * @param lane レーン
 	 * @return 入力デバイスリスト
 	 * @exception NullPointerException laneがnull
+	 * @since 0.6.0
 	 */
 	public static List<BeMusicDevice> getDevices(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
@@ -484,6 +504,7 @@ public enum BeMusicDevice {
 	 * @param lane レーン
 	 * @return スイッチデバイスリスト
 	 * @exception NullPointerException laneがnull
+	 * @since 0.6.0
 	 */
 	public static List<BeMusicDevice> getSwitches(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
@@ -495,6 +516,7 @@ public enum BeMusicDevice {
 	 * @param lane レーン
 	 * @return laneに配置されたスクラッチデバイス
 	 * @exception NullPointerException laneがnull
+	 * @since 0.6.0
 	 */
 	public static BeMusicDevice getScratch(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");

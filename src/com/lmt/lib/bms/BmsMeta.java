@@ -76,6 +76,7 @@ import java.util.regex.Pattern;
  *
  * @see BmsUnit
  * @see BmsType
+ * @since 0.0.1
  */
 public final class BmsMeta extends BmsMetaKey {
 	/** メタ情報の名称に使用可能な文字列の正規表現パターンです。 */
@@ -287,6 +288,7 @@ public final class BmsMeta extends BmsMetaKey {
 	/**
 	 * このメタ情報が基数選択メタ情報かどうかを取得します。
 	 * @return 基数選択メタ情報であればtrue
+	 * @since 0.8.0
 	 */
 	public boolean isBaseChanger() {
 		return mIsBaseChanger;
@@ -296,6 +298,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が整数であるかどうかを取得します。
 	 * @return データ型が整数であればtrue
 	 * @see BmsType#INTEGER
+	 * @since 0.8.0
 	 */
 	public boolean isIntegerType() {
 		return mType.isIntegerType();
@@ -305,6 +308,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が実数であるかどうかを取得します。
 	 * @return データ型が実数であればtrue
 	 * @see BmsType#FLOAT
+	 * @since 0.8.0
 	 */
 	public boolean isFloatType() {
 		return mType.isFloatType();
@@ -314,6 +318,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が文字列であるかどうかを取得します。
 	 * @return データ型が文字列であればtrue
 	 * @see BmsType#STRING
+	 * @since 0.8.0
 	 */
 	public boolean isStringType() {
 		return mType.isStringType();
@@ -323,6 +328,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が16進数値であるかどうかを取得します。
 	 * @return データ型が16進数値であればtrue
 	 * @see BmsType#BASE16
+	 * @since 0.8.0
 	 */
 	public boolean isBase16Type() {
 		return mType.isBase16Type();
@@ -332,6 +338,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が36進数値であるかどうかを取得します。
 	 * @return データ型が36進数値であればtrue
 	 * @see BmsType#BASE36
+	 * @since 0.8.0
 	 */
 	public boolean isBase36Type() {
 		return mType.isBase36Type();
@@ -341,6 +348,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が62進数値であるかどうかを取得します。
 	 * @return データ型が62進数値であればtrue
 	 * @see BmsType#BASE62
+	 * @since 0.8.0
 	 */
 	public boolean isBase62Type() {
 		return mType.isBase62Type();
@@ -350,6 +358,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が16進数値配列であるかどうかを取得します。
 	 * @return データ型が16進数値配列であればtrue
 	 * @see BmsType#ARRAY16
+	 * @since 0.8.0
 	 */
 	public boolean isArray16Type() {
 		return mType.isArray16Type();
@@ -359,6 +368,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が36進数値配列であるかどうかを取得します。
 	 * @return データ型が36進数値配列であればtrue
 	 * @see BmsType#ARRAY36
+	 * @since 0.8.0
 	 */
 	public boolean isArray36Type() {
 		return mType.isArray36Type();
@@ -368,6 +378,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が62進数値配列であるかどうかを取得します。
 	 * @return データ型が62進数値配列であればtrue
 	 * @see BmsType#ARRAY62
+	 * @since 0.8.0
 	 */
 	public boolean isArray62Type() {
 		return mType.isArray62Type();
@@ -377,6 +388,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が任意型であるかどうかを取得します。
 	 * @return データ型が任意型である場合はtrue
 	 * @see BmsType#OBJECT
+	 * @since 0.8.0
 	 */
 	public boolean isObjectType() {
 		return mType.isObjectType();
@@ -386,6 +398,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が数値型であるかどうかを取得します。
 	 * @return データ型が数値型であればtrue
 	 * @see BmsType#isNumberType()
+	 * @since 0.8.0
 	 */
 	public boolean isNumberType() {
 		return mType.isNumberType();
@@ -395,6 +408,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が値型であるかどうかを取得します。
 	 * @return データ型が値型であればtrue
 	 * @see BmsType#isValueType()
+	 * @since 0.8.0
 	 */
 	public boolean isValueType() {
 		return mType.isValueType();
@@ -404,6 +418,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が配列型であるかどうかを取得します。
 	 * @return データ型が配列型であればtrue
 	 * @see BmsType#isArrayType()
+	 * @since 0.8.0
 	 */
 	public boolean isArrayType() {
 		return mType.isArrayType();
@@ -413,6 +428,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が基数選択数値型であるかどうかを取得します。
 	 * @return データ型が基数選択数値型であればtrue
 	 * @see BmsType#isSelectableBaseType()
+	 * @since 0.8.0
 	 */
 	public boolean isSelectableBaseType() {
 		return mType.isSelectableBaseType();
@@ -422,6 +438,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が基数選択数値配列型であるかどうかを取得します。
 	 * @return データ型が基数選択数値配列型であればtrue
 	 * @see BmsType#isSelectableArrayType()
+	 * @since 0.8.0
 	 */
 	public boolean isSelectableArrayType() {
 		return mType.isSelectableArrayType();
@@ -431,6 +448,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * メタ情報のデータ型が基数選択可能な型かどうかを取得します
 	 * @return データ型が基数選択可能な型であればtrue
 	 * @see BmsType#isSelectable()
+	 * @since 0.8.0
 	 */
 	public boolean isSelectableType() {
 		return mType.isSelectable();
@@ -441,6 +459,7 @@ public final class BmsMeta extends BmsMetaKey {
 	 * <p>通常型とは {@link BmsType#OBJECT} 以外の全てのデータ型が該当します。<br>
 	 * つまり、{@link #isObjectType()} とは常に逆の結果を返します。</p>
 	 * @return データ型が通常型である場合はtrue
+	 * @since 0.8.0
 	 */
 	public boolean isNormalType() {
 		return mType.isNormalType();

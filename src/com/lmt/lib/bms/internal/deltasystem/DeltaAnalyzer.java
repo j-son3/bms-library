@@ -8,8 +8,8 @@ public class DeltaAnalyzer extends RatingAnalyzer {
 	}
 
 	@Override
-	protected void compute(DsContext cxt) {
+	protected void compute(DsContext ctx) {
 		// TODO 自動生成されたメソッド・スタブ
-		cxt.stat.setRating(getRatingType(), -1);
+		ctx.stat.setRating(getRatingType(), -1);
 	}
 }

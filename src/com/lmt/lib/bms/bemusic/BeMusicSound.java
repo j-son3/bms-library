@@ -15,6 +15,8 @@ import static com.lmt.lib.bms.internal.Assertion.*;
  * <li>{@link BeMusicChannel#LONG_1P_01}～{@link BeMusicChannel#LONG_2P_35}</li>
  * <li>{@link BeMusicChannel#MINE_1P_01}～{@link BeMusicChannel#MINE_1P_09}</li>
  * </ul>
+ *
+ * @since 0.7.0
  */
 public class BeMusicSound {
 	/** 音声データのトラックID最小値 */
@@ -68,6 +70,7 @@ public class BeMusicSound {
 	 * {@link BeMusicNoteType#NONE} を返します。</p>
 	 * @param raw ノートの生値
 	 * @return ノート種別
+	 * @since 0.8.0
 	 */
 	public static BeMusicNoteType getNoteType(int raw) {
 		return RawNotes.getNoteType(raw);
@@ -79,6 +82,7 @@ public class BeMusicSound {
 	 * それ以外の生値を指定した場合nullを返します。</p>
 	 * @param raw ノートの生値
 	 * @return 入力デバイスまたはnull
+	 * @since 0.8.0
 	 */
 	public static BeMusicDevice getDevice(int raw) {
 		return RawNotes.getDevice(raw);
@@ -90,6 +94,7 @@ public class BeMusicSound {
 	 * それ以外の生値ではfalseを返します。</p>
 	 * @param raw ノートの生値
 	 * @return 入力デバイスが存在すればtrue
+	 * @since 0.8.0
 	 */
 	public static boolean hasDevice(int raw) {
 		return RawNotes.getDevice(raw) != null;
@@ -101,6 +106,7 @@ public class BeMusicSound {
 	 * @param raw ノートの生値
 	 * @return トラックIDが存在すればtrue
 	 * @see #getTrackId(int)
+	 * @since 0.8.0
 	 */
 	public static boolean hasTrack(int raw) {
 		return RawNotes.getTrackId(raw) != 0;
@@ -112,6 +118,7 @@ public class BeMusicSound {
 	 * それらの情報いずれかのデータが0以外の値を示す時にtrueを返します。</p>
 	 * @param raw ノートの生値
 	 * @return 拡張情報が存在すればtrue
+	 * @since 0.8.0
 	 */
 	public static boolean hasExtended(int raw) {
 		return (RawNotes.getValue(raw) & 0x00070000) != 0;
@@ -121,6 +128,7 @@ public class BeMusicSound {
 	 * 指定した生値が可視オブジェの値であるかどうかを取得します。
 	 * @param raw ノートの生値
 	 * @return 生値が可視オブジェの値であればtrue
+	 * @since 0.8.0
 	 */
 	public static boolean isVisible(int raw) {
 		return RawNotes.getKind(raw) == RawNotes.VISIBLE;
@@ -130,6 +138,7 @@ public class BeMusicSound {
 	 * 指定した生値が不可視オブジェの値であるかどうかを取得します。
 	 * @param raw ノートの生値
 	 * @return 生値が不可視オブジェの値であればtrue
+	 * @since 0.8.0
 	 */
 	public static boolean isInvisible(int raw) {
 		return RawNotes.getKind(raw) == RawNotes.INVISIBLE;
@@ -139,6 +148,7 @@ public class BeMusicSound {
 	 * 指定した生値がBGMの値であるかどうかを取得します。
 	 * @param raw ノートの生値
 	 * @return 生値がBGMの値であればtrue
+	 * @since 0.8.0
 	 */
 	public static boolean isBgm(int raw) {
 		return RawNotes.getKind(raw) == RawNotes.BGM;

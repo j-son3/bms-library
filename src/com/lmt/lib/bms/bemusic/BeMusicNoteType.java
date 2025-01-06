@@ -13,6 +13,8 @@ import java.util.stream.Stream;
  *
  * <p>楽曲位置情報({@link BeMusicPoint})には全レーン、全入力デバイスに対応するノートの情報が格納されており、
  * ノートの種別もそこから参照可能になっています。アプリケーションはノートの種別を参照し、視覚的な演出を行うことができます。</p>
+ *
+ * @since 0.0.1
  */
 public enum BeMusicNoteType {
 	/**
@@ -122,6 +124,7 @@ public enum BeMusicNoteType {
 	 * このノート種別が長押し継続中を示すかどうかを判定します。
 	 * <p>当メソッドがtrueを返す時、ノート種別は{@link #LONG}であることを示します。</p>
 	 * @return 長押し継続中の場合はtrue、そうでない場合はfalse
+	 * @since 0.5.0
 	 */
 	public final boolean isHolding() {
 		return this == LONG;
@@ -131,6 +134,7 @@ public enum BeMusicNoteType {
 	 * このノート種別が長押し開始を示すかどうかを判定します。
 	 * <p>当メソッドがtrueを返す時、ノート種別は{@link #LONG_ON}であることを示します。</p>
 	 * @return 長押し開始の場合はtrue、そうでない場合はfalse
+	 * @since 0.6.0
 	 */
 	public final boolean isLongNoteHead() {
 		return this == LONG_ON;
@@ -141,6 +145,7 @@ public enum BeMusicNoteType {
 	 * <p>この値はロングノートモード({@link BeMusicLongNoteMode})が何であるかは問いません。</p>
 	 * @return ノート種別がロングノートの終端である場合はtrue、そうでない場合はfalse
 	 * @see BeMusicLongNoteMode
+	 * @since 0.6.0
 	 */
 	public final boolean isLongNoteTail() {
 		return mIsLongNoteTail;
@@ -150,6 +155,7 @@ public enum BeMusicNoteType {
 	 * このノート種別がロングノートに関連する種別であるかどうかを判定します。
 	 * <p>具体的には{@link #LONG_ON}, {@link #LONG}, {@link #LONG_OFF}, {@link #CHARGE_OFF}の場合にtrueを返します。</p>
 	 * @return ロングノートに関連する種別の場合はtrue、そうでない場合はfalse
+	 * @since 0.6.0
 	 */
 	public final boolean isLongNoteType() {
 		return mIsLongNoteType;
@@ -176,6 +182,7 @@ public enum BeMusicNoteType {
 	 * <p>解放操作とは、入力デバイスから手を放すことを示します。従って、長押し終了や短押しを表します。
 	 * 長押し継続中のように操作状態に変化のないノート種別は該当しません。</p>
 	 * @return 解放操作を伴うノートである場合はtrue、そうでない場合はfalse
+	 * @since 0.5.0
 	 */
 	public final boolean hasUpAction() {
 		return mHasUpAction;
@@ -186,6 +193,7 @@ public enum BeMusicNoteType {
 	 * <p>押下操作とは、入力デバイスに触れることを示します。従って、長押し開始や短押しを表します。
 	 * 長押し継続中のように操作状態に変化のないノート種別は該当しません。</p>
 	 * @return 押下操作を伴うノートである場合はtrue、そうでない場合はfalse
+	 * @since 0.5.0
 	 */
 	public final boolean hasDownAction() {
 		return mHasDownAction;
@@ -197,6 +205,7 @@ public enum BeMusicNoteType {
 	 * @return 何らかの操作を伴うノートである場合はtrue、そうでない場合はfalse
 	 * @see #hasUpAction()
 	 * @see #hasDownAction()
+	 * @since 0.5.0
 	 */
 	public final boolean hasMovement() {
 		return mHasMovement;

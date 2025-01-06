@@ -45,14 +45,24 @@ class ScratchConfig extends RatingConfig {
 	/** 内回りスクラッチに対する加点量 */
 	double addScoreInner = 0.26;
 
-	/** 最もスクラッチに近いスイッチの操作がある時の加点量 */
-	double addScoreNear = 0.18;
-	/** スクラッチから遠いスイッチの操作がある時の加点量 */
-	double addScoreFar = 0.32;
-	/** スクラッチをどちらの手でも操作可能な位置のスイッチの操作がある時の加点量 */
-	double addScoreBorder = 0.36;
-	/** スクラッチを操作する反対の手で操作するスイッチの操作がある時の加点量 */
-	double addScoreOpposite = 0.04;
+	/** 最もスクラッチに近いスイッチの操作がある時の加点量(SP) */
+	double spAddScoreNear = 0.18;
+	/** スクラッチから遠いスイッチの操作がある時の加点量(SP) */
+	double spAddScoreFar = 0.32;
+	/** スクラッチをどちらの手でも操作可能な位置のスイッチの操作がある時の加点量(SP) */
+	double spAddScoreBorder = 0.36;
+	/** スクラッチを操作する反対の手で操作するスイッチの操作がある時の加点量(SP) */
+	double spAddScoreOpposite = 0.04;
+	/** 最もスクラッチに近いスイッチの操作がある時の加点量(DP) */
+	double dpAddScoreNear = 0.32;
+	/** スクラッチから遠いスイッチの操作がある時の加点量(DP) */
+	double dpAddScoreFar = 0.42;
+	/** スクラッチから非常に遠いスイッチの操作がある時の加点量(DP) */
+	double dpAddScoreBorder = 0.51;
+	/** スクラッチを操作する反対の手で操作するスイッチの操作がある時の加点量(DP) */
+	double dpAddScoreOpposite = 0.34;
+	/** スクラッチと同時には操作できないスイッチの操作がある時の加点量(DPのみ) */
+	double dpAddScoreImpossible = 0.94;
 
 	/** 短押し操作がある時の加点量 */
 	double addScoreBeat = 0.1;
@@ -63,12 +73,66 @@ class ScratchConfig extends RatingConfig {
 	/** スクラッチの後方楽曲位置でのスイッチ操作がある時の加点量 */
 	double behindScoreRate = 1.6;
 
+	/** ダブルプレーで、最終評価点が高い側のレーンの評価点影響度 */
+	double dpInfluenceScoreHigh = 0.91;
+	/** ダブルプレーで、最終評価点が低い側のレーンの評価点影響度 */
+	double dpInfluenceScoreLow = 0.25;
+	/** ダブルプレーで、評価点影響度の調整を実施する最小の最終評価点比率 */
+	double dpAdjustInfluenceRate = 0.19;
+	/** ダブルプレーで、評価点影響度の最大調整幅(ScoreHigh/Lowのどちらか以下の値にすること) */
+	double dpAdjustInfluenceMaxStrength = 0.19;
+
 	/**
 	 * インスタンス取得
 	 * @return インスタンス
 	 */
 	static ScratchConfig getInstance() {
 		return sInstance;
+	}
+
+	/**
+	 * 最もスクラッチに近いスイッチの操作がある時の加点量取得
+	 * @param ctx Delta System用コンテキスト
+	 * @return 最もスクラッチに近いスイッチの操作がある時の加点量
+	 */
+	double addScoreNear(DsContext ctx) {
+		return ctx.dpMode ? this.dpAddScoreNear : this.spAddScoreNear;
+	}
+
+	/**
+	 * スクラッチから遠いスイッチの操作がある時の加点量取得
+	 * @param ctx Delta System用コンテキスト
+	 * @return スクラッチから遠いスイッチの操作がある時の加点量
+	 */
+	double addScoreFar(DsContext ctx) {
+		return ctx.dpMode ? this.dpAddScoreFar : this.spAddScoreFar;
+	}
+
+	/**
+	 * スクラッチをどちらの手でも操作可能な位置、または非常に遠いスイッチの操作がある時の加点量取得
+	 * @param ctx Delta System用コンテキスト
+	 * @return スクラッチをどちらの手でも操作可能な位置、または非常に遠いスイッチの操作がある時の加点量
+	 */
+	double addScoreBorder(DsContext ctx) {
+		return ctx.dpMode ? this.dpAddScoreBorder : this.spAddScoreBorder;
+	}
+
+	/**
+	 * スクラッチを操作する反対の手で操作するスイッチの操作がある時の加点量取得
+	 * @param ctx Delta System用コンテキスト
+	 * @return スクラッチを操作する反対の手で操作するスイッチの操作がある時の加点量
+	 */
+	double addScoreOpposite(DsContext ctx) {
+		return ctx.dpMode ? this.dpAddScoreOpposite : this.spAddScoreOpposite;
+	}
+
+	/**
+	 * スクラッチと同時には操作できないスイッチの操作がある時の加点量取得
+	 * @param ctx Delta System用コンテキスト
+	 * @return スクラッチと同時には操作できないスイッチの操作がある時の加点量
+	 */
+	double addScoreImpossible(DsContext ctx) {
+		return ctx.dpMode ? this.dpAddScoreImpossible : 0.0;
 	}
 
 	/** {@inheritDoc} */
@@ -88,14 +152,23 @@ class ScratchConfig extends RatingConfig {
 		satulateDifficulty = loader.numeric("satulate_difficulty", satulateDifficulty);
 		addScoreOuter = loader.numeric("add_score_outer", addScoreOuter);
 		addScoreInner = loader.numeric("add_score_inner", addScoreInner);
-		addScoreNear = loader.numeric("add_score_near", addScoreNear);
-		addScoreFar = loader.numeric("add_score_far", addScoreFar);
-		addScoreBorder = loader.numeric("add_score_border", addScoreBorder);
-		addScoreOpposite = loader.numeric("add_score_opposite", addScoreOpposite);
+		spAddScoreNear = loader.numeric("sp_add_score_near", spAddScoreNear);
+		spAddScoreFar = loader.numeric("sp_add_score_far", spAddScoreFar);
+		spAddScoreBorder = loader.numeric("sp_add_score_border", spAddScoreBorder);
+		spAddScoreOpposite = loader.numeric("sp_add_score_opposite", spAddScoreOpposite);
+		dpAddScoreNear = loader.numeric("dp_add_score_near", dpAddScoreNear);
+		dpAddScoreFar = loader.numeric("dp_add_score_far", dpAddScoreFar);
+		dpAddScoreBorder = loader.numeric("dp_add_score_border", dpAddScoreBorder);
+		dpAddScoreOpposite = loader.numeric("dp_add_score_opposite", dpAddScoreOpposite);
+		dpAddScoreImpossible = loader.numeric("dp_add_score_impossible", dpAddScoreImpossible);
 		addScoreBeat = loader.numeric("add_score_beat", addScoreBeat);
 		addScoreLongOn = loader.numeric("add_score_long_on", addScoreLongOn);
 		addScoreLong = loader.numeric("add_score_long", addScoreLong);
 		behindScoreRate = loader.numeric("behind_score_rate", behindScoreRate);
+		dpInfluenceScoreHigh = loader.numeric("dp_influence_score_high", dpInfluenceScoreHigh);
+		dpInfluenceScoreLow = loader.numeric("dp_influence_score_low", dpInfluenceScoreLow);
+		dpAdjustInfluenceRate = loader.numeric("dp_adjust_influence_rate", dpAdjustInfluenceRate);
+		dpAdjustInfluenceMaxStrength = loader.numeric("dp_adjust_influence_max_strength", dpAdjustInfluenceMaxStrength);
 	}
 
 	/** {@inheritDoc} */
@@ -115,14 +188,23 @@ class ScratchConfig extends RatingConfig {
 		Ds.debug("  satulateDifficulty: %s", satulateDifficulty);
 		Ds.debug("  addScoreOuter: %s", addScoreOuter);
 		Ds.debug("  addScoreInner: %s", addScoreInner);
-		Ds.debug("  addScoreNear: %s", addScoreNear);
-		Ds.debug("  addScoreFar: %s", addScoreFar);
-		Ds.debug("  addScoreBorder: %s", addScoreBorder);
-		Ds.debug("  addScoreOpposite: %s", addScoreOpposite);
+		Ds.debug("  spAddScoreNear: %s", spAddScoreNear);
+		Ds.debug("  spAddScoreFar: %s", spAddScoreFar);
+		Ds.debug("  spAddScoreBorder: %s", spAddScoreBorder);
+		Ds.debug("  spAddScoreOpposite: %s", spAddScoreOpposite);
+		Ds.debug("  dpAddScoreNear: %s", dpAddScoreNear);
+		Ds.debug("  dpAddScoreFar: %s", dpAddScoreFar);
+		Ds.debug("  dpAddScoreBorder: %s", dpAddScoreBorder);
+		Ds.debug("  dpAddScoreOpposite: %s", dpAddScoreOpposite);
+		Ds.debug("  dpAddScoreImpossible: %s", dpAddScoreImpossible);
 		Ds.debug("  addScoreBeat: %s", addScoreBeat);
 		Ds.debug("  addScoreLongOn: %s", addScoreLongOn);
 		Ds.debug("  addScoreLong: %s", addScoreLong);
 		Ds.debug("  behindScoreRate: %s", behindScoreRate);
+		Ds.debug("  dpInfluenceScoreHigh: %s", dpInfluenceScoreHigh);
+		Ds.debug("  dpInfluenceScoreLow: %s", dpInfluenceScoreLow);
+		Ds.debug("  dpAdjustInfluenceRate: %s", dpAdjustInfluenceRate);
+		Ds.debug("  dpAdjustInfluenceMaxStrength: %s", dpAdjustInfluenceMaxStrength);
 		Ds.debug("}");
 	}
 }

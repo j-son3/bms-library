@@ -15,6 +15,8 @@ import java.util.Arrays;
  * 16進数の場合：&quot;004A007800FFC9&quot;<br>
  * 36進数の場合：&quot;GH00ZAZ60000AFPIZZ&quot;<br>
  * 62進数の場合：&quot;A8006x00zC00QPyt&quot;</p>
+ *
+ * @since 0.0.1
  */
 public final class BmsArray extends AbstractList<Integer> {
 	/** 基数に応じた整数オブジェクト */
@@ -143,6 +145,7 @@ public final class BmsArray extends AbstractList<Integer> {
 	/**
 	 * 入力元データの基数を返します。
 	 * @return 基数
+	 * @since 0.8.0
 	 */
 	public int getBase() {
 		return mInt.base();

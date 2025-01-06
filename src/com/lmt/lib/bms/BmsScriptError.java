@@ -20,6 +20,8 @@ import static com.lmt.lib.bms.internal.Assertion.*;
  * 解析エラーとなった外部データ上の行の記述内容そのものを示します。行番号と同様、アプリケーションに対してどのような内容の記述が
  * エラーになったかを示す目的で使用できます。</li>
  * </ul>
+ *
+ * @since 0.4.0
  */
 public class BmsScriptError extends BmsError {
 	/** 行番号 */

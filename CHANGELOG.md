@@ -4,6 +4,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.0 / 1.3-D] - 2025-01-06
+### Added
+- BmsContent にハッシュ値の出力オプション付きの generateHash(boolean, boolean, boolean) を追加しました。
+- BeMusicChannel に指定レーンのチャンネルリストを取得する visibles, invisibles, longs, mines を追加しました。
+- BeMusicChannel にレーンごとの読み取り専用のチャンネルリストを追加しました。
+- BeMusicChart に指定レーン、指定入力デバイスの各種データ数、状態を取得する以下のメソッドを追加しました。
+    - getNoteCount
+    - getLongNoteCount
+    - getMineCount
+    - hasLongNote
+    - hasMine
+- BeMusicPoint に指定レーンの各種データ数、状態を取得する以下のメソッドを追加しました。
+    - getNoteCount
+    - getLongNoteCount
+    - getMineCount
+    - getVisualEffectCount
+    - hasPlayableNote
+    - hasMovementNote
+    - hasHolding
+    - hasLongNoteHead
+    - hasLongNoteTail
+    - hasLongNoteType
+    - hasVisualEffect
+- BeMusicPoint に当該楽曲位置でのテキスト有無を判定する hasText を追加しました。
+- BeMusicLoadHandler にハンドラ生成のヘルパメソッド withControlFlow を追加しました。
+
+### Changed
+- Delta System をダブルプレー譜面に対応しました。
+- GIMMICK にて、譜面停止が極端に多い時に数値が想定以上に高くなる問題を改善しました。
+- HOLDING にて、モードが「LN」の時に短いロングノート多いと数値が高騰することがある問題を改善しました。
+- HOLDING にて、長押し継続中の長押し開始の難易度評価を僅かに下方修正しました。
+- COMPLEX にて、超微細なズレ配置を多用している譜面の数値が異常に高騰する問題を改善しました。
+- BmsContent のハッシュ値を計算する generateHash の処理内容を見直し、ハッシュ値出力機能が正式化されました。
+- BmsSpec のハッシュ値を計算する generateHash の処理内容を見直し、ハッシュ値出力機能が正式化されました。
+- BeMusicHeader の getWavs, getBmps, getBpms, getStops, getScrolls, getTexts で取得できるマップが読み取り専用になりました。
+
+### Fixed
+- BeMusicChart#getLongNoteCount(BeMusicDevice) にて、長押しモードが「CN/HCN」の譜面のロングノート数が正しい値になっていない不具合を修正しました。
+- 62進数表記のBMSファイルを BmsStandardSaver で保存しようとすると予期しない例外がスローされ保存できないことがある不具合を修正しました。
+- SCRATCH値が極端に高く演奏時間が短い譜面において、演奏時間による数値の補正が効いていない不具合を修正しました。
+- 操作を伴うノートがある譜面のCOMPLEX値が0と評価されることがある不具合を修正しました。
+
 ## [0.8.0 / 1.2-D] - 2024-04-16
 ### Added
 - BeMusicSequencer クラスを追加しました。時間経過によるBMS譜面のシーケンス処理を行うクラスです。

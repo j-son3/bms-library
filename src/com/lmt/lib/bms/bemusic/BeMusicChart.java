@@ -31,6 +31,8 @@ import com.lmt.lib.bms.internal.Utility;
  *
  * <p>当クラスが持つ情報や機能では足りない場合には、当クラスを拡張し、処理や機能を追加してください。そのための
  * 処理実装は{@link #onCreate()}で行うことを想定しています。</p>
+ *
+ * @since 0.0.1
  */
 public class BeMusicChart implements Iterable<BeMusicPoint> {
 	/** LNモードで、疑似的なBack-Spin, Multi-Spinと判定する最大間隔(秒単位) */
@@ -65,12 +67,18 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	private int mLnCount;
 	/** 地雷オブジェ数 */
 	private int mLmCount;
+	/** レーンごとの総ノート数 */
+	private int[] mNoteCountsLane = new int[BeMusicLane.COUNT];
 	/** 入力デバイスごとの総ノート数 */
-	private int[] mNoteCounts = new int[BeMusicDevice.COUNT];
+	private int[] mNoteCountsDevice = new int[BeMusicDevice.COUNT];
+	/** レーンごとのロングノート数 */
+	private int[] mLnCountsLane = new int[BeMusicLane.COUNT];
 	/** 入力デバイスごとのロングノート数 */
-	private int[] mLnCounts = new int[BeMusicDevice.COUNT];
+	private int[] mLnCountsDevice = new int[BeMusicDevice.COUNT];
+	/** レーンごとの地雷オブジェ数 */
+	private int[] mLmCountsLane = new int[BeMusicLane.COUNT];
 	/** 入力デバイスごとの地雷オブジェ数 */
-	private int[] mLmCounts = new int[BeMusicDevice.COUNT];
+	private int[] mLmCountsDevice = new int[BeMusicDevice.COUNT];
 	/** スクロール速度変化回数 */
 	private int mChgScrollCount;
 	/** BPM変化回数 */
@@ -186,6 +194,18 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	}
 
 	/**
+	 * 指定レーンの総ノート数を取得します。
+	 * @param lane レーン
+	 * @return 指定レーンの総ノート数
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public final int getNoteCount(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return mNoteCountsLane[lane.getIndex()];
+	}
+
+	/**
 	 * 指定入力デバイスの総ノート数を取得します。
 	 * @param device 入力デバイス
 	 * @return 指定入力デバイスの総ノート数
@@ -193,7 +213,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 */
 	public final int getNoteCount(BeMusicDevice device) {
 		assertArgNotNull(device, "device");
-		return mNoteCounts[device.getIndex()];
+		return mNoteCountsDevice[device.getIndex()];
 	}
 
 	/**
@@ -205,6 +225,18 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	}
 
 	/**
+	 * 指定レーンのロングノート数を取得します。
+	 * @param lane レーン
+	 * @return 指定レーンのロングノート数
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public final int getLongNoteCount(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return mLnCountsLane[lane.getIndex()];
+	}
+
+	/**
 	 * 指定入力デバイスのロングノート数を取得します。
 	 * @param device 入力デバイス
 	 * @return 指定入力デバイスのロングノート数
@@ -212,7 +244,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 */
 	public final int getLongNoteCount(BeMusicDevice device) {
 		assertArgNotNull(device, "device");
-		return mLnCounts[device.getIndex()];
+		return mLnCountsDevice[device.getIndex()];
 	}
 
 	/**
@@ -224,6 +256,18 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	}
 
 	/**
+	 * 指定レーンの地雷オブジェ数を取得します。
+	 * @param lane レーン
+	 * @return 指定レーンの地雷オブジェ数
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public final int getMineCount(BeMusicLane lane) {
+		assertArgNotNull(lane, "lane");
+		return mLmCountsLane[lane.getIndex()];
+	}
+
+	/**
 	 * 指定入力デバイスの地雷オブジェ数を取得します。
 	 * @param device 入力デバイス
 	 * @return 指定入力デバイスの地雷オブジェ数
@@ -231,7 +275,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 */
 	public final int getMineCount(BeMusicDevice device) {
 		assertArgNotNull(device, "device");
-		return mLmCounts[device.getIndex()];
+		return mLmCountsDevice[device.getIndex()];
 	}
 
 	/**
@@ -248,6 +292,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	/**
 	 * スクロール速度の変化回数を取得します。
 	 * @return スクロール速度の変化回数
+	 * @since 0.6.0
 	 */
 	public final int getChangeScrollCount() {
 		return mChgScrollCount;
@@ -276,6 +321,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * #TOTAL = 7.605 * N / (0.01 * N + 6.5)
 	 * ※N = 総ノート数</pre>
 	 * @return 推奨TOTAL値
+	 * @since 0.3.0
 	 */
 	public final double getRecommendTotal1() {
 		return mRecommendTotal1;
@@ -290,6 +336,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * N &gt;= 600: #TOTAL = 360 + (N - 600) / 5
 	 * ※N = 総ノート数</pre>
 	 * @return 推奨TOTAL値
+	 * @since 0.3.0
 	 */
 	public final double getRecommendTotal2() {
 		return mRecommendTotal2;
@@ -298,6 +345,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	/**
 	 * スクラッチモードを取得します。
 	 * @return スクラッチモード
+	 * @since 0.7.0
 	 */
 	public final BeMusicScratchMode getScratchMode() {
 		return mScratchMode;
@@ -312,11 +360,55 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	}
 
 	/**
+	 * 指定レーンのロングノート有無を取得します。
+	 * @param lane レーン
+	 * @return 指定レーンにロングノートが含まれていればtrue
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public final boolean hasLongNote(BeMusicLane lane) {
+		return (getLongNoteCount(lane) > 0);
+	}
+
+	/**
+	 * 指定入力デバイスのロングノート有無を取得します。
+	 * @param device 入力デバイス
+	 * @return 指定入力デバイスにロングノートが含まれていればtrue
+	 * @exception NullPointerException deviceがnull
+	 * @since 0.9.0
+	 */
+	public final boolean hasLongNote(BeMusicDevice device) {
+		return (getLongNoteCount(device) > 0);
+	}
+
+	/**
 	 * 地雷オブジェ有無を取得します。
 	 * @return 地雷オブジェ有無
 	 */
 	public final boolean hasMine() {
 		return (mLmCount > 0);
+	}
+
+	/**
+	 * 指定レーンの地雷オブジェ有無を取得します。
+	 * @param lane レーン
+	 * @return 指定レーンに地雷オブジェが含まれていればtrue
+	 * @exception NullPointerException laneがnull
+	 * @since 0.9.0
+	 */
+	public final boolean hasMine(BeMusicLane lane) {
+		return (getMineCount(lane) > 0);
+	}
+
+	/**
+	 * 指定入力デバイスの地雷オブジェ有無を取得します。
+	 * @param device 入力デバイス
+	 * @return 指定入力デバイスに地雷オブジェが含まれていればtrue
+	 * @exception NullPointerException deviceがnull
+	 * @since 0.9.0
+	 */
+	public final boolean hasMine(BeMusicDevice device) {
+		return (getMineCount(device) > 0);
 	}
 
 	/**
@@ -338,6 +430,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	/**
 	 * スクロール速度の変化有無を取得します。
 	 * @return スクロール速度の変化有無
+	 * @since 0.6.0
 	 */
 	public final boolean hasChangeScroll() {
 		return (mChgScrollCount > 0);
@@ -357,6 +450,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @return 速度変更有無
 	 * @see #hasChangeBpm()
 	 * @see #hasChangeScroll()
+	 * @since 0.6.0
 	 */
 	public final boolean hasChangeSpeed() {
 		return mChgSpeed;
@@ -380,6 +474,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @see #hasChangeScroll()
 	 * @see #hasStop()
 	 * @see #hasMine()
+	 * @since 0.6.0
 	 */
 	public final boolean hasGimmick() {
 		return mGimmick;
@@ -395,6 +490,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 楽曲位置情報リストを走査するストリームを返します。
 	 * <p>楽曲位置情報リストは、楽曲位置の時間で昇順ソートされていることを保証します。</p>
 	 * @return 楽曲位置情報リストを走査するストリーム
+	 * @since 0.1.0
 	 */
 	public final Stream<BeMusicPoint> points() {
 		return mPoints.stream();
@@ -408,6 +504,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @return 楽曲位置情報リストを走査するストリーム
 	 * @exception IndexOutOfBoundsException startが 0～{@link #getPointCount()}-1 の範囲外
 	 * @exception IndexOutOfBoundsException endが 0～{@link #getPointCount()} の範囲外
+	 * @since 0.8.0
 	 */
 	public final Stream<BeMusicPoint> points(int start, int end) {
 		var count = mPoints.size();
@@ -555,9 +652,9 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 		mHasBgm = false;
 		mHasBga = false;
 		mScratchMode = BeMusicScratchMode.NORMAL;
-		Arrays.fill(mNoteCounts, 0);
-		Arrays.fill(mLnCounts, 0);
-		Arrays.fill(mLmCounts, 0);
+		Arrays.fill(mNoteCountsDevice, 0);
+		Arrays.fill(mLnCountsDevice, 0);
+		Arrays.fill(mLmCountsDevice, 0);
 
 		// 楽曲位置情報を分析する
 		var listCount = list.size();
@@ -597,9 +694,9 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 			// 各ノート数を更新する
 			for (var i = 0; i < BeMusicDevice.COUNT; i++) {
 				var ntype = pt.getVisibleNoteType(BeMusicDevice.fromIndex(i));
-				mNoteCounts[i] += (ntype.isCountNotes() ? 1 : 0);
-				mLnCounts[i] += ((ntype == BeMusicNoteType.LONG_ON) ? 1 : 0);
-				mLmCounts[i] += ((ntype == BeMusicNoteType.MINE) ? 1 : 0);
+				mNoteCountsDevice[i] += (ntype.isCountNotes() ? 1 : 0);
+				mLnCountsDevice[i] += ((ntype.isCountNotes() && ntype.isLongNoteType()) ? 1 : 0);
+				mLmCountsDevice[i] += ((ntype == BeMusicNoteType.MINE) ? 1 : 0);
 			}
 
 			// スクラッチモードを更新する
@@ -657,6 +754,17 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 			lastMeasure = measure;
 			lastTick = tick;
 			lastTime = time;
+		}
+
+		// レーンごとの各種個数を計算する
+		Arrays.fill(mNoteCountsLane, 0);
+		Arrays.fill(mLnCountsLane, 0);
+		Arrays.fill(mLmCountsLane, 0);
+		for (var i = 0; i < BeMusicDevice.COUNT; i++) {
+			var iLane = BeMusicDevice.fromIndex(i).getLane().getIndex();
+			mNoteCountsLane[iLane] += mNoteCountsDevice[i];
+			mLnCountsLane[iLane] += mLnCountsDevice[i];
+			mLmCountsLane[iLane] += mLmCountsDevice[i];
 		}
 
 		// 推奨TOTAL値1を計算する

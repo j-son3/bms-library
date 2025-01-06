@@ -1,42 +1,22 @@
 package com.lmt.lib.bms.internal.deltasystem;
 
-import com.lmt.lib.bms.bemusic.BeMusicDevice;
+import com.lmt.lib.bms.bemusic.BeMusicLane;
 import com.lmt.lib.bms.bemusic.BeMusicPoint;
 
 /**
  * 譜面傾向「RHYTHM」の分析データクラス
  */
 class RhythmElement extends RatingElement {
-	/** サイド */
-	enum Side {
-		/** 全体 */
-		ALL(0),
-		/** 左サイド */
-		LEFT(1),
-		/** 右サイド */
-		RIGHT(2);
-
-		/** インデックス */
-		int index;
-
-		/**
-		 * コンストラクタ
-		 * @param i インデックス
-		 */
-		private Side(int i) {
-			index = i;
-		}
-	}
-
 	/** リズム範囲データ */
 	private PulseRange[] mPulseRanges = new PulseRange[3];
 
 	/**
 	 * コンストラクタ
+	 * @param ctx コンテキスト
 	 * @param point 楽曲位置情報
 	 */
-	RhythmElement(BeMusicPoint point) {
-		super(point);
+	RhythmElement(DsContext ctx, BeMusicPoint point) {
+		super(ctx, point);
 	}
 
 	/**
@@ -44,7 +24,7 @@ class RhythmElement extends RatingElement {
 	 * @param side サイド
 	 * @return リズム範囲
 	 */
-	final PulseRange getPulseRange(Side side) {
+	final PulseRange getPulseRange(Rhythm.Side side) {
 		return mPulseRanges[side.index];
 	}
 
@@ -53,38 +33,58 @@ class RhythmElement extends RatingElement {
 	 * @param side サイド
 	 * @param pulseRange リズム範囲
 	 */
-	final void setPulseRange(Side side, PulseRange pulseRange) {
+	final void setPulseRange(Rhythm.Side side, PulseRange pulseRange) {
 		mPulseRanges[side.index] = pulseRange;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printData(int pos) {
-		var s = String.format("   |%.3f|%s %s %s %s %s %s %s %s|%s|%s|%s|",
-				getTimeDelta(),
-				getNoteTypeString(BeMusicDevice.SCRATCH1), getNoteTypeString(BeMusicDevice.SWITCH11),
-				getNoteTypeString(BeMusicDevice.SWITCH12), getNoteTypeString(BeMusicDevice.SWITCH13),
-				getNoteTypeString(BeMusicDevice.SWITCH14), getNoteTypeString(BeMusicDevice.SWITCH15),
-				getNoteTypeString(BeMusicDevice.SWITCH16), getNoteTypeString(BeMusicDevice.SWITCH17),
-				makePulseRange(Side.ALL), makePulseRange(Side.LEFT), makePulseRange(Side.RIGHT));
+	protected void printSpData(int pos) {
+		var s = String.format("   |%.3f|%s|%s|%s|%s|",
+				getTimeDelta(), makeNotesString(BeMusicLane.PRIMARY),
+				makePulseRange(Rhythm.Side.ALL), makePulseRange(Rhythm.Side.LEFT), makePulseRange(Rhythm.Side.RIGHT));
 		Ds.debug(s);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printMeasure() {
-		var m = getMeasure();
+	protected void printDpData(int pos) {
+		var s = String.format("   |%.3f|%s| |%s|%s|%s|%s|",
+				getTimeDelta(), makeNotesString(BeMusicLane.PRIMARY), makeNotesString(BeMusicLane.SECONDARY),
+				makePulseRange(Rhythm.Side.ALL), makePulseRange(Rhythm.Side.LEFT), makePulseRange(Rhythm.Side.RIGHT));
+		Ds.debug(s);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void printSpMeasure(int m) {
 		Ds.debug("%3d+-----+---------------------------------------+-------+-------------+----------+------+-------+------+-------+-------------+----------+------+-------+------+-------+-------------+----------+------+-------+------+", m);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printHeader() {
+	protected void printDpMeasure(int m) {
+		Ds.debug("%3d+-----+-------------------------------| |-------------------------------|-------+-------------+----------+------+-------+------+-------+-------------+----------+------+-------+------+-------+-------------+----------+------+-------+------+", m);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void printSpHeader() {
 		Ds.debug("---+-----+----+----+----+----+----+----+----+----+------------------------------------------------------+------------------------------------------------------+------------------------------------------------------+");
-		Ds.debug("   |     |    |    |    |    |    |    |    |    |                       ALL                            |                        ALL                           |                        ALL                           |");
+		Ds.debug("   |     |    |    |    |    |    |    |    |    |                       ALL                            |                       LEFT                           |                       RIGHT                          |");
 		Ds.debug("   |     |    |    |    |    |    |    |    |    +-------+-------------+----------+------+-------+------+-------+-------------+----------+------+-------+------+-------+-------------+----------+------+-------+------+");
 		Ds.debug("M  |DELTA|SCR1|SW1 |SW2 |SW3 |SW4 |SW5 |SW6 |SW7 |RNG/RPT|RANGE-TIME   |PULSE     |INTRVL|DENSITY|SCORE |RNG/RPT|RANGE-TIME   |PULSE     |INTRVL|DENSITY|SCORE |RNG/RPT|RANGE-TIME   |PULSE     |INTRVL|DENSITY|SCORE |");
 		Ds.debug("---+-----+----+----+----+----+----+----+----+----+-------+-------------+----------+------+-------+------+-------+-------------+----------+------+-------+------+-------+-------------+----------+------+-------+------+");
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void printDpHeader() {
+		Ds.debug("---+-----+-------------------------------+-+-------------------------------+------------------------------------------------------+------------------------------------------------------+------------------------------------------------------+");
+		Ds.debug("   |     |             LEFT              | |              RIGHT            |                       ALL                            |                       LEFT                           |                       RIGHT                          |");
+		Ds.debug("   |     +---+---+---+---+---+---+---+---+ +---+---+---+---+---+---+---+---+-------+-------------+----------+------+-------+------+-------+-------------+----------+------+-------+------+-------+-------------+----------+------+-------+------+");
+		Ds.debug("M  |DELTA|SC1|SW1|SW2|SW3|SW4|SW5|SW6|SW7| |SW1|SW2|SW3|SW4|SW5|SW6|SW7|SC2|RNG/RPT|RANGE-TIME   |PULSE     |INTRVL|DENSITY|SCORE |RNG/RPT|RANGE-TIME   |PULSE     |INTRVL|DENSITY|SCORE |RNG/RPT|RANGE-TIME   |PULSE     |INTRVL|DENSITY|SCORE |");
+		Ds.debug("---+-----+---+---+---+---+---+---+---+---+-+---+---+---+---+---+---+---+---+-------+-------------+----------+------+-------+------+-------+-------------+----------+------+-------+------+-------+-------------+----------+------+-------+------+");
 	}
 
 	/**
@@ -92,7 +92,7 @@ class RhythmElement extends RatingElement {
 	 * @param side サイド
 	 * @return リズム範囲データの文字列表現
 	 */
-	private String makePulseRange(Side side) {
+	private String makePulseRange(Rhythm.Side side) {
 		// リズム範囲未設定の場合は空白を出力する
 		var r = getPulseRange(side);
 		if (r == null) {

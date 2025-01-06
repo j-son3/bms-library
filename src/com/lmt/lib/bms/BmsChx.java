@@ -9,6 +9,8 @@ import java.util.Objects;
  *
  * <p>タイムラインのCHXの有効範囲は、チャンネル番号が{@link BmsSpec#CHANNEL_MIN}～{@link BmsSpec#CHANNEL_MAX}、
  * チャンネルインデックスが{@link BmsSpec#CHINDEX_MIN}～{@link BmsSpec#CHINDEX_MAX}となります。</p>
+ *
+ * @since 0.1.0
  */
 public interface BmsChx {
 	/**

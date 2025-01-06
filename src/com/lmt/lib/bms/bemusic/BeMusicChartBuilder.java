@@ -57,6 +57,8 @@ import com.lmt.lib.bms.internal.Utility;
  *     return myChart;
  * }
  * </pre>
+ *
+ * @since 0.0.1
  */
 public class BeMusicChartBuilder {
 	/** 小節線をシークするかどうか */
@@ -148,6 +150,7 @@ public class BeMusicChartBuilder {
 	 * @param content BMSコンテンツ
 	 * @param isSeekAll 全情報シーク有無
 	 * @exception NullPointerException contentがnull
+	 * @since 0.8.0
 	 */
 	public BeMusicChartBuilder(BmsContent content, boolean isSeekAll) {
 		assertArgNotNull(content, "content");
@@ -259,6 +262,7 @@ public class BeMusicChartBuilder {
 	 * @return このBMS譜面ビルダーオブジェクトのインスタンス
 	 * @exception IllegalStateException BMS譜面生成中
 	 * @exception NullPointerException creatorがnull
+	 * @since 0.8.0
 	 */
 	public final BeMusicChartBuilder setPointCreator(Supplier<BeMusicPoint> creator) {
 		assertNotSeeking();
@@ -278,6 +282,7 @@ public class BeMusicChartBuilder {
 	 * @return このBMS譜面ビルダーオブジェクトのインスタンス
 	 * @exception IllegalStateException BMS譜面生成中
 	 * @exception NullPointerException creatorがnull
+	 * @since 0.8.0
 	 */
 	public final BeMusicChartBuilder setChartCreator(Supplier<BeMusicChart> creator) {
 		assertNotSeeking();
@@ -363,6 +368,7 @@ public class BeMusicChartBuilder {
 	 * @param content BMSコンテンツ
 	 * @return BMS譜面オブジェクト
 	 * @exception NullPointerException contentがnull
+	 * @since 0.8.0
 	 */
 	public static BeMusicChart createChart(BmsContent content) {
 		return (new BeMusicChartBuilder(content)).createChart();

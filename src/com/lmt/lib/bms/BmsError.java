@@ -27,6 +27,8 @@ import java.util.Objects;
  * 例外の詳細な内容をログ出力したりすることができます。例外に起因しないエラーも多数あるため、多くのケースでこの値は
  * 未設定(null)を示します。</li>
  * </ul>
+ *
+ * @since 0.4.0
  */
 public class BmsError {
 	/** エラー種別 */

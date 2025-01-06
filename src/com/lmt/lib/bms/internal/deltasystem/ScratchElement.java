@@ -1,62 +1,77 @@
 package com.lmt.lib.bms.internal.deltasystem;
 
-import com.lmt.lib.bms.bemusic.BeMusicDevice;
+import com.lmt.lib.bms.bemusic.BeMusicLane;
 import com.lmt.lib.bms.bemusic.BeMusicPoint;
 
 /**
  * 譜面傾向「SCRATCH」の分析データクラス
  */
 class ScratchElement extends RatingElement {
+	/** レーンごとの要素データ */
+	private ScratchRange[] mData = { null, null };
+
 	/**
 	 * コンストラクタ
+	 * @param ctx コンテキスト
 	 * @param point 楽曲位置情報
 	 */
-	ScratchElement(BeMusicPoint point) {
-		super(point);
-	}
-
-	/** スクラッチ範囲 */
-	private ScratchRange mRange;
-
-	/**
-	 * スクラッチ範囲設定
-	 * @param range スクラッチ範囲
-	 */
-	final void setRange(ScratchRange range) {
-		mRange = range;
+	ScratchElement(DsContext ctx, BeMusicPoint point) {
+		super(ctx, point);
 	}
 
 	/**
-	 * スクラッチ範囲取得
-	 * @return スクラッチ範囲
+	 * 要素データ取得
+	 * @param lane レーン
+	 * @return 要素データ
 	 */
-	final ScratchRange getRange() {
-		return mRange;
+	ScratchRange getData(BeMusicLane lane) {
+		return mData[lane.getIndex()];
+	}
+
+	/**
+	 * 要素データ設定
+	 * @param lane レーン
+	 * @param range 要素データ
+	 */
+	void setData(BeMusicLane lane, ScratchRange range) {
+		mData[lane.getIndex()] = range;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printData(int pos) {
-		var s = String.format("   |%.3f|%s %s %s %s %s %s %s %s|%s",
+	protected void printSpData(int pos) {
+		var s = String.format("   |%.3f|%s|%s",
 				getTimeDelta(),
-				getNoteTypeString(BeMusicDevice.SCRATCH1), getNoteTypeString(BeMusicDevice.SWITCH11),
-				getNoteTypeString(BeMusicDevice.SWITCH12), getNoteTypeString(BeMusicDevice.SWITCH13),
-				getNoteTypeString(BeMusicDevice.SWITCH14), getNoteTypeString(BeMusicDevice.SWITCH15),
-				getNoteTypeString(BeMusicDevice.SWITCH16), getNoteTypeString(BeMusicDevice.SWITCH17),
-				makePrintString(pos));
+				makeNotesString(BeMusicLane.PRIMARY),
+				makePrintString(pos, BeMusicLane.PRIMARY));
 		Ds.debug(s);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printMeasure() {
-		var m = getMeasure();
+	protected void printDpData(int pos) {
+		var s = String.format("   |%.3f|%s| |%s|%s%s",
+				getTimeDelta(),
+				makeNotesString(BeMusicLane.PRIMARY), makeNotesString(BeMusicLane.SECONDARY),
+				makePrintString(pos, BeMusicLane.PRIMARY), makePrintString(pos, BeMusicLane.SECONDARY));
+		Ds.debug(s);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void printSpMeasure(int m) {
 		Ds.debug("%3d+-----+---------------------------------------+-----+------+-------+----------+---+----+----+----+----+----+----+------+", m);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected void printHeader() {
+	protected void printDpMeasure(int m) {
+		Ds.debug("%3d+-----+-------------------------------|-|-------------------------------|-----+------+-------+----------+---+----+----+----+----+----+----+------+-----+------+-------+----------+---+----+----+----+----+----+----+------+", m);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void printSpHeader() {
 		Ds.debug("---+-----+----+----+----+----+----+----+----+----+-------------------------------+---+--------------+--------------+------+");
 		Ds.debug("   |     |    |    |    |    |    |    |    |    |             RANGE             |   |    STATUS    |    BEHIND    |      |");
 		Ds.debug("   |     |    |    |    |    |    |    |    |    +-----+------+-------+----------+   +----+----+----+----+----+----+      |");
@@ -64,14 +79,28 @@ class ScratchElement extends RatingElement {
 		Ds.debug("---+-----+----+----+----+----+----+----+----+----+-----+------+-------+----------+---+----+----+----+----+----+----+------+");
 	}
 
+	/** {@inheritDoc} */
+	@Override
+	protected void printDpHeader() {
+		Ds.debug("---------+-------------------------------+-+-------------------------------+------------------------------------------------------------------------+------------------------------------------------------------------------+");
+		Ds.debug("         |             LEFT              | |              RIGHT            |                                PRIMARY                                 |                               SECONDARY                                |");
+		Ds.debug("---+-----+---+---+---+---+---+---+---+---+-+---+---+---+---+---+---+---+---+-------------------------------+---+--------------+--------------+------+-------------------------------+---+--------------+--------------+------+");
+		Ds.debug("   |     |   |   |   |   |   |   |   |   | |   |   |   |   |   |   |   |   |             RANGE             |   |    STATUS    |    BEHIND    |      |             RANGE             |   |    STATUS    |    BEHIND    |      |");
+		Ds.debug("   |     |   |   |   |   |   |   |   |   | |   |   |   |   |   |   |   |   +-----+------+-------+----------+   +----+----+----+----+----+----+      |-----+------+-------+----------+   +----+----+----+----+----+----+      |");
+		Ds.debug("M  |DELTA|SC1|SW1|SW2|SW3|SW4|SW5|SW6|SW7| |SW1|SW2|SW3|SW4|SW5|SW6|SW7|SC2|POS  |TYPE  |BEHIND |DETAIL    |DIR|NEAR|FAR |OPP |NEAR|FAR |OPP |SCORE |POS  |TYPE  |BEHIND |DETAIL    |DIR|NEAR|FAR |OPP |NEAR|FAR |OPP |SCORE |");
+		Ds.debug("---+-----+---+---+---+---+---+---+---+---+-+---+---+---+---+---+---+---+---+-----+------+-------+----------+---+----+----+----+----+----+----+------+-----+------+-------+----------+---+----+----+----+----+----+----+------+");
+	}
+
 	/**
 	 * スクラッチ範囲データの文字列表現生成
 	 * @param pos 要素リストのインデックス
+	 * @param lane レーン
 	 * @return スクラッチ範囲データの文字列表現
 	 */
-	private String makePrintString(int pos) {
+	private String makePrintString(int pos, BeMusicLane lane) {
 		// スクラッチの範囲外は空白
-		if (mRange == null) {
+		var range = mData[lane.getIndex()];
+		if (range == null) {
 			return "     |      |       |          |   |    |    |    |    |    |    |      |";
 		}
 
@@ -79,29 +108,29 @@ class ScratchElement extends RatingElement {
 		var sb = new StringBuilder();
 
 		// スクラッチ範囲の記号
-		if ((pos == mRange.first.position) || (pos == mRange.last.position)) {
-			sb.append((mRange.first.position == mRange.last.position) ? "<--o |" : "<--+ |");
+		if ((pos == range.first.position) || (pos == range.last.position)) {
+			sb.append((range.first.position == range.last.position) ? "<--o |" : "<--+ |");
 		} else {
 			sb.append("   | |");
 		}
 
 		// スクラッチ範囲の先頭では、範囲データの詳細を出力する
-		if ((pos == mRange.first.position)) {
+		if ((pos == range.first.position)) {
 			// スクラッチ種別
-			sb.append(mRange.type.shortName).append("|");
+			sb.append(range.type.shortName).append("|");
 
 			// 後方時間
-			sb.append(String.format("%-7.3f|", mRange.behindTime));
+			sb.append(String.format("%-7.3f|", range.behindTime));
 
 			// 詳細データ
-			sb.append(mRange.detail()).append("|");
+			sb.append(range.detail()).append("|");
 		} else {
 			// 先頭以外では詳細部分は空白とする
 			sb.append("      |       |          |");
 		}
 
 		// スクラッチ評価データ
-		var eval = mRange.getEvaluation(pos);
+		var eval = range.getEvaluation(pos);
 		if (eval != null) {
 			// スクラッチの操作方向
 			sb.append(' ').append(eval.direction.shortName).append(" |");

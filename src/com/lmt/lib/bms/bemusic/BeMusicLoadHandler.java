@@ -17,6 +17,8 @@ import com.lmt.lib.bms.parse.BmsTestResult;
  * 具体的には「CONTROL FLOW機能」を提供します。これは「#RANDOM」による乱数の生成と「#IF」等によるコンテンツ読み込みの
  * ランダム化を実現するものとなっており、CONTROL FLOWを記述したBe-Music用BMSコンテンツでは読み込み毎に異なるデータを
  * 読み込むことが可能となるものです。</p>
+ *
+ * @since 0.0.1
  */
 public class BeMusicLoadHandler implements BmsLoadHandler {
 	/** CONTROL FLOWのコマンド */
@@ -242,6 +244,45 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 		initializeControlFlow(mRandomValue, null);
 
 		return BmsTestResult.OK;
+	}
+
+	/**
+	 * CONTROL FLOWを有効にしたBe-Music用BMSコンテンツ読み込みハンドラを生成して返します。
+	 * <p>当メソッドを使用して生成したハンドラではCONTROL FLOWが有効になり
+	 * #RANDOMの値は毎回異なる値を示すようになります。</p>
+	 * @return CONTROL FLOWを有効にしたBe-Music用BMSコンテンツ読み込みハンドラ
+	 * @see #setEnableControlFlow(boolean)
+	 * @see #setForceRandomValue(Long)
+	 * @since 0.9.0
+	 */
+	public static BeMusicLoadHandler withControlFlow() {
+		return new BeMusicLoadHandler().setEnableControlFlow(true).setForceRandomValue(null);
+	}
+
+	/**
+	 * CONTROL FLOWを有効にしたBe-Music用BMSコンテンツ読み込みハンドラを生成して返します。
+	 * <p>当メソッドを使用して生成したハンドラではCONTROL FLOWが有効になり
+	 * #RANDOMの値は指定された固定値になります。</p>
+	 * @param fixedValue 強制する乱数の値
+	 * @return CONTROL FLOWを有効にしたBe-Music用BMSコンテンツ読み込みハンドラ
+	 * @see #setEnableControlFlow(boolean)
+	 * @see #setForceRandomValue(Long)
+	 * @since 0.9.0
+	 */
+	public static BeMusicLoadHandler withControlFlow(long fixedValue) {
+		return new BeMusicLoadHandler().setEnableControlFlow(true).setForceRandomValue(fixedValue);
+	}
+
+	/**
+	 * CONTROL FLOWを無効にしたBe-Music用BMSコンテンツ読み込みハンドラを生成して返します。
+	 * <p>当メソッドを使用して生成したハンドラではCONTROL FLOWが有効になります。</p>
+	 * @return CONTROL FLOWを無効にしたBe-Music用BMSコンテンツ読み込みハンドラ
+	 * @see #setEnableControlFlow(boolean)
+	 * @see #setForceRandomValue(Long)
+	 * @since 0.9.0
+	 */
+	public static BeMusicLoadHandler withoutControlFlow() {
+		return new BeMusicLoadHandler().setEnableControlFlow(false);
 	}
 
 	/**

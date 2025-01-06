@@ -6,6 +6,8 @@ import com.lmt.lib.bms.BmsScriptError;
  * BMSローダのパーサ部で発生したエラーを表す要素データクラスです。
  *
  * <p><strong>※当クラスはBMSライブラリの一般利用者が参照する必要はありません。</strong></p>
+ *
+ * @since 0.8.0
  */
 public class BmsErrorParsed extends BmsParsed {
 	/** エラーがないことを表すエラー要素オブジェクト */
