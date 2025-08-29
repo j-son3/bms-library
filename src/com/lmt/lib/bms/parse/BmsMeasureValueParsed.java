@@ -38,7 +38,7 @@ public class BmsMeasureValueParsed extends BmsTimelineParsed {
 	 * @param value 小節データの値の文字列表現
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsTimelineParsed set(int lineNumber, Object line, int measure, int number, String value) {
+	public BmsTimelineParsed set(int lineNumber, Object line, int measure, int number, String value) {
 		this.lineNumber = lineNumber;
 		this.line = line;
 		this.measure = measure;

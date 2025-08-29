@@ -115,13 +115,13 @@ class MetaContainer {
 	 * 単体メタ情報の値を設定する
 	 * @param name メタ情報の名称
 	 * @param value 設定する値。nullを指定するとその名前のメタ情報を削除する。
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
-	 * @exception IllegalArgumentException 初期BPM指定時、BPMが{@link BmsSpec#BPM_MIN}～{@link BmsSpec#BPM_MAX}の範囲外
-	 * @exception ClassCastException valueが設定先メタ情報のデータ型に変換できない
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws IllegalArgumentException 初期BPM指定時、BPMが{@link BmsSpec#BPM_MIN}～{@link BmsSpec#BPM_MAX}の範囲外
+	 * @throws ClassCastException valueが設定先メタ情報のデータ型に変換できない
 	 */
-	final void setSingleMeta(String name, Object value) {
+	void setSingleMeta(String name, Object value) {
 		// アサーション
 		assertIsEditMode();
 		assertArgMetaName(name);
@@ -158,13 +158,13 @@ class MetaContainer {
 	 * @param name メタ情報の名称
 	 * @param index インデックス
 	 * @param value 設定する値。nullを指定するとその名前のメタ情報を削除する。
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception ClassCastException valueが設定先メタ情報のデータ型に変換できない
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws ClassCastException valueが設定先メタ情報のデータ型に変換できない
 	 */
-	final void setMultipleMeta(String name, int index, Object value) {
+	void setMultipleMeta(String name, int index, Object value) {
 		// アサーション
 		assertIsEditMode();
 		assertArgMetaName(name);
@@ -203,13 +203,13 @@ class MetaContainer {
 	 * @param name メタ情報の名称
 	 * @param index インデックス
 	 * @param value 設定する値。nullを指定するとその名前のメタ情報を削除する。
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception ClassCastException valueが設定先メタ情報のデータ型に変換できない
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws ClassCastException valueが設定先メタ情報のデータ型に変換できない
 	 */
-	final void setIndexedMeta(String name, int index, Object value) {
+	void setIndexedMeta(String name, int index, Object value) {
 		// アサーション
 		assertIsEditMode();
 		assertArgMetaName(name);
@@ -241,16 +241,16 @@ class MetaContainer {
 	 * @param unit メタ情報の単位
 	 * @param index インデックス
 	 * @param value 設定する値。nullを指定するとその名前のメタ情報を削除する。
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
-	 * @exception IllegalArgumentException name, unitに合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#SINGLE SINGLE}の時、indexが0以外
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#MULTIPLE MULTIPLE}の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#INDEXED INDEXED}の時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception ClassCastException valueが設定先メタ情報のデータ型に変換できない
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
+	 * @throws IllegalArgumentException name, unitに合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#SINGLE SINGLE}の時、indexが0以外
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#MULTIPLE MULTIPLE}の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#INDEXED INDEXED}の時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws ClassCastException valueが設定先メタ情報のデータ型に変換できない
 	 */
-	final void setMeta(String name, BmsUnit unit, int index, Object value) {
+	void setMeta(String name, BmsUnit unit, int index, Object value) {
 		// 単位により処理を分岐
 		assertArgMetaUnit(unit);
 		switch (unit) {
@@ -273,10 +273,10 @@ class MetaContainer {
 	 * 単体メタ情報の値を取得する。
 	 * @param name メタ情報の名称
 	 * @return メタ情報の値。値が未設定の場合、そのメタ情報の初期値。
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	final Object getSingleMeta(String name) {
+	Object getSingleMeta(String name) {
 		assertArgMetaName(name);
 		assertMetaSpec(name, BmsUnit.SINGLE);
 		return mSingleMetas.get(name).getValue();
@@ -287,10 +287,10 @@ class MetaContainer {
 	 * @param name メタ情報の名称
 	 * @param index インデックス
 	 * @return メタ情報の値。値が未設定の場合、そのメタ情報の初期値。
-	 * @exception NullPointerException nameがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException nameがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
 	 */
-	final Object getMultipleMeta(String name, int index) {
+	Object getMultipleMeta(String name, int index) {
 		// アサーション
 		assertArgMetaName(name);
 		assertArgMultipleMetaIndex(index);
@@ -306,11 +306,11 @@ class MetaContainer {
 	 * @param name メタ情報の名称
 	 * @param index インデックス
 	 * @return メタ情報の値。値が未設定の場合、そのメタ情報の初期値。
-	 * @exception NullPointerException nameがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	final Object getIndexedMeta(String name, int index) {
+	Object getIndexedMeta(String name, int index) {
 		// アサーション
 		assertArgMetaName(name);
 		assertArgIndexedMetaIndex(index);
@@ -328,7 +328,7 @@ class MetaContainer {
 	 * @param bpmIfNotExist ノートの値に該当するBPMが見つからなかった時に返す代替値
 	 * @return BPM
 	 */
-	final double getIndexedMetaBpm(BmsNote note, double bpmIfNotExist) {
+	double getIndexedMetaBpm(BmsNote note, double bpmIfNotExist) {
 		if (mSpec.getBpmChannel(note.getChannel()) == null) {
 			// BPM変更チャンネル非対応
 			return bpmIfNotExist;
@@ -356,7 +356,7 @@ class MetaContainer {
 	 * @param stopIfNotExist ノートの値に該当する停止時間が見つからなかった時に返す代替値
 	 * @return 停止時間
 	 */
-	final double getIndexedMetaStop(BmsNote note, double stopIfNotExist) {
+	double getIndexedMetaStop(BmsNote note, double stopIfNotExist) {
 		if (mSpec.getStopChannel(note.getChannel()) == null) {
 			// 譜面停止チャンネル非対応
 			return stopIfNotExist;
@@ -384,14 +384,14 @@ class MetaContainer {
 	 * @param unit メタ情報の単位
 	 * @param index インデックス
 	 * @return メタ情報の値。値が未設定の場合、そのメタ情報の初期値。
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
-	 * @exception IllegalArgumentException name, unitに合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#SINGLE SINGLE}の時、indexが0以外
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#MULTIPLE MULTIPLE}の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#INDEXED INDEXED}の時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
+	 * @throws IllegalArgumentException name, unitに合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#SINGLE SINGLE}の時、indexが0以外
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#MULTIPLE MULTIPLE}の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#INDEXED INDEXED}の時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 */
-	final Object getMeta(String name, BmsUnit unit, int index) {
+	Object getMeta(String name, BmsUnit unit, int index) {
 		// 単位により処理を分岐
 		assertArgMetaUnit(unit);
 		switch (unit) {
@@ -411,10 +411,10 @@ class MetaContainer {
 	 * 指定した重複可能メタ情報の全ての値を取得する。
 	 * @param name メタ情報の名称
 	 * @return 全ての値のリスト
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	final List<Object> getMultipleMetas(String name) {
+	List<Object> getMultipleMetas(String name) {
 		assertArgMetaName(name);
 		assertMetaSpec(name, BmsUnit.MULTIPLE);
 		return mMultipleMetas.get(name).stream().map(BmsMetaElement::getValue).collect(Collectors.toList());
@@ -424,10 +424,10 @@ class MetaContainer {
 	 * 指定した索引付きメタ情報の全ての値を取得する。
 	 * @param name メタ情報の名称
 	 * @return 全ての値のリスト
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	final Map<Integer, Object> getIndexedMetas(String name) {
+	Map<Integer, Object> getIndexedMetas(String name) {
 		assertArgMetaName(name);
 		assertMetaSpec(name, BmsUnit.INDEXED);
 		return mIndexedMetas.get(name).entrySet().stream().collect(Collectors.toMap(
@@ -438,10 +438,10 @@ class MetaContainer {
 	 * 指定した単体メタ情報の数を取得する。
 	 * @param name メタ情報の名称
 	 * @return メタ情報に値が設定されていれば1、なければ0
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	final int getSingleMetaCount(String name) {
+	int getSingleMetaCount(String name) {
 		assertArgMetaName(name);
 		assertMetaSpec(name, BmsUnit.SINGLE);
 		return mSingleMetas.get(name).isContain() ? 1 : 0;
@@ -451,10 +451,10 @@ class MetaContainer {
 	 * 指定した重複可能メタ情報の数を取得する。
 	 * @param name メタ情報の名称
 	 * @return メタ情報の数
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	final int getMultipleMetaCount(String name) {
+	int getMultipleMetaCount(String name) {
 		assertArgMetaName(name);
 		assertMetaSpec(name, BmsUnit.MULTIPLE);
 		return mMultipleMetas.get(name).size();
@@ -464,10 +464,10 @@ class MetaContainer {
 	 * 指定した索引付きメタ情報の数を取得する。
 	 * @param name メタ情報の名称
 	 * @return メタ情報の数
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	final int getIndexedMetaCount(String name) {
+	int getIndexedMetaCount(String name) {
 		assertArgMetaName(name);
 		assertMetaSpec(name, BmsUnit.INDEXED);
 		return mIndexedMetas.get(name).size();
@@ -478,11 +478,11 @@ class MetaContainer {
 	 * @param name メタ情報の名称
 	 * @param unit メタ情報の単位
 	 * @return メタ情報の数
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	final int getMetaCount(String name, BmsUnit unit) {
+	int getMetaCount(String name, BmsUnit unit) {
 		assertArgMetaUnit(unit);
 		switch (unit) {
 		case SINGLE:
@@ -500,10 +500,10 @@ class MetaContainer {
 	 * 指定した名称に該当する単体メタ情報に値が設定されているか判定する。
 	 * @param name メタ情報の名称
 	 * @return 値が設定されていればtrue
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	final boolean containsSingleMeta(String name) {
+	boolean containsSingleMeta(String name) {
 		assertArgMetaName(name);
 		assertMetaSpec(name, BmsUnit.SINGLE);
 		return mSingleMetas.get(name).isContain();
@@ -514,11 +514,11 @@ class MetaContainer {
 	 * @param name メタ情報の名称
 	 * @param index インデックス
 	 * @return 値が設定されていればtrue
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
 	 */
-	final boolean containsMultipleMeta(String name, int index) {
+	boolean containsMultipleMeta(String name, int index) {
 		assertArgMetaName(name);
 		assertMetaSpec(name, BmsUnit.MULTIPLE);
 		assertArgMultipleMetaIndex(index);
@@ -530,11 +530,11 @@ class MetaContainer {
 	 * @param name メタ情報の名称
 	 * @param index インデックス
 	 * @return 値が設定されていればtrue
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 */
-	final boolean containsIndexedMeta(String name, int index) {
+	boolean containsIndexedMeta(String name, int index) {
 		assertArgMetaName(name);
 		assertMetaSpec(name, BmsUnit.INDEXED);
 		assertArgIndexedMetaIndex(index);
@@ -547,14 +547,14 @@ class MetaContainer {
 	 * @param unit メタ情報の単位
 	 * @param index インデックス
 	 * @return 値が設定されていればtrue
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
-	 * @exception IllegalArgumentException 名称・単位に合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#SINGLE SINGLE}の時、indexが0以外
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#MULTIPLE MULTIPLE}の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#INDEXED INDEXED}の時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
+	 * @throws IllegalArgumentException 名称・単位に合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#SINGLE SINGLE}の時、indexが0以外
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#MULTIPLE MULTIPLE}の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#INDEXED INDEXED}の時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 */
-	final boolean containsMeta(String name, BmsUnit unit, int index) {
+	boolean containsMeta(String name, BmsUnit unit, int index) {
 		assertArgMetaUnit(unit);
 		switch (unit) {
 		case SINGLE:
@@ -574,11 +574,11 @@ class MetaContainer {
 	 * @param name メタ情報の名称
 	 * @param unit メタ情報の単位
 	 * @return 当該メタ情報に値が1件でも設定されている場合true
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
-	 * @exception IllegalArgumentException 名称・単位に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
+	 * @throws IllegalArgumentException 名称・単位に合致するメタ情報が存在しない
 	 */
-	final boolean containsMeta(String name, BmsUnit unit) {
+	boolean containsMeta(String name, BmsUnit unit) {
 		assertArgNotNull(name, "name");
 		assertArgNotNull(unit, "unit");
 		switch (unit) {
@@ -612,9 +612,9 @@ class MetaContainer {
 	/**
 	 * 全メタ情報走査ストリームを返す
 	 * @return 全メタ情報走査ストリーム
-	 * @exception IllegalStateException 動作モードが編集モード
+	 * @throws IllegalStateException 動作モードが編集モード
 	 */
-	final Stream<BmsMetaElement> metas() {
+	Stream<BmsMetaElement> metas() {
 		assertIsReferenceMode();
 		return Stream.concat(Stream.concat(singleMetas(), multipleMetas()), indexedMetas());
 	}
@@ -622,9 +622,9 @@ class MetaContainer {
 	/**
 	 * 単体メタ情報走査ストリームを返す
 	 * @return 単体メタ情報走査ストリーム
-	 * @exception IllegalStateException 動作モードが編集モード
+	 * @throws IllegalStateException 動作モードが編集モード
 	 */
-	final Stream<BmsMetaElement> singleMetas() {
+	Stream<BmsMetaElement> singleMetas() {
 		assertIsReferenceMode();
 		return mSingleMetas.values().stream();
 	}
@@ -632,9 +632,9 @@ class MetaContainer {
 	/**
 	 * 複数メタ情報走査ストリームを返す
 	 * @return 複数メタ情報走査ストリーム
-	 * @exception IllegalStateException 動作モードが編集モード
+	 * @throws IllegalStateException 動作モードが編集モード
 	 */
-	final Stream<BmsMetaElement> multipleMetas() {
+	Stream<BmsMetaElement> multipleMetas() {
 		assertIsReferenceMode();
 		return mMultipleMetas.entrySet().stream().flatMap(e -> multipleStream(e.getKey(), e.getValue()));
 	}
@@ -643,11 +643,11 @@ class MetaContainer {
 	 * 指定した名前の複数メタ情報走査ストリームを返す
 	 * @param name 複数メタ情報の名前
 	 * @return 複雑メタ情報走査ストリーム
-	 * @exception IllegalStateException 動作モードが編集モード
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException nameに該当する複数メタ情報がBMS仕様に存在しない
+	 * @throws IllegalStateException 動作モードが編集モード
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException nameに該当する複数メタ情報がBMS仕様に存在しない
 	 */
-	final Stream<BmsMetaElement> multipleMetas(String name) {
+	Stream<BmsMetaElement> multipleMetas(String name) {
 		assertIsReferenceMode();
 		assertArgMetaName(name);
 		assertMetaSpec(name, BmsUnit.MULTIPLE);
@@ -657,9 +657,9 @@ class MetaContainer {
 	/**
 	 * 索引付きメタ情報走査ストリームを返す
 	 * @return 索引付きメタ情報走査ストリーム
-	 * @exception IllegalStateException 動作モードが編集モード
+	 * @throws IllegalStateException 動作モードが編集モード
 	 */
-	final Stream<BmsMetaElement> indexedMetas() {
+	Stream<BmsMetaElement> indexedMetas() {
 		assertIsReferenceMode();
 		return mIndexedMetas.entrySet().stream().flatMap(e -> indexedStream(e.getKey(), e.getValue()));
 	}
@@ -668,11 +668,11 @@ class MetaContainer {
 	 * 指定した名前の索引付きメタ情報走査ストリームを返す
 	 * @param name 索引付きメタ情報の名前
 	 * @return 索引付きメタ情報走査ストリーム
-	 * @exception IllegalStateException 動作モードが編集モード
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException nameに該当する索引付きメタ情報がBMS仕様に存在しない
+	 * @throws IllegalStateException 動作モードが編集モード
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException nameに該当する索引付きメタ情報がBMS仕様に存在しない
 	 */
-	final Stream<BmsMetaElement> indexedMetas(String name) {
+	Stream<BmsMetaElement> indexedMetas(String name) {
 		assertIsReferenceMode();
 		assertArgMetaName(name);
 		assertMetaSpec(name, BmsUnit.INDEXED);
@@ -682,10 +682,10 @@ class MetaContainer {
 	/**
 	 * 初期BPMを設定する。
 	 * @param bpm 初期BPM
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException bpmが{@link BmsSpec#BPM_MIN}未満、または{@link BmsSpec#BPM_MAX}超過
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException bpmが{@link BmsSpec#BPM_MIN}未満、または{@link BmsSpec#BPM_MAX}超過
 	 */
-	final void setInitialBpm(double bpm) {
+	void setInitialBpm(double bpm) {
 		setSingleMeta(mSpec.getInitialBpmMeta().getName(), bpm);
 	}
 
@@ -693,7 +693,7 @@ class MetaContainer {
 	 * 初期BPMを取得する。
 	 * @return 初期BPM
 	 */
-	final double getInitialBpm() {
+	double getInitialBpm() {
 		return (Double)getSingleMeta(mSpec.getInitialBpmMeta().getName());
 	}
 
@@ -702,7 +702,7 @@ class MetaContainer {
 	 * @param channel チャンネル番号
 	 * @return 参照先メタ情報の情報。該当チャンネルに参照先メタ情報がない場合はnull。
 	 */
-	final ReferenceMetaInfo getReferenceMeta(int channel) {
+	ReferenceMetaInfo getReferenceMeta(int channel) {
 		return mReferenceMetas.get(BmsInt.box(channel));
 	}
 
@@ -733,7 +733,7 @@ class MetaContainer {
 	 * @param name メタ情報の名称
 	 * @param unit メタ情報の単位
 	 * @return 名称・単位に合致したメタ情報
-	 * @exception IllegalArgumentException 名称・単位に合致するメタ情報が存在しない
+	 * @throws IllegalArgumentException 名称・単位に合致するメタ情報が存在しない
 	 */
 	private BmsMeta assertMetaSpec(String name, BmsUnit unit) {
 		var meta = mSpec.getMeta(name, unit);
@@ -746,7 +746,7 @@ class MetaContainer {
 
 	/**
 	 * 動作モードが編集モードかどうかをテストするアサーション
-	 * @exception IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalStateException 動作モードが編集モードではない
 	 */
 	private void assertIsEditMode() {
 		if (!mFnIsEditMode.getAsBoolean()) {
@@ -756,7 +756,7 @@ class MetaContainer {
 
 	/**
 	 * 動作モードが参照モードかどうかをテストするアサーション
-	 * @exception IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalStateException 動作モードが参照モードではない
 	 */
 	private void assertIsReferenceMode() {
 		if (mFnIsEditMode.getAsBoolean()) {
@@ -767,7 +767,7 @@ class MetaContainer {
 	/**
 	 * メタ情報の名称をテストするアサーション。
 	 * @param name メタ情報の名称。
-	 * @exception NullPointerException nameがnull
+	 * @throws NullPointerException nameがnull
 	 */
 	private static void assertArgMetaName(String name) {
 		assertArgNotNull(name, "name");
@@ -776,7 +776,7 @@ class MetaContainer {
 	/**
 	 * メタ情報の単位をテストするアサーション。
 	 * @param unit メタ情報の単位
-	 * @exception NullPointerException unitがnull
+	 * @throws NullPointerException unitがnull
 	 */
 	private static void assertArgMetaUnit(BmsUnit unit) {
 		assertArgNotNull(unit, "unit");
@@ -785,7 +785,7 @@ class MetaContainer {
 	/**
 	 * 単体メタ情報のインデックスをテストするアサーション。
 	 * @param index インデックス値
-	 * @exception IndexOutOfBoundsException indexが0以外
+	 * @throws IndexOutOfBoundsException indexが0以外
 	 */
 	private static void assertArgSingleMetaIndex(int index) {
 		if (index != 0) {
@@ -797,7 +797,7 @@ class MetaContainer {
 	/**
 	 * 複数メタ情報のインデックスをテストするアサーション。
 	 * @param index インデックス値
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
 	 */
 	private static void assertArgMultipleMetaIndex(int index) {
 		assertArgIndexRange(index, BmsSpec.MULTIPLE_META_INDEX_MAX + 1, "index");
@@ -806,7 +806,7 @@ class MetaContainer {
 	/**
 	 * 索引付きメタ情報のインデックスをテストするアサーション。
 	 * @param index インデックス値
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 */
 	private static void assertArgIndexedMetaIndex(int index) {
 		assertArgIndexRange(index, BmsSpec.INDEXED_META_INDEX_MAX + 1, "index");
@@ -817,7 +817,7 @@ class MetaContainer {
 	 * @param meta メタ情報
 	 * @param index メタ情報インデックス
 	 * @param value 変換後設定値
-	 * @exception IllegalArgumentException メタ情報への設定値がBMSライブラリ仕様違反
+	 * @throws IllegalArgumentException メタ情報への設定値がBMSライブラリ仕様違反
 	 */
 	private static void assertValueWithinSpec(BmsMeta meta, int index, Object value) {
 		if (meta.isInitialBpm() || meta.isReferenceBpm()) {

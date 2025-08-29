@@ -16,7 +16,7 @@ import java.util.stream.Stream;
  */
 public class BmsLibrary {
 	/** ライブラリ本体バージョン */
-	private static final String LIBRARY_VERSION = "0.9.0";
+	private static final String LIBRARY_VERSION = "0.10.0";
 
 	/**
 	 * デフォルトの文字セットリスト
@@ -67,8 +67,8 @@ public class BmsLibrary {
 	 * <p>指定した文字セットが重複している場合、後方で指定した同一の文字セットは無視されます。</p>
 	 * <p>指定する文字セットの中にnullを含めてはなりません。nullが含まれていると例外がスローされます。</p>
 	 * @param charsets デフォルトの文字セット(複数指定可)
-	 * @exception IllegalArgumentException 文字セットが0件
-	 * @exception NullPointerException 文字セットにnullが含まれている
+	 * @throws IllegalArgumentException 文字セットが0件
+	 * @throws NullPointerException 文字セットにnullが含まれている
 	 * @since 0.7.0
 	 */
 	public static void setDefaultCharsets(Charset...charsets) {
@@ -94,7 +94,7 @@ public class BmsLibrary {
 	/**
 	 * BMSライブラリのロゴを指定した出力ストリームに出力します。
 	 * @param ps ロゴの出力先ストリーム
-	 * @exception NullPointerException psがnull
+	 * @throws NullPointerException psがnull
 	 * @since 0.8.0
 	 */
 	public static void printLogo(PrintStream ps) {

@@ -31,7 +31,7 @@ public abstract class BmsTimelineElement extends BmsAddress {
 	/**
 	 * 指定されたアドレスと同じ新しいタイムライン要素オブジェクトを構築します。
 	 * @param adr アドレス
-	 * @exception NullPointerException adrがnull
+	 * @throws NullPointerException adrがnull
 	 */
 	protected BmsTimelineElement(BmsAddress adr) {
 		super(adr);
@@ -41,7 +41,7 @@ public abstract class BmsTimelineElement extends BmsAddress {
 	 * 指定された楽曲位置、CHXの新しいタイムライン要素オブジェクトを構築します。
 	 * @param at 楽曲位置
 	 * @param chx CHX
-	 * @exception NullPointerException atまたはchxがnull
+	 * @throws NullPointerException atまたはchxがnull
 	 */
 	protected BmsTimelineElement(BmsAt at, BmsChx chx) {
 		super(at, chx);
@@ -61,7 +61,7 @@ public abstract class BmsTimelineElement extends BmsAddress {
 	/**
 	 * タイムライン要素の値をlong型に変換した値を取得します。
 	 * @return タイムライン要素の値をlong型に変換した値
-	 * @exception ClassCastException long型への変換が非対応のタイムライン要素で当メソッドを実行した
+	 * @throws ClassCastException long型への変換が非対応のタイムライン要素で当メソッドを実行した
 	 */
 	public long getValueAsLong() {
 		throw unsupport("long");
@@ -70,7 +70,7 @@ public abstract class BmsTimelineElement extends BmsAddress {
 	/**
 	 * タイムライン要素の値をdouble型に変換した値を取得します。
 	 * @return タイムライン要素の値をdouble型に変換した値
-	 * @exception ClassCastException double型への変換が非対応のタイムライン要素で当メソッドを実行した
+	 * @throws ClassCastException double型への変換が非対応のタイムライン要素で当メソッドを実行した
 	 */
 	public double getValueAsDouble() {
 		throw unsupport("double");
@@ -79,7 +79,7 @@ public abstract class BmsTimelineElement extends BmsAddress {
 	/**
 	 * タイムライン要素の値をString型に変換した値を取得します。
 	 * @return タイムライン要素の値をString型に変換した値
-	 * @exception ClassCastException String型への変換が非対応のタイムライン要素で当メソッドを実行した
+	 * @throws ClassCastException String型への変換が非対応のタイムライン要素で当メソッドを実行した
 	 */
 	public String getValueAsString() {
 		throw unsupport("string");
@@ -88,7 +88,7 @@ public abstract class BmsTimelineElement extends BmsAddress {
 	/**
 	 * タイムライン要素の値をBMS配列型に変換した値を取得します。
 	 * @return タイムライン要素の値をBMS配列型に変換した値
-	 * @exception ClassCastException BMS配列型への変換が非対応のタイムライン要素で当メソッドを実行した
+	 * @throws ClassCastException BMS配列型への変換が非対応のタイムライン要素で当メソッドを実行した
 	 */
 	public BmsArray getValueAsArray() {
 		throw unsupport("array");
@@ -97,7 +97,7 @@ public abstract class BmsTimelineElement extends BmsAddress {
 	/**
 	 * タイムライン要素の値をObject型に変換した値を取得します。
 	 * @return タイムライン要素の値をObject型に変換した値
-	 * @exception ClassCastException Object型への変換が非対応のタイムライン要素で当メソッドを実行した
+	 * @throws ClassCastException Object型への変換が非対応のタイムライン要素で当メソッドを実行した
 	 */
 	public Object getValueAsObject() {
 		throw unsupport("object");

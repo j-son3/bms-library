@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -255,7 +256,7 @@ public abstract class BmsLoader {
 	 * @see BmsStandardLoader
 	 * @since 0.8.0
 	 */
-	public final boolean isStandard() {
+	public boolean isStandard() {
 		return mIsStandard;
 	}
 
@@ -264,7 +265,7 @@ public abstract class BmsLoader {
 	 * @return 入力データがバイナリフォーマットの場合true
 	 * @since 0.8.0
 	 */
-	public final boolean isBinaryFormat() {
+	public boolean isBinaryFormat() {
 		return mIsBinaryFormat;
 	}
 
@@ -285,7 +286,7 @@ public abstract class BmsLoader {
 	 * @see BmsLibrary#setDefaultCharsets(Charset...)
 	 * @since 0.8.0
 	 */
-	public final Charset getLastProcessedCharset() {
+	public Charset getLastProcessedCharset() {
 		return mLastProcessedCharset;
 	}
 
@@ -305,7 +306,7 @@ public abstract class BmsLoader {
 	 * @return 最後に読み込んだBMSコンテンツにBOMが含まれていた場合true
 	 * @since 0.8.0
 	 */
-	public final boolean getLastProcessedHasBom() {
+	public boolean getLastProcessedHasBom() {
 		return mLastProcessedHasBom;
 	}
 
@@ -315,7 +316,7 @@ public abstract class BmsLoader {
 	 * @param spec BMS仕様
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsLoader setSpec(BmsSpec spec) {
+	public BmsLoader setSpec(BmsSpec spec) {
 		mSpec = spec;
 		return this;
 	}
@@ -328,7 +329,7 @@ public abstract class BmsLoader {
 	 * @param handler BMS読み込みハンドラ
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsLoader setHandler(BmsLoadHandler handler) {
+	public BmsLoader setHandler(BmsLoadHandler handler) {
 		mHandler = handler;
 		return this;
 	}
@@ -358,7 +359,7 @@ public abstract class BmsLoader {
 	 * @see #setIgnoreWrongData(boolean)
 	 * @since 0.7.0
 	 */
-	public final BmsLoader setStrictly(boolean strictly) {
+	public BmsLoader setStrictly(boolean strictly) {
 		return this
 				.setSyntaxErrorEnable(strictly)
 				.setFixSpecViolation(!strictly)
@@ -381,7 +382,7 @@ public abstract class BmsLoader {
 	 * @param isEnable 構文エラーの有効状態
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsLoader setSyntaxErrorEnable(boolean isEnable) {
+	public BmsLoader setSyntaxErrorEnable(boolean isEnable) {
 		mIsEnableSyntaxError = isEnable;
 		return this;
 	}
@@ -401,7 +402,7 @@ public abstract class BmsLoader {
 	 * @param isFix 仕様違反訂正の有効状態
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsLoader setFixSpecViolation(boolean isFix) {
+	public BmsLoader setFixSpecViolation(boolean isFix) {
 		mIsFixSpecViolation = isFix;
 		return this;
 	}
@@ -420,7 +421,7 @@ public abstract class BmsLoader {
 	 * @return このオブジェクトのインスタンス
 	 * @since 0.2.0
 	 */
-	public final BmsLoader setAllowRedefine(boolean isAllow) {
+	public BmsLoader setAllowRedefine(boolean isAllow) {
 		mIsAllowRedefine = isAllow;
 		return this;
 	}
@@ -434,7 +435,7 @@ public abstract class BmsLoader {
 	 * @param isIgnore 不明メタ情報を無視するかどうか
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsLoader setIgnoreUnknownMeta(boolean isIgnore) {
+	public BmsLoader setIgnoreUnknownMeta(boolean isIgnore) {
 		mIsIgnoreUnknownMeta = isIgnore;
 		return this;
 	}
@@ -448,7 +449,7 @@ public abstract class BmsLoader {
 	 * @param isIgnore 不明チャンネルを無視するかどうか
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsLoader setIgnoreUnknownChannel(boolean isIgnore) {
+	public BmsLoader setIgnoreUnknownChannel(boolean isIgnore) {
 		mIsIgnoreUnknownChannel = isIgnore;
 		return this;
 	}
@@ -463,7 +464,7 @@ public abstract class BmsLoader {
 	 * @param isIgnore 不正データを無視するかどうか
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsLoader setIgnoreWrongData(boolean isIgnore) {
+	public BmsLoader setIgnoreWrongData(boolean isIgnore) {
 		mIsIgnoreWrongData = isIgnore;
 		return this;
 	}
@@ -483,7 +484,7 @@ public abstract class BmsLoader {
 	 * @return このオブジェクトのインスタンス
 	 * @since 0.4.0
 	 */
-	public final BmsLoader setSkipReadTimeline(boolean isSkip) {
+	public BmsLoader setSkipReadTimeline(boolean isSkip) {
 		mIsSkipReadTimeline = isSkip;
 		return this;
 	}
@@ -499,11 +500,11 @@ public abstract class BmsLoader {
 	 * <p>入力データがバイナリフォーマットのローダでは、当メソッドで設定した文字セットは使用されません。</p>
 	 * @param charsets テキストのデコード処理時に使用する文字セットリスト
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException charsetsにnullが含まれている
+	 * @throws NullPointerException charsetsにnullが含まれている
 	 * @see BmsLibrary#setDefaultCharsets(Charset...)
 	 * @since 0.7.0
 	 */
-	public final BmsLoader setCharsets(Charset...charsets) {
+	public BmsLoader setCharsets(Charset...charsets) {
 		mCharsets = Stream.of(charsets)
 				.peek(cs -> assertArgNotNull(cs, "charsets[?]"))
 				.distinct()
@@ -513,36 +514,48 @@ public abstract class BmsLoader {
 
 	/**
 	 * BMSコンテンツを読み込みます。
-	 * <p>BMSコンテンツは指定されたファイルから読み込みます。</p>
-	 * <p>読み込み処理の詳細は{@link #load(String)}を参照してください。</p>
+	 * <p>当メソッドは指定されたファイル全体を読み込み {@link #load(byte[])} を呼び出す下記コードと等価です。</p>
+	 * <pre>loader.load(Files.readAllBytes(bms.toPath()));</pre>
+	 * <p>ファイル読み込み時に異常が発生すると {@link IOException} がスローされますが、
+	 * より具体的にスローされる例外についてはJDKの {@link java.nio.file} のドキュメントを参照してください。
+	 * 指定したパスのファイルが存在しない場合は {@link NoSuchFileException} がスローされます。</p>
 	 * @param bms BMSファイル
 	 * @return BMSコンテンツ
-	 * @exception NullPointerException bmsがnull
-	 * @exception IllegalStateException BMS仕様が設定されていない
-	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
-	 * @exception IOException 指定されたファイルが見つからない、読み取り権限がない、または読み取り中に異常を検出した
-	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
-	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
+	 * @throws NullPointerException bmsがnull
+	 * @throws IllegalStateException BMS仕様が設定されていない
+	 * @throws IllegalStateException BMS読み込みハンドラが設定されていない
+	 * @throws NoSuchFileException 指定されたパスのファイルが存在しない
+	 * @throws IOException 何らかの理由によりデータ読み取り異常が発生した
+	 * @throws BmsHandleException ユーザープログラムの処理異常を検出した
+	 * @throws BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
+	 * @throws BmsPanicException 内部処理異常による処理の強制停止が発生した
+	 * @see #load(byte[])
 	 */
-	public final BmsContent load(File bms) throws BmsException, IOException {
+	public BmsContent load(File bms) throws IOException {
 		assertArgNotNull(bms, "bms");
 		return load(bms.toPath());
 	}
 
 	/**
 	 * BMSコンテンツを読み込みます。
-	 * <p>BMSコンテンツは指定されたパスが示すファイルから読み込みます。</p>
-	 * <p>読み込み処理の詳細は{@link #load(String)}を参照してください。</p>
+	 * <p>当メソッドは指定されたファイル全体を読み込み {@link #load(byte[])} を呼び出す下記コードと等価です。</p>
+	 * <pre>loader.load(Files.readAllBytes(bms));</pre>
+	 * <p>ファイル読み込み時に異常が発生すると {@link IOException} がスローされますが、
+	 * より具体的にスローされる例外についてはJDKの {@link java.nio.file} のドキュメントを参照してください。
+	 * 指定したパスのファイルが存在しない場合は {@link NoSuchFileException} がスローされます。</p>
 	 * @param bms BMSファイルのパス
 	 * @return BMSコンテンツ
-	 * @exception NullPointerException bmsがnull
-	 * @exception IllegalStateException BMS仕様が設定されていない
-	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
-	 * @exception IOException 指定されたファイルが見つからない、読み取り権限がない、または読み取り中に異常を検出した
-	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
-	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
+	 * @throws NullPointerException bmsがnull
+	 * @throws IllegalStateException BMS仕様が設定されていない
+	 * @throws IllegalStateException BMS読み込みハンドラが設定されていない
+	 * @throws NoSuchFileException 指定されたパスのファイルが存在しない
+	 * @throws IOException 何らかの理由によりデータ読み取り異常が発生した
+	 * @throws BmsHandleException ユーザープログラムの処理異常を検出した
+	 * @throws BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
+	 * @throws BmsPanicException 内部処理異常による処理の強制停止が発生した
+	 * @see #load(byte[])
 	 */
-	public final BmsContent load(Path bms) throws BmsException, IOException {
+	public BmsContent load(Path bms) throws IOException {
 		assertArgNotNull(bms, "bms");
 		assertLoaderState();
 		return load(Files.readAllBytes(bms));
@@ -554,14 +567,15 @@ public abstract class BmsLoader {
 	 * <p>読み込み処理の詳細は{@link #load(String)}を参照してください。</p>
 	 * @param bms BMSの入力ストリーム
 	 * @return BMSコンテンツ
-	 * @exception NullPointerException bmsがnull
-	 * @exception IllegalStateException BMS仕様が設定されていない
-	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
-	 * @exception IOException 入力ストリームからのデータ読み取り中に異常を検出した
-	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
-	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
+	 * @throws NullPointerException bmsがnull
+	 * @throws IllegalStateException BMS仕様が設定されていない
+	 * @throws IllegalStateException BMS読み込みハンドラが設定されていない
+	 * @throws IOException 入力ストリームからのデータ読み取り中に異常を検出した
+	 * @throws BmsHandleException ユーザープログラムの処理異常を検出した
+	 * @throws BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
+	 * @throws BmsPanicException 内部処理異常による処理の強制停止が発生した
 	 */
-	public final BmsContent load(InputStream bms) throws BmsException, IOException {
+	public BmsContent load(InputStream bms) throws IOException {
 		assertArgNotNull(bms, "bms");
 		assertLoaderState();
 		return load(bms.readAllBytes());
@@ -592,13 +606,15 @@ public abstract class BmsLoader {
 	 * 入力データのバイト配列が直接BMSパーサ部への入力データとなります。</p>
 	 * @param bms BMSのバイト配列
 	 * @return BMSコンテンツ
-	 * @exception NullPointerException bmsがnull
-	 * @exception IllegalStateException BMS仕様が設定されていない
-	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
-	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
-	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
+	 * @throws NullPointerException bmsがnull
+	 * @throws IllegalStateException BMS仕様が設定されていない
+	 * @throws IllegalStateException BMS読み込みハンドラが設定されていない
+	 * @throws BmsException BMSローダの解析処理部からBMS例外がスローされた(実際はこの例外を継承した例外)
+	 * @throws BmsHandleException ユーザープログラムの処理異常を検出した
+	 * @throws BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
+	 * @throws BmsPanicException 内部処理異常による処理の強制停止が発生した
 	 */
-	public final BmsContent load(byte[] bms) throws BmsException {
+	public BmsContent load(byte[] bms) throws BmsException {
 		assertArgNotNull(bms, "bms");
 		assertLoaderState();
 
@@ -674,15 +690,16 @@ public abstract class BmsLoader {
 	 * 呼び出すと例外をスローします。</p>
 	 * @param bms BMSのReader
 	 * @return BMSコンテンツ
-	 * @exception UnsupportedOperationException 入力データがバイナリフォーマットのローダで当メソッドを呼び出した
-	 * @exception NullPointerException bmsがnull
-	 * @exception IllegalStateException BMS仕様が設定されていない
-	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
-	 * @exception IOException テキストの読み取り中に異常を検出した
-	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
-	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
+	 * @throws UnsupportedOperationException 入力データがバイナリフォーマットのローダで当メソッドを呼び出した
+	 * @throws NullPointerException bmsがnull
+	 * @throws IllegalStateException BMS仕様が設定されていない
+	 * @throws IllegalStateException BMS読み込みハンドラが設定されていない
+	 * @throws IOException テキストの読み取り中に異常を検出した
+	 * @throws BmsHandleException ユーザープログラムの処理異常を検出した
+	 * @throws BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
+	 * @throws BmsPanicException 内部処理異常による処理の強制停止が発生した
 	 */
-	public final BmsContent load(Reader bms) throws BmsException, IOException {
+	public BmsContent load(Reader bms) throws IOException {
 		assertIsTextFormat();
 		assertArgNotNull(bms, "bms");
 		assertLoaderState();
@@ -717,14 +734,16 @@ public abstract class BmsLoader {
 	 * <p>入力データがバイナリフォーマットのローダでは当メソッドを使用できません。呼び出すと例外をスローします。</p>
 	 * @param bms BMSの文字列
 	 * @return BMSコンテンツ
-	 * @exception UnsupportedOperationException 入力データがバイナリフォーマットのローダで当メソッドを呼び出した
-	 * @exception NullPointerException bmsがnull
-	 * @exception IllegalStateException BMS仕様が設定されていない
-	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
-	 * @exception BmsLoadException ハンドラ({@link BmsLoadHandler#parseError})がfalseを返した
-	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
+	 * @throws UnsupportedOperationException 入力データがバイナリフォーマットのローダで当メソッドを呼び出した
+	 * @throws NullPointerException bmsがnull
+	 * @throws IllegalStateException BMS仕様が設定されていない
+	 * @throws IllegalStateException BMS読み込みハンドラが設定されていない
+	 * @throws BmsException BMSローダの解析処理部からBMS例外がスローされた(実際はこの例外を継承した例外)
+	 * @throws BmsHandleException ユーザープログラムの処理異常を検出した
+	 * @throws BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
+	 * @throws BmsPanicException 内部処理異常による処理の強制停止が発生した
 	 */
-	public final BmsContent load(String bms) throws BmsException {
+	public BmsContent load(String bms) throws BmsException {
 		assertIsTextFormat();
 		assertArgNotNull(bms, "bms");
 		assertLoaderState();
@@ -751,43 +770,35 @@ public abstract class BmsLoader {
 			// BMSコンテンツ読み込み処理
 			content = loadCore(bms);
 		} catch (BmsException e) {
-			// スローされた例外はそのまま読み出し元へ流す
+			// 読み込み処理で既にBMS例外がスローされていた
 			throw e;
 		} catch (Exception e) {
-			// スローされた例外はBmsExceptionに内包する
-			throw new BmsException(e);
+			// 予期しない例外がスローされた
+			handleError(e, "startLoad");
 		}
 
 		// BMSコンテンツ読み込み終了
+		var result = BmsTestResult.FAIL;
 		try {
-			var result = mHandler.testContent(content);
-			if (result == null) {
-				var msg = "Content test result was returned null by handler";
-				error(BmsErrorType.PANIC, 0, "", msg, null);
-			} else switch (result.getResult()) {
-			case BmsTestResult.RESULT_OK:
-			case BmsTestResult.RESULT_THROUGH:
-				// 検査失敗でなければ合格とする
-				if (content.isEditMode()) {
-					// BMSコンテンツが編集モードの場合はエラーとする
-					throw new BmsException("Loaded content is edit mode");
-				}
-				break;
-			case BmsTestResult.RESULT_FAIL: {
-				// BMSコンテンツ検査失敗
-				error(BmsErrorType.TEST_CONTENT, 0, "", result.getMessage(), null);
-				break;
-			}
-			default:
-				// 想定外
-				var msg = String.format("Content test result was returned '%d' by handler", result.getResult());
-				var err = new BmsScriptError(BmsErrorType.PANIC, 0, "", msg, null);
-				throw new BmsLoadException(err);
-			}
-		} catch (BmsException e) {
-			throw e;
+			result = mHandler.testContent(content);
 		} catch (Exception e) {
-			throw new BmsException (e);
+			handleError(e, "testContent");
+		}
+		handleErrorIf(result == null, "Null result was returned by testContent()");
+		switch (result.getResult()) {
+		case BmsTestResult.RESULT_OK:
+		case BmsTestResult.RESULT_THROUGH:
+			// 検査失敗でなければ合格とする
+			// BMSコンテンツが編集モードの場合はエラーとする
+			handleErrorIf(content.isEditMode(), "Loaded content was returned by testContent() as edit mode");
+			break;
+		case BmsTestResult.RESULT_FAIL:
+			// BMSコンテンツ検査失敗
+			loadError(BmsErrorType.TEST_CONTENT, 0, "", result.getMessage(), null);
+			break;
+		default:
+			// 想定外
+			handleErrorIf(true, "Illegal result was returned by testContent(): result=", result.getResult());
 		}
 
 		return content;
@@ -797,13 +808,13 @@ public abstract class BmsLoader {
 	 * 引数のBMSスクリプトを解析し、BMS仕様に従ってBMSコンテンツを生成する。
 	 * @param bms 入力データ
 	 * @return 生成されたBMSコンテンツ
-	 * @exception IllegalStateException BMS仕様が設定されていない時
-	 * @exception IllegalStateException ハンドラが設定されていない時
-	 * @exception IllegalStateException BmsContentクリエータが設定されていない時
-	 * @exception IllegalStateException BmsNoteクリエータが設定されていない時
-	 * @exception NullPointerException 引数bmsがnullの時
-	 * @exception BmsParseException エラーハンドラがfalseを返した時
-	 * @exception BmsException 入出力エラー等、解析処理中にエラーが発生した時。causeが設定される場合がある。
+	 * @throws IllegalStateException BMS仕様が設定されていない時
+	 * @throws IllegalStateException ハンドラが設定されていない時
+	 * @throws IllegalStateException BmsContentクリエータが設定されていない時
+	 * @throws IllegalStateException BmsNoteクリエータが設定されていない時
+	 * @throws NullPointerException 引数bmsがnullの時
+	 * @throws BmsParseException エラーハンドラがfalseを返した時
+	 * @throws BmsException 入出力エラー等、解析処理中にエラーが発生した時。causeが設定される場合がある。
 	 */
 	private BmsContent loadCore(BmsSource bms) throws BmsException {
 		// 出力対象となるBmsContentを生成する
@@ -811,43 +822,40 @@ public abstract class BmsLoader {
 		try {
 			createdContent = mHandler.createContent(mSpec);
 		} catch (Exception e) {
-			var msg = String.format("Failed to create BmsContent by '%s'.", mHandler.getClass().getSimpleName());
-			throw new BmsException(msg, e);
+			handleError(e, "createContent");
 		}
 
 		// 生成されたBMSコンテンツのチェック
-		if (createdContent == null) {
-			// BMSコンテンツが生成されなかった場合は続行不能
-			var msg = String.format("null BmsContent is returned by '%s'.", mHandler.getClass().getSimpleName());
-			throw new BmsException(msg);
-		} else if (createdContent.getSpec() != mSpec) {
-			// 生成されたBMSコンテンツのBMS仕様が指定したBMS仕様と異なる
-			var msg = String.format("Created BmsContent has illegal BMS specification. It's created by '%s'.",
-					mHandler.getClass().getSimpleName());
-			throw new BmsException(msg);
-		}
+		handleErrorIf(createdContent == null, "Null content was returned by createContent()");
+		handleErrorIf(createdContent.getSpec() != mSpec, "Content with illegal spec was returned by createContent()");
 
 		final var content = createdContent;
 		var activeParse = Optional.of(Void.TYPE);
 		try {
 			// BMS解析を開始する
-			var beginError = beginParse(mSettings, bms);
-			bms = null;
-			if (beginError == null) {
-				// BMS解析開始結果のエラー情報が未設定の場合は処理を続行しない
-				throw new BmsException("Result of start parse is not returned.");
-			} else if (beginError.isFail()) {
-				// BMS解析開始でエラーが検出された場合も処理を続行しない
+			var beginError = (BmsErrorParsed)null;
+			try {
+				beginError = beginParse(mSettings, bms);
+				bms = null;
+			} catch (BmsException e) {
+				throw e;
+			} catch (Exception e) {
+				handleError(e, "beginParse");
+			}
+
+			// BMS解析開始結果のエラー情報が未設定の場合は処理を続行しない
+			handleErrorIf(beginError == null, "Null result was returned by beginParse()");
+
+			// BMS解析開始でエラーが検出された場合も処理を続行しない
+			if (beginError.isFail()) {
 				throw new BmsLoadException(beginError.error);
-			} else {
-				// Do nothing
 			}
 
 			// 全ての要素を解析し、一旦解析順にリスト化しておく
 			// その際、後続処理で使用する基数も判定する
 			var intc = (BmsInt)null;
 			var elements = new ArrayList<BmsParsed>();
-			for (var element = nextElement(); element != null; element = nextElement()) {
+			for (var element = fetchElement(); element != null; element = fetchElement()) {
 				elements.add(element);
 				if (element.getType() == BmsParsedType.META) {
 					intc = parseBase((BmsMetaParsed)element, intc);
@@ -884,15 +892,19 @@ public abstract class BmsLoader {
 
 			// BMS解析を終了する
 			activeParse = Optional.empty();
-			var endError = endParse();
-			if (endError == null) {
-				// BMS解析終了結果のエラー情報が未設定の場合は処理を続行しない
-				throw new BmsException("Result of start parse is not returned.");
-			} else if (endError.isFail()) {
-				// BMS解析終了でエラーが検出された場合も処理を続行しない
+			var endError = (BmsErrorParsed)null;
+			try {
+				endError = endParse();
+			} catch (Exception e) {
+				handleError(e, "endParse");
+			}
+
+			// BMS解析終了結果のエラー情報が未設定の場合は処理を続行しない
+			handleErrorIf(endError == null, "Null result was returned by endParse()");
+
+			// BMS解析終了でエラーが検出された場合も処理を続行しない
+			if (endError.isFail()) {
 				throw new BmsLoadException(endError.error);
-			} else {
-				// Do nothing
 			}
 
 			// 全てノートをBMSコンテンツに登録する
@@ -907,10 +919,8 @@ public abstract class BmsLoader {
 
 				// タイムライン要素の検査を行う
 				var result = mHandler.testChannel(data.channel, chIndex, data.measure, data.array);
-				if (result == null) {
-					var msg = "Channel test result was returned null by handler";
-					error(BmsErrorType.PANIC, data.lineNumber, data.line, msg, null);
-				} else switch (result.getResult()) {
+				handleErrorIf(result == null, "Null result was returned by testChannel()");
+				switch (result.getResult()) {
 				case BmsTestResult.RESULT_OK: {
 					// 重複可能チャンネルの場合は次のインデックスへの登録を行う
 					// 登録先インデックスの配列データ数が0個の場合そのインデックスは空データとなるが、それは意図した動作
@@ -942,7 +952,7 @@ public abstract class BmsLoader {
 								throw new Exception(msg);
 							}
 						} catch (Exception e) {
-							error(BmsErrorType.WRONG_DATA, data.lineNumber, data.line, null, e);
+							loadError(BmsErrorType.WRONG_DATA, data.lineNumber, data.line, null, e);
 							occurError = true;
 							break;
 						}
@@ -951,18 +961,10 @@ public abstract class BmsLoader {
 						var newNote = (BmsNote)null;
 						try {
 							newNote = mHandler.createNote();
-							if (newNote == null) {
-								// ノートオブジェクト生成でnullを返した場合は続行不可
-								var msg = String.format("New note object is returned null by '%s'.",
-										mHandler.getClass().getSimpleName());
-								throw new BmsException(msg);
-							}
-						} catch (BmsException e) {
-							throw e;
 						} catch (Exception e) {
-							var msg = String.format("Failed to create note object: %s", e);
-							throw new BmsException(msg, e);
+							handleError(e, "createNote");
 						}
+						handleErrorIf(newNote == null, "Null note was returned by createNote()");
 
 						// ノートを追記する
 						try {
@@ -970,7 +972,7 @@ public abstract class BmsLoader {
 							content.putNote(chNumber, chIndex, data.measure, tick, value, () -> note);
 						} catch (Exception e) {
 							// データ不備により例外発生時はデータ不正とする
-							error(BmsErrorType.WRONG_DATA, data.lineNumber, data.line, null, e);
+							loadError(BmsErrorType.WRONG_DATA, data.lineNumber, data.line, null, e);
 							occurError = true;
 							break;
 						}
@@ -991,24 +993,23 @@ public abstract class BmsLoader {
 				}
 				case BmsTestResult.RESULT_FAIL:
 					// 検査に失敗した場合はエラーとし、ノートの登録処理は省略しようとする
-					error(BmsErrorType.TEST_CHANNEL, data.lineNumber, data.line, result.getMessage(), null);
+					loadError(BmsErrorType.TEST_CHANNEL, data.lineNumber, data.line, result.getMessage(), null);
 					break;
 				case BmsTestResult.RESULT_THROUGH:
 					// 解析したタイムライン要素を破棄する
 					break;
 				default:
 					// 不明なエラー
-					var msg = String.format("Channel test result was returned '%d' by handler", result.getResult());
-					error(BmsErrorType.PANIC, data.lineNumber, data.line, msg, null);
-					break;
+					handleErrorIf(true, "Illegal result was returned by testChannel(): result=", result.getResult());
 				}
 			}
 			content.endEdit();
 		} catch (BmsException e) {
+			// 既知の例外は丸投げする
 			throw e;
 		} catch (Exception e) {
-			var msg = String.format("Caught un-expected exception: %s", e);
-			throw new BmsException(msg, e);
+			// ライブラリ内部処理で未知の例外がスローされた場合はライブラリ責の例外として扱う
+			throw new BmsPanicException("Thrown un-expected exception", e);
 		} finally {
 			activeParse.ifPresent(x -> endParse());
 		}
@@ -1018,38 +1019,55 @@ public abstract class BmsLoader {
 	}
 
 	/**
+	 * BMSコンテンツの要素取り出し
+	 * @return BMSコンテンツの要素
+	 * @throws BmsException nextElement()で既知の例外がスローされた
+	 * @throws BmsHandleException nextElement()で期待外の例外がスローされた
+	 */
+	private BmsParsed fetchElement() throws BmsException {
+		try {
+			return nextElement();
+		} catch (BmsException e) {
+			throw e;
+		} catch (Exception e) {
+			handleError(e, "nextElement");
+			return null; // 到達不可
+		}
+	}
+
+	/**
 	 * BMS宣言を解析する
 	 * @param element BMS宣言要素
 	 * @param content BMSコンテンツ
-	 * @exception BmsException エラーハンドラがfalseを返した時
+	 * @throws BmsException エラーハンドラがfalseを返した時
 	 */
 	private void parseDeclaration(BmsDeclarationParsed element, BmsContent content) throws BmsException {
-		var lineNumber = element.lineNumber;
 		var line = element.line;
 		var key = element.name;
 		var value = element.value;
-		var result = mHandler.testDeclaration(key, value);
-		if (result == null) {
-			var msg = "BMS declaration test result was returned null by handler";
-			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
-		} else switch (result.getResult()) {
+		var result = BmsTestResult.FAIL;
+		try {
+			result = mHandler.testDeclaration(key, value);
+		} catch (Exception e) {
+			handleError(e, "testDeclaration");
+		}
+
+		handleErrorIf(result == null, "Null result was returned by testDeclaration()");
+		switch (result.getResult()) {
 		case BmsTestResult.RESULT_OK:
 			// BMS宣言の検査合格時はコンテンツに登録する
 			content.putDeclaration(key, value);
 			break;
 		case BmsTestResult.RESULT_FAIL:
 			// BMS宣言の検査失敗時はコンテンツに登録せずにエラー処理に回す
-			error(BmsErrorType.TEST_DECLARATION, 1, line, result.getMessage(), null);
+			loadError(BmsErrorType.TEST_DECLARATION, 1, line, result.getMessage(), null);
 			break;
 		case BmsTestResult.RESULT_THROUGH:
 			// BMS宣言を破棄する
 			break;
 		default:
 			// 想定外
-			var msg = String.format("BMS declaration test result was returned '%d' by handler",
-					result.getResult());
-			error(BmsErrorType.PANIC, 1, line, msg, null);
-			break;
+			handleErrorIf(true, "Illegal result was returned by testDeclaration(): result=", result.getResult());
 		}
 	}
 
@@ -1088,7 +1106,7 @@ public abstract class BmsLoader {
 	 * @param element メタ情報要素
 	 * @param intc 基数に応じた整数オブジェクト
 	 * @param content BMSコンテンツ
-	 * @exception BmsException エラーハンドラがfalseを返した時
+	 * @throws BmsException エラーハンドラがfalseを返した時
 	 */
 	private void parseMeta(BmsMetaParsed element, BmsInt intc, BmsContent content) throws BmsException {
 		// 値を取り出す
@@ -1096,14 +1114,7 @@ public abstract class BmsLoader {
 		var line = element.line;
 		var meta = element.meta;
 		var value = Objects.requireNonNullElse(element.value, "");
-
-		// パーサ部から返されたメタ情報を検証する
-		if (meta == null) {
-			// メタ情報が未設定の場合はエラーとして扱う
-			var msg = String.format("Parser '%s' is returned null meta.", getClass().getSimpleName());
-			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
-			return;
-		}
+		handleErrorIf(meta == null, "Detected null meta");
 
 		// インデックス値を解析する
 		var index = element.index;
@@ -1113,7 +1124,7 @@ public abstract class BmsLoader {
 				index = intc.toi(element.encodedIndex);
 			} catch (Exception e) {
 				// インデックス値のデコードに失敗
-				error(BmsErrorType.WRONG_DATA, lineNumber, line, "Wrong meta index.", e);
+				loadError(BmsErrorType.WRONG_DATA, lineNumber, line, "Wrong meta index.", e);
 				return;
 			}
 		}
@@ -1123,14 +1134,14 @@ public abstract class BmsLoader {
 			// 索引付きメタ情報の場合はインデックス値の範囲チェックを行う
 			if ((index < 0) || (index > BmsSpec.INDEXED_META_INDEX_MAX)) {
 				var msg = String.format("Index out of range. [index=%d]", index);
-				error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
+				loadError(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
 				return;
 			}
 		} else {
 			// 索引付き以外ではインデックス値は0でなければならない
 			if (index != 0) {
 				var msg = String.format("At %s unit, index must be 0. [index=%d]", meta.getUnit(), index);
-				error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
+				loadError(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
 				return;
 			}
 		}
@@ -1140,7 +1151,7 @@ public abstract class BmsLoader {
 		if (!type.test(value)) {
 			// データの記述内容が適合しない
 			var msg = "Type mismatch meta value";
-			error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
+			loadError(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
 			return;
 		}
 
@@ -1149,14 +1160,14 @@ public abstract class BmsLoader {
 		try {
 			obj = castValue(type, intc, value);
 		} catch (Exception e) {
-			error(BmsErrorType.WRONG_DATA, lineNumber, line, "Failed to parse meta value", e);
+			loadError(BmsErrorType.WRONG_DATA, lineNumber, line, "Failed to parse meta value", e);
 			return;
 		}
 
 		// 基数選択の内容を検査する
 		if (meta.isBaseChanger() && !BmsInt.isSupportBase(((Long)obj).intValue())) {
 			// 非サポートの基数が選択された
-			error(BmsErrorType.WRONG_DATA, lineNumber, line, "Wrong base value", null);
+			loadError(BmsErrorType.WRONG_DATA, lineNumber, line, "Wrong base value", null);
 			return;
 		}
 
@@ -1169,7 +1180,7 @@ public abstract class BmsLoader {
 					obj = Math.min(BmsSpec.BPM_MAX, Math.max(BmsSpec.BPM_MIN, bpm));
 				} else {
 					var msg = "This BPM is spec violation of BMS library";
-					error(BmsErrorType.SPEC_VIOLATION, lineNumber, line, msg, null);
+					loadError(BmsErrorType.SPEC_VIOLATION, lineNumber, line, msg, null);
 					return;
 				}
 			}
@@ -1182,7 +1193,7 @@ public abstract class BmsLoader {
 					obj = Math.min(BmsSpec.STOP_MAX, Math.max(BmsSpec.STOP_MIN, stop));
 				} else {
 					var msg = "This stop time is spec violation of BMS library";
-					error(BmsErrorType.SPEC_VIOLATION, lineNumber, line, msg, null);
+					loadError(BmsErrorType.SPEC_VIOLATION, lineNumber, line, msg, null);
 					return;
 				}
 			}
@@ -1196,12 +1207,16 @@ public abstract class BmsLoader {
 		case SINGLE:
 		case INDEXED: {
 			// ユーザーによる検査処理
-			result = mHandler.testMeta(meta, index, obj);
+			try {
+				result = mHandler.testMeta(meta, index, obj);
+			} catch (Exception e) {
+				handleError(e, "testMeta");
+			}
 
 			// 再定義不許可の状態で再定義を検出した場合はエラーとする
 			if ((result != null) && (result.getResult() == BmsTestResult.RESULT_OK) &&
 					!mIsAllowRedefine && content.containsMeta(meta, index)) {
-				error(BmsErrorType.REDEFINE, lineNumber, line, "Re-defined meta", null);
+				loadError(BmsErrorType.REDEFINE, lineNumber, line, "Re-defined meta", null);
 				return;
 			}
 
@@ -1209,16 +1224,20 @@ public abstract class BmsLoader {
 		}
 		case MULTIPLE: {
 			// ユーザーによる検査処理
-			result = mHandler.testMeta(meta, content.getMultipleMetaCount(name), obj);
+			try {
+				result = mHandler.testMeta(meta, content.getMultipleMetaCount(name), obj);
+			} catch (Exception e) {
+				handleError(e, "testMeta");
+			}
 			break;
 		}
 		default:
+			// Don't care
 			break;
 		}
-		if (result == null) {
-			var msg = "Meta test result was returned null by handler";
-			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
-		} else switch (result.getResult()) {
+
+		handleErrorIf(result == null, "Null result was returned by testMeta()");
+		switch (result.getResult()) {
 		case BmsTestResult.RESULT_OK:
 			// メタ情報をBMSコンテンツに登録する
 			switch (unit) {
@@ -1230,16 +1249,14 @@ public abstract class BmsLoader {
 			break;
 		case BmsTestResult.RESULT_FAIL:
 			// 検査不合格
-			error(BmsErrorType.TEST_META, lineNumber, line, result.getMessage(), null);
+			loadError(BmsErrorType.TEST_META, lineNumber, line, result.getMessage(), null);
 			break;
 		case BmsTestResult.RESULT_THROUGH:
 			// メタ情報破棄
 			break;
 		default:
 			// 想定外
-			var msg = String.format("Meta test result was returned '%d' by handler", result.getResult());
-			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
-			break;
+			handleErrorIf(true, "Illegal result was returned by testMeta(): result=", result.getResult());
 		}
 	}
 
@@ -1248,7 +1265,7 @@ public abstract class BmsLoader {
 	 * @param element 値型チャンネル要素
 	 * @param intc 基数に応じた整数オブジェクト
 	 * @param content BMSコンテンツ
-	 * @exception BmsException エラーハンドラがfalseを返した時
+	 * @throws BmsException エラーハンドラがfalseを返した時
 	 */
 	private void parseValueChannel(BmsMeasureValueParsed element, BmsInt intc, BmsContent content) throws BmsException {
 		// タイムライン読み込みをスキップする場合は何もしない
@@ -1268,13 +1285,13 @@ public abstract class BmsLoader {
 		if (channel == null) {
 			// 該当するチャンネルが仕様として規定されていない
 			var msg = String.format("'%s' No such channel in spec", BmsInt.to36s(channelNum));
-			error(BmsErrorType.UNKNOWN_CHANNEL, lineNumber, line, msg, null);
+			loadError(BmsErrorType.UNKNOWN_CHANNEL, lineNumber, line, msg, null);
 			return;
 		}
 		if (!BmsSpec.isMeasureWithinRange(measure)) {
 			// 小節番号が不正
 			var msg = String.format("Measure is out of range", measure);
-			error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
+			loadError(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
 			return;
 		}
 
@@ -1286,7 +1303,7 @@ public abstract class BmsLoader {
 			try {
 				object = castValue(channelType, intc, value);
 			} catch (Exception e) {
-				error(BmsErrorType.WRONG_DATA, lineNumber, line, "Failed to parse measure value", e);
+				loadError(BmsErrorType.WRONG_DATA, lineNumber, line, "Failed to parse measure value", e);
 				return;
 			}
 
@@ -1299,7 +1316,7 @@ public abstract class BmsLoader {
 						object = Math.min(BmsSpec.LENGTH_MAX, Math.max(BmsSpec.LENGTH_MIN, length));
 					} else {
 						var msg = "This length is spec violation of BMS library";
-						error(BmsErrorType.SPEC_VIOLATION, lineNumber, line, msg, null);
+						loadError(BmsErrorType.SPEC_VIOLATION, lineNumber, line, msg, null);
 						return;
 					}
 				}
@@ -1307,12 +1324,13 @@ public abstract class BmsLoader {
 
 			// 小節データの検査を行う
 			var chIndex = content.getChannelDataCount(channelNum, measure);
-			var result = mHandler.testChannel(channel, chIndex, measure, object);
-			if (result == null) {
-				var msg = "Channel test result was returned null by handler";
-				error(BmsErrorType.PANIC, lineNumber, line, msg, null);
-				return;
+			var result = BmsTestResult.FAIL;
+			try {
+				result = mHandler.testChannel(channel, chIndex, measure, object);
+			} catch (Exception e) {
+				handleError(e, "testChannel");
 			}
+			handleErrorIf(result == null, "Null result was returned by testChannel()");
 
 			// 重複不可チャンネルの重複チェックを行う
 			if ((result == BmsTestResult.OK) && (chIndex > 0) && !channel.isMultiple()) {
@@ -1321,7 +1339,7 @@ public abstract class BmsLoader {
 					chIndex = 0;
 				} else {
 					// 上書き不許可・重複不可・再定義検出の条件が揃った場合はエラーとする
-					error(BmsErrorType.REDEFINE, lineNumber, line, "Re-defined value type channel", null);
+					loadError(BmsErrorType.REDEFINE, lineNumber, line, "Re-defined value type channel", null);
 					return;
 				}
 			}
@@ -1334,27 +1352,23 @@ public abstract class BmsLoader {
 					content.setMeasureValue(channelNum, chIndex, measure, object);
 				} catch (Exception e) {
 					// 何らかのエラーが発生した場合はデータの不備
-					error(BmsErrorType.WRONG_DATA, lineNumber, line, null, e);
+					loadError(BmsErrorType.WRONG_DATA, lineNumber, line, null, e);
 				}
 				break;
 			case BmsTestResult.RESULT_FAIL:
 				// 検査不合格
-				error(BmsErrorType.TEST_CHANNEL, lineNumber, line, result.getMessage(), null);
+				loadError(BmsErrorType.TEST_CHANNEL, lineNumber, line, result.getMessage(), null);
 				break;
 			case BmsTestResult.RESULT_THROUGH:
 				// 小節データを破棄する
 				break;
 			default:
 				// 想定外
-				var msg = String.format("Channel test result was returned '%d' by handler", result.getResult());
-				error(BmsErrorType.PANIC, lineNumber, line, msg, null);
-				break;
+				handleErrorIf(true, "Illegal result was returned by testMeta(): result=", result.getResult());
 			}
 		} else {
 			// 値型チャンネル要素で配列型チャンネルを返されても処理しない
-			var msg = String.format("Number %d this channel is array type", channelNum);
-			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
-			return;
+			handleErrorIf(true, "Detected array type in measure value element");
 		}
 	}
 
@@ -1367,7 +1381,7 @@ public abstract class BmsLoader {
 	 * @param intc 基数に応じた整数オブジェクト
 	 * @param dataList 解析済みチャンネル定義データ
 	 * @param content BMSコンテンツ
-	 * @exception BmsException エラーハンドラがfalseを返した時
+	 * @throws BmsException エラーハンドラがfalseを返した時
 	 */
 	private void parseArrayChannel(BmsNoteParsed element, BmsInt intc, List<ChannelArrayData> dataList, BmsContent content)
 			throws BmsException {
@@ -1387,13 +1401,13 @@ public abstract class BmsLoader {
 		if (channel == null) {
 			// 該当するチャンネルが仕様として規定されていない
 			var msg = String.format("'%s' No such channel in spec", BmsInt.to36s(channelNum));
-			error(BmsErrorType.UNKNOWN_CHANNEL, lineNumber, line, msg, null);
+			loadError(BmsErrorType.UNKNOWN_CHANNEL, lineNumber, line, msg, null);
 			return;
 		}
 		if (!BmsSpec.isMeasureWithinRange(measure)) {
 			// 小節番号が不正
 			var msg = String.format("Measure is out of range", measure);
-			error(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
+			loadError(BmsErrorType.WRONG_DATA, lineNumber, line, msg, null);
 			return;
 		}
 
@@ -1405,7 +1419,7 @@ public abstract class BmsLoader {
 				array = new BmsArray(element.encodedArray, intc.base());
 			} catch (Exception e) {
 				// 配列データのデコードに失敗
-				error(BmsErrorType.WRONG_DATA, lineNumber, line, "Wrong array data", e);
+				loadError(BmsErrorType.WRONG_DATA, lineNumber, line, "Wrong array data", e);
 				return;
 			}
 		}
@@ -1416,12 +1430,13 @@ public abstract class BmsLoader {
 			// 配列型の場合
 			// ノートの検査を行う
 			var chIndex = content.getChannelDataCount(channelNum, measure);
-			var result = mHandler.testChannel(channel, chIndex, measure, array);
-			if (result == null) {
-				var msg = "Channel test result was returned null by handler";
-				error(BmsErrorType.PANIC, lineNumber, line, msg, null);
-				return;
+			var result = BmsTestResult.FAIL;
+			try {
+				result = mHandler.testChannel(channel, chIndex, measure, array);
+			} catch (Exception e) {
+				handleError(e, "testChannel");
 			}
+			handleErrorIf(result == null, "Null result was returned by testChannel()");
 
 			// ノートの検査結果を判定する
 			switch (result.getResult()) {
@@ -1438,21 +1453,18 @@ public abstract class BmsLoader {
 			}
 			case BmsTestResult.RESULT_FAIL:
 				// 検査不合格
-				error(BmsErrorType.TEST_CHANNEL, lineNumber, line, result.getMessage(), null);
+				loadError(BmsErrorType.TEST_CHANNEL, lineNumber, line, result.getMessage(), null);
 				break;
 			case BmsTestResult.RESULT_THROUGH:
 				// ノートを破棄する
 				break;
 			default:
 				// 想定外
-				var msg = String.format("Channel test result was returned '%d' by handler", result.getResult());
-				error(BmsErrorType.PANIC, lineNumber, line, msg, null);
-				break;
+				handleErrorIf(true, "Illegal result was returned by testChannel(): result=", result.getResult());
 			}
 		} else {
 			// 配列型チャンネル要素で値型チャンネルを返されても処理しない
-			var msg = String.format("Number %d this channel is value type", channelNum);
-			error(BmsErrorType.PANIC, lineNumber, line, msg, null);
+			handleErrorIf(true, "Detected value type in note element");
 		}
 	}
 
@@ -1460,11 +1472,11 @@ public abstract class BmsLoader {
 	 * エラーを解析する
 	 * <p>ローダの解析部から報告されたエラーをハンドラに通知する。</p>
 	 * @param element エラー要素
-	 * @exception BmsException エラーハンドラがfalseを返した時
+	 * @throws BmsException エラーハンドラがfalseを返した時
 	 */
 	private void parseError(BmsErrorParsed element) throws BmsException {
 		var err = element.error;
-		error(err.getType(), err.getLineNumber(), err.getLine(), err.getMessage(), err.getCause());
+		loadError(err.getType(), err.getLineNumber(), err.getLine(), err.getMessage(), err.getCause());
 	}
 
 	/**
@@ -1492,10 +1504,10 @@ public abstract class BmsLoader {
 	 * @param line 行文字列
 	 * @param message エラーメッセージ
 	 * @param throwable 発生した例外
-	 * @exception BmsLoadException エラーハンドラがfalseを返した時
+	 * @throws BmsException エラーハンドラで予期しない例外がスローされた、またはfalseを返した時
 	 */
-	private void error(BmsErrorType errType, int lineNumber, Object line, String message, Throwable throwable)
-			throws BmsLoadException {
+	private void loadError(BmsErrorType errType, int lineNumber, Object line, String message, Throwable throwable)
+			throws BmsException {
 		// エラーが無効にされている場合は例外をスローしない
 		var fnIsOccur = mOccurErrorMap.get(errType);
 		if ((fnIsOccur != null) && !fnIsOccur.getAsBoolean()) {
@@ -1505,10 +1517,40 @@ public abstract class BmsLoader {
 		// エラーハンドラにエラー内容を通知する
 		var lineStr = (line == null) ? "" : line.toString();
 		var error = new BmsScriptError(errType, lineNumber, lineStr, message, throwable);
-		if (!mHandler.parseError(error)) {
+		var canContinue = true;
+		try {
+			canContinue = mHandler.parseError(error);
+		} catch (Exception e) {
+			handleError(e, "parseError");
+		}
+		if (!canContinue) {
 			// BMS解析を中断する場合は例外を投げる
 			throw new BmsLoadException(error);
 		}
+	}
+
+	/**
+	 * ユーザープログラム処理異常例外スロー
+	 * @param expr 評価結果
+	 * @param msgFormat メッセージ書式
+	 * @param args メッセージ引数
+	 * @throws BmsHandleException 評価結果が true の時
+	 */
+	private void handleErrorIf(boolean expr, String msgFormat, Object...args) throws BmsHandleException {
+		if (expr) {
+			throw new BmsHandleException(String.format(msgFormat, args), null);
+		}
+	}
+
+	/**
+	 * ユーザープログラム処理異常例外スロー
+	 * @param cause 例外要因
+	 * @param methodName 例外がスローされたメソッド名
+	 * @throws BmsHandleException ユーザープログラム処理異常例外
+	 */
+	private void handleError(Throwable cause, String methodName) throws BmsHandleException {
+		var message = String.format("Thrown un-expected exception in %s()", methodName);
+		throw new BmsHandleException(message, cause);
 	}
 
 	/**
@@ -1556,8 +1598,8 @@ public abstract class BmsLoader {
 
 	/**
 	 * ローダの状態アサーション
-	 * @exception IllegalStateException BMS仕様が設定されていない
-	 * @exception IllegalStateException BMS読み込みハンドラが設定されていない
+	 * @throws IllegalStateException BMS仕様が設定されていない
+	 * @throws IllegalStateException BMS読み込みハンドラが設定されていない
 	 */
 	private void assertLoaderState() {
 		assertField(mSpec != null, "BmsSpec is NOT specified.");
@@ -1566,7 +1608,7 @@ public abstract class BmsLoader {
 
 	/**
 	 * ローダへの入力データがテキストフォーマットであることを確認するアサーション
-	 * @exception UnsupportedOperationException ローダへの入力データがバイナリフォーマット
+	 * @throws UnsupportedOperationException ローダへの入力データがバイナリフォーマット
 	 */
 	private void assertIsTextFormat() {
 		if (mIsBinaryFormat) {
@@ -1576,7 +1618,7 @@ public abstract class BmsLoader {
 		}
 	}
 
-	protected final BmsLoaderSettings getSettings() {
+	protected BmsLoaderSettings getSettings() {
 		return mSettings;
 	}
 
@@ -1589,16 +1631,17 @@ public abstract class BmsLoader {
 	 * しかし、当メソッドの実行で以下の条件のいずれかを満たすと、パーサ部の初期化エラーと見なしBMS読み込みは中止され
 	 * {@link BmsException}がスローされます。</p>
 	 * <ul>
-	 * <li>戻り値でnullを返した</li>
+	 * <li>戻り値でnullを返した({@link BmsHandleException})</li>
 	 * <li>戻り値でエラー({@link BmsErrorParsed#isFail()}がtrueになるオブジェクト)を返した({@link BmsLoadException})</li>
-	 * <li>当メソッドから実行時例外がスローされた</li>
-	 * <li>当メソッドから意図的に{@link BmsException}をスローした</li>
+	 * <li>当メソッドから実行時例外がスローされた({@link BmsHandleException})</li>
 	 * </ul>
+	 * <p>当メソッドから {@link BmsException} を継承した例外を意図的にスローすると、呼び出し元へはその例外が
+	 * そのままスローされます。</p>
 	 * <p>当メソッドが呼ばれると、上記の実行結果に関わらず{@link #endParse()}が必ず呼び出されます。</p>
 	 * @param settings ローダの設定
 	 * @param source 解析対象の入力データ
 	 * @return 初期化結果を表すエラー情報要素
-	 * @exception BmsException 解析処理開始時に続行不可能なエラーが発生した
+	 * @throws BmsException 解析処理開始時に続行不可能なエラーが発生した
 	 */
 	protected abstract BmsErrorParsed beginParse(BmsLoaderSettings settings, BmsSource source) throws BmsException;
 
@@ -1609,12 +1652,12 @@ public abstract class BmsLoader {
 	 * BMSローダのパーサ部が使用したリソースを確実に解放する契機を確保するためです。</p>
 	 * <p>パーサ部の初期化途中で実行時例外がスローされ、初期化が中途半端な状態で当メソッドが実行される可能性がありますので、
 	 * それを踏まえたうえで当メソッドの処理を実装するようにしてください。</p>
-	 * <p>当メソッドの実行で以下の条件のいずれかを満たすと読み込まれたBMSコンテンツは破棄され{@link BmsException}
-	 * がスローされます。</p>
+	 * <p>当メソッドの実行で以下の条件のいずれかを満たすと読み込まれたBMSコンテンツは破棄され以下の条件で
+	 * 例外がスローされます。</p>
 	 * <ul>
-	 * <li>戻り値でnullを返した</li>
+	 * <li>戻り値でnullを返した({@link BmsHandleException})</li>
 	 * <li>戻り値でエラー({@link BmsErrorParsed#isFail()}がtrueになるオブジェクト)を返した({@link BmsLoadException})</li>
-	 * <li>当メソッドから実行時例外がスローされた</li>
+	 * <li>当メソッドから実行時例外がスローされた({@link BmsHandleException})</li>
 	 * </ul>
 	 * <p>パーサ部の初期化エラー後に当メソッドが呼ばれ実行時例外がスローされた場合、BMSローダは未定義の動作となります。
 	 * 当メソッドは極力、実行時例外がスローされる契機がないよう実装してください。</p>
@@ -1636,10 +1679,11 @@ public abstract class BmsLoader {
 	 * <p>解析の過程でエラーが検出された場合、BMSコンテンツへ登録する要素ではなくエラー要素({@link BmsErrorParsed})
 	 * を返してください。エラー要素はBMSローダによってBMS読み込みハンドラの{@link BmsLoadHandler#parseError(BmsScriptError)}
 	 * へ通知されます。また、1つの要素で複数のエラーが発生した場合、当メソッドの呼び出し毎に発生したエラーの要素を全て返してください。</p>
-	 * <p>当メソッドで実行時例外がスローされた場合BMSローダによってキャッチされ、{@link BmsException}がスローされます。
-	 * 意図的に{@link BmsException}をスローした場合、その例外がそのまま呼び出し元へスローされます。</p>
+	 * <p>当メソッドで意図的に{@link BmsException}を継承する例外をスローした場合、
+	 * その例外がそのまま呼び出し元へスローされます。</p>
 	 * @return BMSコンテンツの要素、またはエラー要素。これ以上要素がない場合はnull。
-	 * @exception BmsException 処理中に続行不可能なエラーが発生した
+	 * @throws BmsException 処理中に続行不可能なエラーが発生した
+	 * @throws BmsHandleException 想定外の実行時例外がスローされた
 	 * @see BmsDeclarationParsed
 	 * @see BmsMetaParsed
 	 * @see BmsTimelineParsed

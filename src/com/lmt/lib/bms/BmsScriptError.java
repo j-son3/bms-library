@@ -38,9 +38,9 @@ public class BmsScriptError extends BmsError {
 	 * @param line 行の記述内容
 	 * @param message エラーメッセージ
 	 * @param throwable 発生した例外
-	 * @exception NullPointerException errTypeがnull
-	 * @exception NullPointerException lineがnull
-	 * @exception IllegalArgumentException lineNumberがマイナス値
+	 * @throws NullPointerException errTypeがnull
+	 * @throws NullPointerException lineがnull
+	 * @throws IllegalArgumentException lineNumberがマイナス値
 	 */
 	public BmsScriptError(BmsErrorType errType, int lineNumber, String line, String message, Throwable throwable) {
 		super(errType, message, throwable);
@@ -75,7 +75,7 @@ public class BmsScriptError extends BmsError {
 	 * エラー発生行の行番号を取得します。
 	 * @return 行番号
 	 */
-	public final int getLineNumber() {
+	public int getLineNumber() {
 		return mLineNumber;
 	}
 
@@ -83,7 +83,7 @@ public class BmsScriptError extends BmsError {
 	 * エラー発生行の記述を取得します。
 	 * @return 行の記述内容
 	 */
-	public final String getLine() {
+	public String getLine() {
 		return mLine;
 	}
 }

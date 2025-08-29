@@ -23,13 +23,13 @@ public abstract class BmsSaver {
 	 * <p>当メソッドは指定パスのファイルを書き込みモードでオープンし{@link #save(BmsContent, OutputStream)}を実行します。</p>
 	 * @param content 出力対象のBMSコンテンツ
 	 * @param dst 出力先パス
-	 * @exception NullPointerException contentがnull
-	 * @exception NullPointerException dstがnull
-	 * @exception IllegalArgumentException contentが参照モードではない
-	 * @exception IOException 指定パスへのファイル作成失敗、またはBMSコンテンツの出力失敗
-	 * @exception BmsException BMSコンテンツ出力時、BMSに関連する要因で出力処理がエラー終了した
+	 * @throws NullPointerException contentがnull
+	 * @throws NullPointerException dstがnull
+	 * @throws IllegalArgumentException contentが参照モードではない
+	 * @throws IOException 指定パスへのファイル作成失敗、またはBMSコンテンツの出力失敗
+	 * @throws BmsHandleException ユーザープログラムの処理異常を検出した
 	 */
-	public final void save(BmsContent content, Path dst) throws IOException, BmsException {
+	public void save(BmsContent content, Path dst) throws IOException {
 		assertArgNotNull(content, "content");
 		assertArgNotNull(dst, "dst");
 		assertArg(content.isReferenceMode(), "'content' is NOT reference mode.");
@@ -43,13 +43,13 @@ public abstract class BmsSaver {
 	 * <p>当メソッドは指定ファイルを書き込みモードでオープンし{@link #save(BmsContent, OutputStream)}を実行します。</p>
 	 * @param content 出力対象のBMSコンテンツ
 	 * @param dst 出力先パス
-	 * @exception NullPointerException contentがnull
-	 * @exception NullPointerException dstがnull
-	 * @exception IllegalArgumentException contentが参照モードではない
-	 * @exception IOException 指定ファイルへのファイル作成失敗、またはBMSコンテンツの出力失敗
-	 * @exception BmsException BMSコンテンツ出力時、BMSに関連する要因で出力処理がエラー終了した
+	 * @throws NullPointerException contentがnull
+	 * @throws NullPointerException dstがnull
+	 * @throws IllegalArgumentException contentが参照モードではない
+	 * @throws IOException 指定ファイルへのファイル作成失敗、またはBMSコンテンツの出力失敗
+	 * @throws BmsHandleException ユーザープログラムの処理異常を検出した
 	 */
-	public final void save(BmsContent content, File dst) throws IOException, BmsException {
+	public void save(BmsContent content, File dst) throws IOException {
 		assertArgNotNull(content, "content");
 		assertArgNotNull(dst, "dst");
 		assertArg(content.isReferenceMode(), "'content' is NOT reference mode.");
@@ -64,13 +64,13 @@ public abstract class BmsSaver {
 	 * に委譲します。</p>
 	 * @param content 出力対象のBMSコンテンツ
 	 * @param dst 出力先ストリーム
-	 * @exception NullPointerException contentがnull
-	 * @exception NullPointerException dstがnull
-	 * @exception IllegalArgumentException contentが参照モードではない
-	 * @exception IOException BMSコンテンツ出力時、異常を検知した
-	 * @exception BmsException BMSコンテンツ出力時、BMSに関連する要因で出力処理がエラー終了した
+	 * @throws NullPointerException contentがnull
+	 * @throws NullPointerException dstがnull
+	 * @throws IllegalArgumentException contentが参照モードではない
+	 * @throws IOException BMSコンテンツ出力時、異常を検知した
+	 * @throws BmsHandleException ユーザープログラムの処理異常を検出した
 	 */
-	public final void save(BmsContent content, OutputStream dst) throws IOException, BmsException {
+	public void save(BmsContent content, OutputStream dst) throws IOException {
 		assertArgNotNull(content, "content");
 		assertArgNotNull(dst, "dst");
 		assertArg(content.isReferenceMode(), "'content' is NOT reference mode.");
@@ -81,16 +81,16 @@ public abstract class BmsSaver {
 	 * BMSコンテンツ出力処理メイン
 	 * @param content 出力対象のBMSコンテンツ
 	 * @param dst 出力先ストリーム
-	 * @exception IOException BMSコンテンツ出力時、異常を検知した
-	 * @exception BmsException BMSコンテンツ出力時、BMSに関連する要因で出力処理がエラー終了した
+	 * @throws IOException BMSコンテンツ出力時、異常を検知した
+	 * @throws BmsHandleException ユーザープログラムの処理異常を検出した
 	 */
-	private void saveMain(BmsContent content, OutputStream dst) throws IOException, BmsException {
+	private void saveMain(BmsContent content, OutputStream dst) throws IOException {
 		try {
 			onWrite(content, dst);
-		} catch (IOException | BmsException e) {
+		} catch (IOException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new BmsException(e);
+			throw new BmsHandleException("Thrown un-expected exception by onWrite()", e);
 		}
 	}
 
@@ -105,8 +105,7 @@ public abstract class BmsSaver {
 	 * ただし、原因によってはnullが返る場合があります。</p>
 	 * @param content 出力対象のBMSコンテンツ
 	 * @param dst 出力先ストリーム
-	 * @exception IOException dstへのBMSコンテンツ出力時に入出力エラーが発生した時
-	 * @exception BmsException BMSに関連する要因、または出力処理で例外がスローされエラー終了した時
+	 * @throws IOException dstへのBMSコンテンツ出力時に入出力エラーが発生した時
 	 */
-	protected abstract void onWrite(BmsContent content, OutputStream dst) throws IOException, BmsException;
+	protected abstract void onWrite(BmsContent content, OutputStream dst) throws IOException;
 }

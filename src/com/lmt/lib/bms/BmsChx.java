@@ -61,7 +61,7 @@ public interface BmsChx {
 	 * @param chx1 CHX1
 	 * @param chx2 CHX2
 	 * @return 2つのCHXが同じ場所を指していればtrue
-	 * @exception NullPointerException chx1またはchx2がnull
+	 * @throws NullPointerException chx1またはchx2がnull
 	 */
 	public static boolean equals(BmsChx chx1, BmsChx chx2) {
 		return (chx1.getChannel() == chx2.getChannel()) && (chx1.getIndex() == chx2.getIndex());
@@ -72,7 +72,7 @@ public interface BmsChx {
 	 * @param chx1 CHX1
 	 * @param chx2 CHX2
 	 * @return CHX1 == CHX2は0、CHX1 &gt; CHX2は正の値、CHX1 &lt; CHX2は負の値
-	 * @exception NullPointerException chx1またはchx2がnull
+	 * @throws NullPointerException chx1またはchx2がnull
 	 */
 	public static int compare(BmsChx chx1, BmsChx chx2) {
 		return Integer.compareUnsigned(toInt(chx1), toInt(chx2));
@@ -82,7 +82,7 @@ public interface BmsChx {
 	 * CHXからハッシュコード値を生成します。
 	 * @param chx CHX
 	 * @return ハッシュコード値
-	 * @exception NullPointerException chxがnull
+	 * @throws NullPointerException chxがnull
 	 */
 	public static int hashCode(BmsChx chx) {
 		return Objects.hashCode(toInt(chx));
@@ -92,7 +92,7 @@ public interface BmsChx {
 	 * CHXの文字列表現を返します。
 	 * @param chx CHX
 	 * @return CHXの文字列表現
-	 * @exception NullPointerException chxがnull
+	 * @throws NullPointerException chxがnull
 	 */
 	public static String toString(BmsChx chx) {
 		return toString(chx.getChannel(), chx.getIndex());
@@ -153,7 +153,7 @@ public interface BmsChx {
 	 * 範囲外の値を指定しても範囲内チェックは行われず、例外もスローされません。</p>
 	 * @param chx CHX
 	 * @return CHX値
-	 * @exception NullPointerException chxがnull
+	 * @throws NullPointerException chxがnull
 	 */
 	public static int toInt(BmsChx chx) {
 		return ((chx.getChannel() & 0xffff) << 16) | (chx.getIndex() & 0xffff);

@@ -89,9 +89,9 @@ class ScoreSummarizer {
 	 * 評価点投入
 	 * @param time この評価点の時間(前回投入した時間より大きい値にすること)
 	 * @param score 評価点
-	 * @exception IllegalArgumentException 時間が前回投入した時間の値以下
+	 * @throws IllegalArgumentException 時間が前回投入した時間の値以下
 	 */
-	final void put(double time, double score) {
+	void put(double time, double score) {
 		// サマリ値を計算する
 		var thisScore = Math.max(0.0, Math.min(mSatulate, score));
 		var thisSum = thisScore / mSatulate;
@@ -122,7 +122,7 @@ class ScoreSummarizer {
 	 * @param filter 評価対象要素の選択関数
 	 * @param getter 評価点取得関数
 	 */
-	final <T extends RatingElement> void put(Collection<T> elems, Predicate<T> filter, ToDoubleFunction<T> getter) {
+	<T extends RatingElement> void put(Collection<T> elems, Predicate<T> filter, ToDoubleFunction<T> getter) {
 		elems.stream().filter(filter).forEach(e -> put(e.getTime(), getter.applyAsDouble(e)));
 	}
 
@@ -130,7 +130,7 @@ class ScoreSummarizer {
 	 * サマリ実行
 	 * @return サマリ結果
 	 */
-	final double summary() {
+	double summary() {
 		return mScores.isEmpty() ? 0.0 : (mScores.last().summary / mScoreCount);
 	}
 

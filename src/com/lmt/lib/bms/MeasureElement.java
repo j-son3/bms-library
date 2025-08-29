@@ -72,7 +72,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 
 	/** {@inheritDoc} */
 	@Override
-	public final boolean isMeasureLineElement() {
+	public boolean isMeasureLineElement() {
 		return true;
 	}
 
@@ -80,7 +80,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * BMS仕様取得
 	 * @return BMS仕様
 	 */
-	final BmsSpec getSpec() {
+	BmsSpec getSpec() {
 		return mSpec;
 	}
 
@@ -88,7 +88,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * BMS仕様設定
 	 * @param spec BMS仕様
 	 */
-	final void setSpec(BmsSpec spec) {
+	void setSpec(BmsSpec spec) {
 		mSpec = spec;
 	}
 
@@ -100,7 +100,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * 小節長変更チャンネルを定義しなかった場合には、このメソッドは必ず1を返す結果となる。</p>
 	 * @return 4/4拍子を1.0とした当該小節の長さ倍率
 	 */
-	final double getLengthRatio() {
+	double getLengthRatio() {
 		return mLengthRatio;
 	}
 
@@ -110,7 +110,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * 時間が格納される。終端の小節データに対してこのメソッドを呼び出した場合、返される値は不定である。</p>
 	 * @return 小節の演奏が開始されるべき基準の時間(秒単位)
 	 */
-	final double getBaseTime() {
+	double getBaseTime() {
 		return mBaseTime;
 	}
 
@@ -120,7 +120,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * このメソッドが返す値の用途は主に時間を指定しての譜面データの取得である。</p>
 	 * @return 当該小節の長さ(秒単位)
 	 */
-	final double getLength() {
+	double getLength() {
 		return mLength;
 	}
 
@@ -130,7 +130,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * 長さ倍率に応じてその値に倍率を乗じた値を返す。</p>
 	 * @return 当該小節の刻み数
 	 */
-	final double getTickCount() {
+	double getTickCount() {
 		return mTickCount;
 	}
 
@@ -138,7 +138,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * 当該小節の刻み位置最大値を返す。
 	 * @return 当該小節の刻み位置最大値
 	 */
-	final double getTickMax() {
+	double getTickMax() {
 		return mTickMax;
 	}
 
@@ -146,7 +146,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * 当該小節開始時のBPMを返す。
 	 * @return 当該小節開始時のBPM
 	 */
-	final double getBeginBpm() {
+	double getBeginBpm() {
 		return mBeginBpm;
 	}
 
@@ -154,7 +154,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * 当該小節終了時のBPMを返す。
 	 * @return 当該小節終了時のBPM
 	 */
-	final double getEndBpm() {
+	double getEndBpm() {
 		return mEndBpm;
 	}
 
@@ -163,7 +163,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * @param tick 刻み位置
 	 * @return この小節の小節番号と指定刻み位置の実際の時間
 	 */
-	final double computeTime(double tick) {
+	double computeTime(double tick) {
 		var entry = (mTimeNodeMap != null) ? mTimeNodeMap.floorEntry(tick) : null;
 		if (entry == null) {
 			// この小節にBPM変更・譜面停止が存在しない場合、小節内の指定刻み位置までにBPM変更・譜面停止が登場しない場合
@@ -187,7 +187,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * ノート追加
 	 * @param note ノート
 	 */
-	final void putNote(BmsNote note) {
+	void putNote(BmsNote note) {
 		// CHXごとのノートリストマップを生成する
 		if (mNotesChMap == null) {
 			mNotesChMap = new TreeMap<>();
@@ -211,7 +211,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * @param index チャンネルインデックス
 	 * @param tick 小節の刻み位置
 	 */
-	final void removeNote(int channel, int index, double tick) {
+	void removeNote(int channel, int index, double tick) {
 		// CHXごとのノートリストが存在しない場合は何もしない
 		if (mNotesChMap == null) {
 			return;
@@ -246,7 +246,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * @param index チャンネルインデックス
 	 * @param value 小節データ
 	 */
-	final void putValue(int channel, int index, Object value) {
+	void putValue(int channel, int index, Object value) {
 		// CHXごとの値マップを生成する
 		if (mValuesChMap == null) {
 			mValuesChMap = new TreeMap<>();
@@ -270,7 +270,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * @param channel チャンネル番号
 	 * @param index チャンネルインデックス
 	 */
-	final void removeValue(int channel, int index) {
+	void removeValue(int channel, int index) {
 		// CHXごとの値マップが存在しない場合は何もしない
 		if (mValuesChMap == null) {
 			return;
@@ -297,7 +297,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * @param outList ノートリスト格納先リスト
 	 * @return パラメータで指定したノートリスト格納先リスト
 	 */
-	final List<BmsNote> listNotes(int channel, int index, List<BmsNote> outList) {
+	List<BmsNote> listNotes(int channel, int index, List<BmsNote> outList) {
 		// CHXごとのノートリストが存在しない場合は何もしない
 		outList.clear();
 		if (mNotesChMap == null) {
@@ -319,7 +319,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * この小節が持つ全ての小節データ取得
 	 * @return CHXごとの小節データマップ
 	 */
-	final Map<Integer, BmsTimelineElement> mapValues() {
+	Map<Integer, BmsTimelineElement> mapValues() {
 		// CHXごとの小節の値が存在しない場合は何もしない
 		var result = new TreeMap<Integer, BmsTimelineElement>();
 		if (mValuesChMap == null) {
@@ -336,7 +336,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * @param tester チャンネルを検査するテスター
 	 * @return 検査に合格するチャンネルが存在した場合true、そうでなければfalse
 	 */
-	final boolean testValueChannels(IntPredicate tester) {
+	boolean testValueChannels(IntPredicate tester) {
 		// CHXごとの小節の値が存在しない場合はテスト不合格とする
 		if (mValuesChMap == null) {
 			return false;
@@ -359,7 +359,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * @param index チャンネルインデックス
 	 * @return 小節データ
 	 */
-	final BmsTimelineElement getValue(int channel, int index) {
+	BmsTimelineElement getValue(int channel, int index) {
 		return (mValuesChMap == null) ? null : mValuesChMap.get(BmsInt.box(BmsChx.toInt(channel, index)));
 	}
 
@@ -367,7 +367,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * 小節データのイテレータ取得
 	 * @return 小節データのイテレータ
 	 */
-	final Iterator<? extends BmsTimelineElement> valueIterator() {
+	Iterator<? extends BmsTimelineElement> valueIterator() {
 		return (mValuesChMap == null) ? Collections.emptyIterator() : mValuesChMap.values().iterator();
 	}
 
@@ -376,7 +376,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * @param channel チャンネル番号
 	 * @return 配列型チャンネルのデータ数
 	 */
-	final int getNoteChannelDataCount(int channel) {
+	int getNoteChannelDataCount(int channel) {
 		var chx = BmsInt.box(BmsChx.toInt(channel, BmsSpec.CHINDEX_MAX));
 		var key = (mNotesChMap == null) ? null : mNotesChMap.floorKey(chx);
 		return getChannelDataCount(channel, key);
@@ -387,7 +387,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * @param channel チャンネル番号
 	 * @return 値型チャンネルのデータ数
 	 */
-	final int getValueChannelDataCount(int channel) {
+	int getValueChannelDataCount(int channel) {
 		var chx = BmsInt.box(BmsChx.toInt(channel, BmsSpec.CHINDEX_MAX));
 		var key = (mValuesChMap == null) ? null : mValuesChMap.floorKey(chx);
 		return getChannelDataCount(channel, key);
@@ -397,7 +397,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * この小節のデータが空かどうかを判定
 	 * @return この小節のデータが空ならtrue、そうでないならfalse
 	 */
-	final boolean isEmpty() {
+	boolean isEmpty() {
 		return ((mNotesChMap == null) && (mValuesChMap == null));
 	}
 
@@ -405,7 +405,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * この小節のノートが空かどうかを判定
 	 * @return この小節のノートが空ならtrue、そうでないならfalse
 	 */
-	final boolean isEmptyNotes() {
+	boolean isEmptyNotes() {
 		return (mNotesChMap == null);
 	}
 
@@ -413,7 +413,7 @@ abstract class MeasureElement extends BmsTimelineElement {
 	 * 時間・BPMに関連する情報を再計算する。
 	 * @param userParam ユーザー定義のパラメータ
 	 */
-	final void recalculateTimeInfo(Object userParam) {
+	void recalculateTimeInfo(Object userParam) {
 		var timeInfo = onRecalculateTimeInfo(userParam);
 		mBaseTime = timeInfo.baseTime;
 		mLength = timeInfo.length;

@@ -4,6 +4,7 @@ import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.lmt.lib.bms.internal.deltasystem.Ds;
 
@@ -97,7 +98,7 @@ public class BeMusicStatistics {
 	 * 期間統計情報の数を取得します。
 	 * @return 期間統計情報の数
 	 */
-	public final int getSpanCount() {
+	public int getSpanCount() {
 		return mTimeSpanList.size();
 	}
 
@@ -105,17 +106,27 @@ public class BeMusicStatistics {
 	 * 指定された位置の期間統計情報を取得します。
 	 * @param index インデックス
 	 * @return 期間統計情報
-	 * @exception IndexOutOfBoundsException indexが負の値または{@link #getSpanCount()}以上
+	 * @throws IndexOutOfBoundsException indexが負の値または{@link #getSpanCount()}以上
 	 */
-	public final BeMusicTimeSpan getSpan(int index) {
+	public BeMusicTimeSpan getSpan(int index) {
 		return mTimeSpanList.get(index);
+	}
+
+	/**
+	 * 期間統計情報を走査するストリームを返します。
+	 * <p>走査順は {@link #getSpan(int)} で返される順番と同じです。</p>
+	 * @return 期間統計情報を走査するストリーム
+	 * @since 0.10.0
+	 */
+	public Stream<BeMusicTimeSpan> spans() {
+		return mTimeSpanList.stream();
 	}
 
 	/**
 	 * 期間統計情報リスト設定
 	 * @param list 期間統計情報リスト
 	 */
-	final void setTimeSpanList(List<BeMusicTimeSpan> list) {
+	void setTimeSpanList(List<BeMusicTimeSpan> list) {
 		mTimeSpanList = list;
 	}
 
@@ -124,7 +135,7 @@ public class BeMusicStatistics {
 	 * <p>この値は{@link BeMusicStatisticsBuilder#setSpanLength(double)}で指定した値と等価になります。</p>
 	 * @return 統計情報1件の長さ
 	 */
-	public final double getSpanLength() {
+	public double getSpanLength() {
 		return mSpanLength;
 	}
 
@@ -132,7 +143,7 @@ public class BeMusicStatistics {
 	 * 期間統計情報1件の長さ設定
 	 * @param length 期間統計情報1件の長さ
 	 */
-	final void setSpanLength(double length) {
+	void setSpanLength(double length) {
 		mSpanLength = length;
 	}
 
@@ -142,7 +153,7 @@ public class BeMusicStatistics {
 	 * 具体的には{@link BeMusicStatisticsBuilder#setNoteLayout(BeMusicNoteLayout)}で指定したレイアウトと等価になります。</p>
 	 * @return この統計情報の対象となったノートレイアウト
 	 */
-	public final BeMusicNoteLayout getNoteLayout() {
+	public BeMusicNoteLayout getNoteLayout() {
 		return mLayout;
 	}
 
@@ -150,7 +161,7 @@ public class BeMusicStatistics {
 	 * この統計情報の対象となったノートレイアウト設定
 	 * @param layout この統計情報の対象となったノートレイアウト
 	 */
-	final void setNoteLayout(BeMusicNoteLayout layout) {
+	void setNoteLayout(BeMusicNoteLayout layout) {
 		mLayout = layout;
 	}
 
@@ -163,7 +174,7 @@ public class BeMusicStatistics {
 	 * 長さが短すぎても長すぎても精度の高い値は得られません。長さ0.5～1秒程度が最も現実的な精度が得られる目安としてください。</p>
 	 * @return 平均ノート密度(Notes/sec)
 	 */
-	public final double getAverageDensity() {
+	public double getAverageDensity() {
 		return mAvgDensity;
 	}
 
@@ -171,7 +182,7 @@ public class BeMusicStatistics {
 	 * 平均ノート密度設定
 	 * @param density 平均ノート密度
 	 */
-	final void setAverageDensity(double density) {
+	void setAverageDensity(double density) {
 		mAvgDensity = density;
 	}
 
@@ -183,7 +194,7 @@ public class BeMusicStatistics {
 	 * 長さが短すぎても長すぎても精度の高い値は得られません。長さ0.5～1秒程度が最も現実的な精度が得られる目安としてください。</p>
 	 * @return 最大ノート密度
 	 */
-	public final double getMaxDensity() {
+	public double getMaxDensity() {
 		return mMaxDensity;
 	}
 
@@ -191,7 +202,7 @@ public class BeMusicStatistics {
 	 * 最大ノート密度設定
 	 * @param density 最大ノート密度
 	 */
-	final void setMaxDensity(double density) {
+	void setMaxDensity(double density) {
 		mMaxDensity = density;
 	}
 
@@ -201,7 +212,7 @@ public class BeMusicStatistics {
 	 * 全期間で1件以上のノート数としてカウントされるノートが存在する場合は0を示します。</p>
 	 * @return 無操作期間の比率
 	 */
-	public final double getNoPlayingRatio() {
+	public double getNoPlayingRatio() {
 		return mNoPlayingRatio;
 	}
 
@@ -209,7 +220,7 @@ public class BeMusicStatistics {
 	 * 無操作期間の比率設定
 	 * @param ratio 無操作期間の比率
 	 */
-	final void setNoPlayingRatio(double ratio) {
+	void setNoPlayingRatio(double ratio) {
 		mNoPlayingRatio = ratio;
 	}
 
@@ -221,7 +232,7 @@ public class BeMusicStatistics {
 	 * 操作継続中({@link BeMusicNoteType#LONG})しか存在しない場合などがこれに該当します。</p>
 	 * @return 視覚効果のない期間の比率
 	 */
-	public final double getNoVisualEffectRatio() {
+	public double getNoVisualEffectRatio() {
 		return mNoVisualEffectRatio;
 	}
 
@@ -229,7 +240,7 @@ public class BeMusicStatistics {
 	 * 視覚効果のない期間の比率設定
 	 * @param ratio 視覚効果のない期間の比率
 	 */
-	final void setNoVisualEffectRatio(double ratio) {
+	void setNoVisualEffectRatio(double ratio) {
 		mNoVisualEffectRatio = ratio;
 	}
 
@@ -241,7 +252,7 @@ public class BeMusicStatistics {
 	 * 多くの一般的な譜面では、注視点は時間の経過と共に左右に大きく振れます。</p>
 	 * @return 注視点傾向の値
 	 */
-	public final double getAverageGazePoint() {
+	public double getAverageGazePoint() {
 		return mAvgGazePoint;
 	}
 
@@ -253,7 +264,7 @@ public class BeMusicStatistics {
 	 * 多くの一般的な譜面では、注視点は時間の経過と共に左右に大きく振れます。</p>
 	 * @return 注視点傾向の値
 	 */
-	public final double getAverageGazePointR() {
+	public double getAverageGazePointR() {
 		return mAvgGazePointR;
 	}
 
@@ -262,7 +273,7 @@ public class BeMusicStatistics {
 	 * @param gazeL 注視点(スクラッチ左側、またはダブルプレー
 	 * @param gazeR 注視点(スクラッチ右側)
 	 */
-	final void setAverageGazePoint(double gazeL, double gazeR) {
+	void setAverageGazePoint(double gazeL, double gazeR) {
 		mAvgGazePoint = gazeL;
 		mAvgGazePointR = gazeR;
 	}
@@ -273,7 +284,7 @@ public class BeMusicStatistics {
 	 * この値は視覚効果のある期間のの視野幅({@link BeMusicTimeSpan#getViewWidth()})の平均値になります。</p>
 	 * @return 平均視野幅
 	 */
-	public final double getAverageViewWidth() {
+	public double getAverageViewWidth() {
 		return mAvgViewWidth;
 	}
 
@@ -283,7 +294,7 @@ public class BeMusicStatistics {
 	 * この値は視覚効果のある期間のの視野幅({@link BeMusicTimeSpan#getViewWidthR()})の平均値になります。</p>
 	 * @return 平均視野幅
 	 */
-	public final double getAverageViewWidthR() {
+	public double getAverageViewWidthR() {
 		return mAvgViewWidthR;
 	}
 
@@ -292,7 +303,7 @@ public class BeMusicStatistics {
 	 * @param widthL 平均視野幅(スクラッチ左側、またはダブルプレー)
 	 * @param widthR 平均視野幅(スクラッチ右側)
 	 */
-	final void setAverageViewWidth(double widthL, double widthR) {
+	void setAverageViewWidth(double widthL, double widthR) {
 		mAvgViewWidth = widthL;
 		mAvgViewWidthR = widthR;
 	}
@@ -305,7 +316,7 @@ public class BeMusicStatistics {
 	 * この値は視覚効果のある期間の注視点変動係数({@link BeMusicTimeSpan#getGazeSwingley()})の平均値になります。</p>
 	 * @return 注視点変動係数の平均値
 	 */
-	public final double getAverageGazeSwingley() {
+	public double getAverageGazeSwingley() {
 		return mAvgGazeSwingley;
 	}
 
@@ -317,7 +328,7 @@ public class BeMusicStatistics {
 	 * この値は視覚効果のある期間の注視点変動係数({@link BeMusicTimeSpan#getGazeSwingleyR()})の平均値になります。</p>
 	 * @return 注視点変動係数の平均値
 	 */
-	public final double getAverageGazeSwingleyR() {
+	public double getAverageGazeSwingleyR() {
 		return mAvgGazeSwingleyR;
 	}
 
@@ -326,7 +337,7 @@ public class BeMusicStatistics {
 	 * @param swingleyL 注視点変動係数(スクラッチ左側、またはダブルプレー)
 	 * @param swingleyR 注視点変動係数(スクラッチ右側)
 	 */
-	final void setAverageGazeSwingley(double swingleyL, double swingleyR) {
+	void setAverageGazeSwingley(double swingleyL, double swingleyR) {
 		mAvgGazeSwingley = swingleyL;
 		mAvgGazeSwingleyR = swingleyR;
 	}
@@ -339,7 +350,7 @@ public class BeMusicStatistics {
 	 * この値は視覚効果のある期間の視野幅変動係数({@link BeMusicTimeSpan#getViewSwingley()})の平均値になります。</p>
 	 * @return 視野幅変動係数の平均値
 	 */
-	public final double getAverageViewSwingley() {
+	public double getAverageViewSwingley() {
 		return mAvgViewSwingley;
 	}
 
@@ -351,7 +362,7 @@ public class BeMusicStatistics {
 	 * この値は視覚効果のある期間の視野幅変動係数({@link BeMusicTimeSpan#getViewSwingleyR()})の平均値になります。</p>
 	 * @return 視野幅変動係数の平均値
 	 */
-	public final double getAverageViewSwingleyR() {
+	public double getAverageViewSwingleyR() {
 		return mAvgViewSwingleyR;
 	}
 
@@ -360,7 +371,7 @@ public class BeMusicStatistics {
 	 * @param swingleyL 視野幅変動係数(スクラッチ左側、またはダブルプレー)
 	 * @param swingleyR 視野幅変動係数(スクラッチ右側)
 	 */
-	final void setAverageViewSwingley(double swingleyL, double swingleyR) {
+	void setAverageViewSwingley(double swingleyL, double swingleyR) {
 		mAvgViewSwingley = swingleyL;
 		mAvgViewSwingleyR = swingleyR;
 	}
@@ -375,7 +386,7 @@ public class BeMusicStatistics {
 	 * @return Delta Systemのアルゴリズムバージョン
 	 * @since 0.5.0
 	 */
-	public final String getRatingAlgorithmVersion() {
+	public String getRatingAlgorithmVersion() {
 		return mDsAlgoVer;
 	}
 
@@ -383,7 +394,7 @@ public class BeMusicStatistics {
 	 * Delta Systemのアルゴリズムバージョン設定
 	 * @param version Delta Systemのアルゴリズムバージョン
 	 */
-	final void setRatingAlgorithmVersion(String version) {
+	void setRatingAlgorithmVersion(String version) {
 		mDsAlgoVer = version;
 	}
 
@@ -413,10 +424,10 @@ public class BeMusicStatistics {
 	 * </table>
 	 * @param ratingType レーティング種別
 	 * @return Delta Systemによって算出されたレーティング値
-	 * @exception NullPointerException ratingTypeがnull
+	 * @throws NullPointerException ratingTypeがnull
 	 * @since 0.5.0
 	 */
-	public final int getRating(BeMusicRatingType ratingType) {
+	public int getRating(BeMusicRatingType ratingType) {
 		assertArgNotNull(ratingType, "ratingType");
 		var rating = mRatings[ratingType.getIndex()];
 		if (ratingType.isUnknown(rating)) {
@@ -432,7 +443,7 @@ public class BeMusicStatistics {
 	 * @param ratingType レーティング種別
 	 * @param rating レーティング値
 	 */
-	final void setRating(BeMusicRatingType ratingType, int rating) {
+	void setRating(BeMusicRatingType ratingType, int rating) {
 		mRatings[ratingType.getIndex()] = rating;
 	}
 
@@ -447,7 +458,7 @@ public class BeMusicStatistics {
 	 * @return レーティング値が最も大きいレーティング種別
 	 * @since 0.5.0
 	 */
-	public final BeMusicRatingType getPrimaryTendency() {
+	public BeMusicRatingType getPrimaryTendency() {
 		return mPrimaryTendency;
 	}
 
@@ -455,7 +466,7 @@ public class BeMusicStatistics {
 	 * 譜面主傾向設定
 	 * @param ratingType レーティング種別
 	 */
-	final void setPrimaryTendency(BeMusicRatingType ratingType) {
+	void setPrimaryTendency(BeMusicRatingType ratingType) {
 		mPrimaryTendency = ratingType;
 	}
 
@@ -471,7 +482,7 @@ public class BeMusicStatistics {
 	 * @return レーティング値が2番目に大きいレーティング種別
 	 * @since 0.5.0
 	 */
-	public final BeMusicRatingType getSecondaryTendency() {
+	public BeMusicRatingType getSecondaryTendency() {
 		return mSecondaryTendency;
 	}
 
@@ -479,7 +490,7 @@ public class BeMusicStatistics {
 	 * 譜面副次傾向設定
 	 * @param ratingType レーティング種別
 	 */
-	final void setSecondaryTendency(BeMusicRatingType ratingType) {
+	void setSecondaryTendency(BeMusicRatingType ratingType) {
 		mSecondaryTendency = ratingType;
 	}
 

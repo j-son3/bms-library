@@ -36,7 +36,7 @@ public enum Hand {
 	 * インデックス取得
 	 * @return インデックス
 	 */
-	final int getIndex() {
+	int getIndex() {
 		return mIndex;
 	}
 
@@ -44,7 +44,7 @@ public enum Hand {
 	 * 手の1文字表現取得
 	 * @return 手の1文字表現
 	 */
-	final char getChar() {
+	char getChar() {
 		return mChar;
 	}
 
@@ -52,7 +52,7 @@ public enum Hand {
 	 * 左手かどうか
 	 * @return 左手であればtrue
 	 */
-	final boolean isLeft() {
+	boolean isLeft() {
 		return this == LEFT;
 	}
 
@@ -60,7 +60,7 @@ public enum Hand {
 	 * 右手かどうか
 	 * @return 右手であればtrue
 	 */
-	final boolean isRight() {
+	boolean isRight() {
 		return this == RIGHT;
 	}
 

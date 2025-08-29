@@ -39,7 +39,7 @@ abstract class RatingRange<R> {
 	 * @param pos 位置(要素データリストのインデックス)
 	 * @return 指定位置がこの範囲データ内の位置を示していればtrue
 	 */
-	final boolean contains(int pos) {
+	boolean contains(int pos) {
 		return (pos >= first) && (pos <= last);
 	}
 
@@ -47,7 +47,7 @@ abstract class RatingRange<R> {
 	 * 範囲データが最小(最初と最後のインデックスが同一)か判定
 	 * @return 範囲データが最小であればtrue
 	 */
-	final boolean isOnePoint() {
+	boolean isOnePoint() {
 		return first == last;
 	}
 
@@ -55,7 +55,7 @@ abstract class RatingRange<R> {
 	 * この範囲データが先頭かどうか判定
 	 * @return 範囲データが先頭であればtrue
 	 */
-	final boolean isHead() {
+	boolean isHead() {
 		return prev == null;
 	}
 
@@ -63,7 +63,7 @@ abstract class RatingRange<R> {
 	 * この範囲データが末尾かどうか判定
 	 * @return 範囲データが末尾であればtrue
 	 */
-	final boolean isTail() {
+	boolean isTail() {
 		return next == null;
 	}
 
@@ -71,7 +71,7 @@ abstract class RatingRange<R> {
 	 * 前の範囲データがあるか判定
 	 * @return 前の範囲データがあればtrue
 	 */
-	final boolean hasPrev() {
+	boolean hasPrev() {
 		return prev != null;
 	}
 
@@ -79,7 +79,7 @@ abstract class RatingRange<R> {
 	 * 次の範囲データがあるか判定
 	 * @return 次の範囲データがあればtrue
 	 */
-	final boolean hasNext() {
+	boolean hasNext() {
 		return next != null;
 	}
 
@@ -88,7 +88,7 @@ abstract class RatingRange<R> {
 	 * @param elems 要素データリスト
 	 * @return 範囲データの時間
 	 */
-	final double time(List<? extends RatingElement> elems) {
+	double time(List<? extends RatingElement> elems) {
 		return Ds.timeDelta(elems, first, last);
 	}
 

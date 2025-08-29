@@ -32,7 +32,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.lmt.lib.bms.BmsContent;
-import com.lmt.lib.bms.BmsException;
 import com.lmt.lib.bms.BmsStandardLoader;
 
 /**
@@ -96,9 +95,8 @@ public class DeltaSystemTestPackage implements Closeable {
 	 * @param id テストデータID
 	 * @return テストデータ
 	 * @throws IOException データ読み込みエラー
-	 * @throws BmsException BMSライブラリエラー
 	 */
-	public Data load(String id) throws IOException, BmsException {
+	public Data load(String id) throws IOException {
 		return load(id, false);
 	}
 
@@ -108,9 +106,8 @@ public class DeltaSystemTestPackage implements Closeable {
 	 * @param includeOutOfScope Delta Systemと関連しないチャンネルを譜面データに含めるかどうか
 	 * @return テストデータ
 	 * @throws IOException データ読み込みエラー
-	 * @throws BmsException BMSライブラリエラー
 	 */
-	public Data load(String id, boolean includeOutOfScope) throws IOException, BmsException {
+	public Data load(String id, boolean includeOutOfScope) throws IOException {
 		// IDから対応するファイル名へ変換する
 		var fileName = mIdMap.get(id);
 		if (fileName == null) {
@@ -316,7 +313,7 @@ public class DeltaSystemTestPackage implements Closeable {
 				var content = (BmsContent)null;
 				try {
 					content = BeMusic.loadContentFrom(bmsFilePath, 1L, false);
-				} catch (IOException | BmsException e) {
+				} catch (IOException e) {
 					System.out.println("ERROR");
 					e.printStackTrace();
 					System.exit(-1);

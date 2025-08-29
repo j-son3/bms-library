@@ -52,7 +52,7 @@ class ComplexElement extends RatingElement {
 	 * @param lane レーン
 	 * @return 要素データ
 	 */
-	final Data getData(BeMusicLane lane) {
+	Data getData(BeMusicLane lane) {
 		return mData[lane.getIndex()];
 	}
 
@@ -61,7 +61,7 @@ class ComplexElement extends RatingElement {
 	 * @param lane レーン
 	 * @param data 要素データ
 	 */
-	final void setData(BeMusicLane lane, Data data) {
+	void setData(BeMusicLane lane, Data data) {
 		mData[lane.getIndex()] = data;
 	}
 
@@ -70,7 +70,7 @@ class ComplexElement extends RatingElement {
 	 * @param lane レーン
 	 * @return 楽曲位置総合評価点
 	 */
-	final double getTotalScore(BeMusicLane lane) {
+	double getTotalScore(BeMusicLane lane) {
 		var data = getData(lane);
 		return data.pointScore + data.backwardScore;
 	}

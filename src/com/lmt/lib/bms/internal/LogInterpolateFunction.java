@@ -24,7 +24,7 @@ public abstract class LogInterpolateFunction extends InterpolateFunction {
 	 * 曲線の強さ取得
 	 * @return 曲線の強さ
 	 */
-	public final double getStrength() {
+	public double getStrength() {
 		return mStrength;
 	}
 
@@ -32,7 +32,7 @@ public abstract class LogInterpolateFunction extends InterpolateFunction {
 	 * 出力値のオフセット量取得
 	 * @return 出力値のオフセット量
 	 */
-	public final double getOffset() {
+	public double getOffset() {
 		return mOffset;
 	}
 
@@ -41,7 +41,7 @@ public abstract class LogInterpolateFunction extends InterpolateFunction {
 	 * @param in 入力値
 	 * @return 反転した出力値
 	 */
-	public final double reverse(double in) {
+	public double reverse(double in) {
 		return mOutRange - compute(in);
 	}
 

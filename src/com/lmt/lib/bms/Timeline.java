@@ -232,7 +232,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param tick 小節の刻み位置
 	 * @return ノート
 	 */
-	final BmsNote getNote(int channel, int index, int measure, double tick) {
+	BmsNote getNote(int channel, int index, int measure, double tick) {
 		// 全体ノートリストから該当ノートを取得する
 		var target = note1(channel, index, measure, tick);
 		var got = mNotes.ceiling(target);
@@ -251,7 +251,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param inclusive 指定楽曲位置のノートも検索対象とするかどうか
 	 * @return 次のノート。そのようなノートが存在しない場合null
 	 */
-	final BmsNote getNextNote(int channel, int index, int measure, double tick, boolean inclusive) {
+	BmsNote getNextNote(int channel, int index, int measure, double tick, boolean inclusive) {
 		var notesCh = mNotesChMap.get(BmsInt.box(BmsChx.toInt(channel, index)));
 		if (notesCh == null) {
 			// 当該チャンネルにノートがない場合はnull
@@ -272,7 +272,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param inclusive 指定楽曲位置のノートも検索対象とするかどうか
 	 * @return 前のノート。そのようなノートが存在しない場合null
 	 */
-	final BmsNote getPreviousNote(int channel, int index, int measure, double tick, boolean inclusive) {
+	BmsNote getPreviousNote(int channel, int index, int measure, double tick, boolean inclusive) {
 		// チャンネルごとのノートリストから指定位置より前にある最初のノートを取得する
 		var notesCh = mNotesChMap.get(BmsInt.box(BmsChx.toInt(channel, index)));
 		if (notesCh == null) {
@@ -292,7 +292,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param measure 小節番号
 	 * @return 小節データ
 	 */
-	final BmsTimelineElement getMeasureValue(int channel, int index, int measure) {
+	BmsTimelineElement getMeasureValue(int channel, int index, int measure) {
 		return mMeasureList.get(measure).getValue(channel, index);
 	}
 
@@ -300,7 +300,7 @@ class Timeline<E extends MeasureElement> {
 	 * 小節数取得
 	 * @return 小節数
 	 */
-	final int getMeasureCount() {
+	int getMeasureCount() {
 		return mMeasureList.size();
 	}
 
@@ -310,7 +310,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param measure 小節番号
 	 * @return 配列型チャンネルのデータ数
 	 */
-	final int getNoteChannelDataCount(int channel, int measure) {
+	int getNoteChannelDataCount(int channel, int measure) {
 		return mMeasureList.get(measure).getNoteChannelDataCount(channel);
 	}
 
@@ -320,7 +320,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param measure 小節番号
 	 * @return 値型チャンネルのデータ数
 	 */
-	final int getValueChannelDataCount(int channel, int measure) {
+	int getValueChannelDataCount(int channel, int measure) {
 		return mMeasureList.get(measure).getValueChannelDataCount(channel);
 	}
 
@@ -329,7 +329,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param measure 小節番号
 	 * @return 指定小節の刻み数
 	 */
-	final double getMeasureTickCount(int measure) {
+	double getMeasureTickCount(int measure) {
 		if ((measure < BmsSpec.MEASURE_MIN) || (measure >= getMeasureCount())) {
 			return BmsSpec.TICK_COUNT_DEFAULT;
 		} else {
@@ -342,7 +342,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param measure 小節番号
 	 * @return 指定小節の刻み位置最大値
 	 */
-	final double getMeasureTickMax(int measure) {
+	double getMeasureTickMax(int measure) {
 		if ((measure < BmsSpec.MEASURE_MIN) || (measure >= getMeasureCount())) {
 			return Math.nextDown(BmsSpec.TICK_COUNT_DEFAULT);
 		} else {
@@ -355,7 +355,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param measure 小節番号
 	 * @return 拡張小節データ
 	 */
-	final E getMeasureData(int measure) {
+	E getMeasureData(int measure) {
 		var measureData = mMeasureList.get(measure);
 		return measureData;
 	}
@@ -365,7 +365,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param measure 小節番号
 	 * @return 指定小節のノートが存在しなければtrue、そうでなければfalse
 	 */
-	final boolean isMeasureEmptyNotes(int measure) {
+	boolean isMeasureEmptyNotes(int measure) {
 		return mMeasureList.get(measure).isEmptyNotes();
 	}
 
@@ -376,7 +376,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param tester ノートを検査するテスター
 	 * @return 見つかった次のノート。そのようなノートが存在しない場合null
 	 */
-	final BmsNote pointOf(int measureFrom, double tickFrom, Predicate<BmsNote> tester) {
+	BmsNote pointOf(int measureFrom, double tickFrom, Predicate<BmsNote> tester) {
 		// 指定位置から進行方向にノートを検索し、テスターの検査に合格した最初のノートを返す
 		for (var note : mNotes.tailSet(note1(BmsSpec.CHANNEL_MIN, BmsSpec.CHINDEX_MIN, measureFrom, tickFrom))) {
 			if (tester.test(note)) { return note; }
@@ -393,7 +393,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param outPoint 見つかった楽曲位置を格納する楽曲位置のインスタンス
 	 * @return パラメータで指定した楽曲位置のインスタンス
 	 */
-	final BmsPoint seekNextPoint(int measure, double tick, boolean inclusiveFrom, IntPredicate chTester, BmsPoint outPoint) {
+	BmsPoint seekNextPoint(int measure, double tick, boolean inclusiveFrom, IntPredicate chTester, BmsPoint outPoint) {
 		// 検索開始位置を決定する
 		var noteFrom = (BmsNote)null;
 		var inclusive = false;
@@ -453,7 +453,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param tickEnd 走査終了楽曲位置の小節の刻み位置(この位置を含まない)
 	 * @return タイムラインの指定楽曲位置の範囲を走査するストリーム
 	 */
-	final Stream<BmsTimelineElement> timeline(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
+	Stream<BmsTimelineElement> timeline(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
 		var spliterator = new ElementSpliterator(measureBegin, tickBegin, measureEnd, tickEnd);
 		return StreamSupport.stream(spliterator, false);
 	}
@@ -465,7 +465,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param channel2 チャンネル番号2
 	 * @param index2 チャンネルインデックス2
 	 */
-	final void swapNoteChannel(int channel1, int index1, int channel2, int index2) {
+	void swapNoteChannel(int channel1, int index1, int channel2, int index2) {
 		// 入れ替え対象チャンネルのデータを全件取り出す
 		var set1 = mNotesChMap.get(BmsInt.box(BmsChx.toInt(channel1, index1)));
 		var set2 = mNotesChMap.get(BmsInt.box(BmsChx.toInt(channel2, index2)));
@@ -490,7 +490,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param channel2 チャンネル番号2
 	 * @param index2 チャンネルインデックス2
 	 */
-	final void swapValueChannel(int channel1, int index1, int channel2, int index2) {
+	void swapValueChannel(int channel1, int index1, int channel2, int index2) {
 		// 入れ替え対象チャンネルの全小節データを抜き出す
 		var elems1 = pullChannelAllValues(channel1, index1);
 		var elems2 = pullChannelAllValues(channel2, index2);
@@ -510,7 +510,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param tEnd 列挙終了小節の刻み位置(この刻み位置を含まない)
 	 * @param action 列挙終了を判定する関数
 	 */
-	final void enumNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd, Consumer<BmsNote> action) {
+	void enumNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd, Consumer<BmsNote> action) {
 		var begin = note1(BmsSpec.CHANNEL_MIN, BmsSpec.CHINDEX_MIN, mBeg, tBeg);
 		var end = note2(BmsSpec.CHANNEL_MIN, BmsSpec.CHINDEX_MIN, mEnd, tEnd);
 		for (var note : mNotes.subSet(begin, true, end, false)) {
@@ -530,7 +530,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param tester リスト追加有無を判定するテスター
 	 * @return ノートリスト
 	 */
-	final List<BmsNote> listNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd,
+	List<BmsNote> listNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd,
 			Predicate<BmsNote> tester) {
 		// ノート列挙を使用して列挙されたノートをリスト化する
 		var notes = new ArrayList<BmsNote>();
@@ -546,7 +546,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param outList リスト化したノートを格納するリストインスタンス
 	 * @return パラメータで指定したリストインスタンス
 	 */
-	final List<BmsNote> listNotes(int channel, int index, int measure, List<BmsNote> outList) {
+	List<BmsNote> listNotes(int channel, int index, int measure, List<BmsNote> outList) {
 		mMeasureList.get(measure).listNotes(channel, index, outList);
 		return outList;
 	}
@@ -562,7 +562,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param tester カウント有無を判定するテスター
 	 * @return
 	 */
-	final int countNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd,
+	int countNotes(int chBeg, int chEnd, int mBeg, double tBeg, int mEnd, double tEnd,
 			Predicate<BmsNote> tester) {
 		// ノート列挙を使用して列挙されたノートをカウントする
 		var num = new MutableInt(0);
@@ -574,7 +574,7 @@ class Timeline<E extends MeasureElement> {
 	 * ノート追加
 	 * @param note 追加対象ノート
 	 */
-	final void putNote(BmsNote note) {
+	void putNote(BmsNote note) {
 		var oldMeasureCount = getMeasureCount();
 
 		// 全体ノートリストへ追加する(既存ノートであれば上書き)
@@ -610,7 +610,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param tick 小節の刻み位置
 	 * @return ノートを消去した場合true、そうでなければfalse
 	 */
-	final boolean removeNote(int channel, int index, int measure, double tick) {
+	boolean removeNote(int channel, int index, int measure, double tick) {
 		// 全体ノートリストから消去する
 		var result = mNotes.remove(note1(channel, index, measure, tick));
 
@@ -641,7 +641,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param where 追加位置
 	 * @param count 追加数
 	 */
-	final void insertMeasure(int where, int count) {
+	void insertMeasure(int where, int count) {
 		// 挿入位置以降の全ノートと全小節データを取得する
 		var oldMeasureCount = getMeasureCount();
 		var noteList = listNotes(BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX + 1, where, 0, oldMeasureCount, 0, n -> true);
@@ -661,7 +661,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param where 消去位置
 	 * @param count 消去数
 	 */
-	final void removeMeasure(int where, int count) {
+	void removeMeasure(int where, int count) {
 		// 消去対象以降の、移動対象全ノートと小節データを取得する
 		var measureCount = getMeasureCount();
 		var moveMeasureBase = where + count;
@@ -688,7 +688,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param measure 小節番号
 	 * @param value 小節データ
 	 */
-	final void putMeasureValue(int channel, int index, int measure, Object value) {
+	void putMeasureValue(int channel, int index, int measure, Object value) {
 		var oldMeasureCount = getMeasureCount();
 		var measureData = getOrCreateMeasureData(measure);
 
@@ -709,7 +709,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param index チャンネルインデックス
 	 * @param measure 小節番号
 	 */
-	final void removeMeasureValue(int channel, int index, int measure) {
+	void removeMeasureValue(int channel, int index, int measure) {
 		// 小節の範囲外に飛び出すノートを全て消去する
 		removeNotesOnShrinkedMeasureIfNeeded(channel, index, measure, null);
 
@@ -728,7 +728,7 @@ class Timeline<E extends MeasureElement> {
 	 * @param first 対象の最小小節番号
 	 * @param last 対象の最大小節番号
 	 */
-	final void updateRecalcRange(int first, int last) {
+	void updateRecalcRange(int first, int last) {
 		mRecalcFirst = Math.min(mRecalcFirst, first);
 		mRecalcLast = Math.max(mRecalcLast, last);
 	}
@@ -737,7 +737,7 @@ class Timeline<E extends MeasureElement> {
 	 * 時間・BPM再計算対象の小節データの再計算処理。
 	 * @return 小節データの再計算を行った場合true
 	 */
-	final boolean recalculateTime(Object userParam) {
+	boolean recalculateTime(Object userParam) {
 		// 再計算範囲が存在しない場合は再計算不要
 		if (mRecalcFirst > mRecalcLast) {
 			return false;

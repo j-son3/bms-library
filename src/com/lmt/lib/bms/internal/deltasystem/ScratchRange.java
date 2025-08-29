@@ -40,14 +40,14 @@ abstract class ScratchRange {
 		 * スクラッチ評価データ追加
 		 * @param pos 要素リストインデックス
 		 */
-		final void put(int pos) {
+		void put(int pos) {
 			this.scratches.put(pos, new ScratchEvaluation(pos));
 		}
 
 		/**
 		 * 現在のデータでスクラッチ範囲確定
 		 */
-		final void determineEnds() {
+		void determineEnds() {
 			this.first = this.scratches.firstEntry().getValue();
 			this.last = this.scratches.lastEntry().getValue();
 		}

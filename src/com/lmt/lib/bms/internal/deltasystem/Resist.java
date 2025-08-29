@@ -23,7 +23,7 @@ class Resist {
 	 * 指取得
 	 * @return 指
 	 */
-	final Finger getFinger() {
+	Finger getFinger() {
 		return mFinger;
 	}
 
@@ -31,7 +31,7 @@ class Resist {
 	 * 抵抗値取得
 	 * @return 抵抗値
 	 */
-	final double getValue() {
+	double getValue() {
 		return mValue;
 	}
 

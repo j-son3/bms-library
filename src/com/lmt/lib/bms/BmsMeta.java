@@ -78,7 +78,7 @@ import java.util.regex.Pattern;
  * @see BmsType
  * @since 0.0.1
  */
-public final class BmsMeta extends BmsMetaKey {
+public class BmsMeta extends BmsMetaKey {
 	/** メタ情報の名称に使用可能な文字列の正規表現パターンです。 */
 	public static final Pattern NAME_PATTERN = Pattern.compile("^(#|%)[a-z][a-z0-9_/]{0,62}$");
 
@@ -117,11 +117,11 @@ public final class BmsMeta extends BmsMetaKey {
 	 * @param order ソートキー
 	 * @param uniqueness 同一性チェック時に使用されるべきメタ情報かどうか
 	 * @return 単体メタ情報オブジェクト
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException typeがnull
-	 * @exception NullPointerException defaultValueがnull
-	 * @exception IllegalArgumentException nameが{@link #NAME_PATTERN}にマッチしない
-	 * @exception IllegalArgumentException defaultValueがtypeの書式に適合しない
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException typeがnull
+	 * @throws NullPointerException defaultValueがnull
+	 * @throws IllegalArgumentException nameが{@link #NAME_PATTERN}にマッチしない
+	 * @throws IllegalArgumentException defaultValueがtypeの書式に適合しない
 	 */
 	public static BmsMeta single(String name, BmsType type, String defaultValue, int order, boolean uniqueness) {
 		return new BmsMeta(name, BmsUnit.SINGLE, type, defaultValue, order, uniqueness);
@@ -135,11 +135,11 @@ public final class BmsMeta extends BmsMetaKey {
 	 * @param order ソートキー
 	 * @param uniqueness 同一性チェック時に使用されるべきメタ情報かどうか
 	 * @return 複数メタ情報オブジェクト
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException typeがnull
-	 * @exception NullPointerException defaultValueがnull
-	 * @exception IllegalArgumentException nameが{@link #NAME_PATTERN}にマッチしない
-	 * @exception IllegalArgumentException defaultValueがtypeの書式に適合しない
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException typeがnull
+	 * @throws NullPointerException defaultValueがnull
+	 * @throws IllegalArgumentException nameが{@link #NAME_PATTERN}にマッチしない
+	 * @throws IllegalArgumentException defaultValueがtypeの書式に適合しない
 	 */
 	public static BmsMeta multiple(String name, BmsType type, String defaultValue, int order, boolean uniqueness) {
 		return new BmsMeta(name, BmsUnit.MULTIPLE, type, defaultValue, order, uniqueness);
@@ -153,11 +153,11 @@ public final class BmsMeta extends BmsMetaKey {
 	 * @param order ソートキー
 	 * @param uniqueness 同一性チェック時に使用されるべきメタ情報かどうか
 	 * @return 索引付きメタ情報オブジェクト
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException typeがnull
-	 * @exception NullPointerException defaultValueがnull
-	 * @exception IllegalArgumentException nameが{@link #NAME_PATTERN}にマッチしない
-	 * @exception IllegalArgumentException defaultValueがtypeの書式に適合しない
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException typeがnull
+	 * @throws NullPointerException defaultValueがnull
+	 * @throws IllegalArgumentException nameが{@link #NAME_PATTERN}にマッチしない
+	 * @throws IllegalArgumentException defaultValueがtypeの書式に適合しない
 	 */
 	public static BmsMeta indexed(String name, BmsType type, String defaultValue, int order, boolean uniqueness) {
 		return new BmsMeta(name, BmsUnit.INDEXED, type, defaultValue, order, uniqueness);
@@ -168,9 +168,9 @@ public final class BmsMeta extends BmsMetaKey {
 	 * @param name メタ情報の名称
 	 * @param unit 構成単位
 	 * @return 任意型メタ情報オブジェクト
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
-	 * @exception IllegalArgumentException nameが{@link #NAME_PATTERN}にマッチしない
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
+	 * @throws IllegalArgumentException nameが{@link #NAME_PATTERN}にマッチしない
 	 */
 	public static BmsMeta object(String name, BmsUnit unit) {
 		return new BmsMeta(name, unit, BmsType.OBJECT, null, 0, false);
@@ -184,14 +184,14 @@ public final class BmsMeta extends BmsMetaKey {
 	 * @param defaultValue 初期値の文字列表現
 	 * @param order ソートキー
 	 * @param uniqueness 同一性チェック時に使用されるべきメタ情報かどうか
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
-	 * @exception NullPointerException typeがnull
-	 * @exception NullPointerException typeがOBJECT以外の時、defaultValueがnull
-	 * @exception IllegalArgumentException typeがOBJECTの時、defaultValueがnullではない
-	 * @exception IllegalArgumentException nameが{@link #NAME_PATTERN}にマッチしない
-	 * @exception IllegalArgumentException defaultValueがtypeの書式に適合しない
-	 * @exception IllegalArgumentException typeがOBJECTの時、uniquenessがtrue
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
+	 * @throws NullPointerException typeがnull
+	 * @throws NullPointerException typeがOBJECT以外の時、defaultValueがnull
+	 * @throws IllegalArgumentException typeがOBJECTの時、defaultValueがnullではない
+	 * @throws IllegalArgumentException nameが{@link #NAME_PATTERN}にマッチしない
+	 * @throws IllegalArgumentException defaultValueがtypeの書式に適合しない
+	 * @throws IllegalArgumentException typeがOBJECTの時、uniquenessがtrue
 	 */
 	public BmsMeta(String name, BmsUnit unit, BmsType type, String defaultValue, int order, boolean uniqueness) {
 		super(name, unit);
@@ -468,7 +468,7 @@ public final class BmsMeta extends BmsMetaKey {
 	/**
 	 * メタ情報を初期BPMメタ情報とする
 	 */
-	final void setIsInitialBpm() {
+	void setIsInitialBpm() {
 		mIsInitialBpm = true;
 	}
 
@@ -476,14 +476,14 @@ public final class BmsMeta extends BmsMetaKey {
 	 * 初期BPMメタ情報かどうか判定する
 	 * @return 初期BPMメタ情報ならtrue
 	 */
-	final boolean isInitialBpm() {
+	boolean isInitialBpm() {
 		return mIsInitialBpm;
 	}
 
 	/**
 	 * BPM変更チャンネルの参照先設定
 	 */
-	final void setIsReferenceBpm() {
+	void setIsReferenceBpm() {
 		mIsReferenceBpm = true;
 	}
 
@@ -491,14 +491,14 @@ public final class BmsMeta extends BmsMetaKey {
 	 * BPM変更チャンネルの参照先になっているかどうか判定
 	 * @return BPM変更チャンネルの参照先であればtrue
 	 */
-	final boolean isReferenceBpm() {
+	boolean isReferenceBpm() {
 		return mIsReferenceBpm;
 	}
 
 	/**
 	 * 譜面停止チャンネルの参照先設定
 	 */
-	final void setIsReferenceStop() {
+	void setIsReferenceStop() {
 		mIsReferenceStop = true;
 	}
 
@@ -506,14 +506,14 @@ public final class BmsMeta extends BmsMetaKey {
 	 * 譜面停止チャンネルの参照先になっているかどうか判定
 	 * @return 譜面停止チャンネルの参照先であればtrue
 	 */
-	final boolean isReferenceStop() {
+	boolean isReferenceStop() {
 		return mIsReferenceStop;
 	}
 
 	/**
 	 * メタ情報を基数選択メタ情報に設定
 	 */
-	final void setIsBaseChanger() {
+	void setIsBaseChanger() {
 		mIsBaseChanger = true;
 	}
 }

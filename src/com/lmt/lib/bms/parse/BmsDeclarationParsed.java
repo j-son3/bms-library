@@ -38,7 +38,7 @@ public class BmsDeclarationParsed extends BmsParsed {
 	 * @param value BMS宣言の値
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsDeclarationParsed set(int lineNumber, Object line, String name, String value) {
+	public BmsDeclarationParsed set(int lineNumber, Object line, String name, String value) {
 		this.lineNumber = lineNumber;
 		this.line = line;
 		this.name = name;

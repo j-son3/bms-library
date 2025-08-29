@@ -56,7 +56,7 @@ import static com.lmt.lib.bms.internal.Assertion.*;
  *
  * @since 0.0.1
  */
-public final class BmsChannel extends BmsChannelKey {
+public class BmsChannel extends BmsChannelKey {
 	/** チャンネルのデータ型 */
 	private BmsType mType;
 	/** チャンネルに関連するメタ情報の参照先の名前(索引付きであること) */
@@ -80,15 +80,15 @@ public final class BmsChannel extends BmsChannelKey {
 	 * @param defaultValue チャンネルデータの初期値
 	 * @param multiple チャンネルデータの重複許可フラグ
 	 * @param uniqueness 同一性チェックを行う際に参照されるチャンネルかどうかを示すフラグ
-	 * @exception NullPointerException typeがnull
-	 * @exception NullPointerException typeが{@link BmsType#OBJECT}以外の時、defaultValueがnull
-	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、defaultValueがnullではない
-	 * @exception IllegalArgumentException numberが{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}超過
-	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、仕様チャンネルを指定した
-	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、refがnullではない
-	 * @exception IllegalArgumentException データ型が値型で参照先メタ情報を指定した
-	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}以外の時、defaultValueがtypeのテストに失敗した
-	 * @exception IllegalArgumentException ユーザーチャンネルでuniquenessをtrueにしようとした
+	 * @throws NullPointerException typeがnull
+	 * @throws NullPointerException typeが{@link BmsType#OBJECT}以外の時、defaultValueがnull
+	 * @throws IllegalArgumentException typeが{@link BmsType#OBJECT}の時、defaultValueがnullではない
+	 * @throws IllegalArgumentException numberが{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}超過
+	 * @throws IllegalArgumentException typeが{@link BmsType#OBJECT}の時、仕様チャンネルを指定した
+	 * @throws IllegalArgumentException typeが{@link BmsType#OBJECT}の時、refがnullではない
+	 * @throws IllegalArgumentException データ型が値型で参照先メタ情報を指定した
+	 * @throws IllegalArgumentException typeが{@link BmsType#OBJECT}以外の時、defaultValueがtypeのテストに失敗した
+	 * @throws IllegalArgumentException ユーザーチャンネルでuniquenessをtrueにしようとした
 	 */
 	public BmsChannel(int number, BmsType type, String ref, String defaultValue, boolean multiple, boolean uniqueness) {
 		super(number);
@@ -103,17 +103,17 @@ public final class BmsChannel extends BmsChannelKey {
 	 * @param defaultValue チャンネルデータの初期値
 	 * @param multiple チャンネルデータの重複許可フラグ
 	 * @param uniqueness 同一性チェックを行う際に参照されるチャンネルかどうかを示すフラグ
-	 * @exception NullPointerException numberがnull
-	 * @exception NumberFormatException numberの内容が36進数ではない
-	 * @exception NullPointerException typeがnull
-	 * @exception NullPointerException typeが{@link BmsType#OBJECT}以外の時、defaultValueがnull
-	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、defaultValueがnullではない
-	 * @exception IllegalArgumentException numberが{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}超過
-	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、仕様チャンネルを指定した
-	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、refがnullではない
-	 * @exception IllegalArgumentException データ型が値型で参照先メタ情報を指定した
-	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}以外の時、defaultValueがtypeのテストに失敗した
-	 * @exception IllegalArgumentException ユーザーチャンネルでuniquenessをtrueにしようとした
+	 * @throws NullPointerException numberがnull
+	 * @throws NumberFormatException numberの内容が36進数ではない
+	 * @throws NullPointerException typeがnull
+	 * @throws NullPointerException typeが{@link BmsType#OBJECT}以外の時、defaultValueがnull
+	 * @throws IllegalArgumentException typeが{@link BmsType#OBJECT}の時、defaultValueがnullではない
+	 * @throws IllegalArgumentException numberが{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}超過
+	 * @throws IllegalArgumentException typeが{@link BmsType#OBJECT}の時、仕様チャンネルを指定した
+	 * @throws IllegalArgumentException typeが{@link BmsType#OBJECT}の時、refがnullではない
+	 * @throws IllegalArgumentException データ型が値型で参照先メタ情報を指定した
+	 * @throws IllegalArgumentException typeが{@link BmsType#OBJECT}以外の時、defaultValueがtypeのテストに失敗した
+	 * @throws IllegalArgumentException ユーザーチャンネルでuniquenessをtrueにしようとした
 	 */
 	public BmsChannel(String number, BmsType type, String ref, String defaultValue, boolean multiple, boolean uniqueness) {
 		super(number);
@@ -130,12 +130,12 @@ public final class BmsChannel extends BmsChannelKey {
 	 * @param multiple チャンネルデータの重複許可フラグ
 	 * @param uniqueness 同一性チェックを行う際に参照されるチャンネルかどうかを示すフラグ
 	 * @return 仕様チャンネルオブジェクト
-	 * @exception NullPointerException typeがnull
-	 * @exception NullPointerException defaultValueがnull
-	 * @exception IllegalArgumentException numberが{@link BmsSpec#SPEC_CHANNEL_MIN}未満または{@link BmsSpec#SPEC_CHANNEL_MAX}超過
-	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}
-	 * @exception IllegalArgumentException データ型が値型の時、refがnullではない
-	 * @exception IllegalArgumentException defaultValueがtypeのテストに失敗した
+	 * @throws NullPointerException typeがnull
+	 * @throws NullPointerException defaultValueがnull
+	 * @throws IllegalArgumentException numberが{@link BmsSpec#SPEC_CHANNEL_MIN}未満または{@link BmsSpec#SPEC_CHANNEL_MAX}超過
+	 * @throws IllegalArgumentException typeが{@link BmsType#OBJECT}
+	 * @throws IllegalArgumentException データ型が値型の時、refがnullではない
+	 * @throws IllegalArgumentException defaultValueがtypeのテストに失敗した
 	 * @since 0.7.0
 	 */
 	public static BmsChannel spec(int number, BmsType type, String ref, String defaultValue, boolean multiple,
@@ -153,13 +153,13 @@ public final class BmsChannel extends BmsChannelKey {
 	 * @param defaultValue チャンネルデータの初期値
 	 * @param multiple チャンネルデータの重複許可フラグ
 	 * @return ユーザーチャンネルオブジェクト
-	 * @exception NullPointerException typeがnull
-	 * @exception NullPointerException typeが{@link BmsType#OBJECT}以外の時、defaultValueがnull
-	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、defaultValueがnullではない
-	 * @exception IllegalArgumentException numberが{@link BmsSpec#USER_CHANNEL_MIN}未満または{@link BmsSpec#USER_CHANNEL_MAX}超過
-	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}の時、refがnullではない
-	 * @exception IllegalArgumentException データ型が値型で参照先メタ情報を指定した
-	 * @exception IllegalArgumentException typeが{@link BmsType#OBJECT}以外の時、defaultValueがtypeのテストに失敗した
+	 * @throws NullPointerException typeがnull
+	 * @throws NullPointerException typeが{@link BmsType#OBJECT}以外の時、defaultValueがnull
+	 * @throws IllegalArgumentException typeが{@link BmsType#OBJECT}の時、defaultValueがnullではない
+	 * @throws IllegalArgumentException numberが{@link BmsSpec#USER_CHANNEL_MIN}未満または{@link BmsSpec#USER_CHANNEL_MAX}超過
+	 * @throws IllegalArgumentException typeが{@link BmsType#OBJECT}の時、refがnullではない
+	 * @throws IllegalArgumentException データ型が値型で参照先メタ情報を指定した
+	 * @throws IllegalArgumentException typeが{@link BmsType#OBJECT}以外の時、defaultValueがtypeのテストに失敗した
 	 */
 	public static BmsChannel user(int number, BmsType type, String ref, String defaultValue, boolean multiple) {
 		assertUserChannelRange(number);
@@ -171,7 +171,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * <p>当メソッドではユーザーチャンネルの範囲外のチャンネル番号は指定できません。</p>
 	 * @param number チャンネル番号
 	 * @return 任意型ユーザーチャンネルオブジェクト
-	 * @exception IllegalArgumentException numberが{@link BmsSpec#USER_CHANNEL_MIN}未満または{@link BmsSpec#USER_CHANNEL_MAX}超過
+	 * @throws IllegalArgumentException numberが{@link BmsSpec#USER_CHANNEL_MIN}未満または{@link BmsSpec#USER_CHANNEL_MAX}超過
 	 */
 	public static BmsChannel object(int number) {
 		assertUserChannelRange(number);
@@ -191,7 +191,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * チャンネルのデータ用途を設定する
 	 * @param flag データ用途 1:小節長 2:BPM変更 3:譜面停止
 	 */
-	final void setRelatedFlag(int flag) {
+	void setRelatedFlag(int flag) {
 		mRelatedFlag = flag;
 	}
 
@@ -199,7 +199,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * チャンネルのデータ型を取得します。
 	 * @return チャンネルのデータ型
 	 */
-	public final BmsType getType() {
+	public BmsType getType() {
 		return mType;
 	}
 
@@ -211,7 +211,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * <p>参照先メタ情報を持たないチャンネルに対してこのメソッドを呼び出すとnullを返します。</p>
 	 * @return 参照先メタ情報の名称。参照先メタ情報を持たない場合はnull。
 	 */
-	public final String getRef() {
+	public String getRef() {
 		return mRef;
 	}
 
@@ -233,7 +233,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * このメソッドがnullを返さないことを保証します。</p>
 	 * @return このチャンネルのデータの初期値
 	 */
-	public final Object getDefaultValue() {
+	public Object getDefaultValue() {
 		return mDefaultValue;
 	}
 
@@ -242,7 +242,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * <p>この値がtrueになるチャンネルでは、1小節内に2つ以上のデータを持つことができます。</p>
 	 * @return 複数データを持つことができる場合はtrue
 	 */
-	public final boolean isMultiple() {
+	public boolean isMultiple() {
 		return mMultiple;
 	}
 
@@ -250,7 +250,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * チャンネルのデータがBMS定義の同一性を判定するために使用されるべきかどうかを取得します。
 	 * @return 同一性判定に使用されるべきである場合はtrue
 	 */
-	public final boolean isUniqueness() {
+	public boolean isUniqueness() {
 		return mUniqueness;
 	}
 
@@ -259,7 +259,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * @see BmsType#isArrayType
 	 * @return データ型が配列型の場合はtrue
 	 */
-	public final boolean isArrayType() {
+	public boolean isArrayType() {
 		return mType.isArrayType();
 	}
 
@@ -268,7 +268,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * @see BmsType#isValueType
 	 * @return データ型が値型の場合はtrue
 	 */
-	public final boolean isValueType() {
+	public boolean isValueType() {
 		return mType.isValueType();
 	}
 
@@ -282,7 +282,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * 定義方法については{@link BmsSpecBuilder}を参照してください。</p>
 	 * @return 演奏時間に関連するチャンネルである場合はtrue
 	 */
-	public final boolean isRelatedToTime() {
+	public boolean isRelatedToTime() {
 		return mRelatedFlag != 0;
 	}
 
@@ -290,7 +290,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * 小節長変更チャンネルであるかどうかを取得します。
 	 * @return 小節長変更チャンネルである場合はtrue
 	 */
-	public final boolean isLength() {
+	public boolean isLength() {
 		return mRelatedFlag == 1;
 	}
 
@@ -298,7 +298,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * BPM変更チャンネルであるかどうかを習得します。
 	 * @return BPM変更チャンネルである場合はtrue
 	 */
-	public final boolean isBpm() {
+	public boolean isBpm() {
 		return mRelatedFlag == 2;
 	}
 
@@ -306,7 +306,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * 譜面停止チャンネルであるかどうかを取得します。
 	 * @return 譜面停止チャンネルである場合はtrue
 	 */
-	public final boolean isStop() {
+	public boolean isStop() {
 		return mRelatedFlag == 3;
 	}
 
@@ -314,7 +314,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * 仕様チャンネルかどうかを取得します。
 	 * @return 仕様チャンネルである場合はtrue
 	 */
-	public final boolean isSpec() {
+	public boolean isSpec() {
 		var number = getNumber();
 		return (number >= BmsSpec.SPEC_CHANNEL_MIN) && (number <= BmsSpec.SPEC_CHANNEL_MAX);
 	}
@@ -323,7 +323,7 @@ public final class BmsChannel extends BmsChannelKey {
 	 * ユーザーチャンネルかどうかを取得します。
 	 * @return ユーザーチャンネルである場合はtrue
 	 */
-	public final boolean isUser() {
+	public boolean isUser() {
 		var number = getNumber();
 		return (number >= BmsSpec.USER_CHANNEL_MIN) && (number <= BmsSpec.USER_CHANNEL_MAX);
 	}
@@ -335,14 +335,14 @@ public final class BmsChannel extends BmsChannelKey {
 	 * @param defaultValue チャンネルデータの初期値
 	 * @param multiple チャンネルデータの重複許可フラグ
 	 * @param uniqueness 同一性チェックを行う際に参照されるチャンネルかどうかを示すフラグ
-	 * @exception NullPointerException typeがnull
-	 * @exception NullPointerException typeがOBJECT以外の時、defaultValueがnull
-	 * @exception IllegalArgumentException typeがOBJECTの時、defaultValueがnullではない
-	 * @exception IllegalArgumentException typeがOBJECTの時、仕様チャンネルを指定した
-	 * @exception IllegalArgumentException typeがOBJECTの時、refがnullではない
-	 * @exception IllegalArgumentException データ型が値型で参照先メタ情報を指定した
-	 * @exception IllegalArgumentException typeがOBJECT以外の時、defaultValueがtypeのテストに失敗した
-	 * @exception IllegalArgumentException ユーザーチャンネルでuniquenessをtrueにしようとした
+	 * @throws NullPointerException typeがnull
+	 * @throws NullPointerException typeがOBJECT以外の時、defaultValueがnull
+	 * @throws IllegalArgumentException typeがOBJECTの時、defaultValueがnullではない
+	 * @throws IllegalArgumentException typeがOBJECTの時、仕様チャンネルを指定した
+	 * @throws IllegalArgumentException typeがOBJECTの時、refがnullではない
+	 * @throws IllegalArgumentException データ型が値型で参照先メタ情報を指定した
+	 * @throws IllegalArgumentException typeがOBJECT以外の時、defaultValueがtypeのテストに失敗した
+	 * @throws IllegalArgumentException ユーザーチャンネルでuniquenessをtrueにしようとした
 	 */
 	private void initialize(BmsType type, String ref, String defaultValue, boolean multiple,
 			boolean uniqueness) {

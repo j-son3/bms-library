@@ -49,7 +49,7 @@ class ConfigLoader {
 	 * @param current 現在値
 	 * @return 数値データ
 	 */
-	final double numeric(String name, double current) {
+	double numeric(String name, double current) {
 		return read(name, current, Double::parseDouble);
 	}
 
@@ -59,7 +59,7 @@ class ConfigLoader {
 	 * @param current 現在値
 	 * @return 整数データ
 	 */
-	final int integer(String name, int current) {
+	int integer(String name, int current) {
 		return read(name, current, Integer::parseInt);
 	}
 
@@ -69,7 +69,7 @@ class ConfigLoader {
 	 * @param current 現在値
 	 * @return 線形補間データ
 	 */
-	final LinearInterpolateFunction ipfnLinear(String name, LinearInterpolateFunction current) {
+	LinearInterpolateFunction ipfnLinear(String name, LinearInterpolateFunction current) {
 		return read(name, current, v -> {
 			var values = Stream.of(v.split(",")).mapToDouble(Double::parseDouble).toArray();
 			var points = DoubleStream.of(values).skip(2).toArray();
@@ -83,7 +83,7 @@ class ConfigLoader {
 	 * @param current 現在値
 	 * @return 対数補間データ
 	 */
-	final LogInterpolateFunction ipfnLog(String name, LogInterpolateFunction current) {
+	LogInterpolateFunction ipfnLog(String name, LogInterpolateFunction current) {
 		return read(name, current, v -> {
 			var values = Stream.of(v.split(",")).mapToDouble(Double::parseDouble).toArray();
 			if (values.length != 4) {

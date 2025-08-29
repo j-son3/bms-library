@@ -17,8 +17,8 @@ public class BmsScriptErrorTest {
 		assertEquals("content", err.getLine());
 		// テスト2
 		var ex = new Exception("Test exception");
-		var err2 = new BmsScriptError(BmsErrorType.PANIC, 9999, "has_exception", "message", ex);
-		assertEquals(BmsErrorType.PANIC, err2.getType());
+		var err2 = new BmsScriptError(BmsErrorType.WRONG_DATA, 9999, "has_exception", "message", ex);
+		assertEquals(BmsErrorType.WRONG_DATA, err2.getType());
 		assertEquals(9999, err2.getLineNumber());
 		assertEquals("has_exception", err2.getLine());
 		assertEquals("message", err2.getMessage());

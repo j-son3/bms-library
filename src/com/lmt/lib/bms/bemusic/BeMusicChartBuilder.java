@@ -134,7 +134,7 @@ public class BeMusicChartBuilder {
 	 * 当ビルダーでの動作保証外になります。</p>
 	 * <p>当コンストラクタで構築したBMS譜面ビルダーはデフォルトで全ての情報をシークする設定になっています。</p>
 	 * @param content BMSコンテンツ
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 */
 	public BeMusicChartBuilder(BmsContent content) {
 		this(content, true);
@@ -149,7 +149,7 @@ public class BeMusicChartBuilder {
 	 * isSeekAll引数をtrueにすると全ての情報をシークし、falseにすると最小限の情報のみシークします。</p>
 	 * @param content BMSコンテンツ
 	 * @param isSeekAll 全情報シーク有無
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @since 0.8.0
 	 */
 	public BeMusicChartBuilder(BmsContent content, boolean isSeekAll) {
@@ -171,9 +171,9 @@ public class BeMusicChartBuilder {
 	 * 保証することができます。アプリケーションの実装都合に合わせて小節線有無を決定してください。</p>
 	 * @param seek 小節線有無
 	 * @return このBMS譜面ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS譜面生成中
+	 * @throws IllegalStateException BMS譜面生成中
 	 */
-	public final BeMusicChartBuilder setSeekMeasureLine(boolean seek) {
+	public BeMusicChartBuilder setSeekMeasureLine(boolean seek) {
 		assertNotSeeking();
 		mSeekMeasureLine = seek;
 		return this;
@@ -183,9 +183,9 @@ public class BeMusicChartBuilder {
 	 * 可視オブジェを楽曲位置情報に含めるかどうかを設定します。
 	 * @param seek 可視オブジェ有無
 	 * @return このBMS譜面ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS譜面生成中
+	 * @throws IllegalStateException BMS譜面生成中
 	 */
-	public final BeMusicChartBuilder setSeekVisible(boolean seek) {
+	public BeMusicChartBuilder setSeekVisible(boolean seek) {
 		assertNotSeeking();
 		mSeekVisible = seek;
 		return this;
@@ -195,9 +195,9 @@ public class BeMusicChartBuilder {
 	 * 不可視オブジェを楽曲位置情報に含めるかどうかを設定します。
 	 * @param seek 不可視オブジェ有無
 	 * @return このBMS譜面ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS譜面生成中
+	 * @throws IllegalStateException BMS譜面生成中
 	 */
-	public final BeMusicChartBuilder setSeekInvisible(boolean seek) {
+	public BeMusicChartBuilder setSeekInvisible(boolean seek) {
 		assertNotSeeking();
 		mSeekInvisible = seek;
 		return this;
@@ -207,9 +207,9 @@ public class BeMusicChartBuilder {
 	 * 地雷オブジェを楽曲位置情報に含めるかどうかを設定します。
 	 * @param seek 地雷オブジェ有無
 	 * @return このBMS譜面ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS譜面生成中
+	 * @throws IllegalStateException BMS譜面生成中
 	 */
-	public final BeMusicChartBuilder setSeekMine(boolean seek) {
+	public BeMusicChartBuilder setSeekMine(boolean seek) {
 		assertNotSeeking();
 		mSeekMine = seek;
 		return this;
@@ -219,9 +219,9 @@ public class BeMusicChartBuilder {
 	 * BGMを楽曲位置情報に含めるかどうかを設定します。
 	 * @param seek BGM有無
 	 * @return このBMS譜面ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS譜面生成中
+	 * @throws IllegalStateException BMS譜面生成中
 	 */
-	public final BeMusicChartBuilder setSeekBgm(boolean seek) {
+	public BeMusicChartBuilder setSeekBgm(boolean seek) {
 		assertNotSeeking();
 		mSeekBgm = seek;
 		return this;
@@ -231,9 +231,9 @@ public class BeMusicChartBuilder {
 	 * BGAを楽曲位置情報に含めるかどうかを設定します。
 	 * @param seek BGA有無
 	 * @return このBMS譜面ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS譜面生成中
+	 * @throws IllegalStateException BMS譜面生成中
 	 */
-	public final BeMusicChartBuilder setSeekBga(boolean seek) {
+	public BeMusicChartBuilder setSeekBga(boolean seek) {
 		assertNotSeeking();
 		mSeekBga = seek;
 		return this;
@@ -243,9 +243,9 @@ public class BeMusicChartBuilder {
 	 * テキストを楽曲位置情報に含めるかどうかを設定します。
 	 * @param seek テキスト有無
 	 * @return このBMS譜面ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS譜面生成中
+	 * @throws IllegalStateException BMS譜面生成中
 	 */
-	public final BeMusicChartBuilder setSeekText(boolean seek) {
+	public BeMusicChartBuilder setSeekText(boolean seek) {
 		assertNotSeeking();
 		mSeekText = seek;
 		return this;
@@ -260,11 +260,11 @@ public class BeMusicChartBuilder {
 	 * <p>デフォルトでは{@link BeMusicPoint}を生成する関数が設定されています。</p>
 	 * @param creator 楽曲位置情報生成関数
 	 * @return このBMS譜面ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS譜面生成中
-	 * @exception NullPointerException creatorがnull
+	 * @throws IllegalStateException BMS譜面生成中
+	 * @throws NullPointerException creatorがnull
 	 * @since 0.8.0
 	 */
-	public final BeMusicChartBuilder setPointCreator(Supplier<BeMusicPoint> creator) {
+	public BeMusicChartBuilder setPointCreator(Supplier<BeMusicPoint> creator) {
 		assertNotSeeking();
 		assertArgNotNull(creator, "creator");
 		mPointCreator = creator;
@@ -280,11 +280,11 @@ public class BeMusicChartBuilder {
 	 * <p>デフォルトでは{@link BeMusicChart}を生成する関数が設定されています。</p>
 	 * @param creator BMS譜面生成関数
 	 * @return このBMS譜面ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS譜面生成中
-	 * @exception NullPointerException creatorがnull
+	 * @throws IllegalStateException BMS譜面生成中
+	 * @throws NullPointerException creatorがnull
 	 * @since 0.8.0
 	 */
-	public final BeMusicChartBuilder setChartCreator(Supplier<BeMusicChart> creator) {
+	public BeMusicChartBuilder setChartCreator(Supplier<BeMusicChart> creator) {
 		assertNotSeeking();
 		assertArgNotNull(creator, "creator");
 		mChartCreator = creator;
@@ -295,7 +295,7 @@ public class BeMusicChartBuilder {
 	 * 処理対象のBMSコンテンツを取得します。
 	 * @return 処理対象のBMSコンテンツ
 	 */
-	public final BmsContent getContent() {
+	public BmsContent getContent() {
 		return mContent;
 	}
 
@@ -307,9 +307,9 @@ public class BeMusicChartBuilder {
 	 * <p>当メソッドと{@link #next()}メソッドは低レベルAPIです。これらのメソッドを用いてBMS譜面を構築することは
 	 * 推奨されません。代わりに{@link #createList()}または{@link #createChart()}を使用してください。</p>
 	 * @return 楽曲位置情報
-	 * @exception IllegalStateException 処理対象BMSコンテンツが参照モードではない
+	 * @throws IllegalStateException 処理対象BMSコンテンツが参照モードではない
 	 */
-	public final BeMusicPoint first() {
+	public BeMusicPoint first() {
 		setup();
 		var first = createPoint(true);
 		mPrevPoint = first;
@@ -324,10 +324,10 @@ public class BeMusicChartBuilder {
 	 * <p>当メソッドと{@link #first()}メソッドは低レベルAPIです。これらのメソッドを用いてBMS譜面を構築することは
 	 * 推奨されません。代わりに{@link #createList()}または{@link #createChart()}を使用してください。</p>
 	 * @return 楽曲位置情報
-	 * @exception IllegalStateException BMS譜面生成中ではない({@link #first()}が実行されていない)
-	 * @exception IllegalStateException 処理対象BMSコンテンツが参照モードではない
+	 * @throws IllegalStateException BMS譜面生成中ではない({@link #first()}が実行されていない)
+	 * @throws IllegalStateException 処理対象BMSコンテンツが参照モードではない
 	 */
-	public final BeMusicPoint next() {
+	public BeMusicPoint next() {
 		assertSeeking();
 		var next = createPoint(false);
 		mPrevPoint = next;
@@ -345,7 +345,7 @@ public class BeMusicChartBuilder {
 	 * </pre>
 	 * @return 楽曲位置情報リスト
 	 */
-	public final List<BeMusicPoint> createList() {
+	public List<BeMusicPoint> createList() {
 		var result = new ArrayList<BeMusicPoint>();
 		for (var data = first(); data != null; data = next()) { result.add(data); }
 		return result;
@@ -357,7 +357,7 @@ public class BeMusicChartBuilder {
 	 * {@link BeMusicChart}オブジェクトを構築する手順を簡略化するヘルパーメソッドです。</p>
 	 * @return BMS譜面オブジェクト
 	 */
-	public final BeMusicChart createChart() {
+	public BeMusicChart createChart() {
 		return BeMusicChart.create(createList(), mChartCreator);
 	}
 
@@ -367,7 +367,7 @@ public class BeMusicChartBuilder {
 	 * <pre>new BeMusicChartBuilder(content).createChart();</pre>
 	 * @param content BMSコンテンツ
 	 * @return BMS譜面オブジェクト
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @since 0.8.0
 	 */
 	public static BeMusicChart createChart(BmsContent content) {
@@ -451,8 +451,8 @@ public class BeMusicChartBuilder {
 	 * 楽曲位置情報生成
 	 * @param inclusiveFrom 現在位置を含めた検索を行うかどうか
 	 * @return 楽曲位置情報
-	 * @exception IllegalStateException 対象BMSコンテンツが参照モードではない
-	 * @exception NullPointerException 楽曲位置情報生成関数がnullを返した
+	 * @throws IllegalStateException 対象BMSコンテンツが参照モードではない
+	 * @throws NullPointerException 楽曲位置情報生成関数がnullを返した
 	 */
 	private BeMusicPoint createPoint(boolean inclusiveFrom) {
 		// アサーション
@@ -764,7 +764,7 @@ public class BeMusicChartBuilder {
 
 	/**
 	 * シーク中であることを確認するアサーション
-	 * @exception IllegalStateException シーク中ではない
+	 * @throws IllegalStateException シーク中ではない
 	 */
 	private void assertSeeking() {
 		assertField(mSeeking, "This operation can't be performed while NOT seeking.");
@@ -772,7 +772,7 @@ public class BeMusicChartBuilder {
 
 	/**
 	 * シーク中でないことを確認するアサーション
-	 * @exception IllegalStateException シーク中
+	 * @throws IllegalStateException シーク中
 	 */
 	private void assertNotSeeking() {
 		assertField(!mSeeking, "This operation can't be performed while seeking.");
@@ -780,7 +780,7 @@ public class BeMusicChartBuilder {
 
 	/**
 	 * 対象コンテンツが参照モードであることを確認するアサーション
-	 * @exception IllegalStateException 対象コンテンツが参照モードではない
+	 * @throws IllegalStateException 対象コンテンツが参照モードではない
 	 */
 	private void assertIsReferenceMode() {
 		assertField(mContent.isReferenceMode(), "Content is NOT reference mode.");

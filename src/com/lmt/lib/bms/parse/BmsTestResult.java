@@ -64,7 +64,7 @@ public class BmsTestResult {
 	 * <p>この値が示すのは {@link #RESULT_OK}, {@link #RESULT_FAIL}, {@link #RESULT_THROUGH} のいずれかです。</p>
 	 * @return 検査結果の値
 	 */
-	public final int getResult() {
+	public int getResult() {
 		return mResult;
 	}
 
@@ -74,7 +74,7 @@ public class BmsTestResult {
 	 * 用いることを想定しています。検査失敗以外の結果ではメッセージを参照する機会がないためnullとなります。</p>
 	 * @return メッセージ
 	 */
-	public final String getMessage() {
+	public String getMessage() {
 		return mMessage;
 	}
 

@@ -20,7 +20,6 @@ public class BmsErrorTypeTest {
 		assertTrue(BmsErrorType.REDEFINE.isScriptError());
 		assertTrue(BmsErrorType.SPEC_VIOLATION.isScriptError());
 		assertTrue(BmsErrorType.COMMENT_NOT_CLOSED.isScriptError());
-		assertTrue(BmsErrorType.PANIC.isScriptError());
 		assertFalse(BmsErrorType.COMMON.isScriptError());
 	}
 
@@ -39,7 +38,6 @@ public class BmsErrorTypeTest {
 		assertFalse(BmsErrorType.REDEFINE.isCommonError());
 		assertFalse(BmsErrorType.SPEC_VIOLATION.isCommonError());
 		assertFalse(BmsErrorType.COMMENT_NOT_CLOSED.isCommonError());
-		assertFalse(BmsErrorType.PANIC.isCommonError());
 		assertTrue(BmsErrorType.COMMON.isCommonError());
 	}
 

@@ -34,7 +34,7 @@ class ScratchEvaluation {
 	 * @param note ノート種別
 	 * @return true:操作あり / false:操作なし
 	 */
-	final boolean getStatus(Scratch.Area area, Scratch.Note note) {
+	boolean getStatus(Scratch.Area area, Scratch.Note note) {
 		return getStatus(0, area.shift, note.shift);
 	}
 
@@ -44,7 +44,7 @@ class ScratchEvaluation {
 	 * @param note ノート種別
 	 * @param status 操作有無
 	 */
-	final void setStatus(Scratch.Area area, Scratch.Note note, boolean status) {
+	void setStatus(Scratch.Area area, Scratch.Note note, boolean status) {
 		setStatus(0, area.shift, note.shift, status);
 	}
 
@@ -54,7 +54,7 @@ class ScratchEvaluation {
 	 * @param note ノート種別
 	 * @return true:操作あり / false:操作なし
 	 */
-	final boolean getBehindStatus(Scratch.Area area, Scratch.Note note) {
+	boolean getBehindStatus(Scratch.Area area, Scratch.Note note) {
 		return getStatus(Scratch.Area.TOTAL_BITS, area.shift, note.shift);
 	}
 
@@ -64,7 +64,7 @@ class ScratchEvaluation {
 	 * @param note ノート種別
 	 * @param status 操作有無
 	 */
-	final void setBehindStatus(Scratch.Area area, Scratch.Note note, boolean status) {
+	void setBehindStatus(Scratch.Area area, Scratch.Note note, boolean status) {
 		setStatus(Scratch.Area.TOTAL_BITS, area.shift, note.shift, status);
 	}
 
@@ -73,7 +73,7 @@ class ScratchEvaluation {
 	 * @param area 領域
 	 * @return 状態の文字列表現
 	 */
-	final String makeStatusString(Scratch.Area area) {
+	String makeStatusString(Scratch.Area area) {
 		return makeStatusString(0, area.shift);
 	}
 
@@ -82,7 +82,7 @@ class ScratchEvaluation {
 	 * @param area 領域
 	 * @return 状態の文字列表現
 	 */
-	final String makeBehindStatusString(Scratch.Area area) {
+	String makeBehindStatusString(Scratch.Area area) {
 		return makeStatusString(Scratch.Area.TOTAL_BITS, area.shift);
 	}
 

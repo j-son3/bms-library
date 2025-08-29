@@ -47,7 +47,7 @@ public enum BeMusicRank {
 	 * 当該列挙値が示す実際の値(#RANKに設定される値)を取得します。
 	 * @return 実際の値
 	 */
-	public final long getNativeValue() {
+	public long getNativeValue() {
 		return mNativeValue;
 	}
 
@@ -55,7 +55,7 @@ public enum BeMusicRank {
 	 * 当該列挙値が示す文字列表記を取得します。
 	 * @return 文字列表記
 	 */
-	public final String getString() {
+	public String getString() {
 		return mString;
 	}
 

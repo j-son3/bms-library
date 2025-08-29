@@ -60,7 +60,7 @@ public enum BeMusicScratchMode {
 	 * インデックス値を取得します。
 	 * @return インデックス値
 	 */
-	public final int getIndex() {
+	public int getIndex() {
 		return mIndex;
 	}
 

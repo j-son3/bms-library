@@ -238,7 +238,7 @@ enum Fingering {
 	 * 運指の1文字表現取得
 	 * @return 運指の1文字表現
 	 */
-	final char getChar() {
+	char getChar() {
 		return mChar;
 	}
 
@@ -247,7 +247,7 @@ enum Fingering {
 	 * @param device 入力デバイス
 	 * @return アサインされた指
 	 */
-	final Finger getFinger(BeMusicDevice device) {
+	Finger getFinger(BeMusicDevice device) {
 		return mFingersFromDevice[device.getIndex()];
 	}
 
@@ -256,7 +256,7 @@ enum Fingering {
 	 * @param finger 指
 	 * @return 周囲指からの抵抗情報
 	 */
-	final Resist[] getResists(Finger finger) {
+	Resist[] getResists(Finger finger) {
 		return mResistTable[finger.getIndex()];
 	}
 
@@ -265,7 +265,7 @@ enum Fingering {
 	 * @param hand 手
 	 * @return 担当する入力デバイス一覧
 	 */
-	final List<BeMusicDevice> getDevices(Hand hand) {
+	List<BeMusicDevice> getDevices(Hand hand) {
 		return hand.isLeft() ? mDevicesLeftHand : mDevicesRightHand;
 	}
 
@@ -274,7 +274,7 @@ enum Fingering {
 	 * @param finger 指
 	 * @return 担当する入力デバイス一覧
 	 */
-	final List<BeMusicDevice> getDevices(Finger finger) {
+	List<BeMusicDevice> getDevices(Finger finger) {
 		return mDevicesMappedByFinger.get(finger.getIndex());
 	}
 
@@ -333,7 +333,7 @@ enum Fingering {
 	 * @param map 解析結果の追記先マップ
 	 * @param devs 入力デバイスリスト
 	 * @param def 定義内容
-	 * @exception IllegalArgumentException 定義内容の構文エラー
+	 * @throws IllegalArgumentException 定義内容の構文エラー
 	 */
 	private static void parseDeviceFinger(Map<BeMusicDevice, Finger> map, List<BeMusicDevice> devs, String def) {
 		try {
@@ -367,7 +367,7 @@ enum Fingering {
 	 * 動作指と抵抗値定義解析
 	 * @param map 解析結果の追記先マップ
 	 * @param def 定義内容
-	 * @exception IllegalArgumentException 定義内容の構文エラー
+	 * @throws IllegalArgumentException 定義内容の構文エラー
 	 */
 	private static void parseResist(Map<Finger, Resist[]> map, String def) {
 		// 定義内容を解析する

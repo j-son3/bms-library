@@ -61,7 +61,7 @@ public class BmsError {
 	 * @param errType エラー種別
 	 * @param message エラーメッセージ
 	 * @param cause エラー原因となった例外
-	 * @exception NullPointerException errTypeがnull
+	 * @throws NullPointerException errTypeがnull
 	 */
 	BmsError(BmsErrorType errType, String message, Throwable cause) {
 		assertArgNotNull(errType, "errType");
@@ -85,7 +85,7 @@ public class BmsError {
 	 * エラー種別を取得します。
 	 * @return エラー種別
 	 */
-	public final BmsErrorType getType() {
+	public BmsErrorType getType() {
 		return mErrType;
 	}
 

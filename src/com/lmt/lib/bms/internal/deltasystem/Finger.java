@@ -73,7 +73,7 @@ enum Finger {
 	 * インデックス取得
 	 * @return インデックス
 	 */
-	final int getIndex() {
+	int getIndex() {
 		return mIndex;
 	}
 
@@ -81,7 +81,7 @@ enum Finger {
 	 * 指の強さ取得
 	 * @return 指の強さ
 	 */
-	final double getStrength() {
+	double getStrength() {
 		return mStrength;
 	}
 
@@ -89,7 +89,7 @@ enum Finger {
 	 * 指の付いた手取得
 	 * @return 指の付いた手
 	 */
-	final Hand getHand() {
+	Hand getHand() {
 		return mHand;
 	}
 

@@ -1463,7 +1463,7 @@ public class BeMusicBmsonLoader extends BmsLoader {
 	 * 標準フォーマットのメタ情報、チャンネルに変換して返します。具体的なbmsonの読み取り手順については、
 	 * {@link BeMusicBmsonLoader}のドキュメントを参照してください。</p>
 	 * @return BMSコンテンツの要素、またはエラー要素。これ以上要素がない場合はnull。
-	 * @exception BmsCompatException BMSライブラリで表現できない定義を検出した時
+	 * @throws BmsCompatException BMSライブラリで表現できない定義を検出した時
 	 */
 	@Override
 	protected BmsParsed nextElement() throws BmsCompatException {

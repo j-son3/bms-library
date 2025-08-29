@@ -2,6 +2,7 @@ package com.lmt.lib.bms;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -12,7 +13,7 @@ public class BmsLoadHandlerTest {
 	// createContent(BmsSpec)
 	// 返却したBmsContentと同じオブジェクト参照がload()の戻り値として返却されること
 	@Test
-	public void testCreateContent_001() throws Exception {
+	public void testCreateContent_Normal() throws Exception {
 		var content = new BmsContent[] { null };
 		var loadedContent = testHandler(new BmsLoadHandler() {
 			@Override public BmsContent createContent(BmsSpec spec) {
@@ -24,24 +25,24 @@ public class BmsLoadHandlerTest {
 	}
 
 	// createContent(BmsSpec)
-	// I/F内で例外をスローするとBmsExceptionがスローされ、その中にI/Fでスローした例外が内包されていること
+	// I/F内で例外をスローするとBmsHandleExceptionがスローされ、その中にI/Fでスローした例外が内包されていること
 	@Test
-	public void testCreateContent_002() throws Exception {
-		var e = assertThrows(BmsException.class, () -> {
+	public void testCreateContent_UnexpectedException() throws Exception {
+		var e = assertThrows(BmsHandleException.class, () -> {
 			testHandler(new BmsLoadHandler() {
 				@Override public BmsContent createContent(BmsSpec spec) {
-					throw new RuntimeException("EXCEPTION");
+					throw new IllegalArgumentException("EXCEPTION");
 				}
 			}, "");
 		});
-		assertEquals(RuntimeException.class, e.getCause().getClass());
+		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// createContent(BmsSpec)
-	// パラメータで渡されたBmsSpec以外を指定したBmsContentを返すと、BmsExceptionがスローされること
+	// パラメータで渡されたBmsSpec以外を指定したBmsContentを返すと、BmsHandleExceptionがスローされること
 	@Test
-	public void testCreateContent_003() throws Exception {
-		assertThrows(BmsException.class, () -> {
+	public void testCreateContent_IllegalSpec() throws Exception {
+		assertThrows(BmsHandleException.class, () -> {
 			testHandler(new BmsLoadHandler() {
 				@Override public BmsContent createContent(BmsSpec spec) {
 					return new BmsContent(BmsTest.createTestSpec());
@@ -50,10 +51,21 @@ public class BmsLoadHandlerTest {
 		});
 	}
 
+	// createContent(BmsSpec)
+	// nullを返すとBmsHandleExceptionがスローされること
+	@Test
+	public void testCreateContent_ReturnNull() throws Exception {
+		assertThrows(BmsHandleException.class, () -> testHandler(new BmsLoadHandler() {
+			@Override public BmsContent createContent(BmsSpec spec) {
+				return null;
+			}
+		}, ""));
+	}
+
 	// createNote()
 	// 返却したBmsNoteオブジェクトがBMSコンテンツ内に格納されていること
 	@Test
-	public void testCreateNote_001() throws Exception {
+	public void testCreateNote_Normal() throws Exception {
 		var tempNote = new BmsNote[] { null };
 		var content = testHandler(new BmsLoadHandler() {
 			@Override public BmsNote createNote() {
@@ -78,7 +90,7 @@ public class BmsLoadHandlerTest {
 	// createNote()
 	// 返却したBmsNoteオブジェクトでonCreateが呼び出されること
 	@Test
-	public void testCreateNote_002() throws Exception {
+	public void testCreateNote_OnCreate() throws Exception {
 		var content = testHandler(new BmsLoadHandler() {
 			@Override public BmsNote createNote() {
 				return new BmsNote4TestCreateNote002();
@@ -91,38 +103,36 @@ public class BmsLoadHandlerTest {
 	}
 
 	// createNote()
-	// I/F内で例外をスローするとBmsExceptionがスローされ、その中にI/Fでスローした例外が内包されていること
+	// I/F内で例外をスローするとBmsHandleExceptionがスローされ、その中にI/Fでスローした例外が内包されていること
 	@Test
-	public void testCreateNote_003() throws Exception {
-		var e = assertThrows(BmsException.class, () -> {
+	public void testCreateNote_UnexpectedException() throws Exception {
+		var e = assertThrows(BmsHandleException.class, () -> {
 			testHandler(new BmsLoadHandler() {
 				@Override public BmsNote createNote() {
-					throw new RuntimeException("EXCEPTION");
+					throw new IllegalArgumentException("EXCEPTION");
 				}
 			}, "#00007:01");
 		});
-		assertEquals(RuntimeException.class, e.getCause().getClass());
+		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// createNote()
-	// nullを返すとBmsExceptionがスローされること
+	// nullを返すとBmsHandleExceptionがスローされること
 	@Test
-	public void testCreateNote_004() throws Exception {
-		assertThrows(BmsException.class, () -> {
-			var bms =
-					"#00001:AB";
+	public void testCreateNote_ReturnNull() throws Exception {
+		assertThrows(BmsHandleException.class, () -> {
 			testHandler(new BmsLoadHandler() {
 				@Override public BmsNote createNote() {
 					return null;
 				}
-			}, bms);
+			}, "#00007:AB");
 		});
 	}
 
 	// startLoad(BmsLoaderSettings)
 	// BmsLoaderにBmsSpecが未指定だとI/Fは呼び出されないこと
 	@Test
-	public void testStartLoad_001() throws Exception {
+	public void testStartLoad_SpecNotSpecified() throws Exception {
 		var called = new boolean[] { false };
 		assertThrows(IllegalStateException.class, () -> {
 			new BmsStandardLoader().setHandler(new BmsLoadHandler() {
@@ -137,7 +147,7 @@ public class BmsLoadHandlerTest {
 	// startLoad(BmsLoaderSettings)
 	// BmsLoaderに指定したBmsSpecと同じ参照がパラメータで渡されていること
 	@Test
-	public void testStartLoad_002() throws Exception {
+	public void testStartLoad_Argument() throws Exception {
 		var called = new boolean[] { false };
 		var specifiedSpec = BmsTest.createTestSpec();
 		new BmsStandardLoader().setSpec(specifiedSpec).setHandler(new BmsLoadHandler() {
@@ -153,7 +163,7 @@ public class BmsLoadHandlerTest {
 	// startLoad(BmsLoaderSettings)
 	// 全てのI/Fの中で、最初に呼ばれること
 	@Test
-	public void testStartLoad_003() throws Exception {
+	public void testStartLoad_CallFirst() throws Exception {
 		var called = new boolean[] { false };
 		var bms =
 				";?bms key=\"value\"\n" +
@@ -196,23 +206,23 @@ public class BmsLoadHandlerTest {
 	}
 
 	// startLoad(BmsLoaderSettings)
-	// I/F内で例外をスローすると、スローした例外を内包したBmsExceptionがスローされること
+	// I/F内で例外をスローすると、スローした例外を内包したBmsHandleExceptionがスローされること
 	@Test
-	public void testStartLoad_004() throws Exception {
-		var e = assertThrows(BmsException.class, () -> {
+	public void testStartLoad_UnexpectedException() throws Exception {
+		var e = assertThrows(BmsHandleException.class, () -> {
 			testHandler(new BmsLoadHandler() {
 				@Override public void startLoad(BmsLoaderSettings spec) {
-					throw new RuntimeException("EXCEPTION");
+					throw new IllegalArgumentException("EXCEPTION");
 				}
 			}, "");
 		});
-		assertEquals(RuntimeException.class, e.getCause().getClass());
+		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// testContent(BmsContent)
 	// startLoad()が呼ばれた後で呼び出されること
 	@Test
-	public void testTestContent_001() throws Exception {
+	public void testTestContent_CallAfterStartLoad() throws Exception {
 		var ok = new boolean[] { false };
 		testHandler(new BmsLoadHandler() {
 			private boolean calledStart = false;
@@ -231,7 +241,7 @@ public class BmsLoadHandlerTest {
 	// testContent(BmsContent)
 	// createContent()で生成したBmsContentオブジェクト参照がパラメータで渡されていること
 	@Test
-	public void testTestContent_002() throws Exception {
+	public void testTestContent_Argument() throws Exception {
 		var ok = new boolean[] { false };
 		testHandler(new BmsLoadHandler() {
 			private BmsContent createdContent = null;
@@ -251,18 +261,18 @@ public class BmsLoadHandlerTest {
 	}
 
 	// testContent(BmsContent)
-	// I/F内(createContent)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsExceptionがスローされること
+	// I/F内(createContent)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsHandleExceptionがスローされること
 	@Test
-	public void testTestContent_003() throws Exception {
+	public void testTestContent_ExceptionInCreateContent() throws Exception {
 		var called = new boolean[] { false };
-		var e = assertThrows(BmsException.class, () -> {
+		var e = assertThrows(BmsHandleException.class, () -> {
 			var bms =
 					";?bms key=\"value\"\n" +
 					"#SINTEGER 100\n" +
 					"#00007:01";
 			testHandler(new BmsLoadHandler() {
 				@Override public BmsContent createContent(BmsSpec spec) {
-					throw new RuntimeException("EXCEPTION");
+					throw new IllegalArgumentException("EXCEPTION");
 				}
 				@Override public BmsTestResult testContent(BmsContent content) {
 					called[0] = true;
@@ -271,22 +281,22 @@ public class BmsLoadHandlerTest {
 			}, bms);
 		});
 		assertFalse(called[0]);
-		assertEquals(RuntimeException.class, e.getCause().getClass());
+		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// testContent(BmsContent)
-	// I/F内(createNote)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsExceptionがスローされること
+	// I/F内(createNote)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsHandleExceptionがスローされること
 	@Test
-	public void testTestContent_004() throws Exception {
+	public void testTestContent_ExceptionInCraeteNote() throws Exception {
 		var called = new boolean[] { false };
-		var e = assertThrows(BmsException.class, () -> {
+		var e = assertThrows(BmsHandleException.class, () -> {
 			var bms =
 					";?bms key=\"value\"\n" +
 					"#SINTEGER 100\n" +
 					"#00007:01";
 			testHandler(new BmsLoadHandler() {
 				@Override public BmsNote createNote() {
-					throw new RuntimeException("EXCEPTION");
+					throw new IllegalArgumentException("EXCEPTION");
 				}
 				@Override public BmsTestResult testContent(BmsContent content) {
 					called[0] = true;
@@ -295,22 +305,22 @@ public class BmsLoadHandlerTest {
 			}, bms);
 		});
 		assertFalse(called[0]);
-		assertEquals(RuntimeException.class, e.getCause().getClass());
+		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// testContent(BmsContent)
-	// I/F内(startLoad)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsExceptionがスローされること
+	// I/F内(startLoad)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsHandleExceptionがスローされること
 	@Test
-	public void testTestContent_005() throws Exception {
+	public void testTestContent_ExceptionInStartLoad() throws Exception {
 		var called = new boolean[] { false };
-		var e = assertThrows(BmsException.class, () -> {
+		var e = assertThrows(BmsHandleException.class, () -> {
 			var bms =
 					";?bms key=\"value\"\n" +
 					"#SINTEGER 100\n" +
 					"#00007:01";
 			testHandler(new BmsLoadHandler() {
 				@Override public void startLoad(BmsLoaderSettings spec) {
-					throw new RuntimeException("EXCEPTION");
+					throw new IllegalArgumentException("EXCEPTION");
 				}
 				@Override public BmsTestResult testContent(BmsContent content) {
 					called[0] = true;
@@ -319,22 +329,22 @@ public class BmsLoadHandlerTest {
 			}, bms);
 		});
 		assertFalse(called[0]);
-		assertEquals(RuntimeException.class, e.getCause().getClass());
+		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// testContent(BmsContent)
-	// I/F内(parseError)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsExceptionがスローされること
+	// I/F内(parseError)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsHandleExceptionがスローされること
 	@Test
-	public void testTestContent_006() throws Exception {
+	public void testTestContent_ExceptionInParseError() throws Exception {
 		var called = new boolean[] { false };
-		var e = assertThrows(BmsException.class, () -> {
+		var e = assertThrows(BmsHandleException.class, () -> {
 			var bms =
 					";?bms key=\"value\"\n" +
 					"#SINTEGER 100\n" +
 					"#00007:01";
 			testHandler(new BmsLoadHandler() {
 				@Override public boolean parseError(BmsScriptError error) {
-					throw new RuntimeException("EXCEPTION");
+					throw new IllegalArgumentException("EXCEPTION");
 				}
 				@Override public BmsTestResult testDeclaration(String key, String value) {
 					return BmsTestResult.FAIL;
@@ -346,22 +356,22 @@ public class BmsLoadHandlerTest {
 			}, bms);
 		});
 		assertFalse(called[0]);
-		assertEquals(RuntimeException.class, e.getCause().getClass());
+		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// testContent(BmsContent)
-	// I/F内(testDeclaration)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsExceptionがスローされること
+	// I/F内(testDeclaration)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsHandleExceptionがスローされること
 	@Test
-	public void testTestContent_007() throws Exception {
+	public void testTestContent_ExceptionInTestDeclaration() throws Exception {
 		var called = new boolean[] { false };
-		var e = assertThrows(BmsException.class, () -> {
+		var e = assertThrows(BmsHandleException.class, () -> {
 			var bms =
 					";?bms key=\"value\"\n" +
 					"#SINTEGER 100\n" +
 					"#00007:01";
 			testHandler(new BmsLoadHandler() {
 				@Override public BmsTestResult testDeclaration(String key, String value) {
-					throw new RuntimeException("EXCEPTION");
+					throw new IllegalArgumentException("EXCEPTION");
 				}
 				@Override public BmsTestResult testContent(BmsContent content) {
 					called[0] = true;
@@ -370,22 +380,22 @@ public class BmsLoadHandlerTest {
 			}, bms);
 		});
 		assertFalse(called[0]);
-		assertEquals(RuntimeException.class, e.getCause().getClass());
+		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// testContent(BmsContent)
-	// I/F内(testMeta)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsExceptionがスローされること
+	// I/F内(testMeta)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsHandleExceptionがスローされること
 	@Test
-	public void testTestContent_008() throws Exception {
+	public void testTestContent_ExceptionInTestMeta() throws Exception {
 		var called = new boolean[] { false };
-		var e = assertThrows(BmsException.class, () -> {
+		var e = assertThrows(BmsHandleException.class, () -> {
 			var bms =
 					";?bms key=\"value\"\n" +
 					"#SINTEGER 100\n" +
 					"#00007:01";
 			testHandler(new BmsLoadHandler() {
 				@Override public BmsTestResult testMeta(BmsMeta meta, int index, Object value) {
-					throw new RuntimeException("EXCEPTION");
+					throw new IllegalArgumentException("EXCEPTION");
 				}
 				@Override public BmsTestResult testContent(BmsContent content) {
 					called[0] = true;
@@ -394,22 +404,22 @@ public class BmsLoadHandlerTest {
 			}, bms);
 		});
 		assertFalse(called[0]);
-		assertEquals(RuntimeException.class, e.getCause().getClass());
+		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// testContent(BmsContent)
-	// I/F内(testChannel)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsExceptionがスローされること(値型チャンネル)
+	// I/F内(testChannel)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsHandleExceptionがスローされること(値型チャンネル)
 	@Test
-	public void testTestContent_009_ValueType() throws Exception {
+	public void testTestContent_ExceptionInTestChannel_ValueType() throws Exception {
 		var called = new boolean[] { false };
-		var e = assertThrows(BmsException.class, () -> {
+		var e = assertThrows(BmsHandleException.class, () -> {
 			var bms =
 					";?bms key=\"value\"\n" +
 					"#SINTEGER 100\n" +
 					"#00001:255";
 			testHandler(new BmsLoadHandler() {
 				@Override public BmsTestResult testChannel(BmsChannel channel, int index, int measure, Object value) {
-					throw new RuntimeException("EXCEPTION");
+					throw new IllegalArgumentException("EXCEPTION");
 				}
 				@Override public BmsTestResult testContent(BmsContent content) {
 					called[0] = true;
@@ -418,22 +428,22 @@ public class BmsLoadHandlerTest {
 			}, bms);
 		});
 		assertFalse(called[0]);
-		assertEquals(RuntimeException.class, e.getCause().getClass());
+		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// testContent(BmsContent)
-	// I/F内(testChannel)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsExceptionがスローされること(配列型チャンネル)
+	// I/F内(testChannel)で例外をスローすると当メソッドは呼ばれず、スローした例外を内包したBmsHandleExceptionがスローされること(配列型チャンネル)
 	@Test
-	public void testTestContent_009_ArrayType() throws Exception {
+	public void testTestContent_ExceptionInTestChannel_ArrayType() throws Exception {
 		var called = new boolean[] { false };
-		var e = assertThrows(BmsException.class, () -> {
+		var e = assertThrows(BmsHandleException.class, () -> {
 			var bms =
 					";?bms key=\"value\"\n" +
 					"#SINTEGER 100\n" +
 					"#00007:01";
 			testHandler(new BmsLoadHandler() {
 				@Override public BmsTestResult testChannel(BmsChannel channel, int index, int measure, Object value) {
-					throw new RuntimeException("EXCEPTION");
+					throw new IllegalArgumentException("EXCEPTION");
 				}
 				@Override public BmsTestResult testContent(BmsContent content) {
 					called[0] = true;
@@ -442,13 +452,13 @@ public class BmsLoadHandlerTest {
 			}, bms);
 		});
 		assertFalse(called[0]);
-		assertEquals(RuntimeException.class, e.getCause().getClass());
+		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// testContent(BmsContent)
-	// 戻り値をtrueで返却時はパラメータと同じオブジェクト参照がload()の戻り値で返却されること
+	// 戻り値をOKで返却時はパラメータと同じオブジェクト参照がload()の戻り値で返却されること
 	@Test
-	public void testTestContent_010() throws Exception {
+	public void testTestContent_ReturnOk() throws Exception {
 		var finishedContent = new BmsContent[] { null };
 		var returnedContent = testHandler(new BmsLoadHandler() {
 			@Override public BmsTestResult testContent(BmsContent content) {
@@ -462,9 +472,9 @@ public class BmsLoadHandlerTest {
 	}
 
 	// testContent(BmsContent)
-	// 戻り値をFAILで返却時はparseError()は呼ばれ、BmsAbortExceptionがスローされ、エラー種別がTEST_CONTENTになること
+	// 戻り値をFAILで返却時はparseError()は呼ばれ、BmsLoadExceptionがスローされ、エラー種別がTEST_CONTENTになること
 	@Test
-	public void testTestContent_011() throws Exception {
+	public void testTestContent_ReturnFail() throws Exception {
 		var called = new boolean[] { false, false };
 		var e = assertThrows(BmsLoadException.class, () -> {
 			testHandler(new BmsLoadHandler() {
@@ -484,19 +494,30 @@ public class BmsLoadHandlerTest {
 	}
 
 	// testContent(BmsContent)
-	// I/F内で例外をスローすると、当該例外を内包したBmsExceptionがスローされること
+	// nullを返すとBmsHandleExceptionがスローされること
 	@Test
-	public void testTestContent_012() throws Exception {
+	public void testTestContent_ReturnNull() throws Exception {
+		assertThrows(BmsHandleException.class, () -> testHandler(new BmsLoadHandler() {
+			@Override public BmsTestResult testContent(BmsContent content) {
+				return null;
+			};
+		}, ""));
+	}
+
+	// testContent(BmsContent)
+	// I/F内で例外をスローすると、当該例外を内包したBmsHandleExceptionがスローされること
+	@Test
+	public void testTestContent_UnexpectedException() throws Exception {
 		var called = new boolean[] { false };
-		var e = assertThrows(BmsException.class, () -> {
+		var e = assertThrows(BmsHandleException.class, () -> {
 			testHandler(new BmsLoadHandler() {
 				@Override public BmsTestResult testContent(BmsContent content) {
 					called[0] = true;
-					throw new RuntimeException("EXCEPTION");
+					throw new IllegalArgumentException("EXCEPTION");
 				}
 			}, "");
 		});
-		assertEquals(RuntimeException.class, e.getCause().getClass());
+		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// testContent(BmsContent)
@@ -525,11 +546,11 @@ public class BmsLoadHandlerTest {
 	}
 
 	// testContent(BmsContent)
-	// BMSコンテンツを編集モードで返すとBmsExceptionがスローされること
+	// BMSコンテンツを編集モードで返すとBmsHandleExceptionがスローされること
 	@Test
 	public void testTestContent_EditMode() throws Exception {
 		var called = new boolean[] { false };
-		assertThrows(BmsException.class, () -> testHandler(new BmsLoadHandler() {
+		assertThrows(BmsHandleException.class, () -> testHandler(new BmsLoadHandler() {
 			@Override public BmsTestResult testContent(BmsContent content) {
 				called[0] = true;
 				content.beginEdit();
@@ -542,8 +563,8 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// SYNTAX, false
 	@Test
-	public void testParseError_001() throws Exception {
-		var e = assertThrows(BmsException.class, () -> {
+	public void testParseError_Syntax_False() throws Exception {
+		var e = assertThrows(BmsLoadException.class, () -> {
 			var bms =
 					"This_is_syntax_error_line";
 			testHandler(new BmsLoadHandler() {
@@ -559,7 +580,7 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// SYNTAX, true
 	@Test
-	public void testParseError_002() throws Exception {
+	public void testParseError_Syntax_True() throws Exception {
 		var callCount = new int[] { 0 };
 		var bms =
 				"#GENRE Good Genre Definition\n" +
@@ -581,8 +602,8 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// TEST_DECLARATION, false
 	@Test
-	public void testParseError_005() throws Exception {
-		var e = assertThrows(BmsException.class, () -> {
+	public void testParseError_TestDeclaration_False() throws Exception {
+		var e = assertThrows(BmsLoadException.class, () -> {
 			var bms =
 					";?bms key=\"value\"";
 			testHandler(new BmsLoadHandler() {
@@ -601,7 +622,7 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// TEST_DECLARATION, true
 	@Test
-	public void testParseError_006() throws Exception {
+	public void testParseError_TestDeclaration_True() throws Exception {
 		var callCount = new int[] { 0 };
 		var bms =
 				";?bms key1=\"value\" key2=\"hoge\"";
@@ -623,8 +644,8 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// TEST_META, false
 	@Test
-	public void testParseError_007() throws Exception {
-		var e = assertThrows(BmsException.class, () -> {
+	public void testParseError_TestMeta_False() throws Exception {
+		var e = assertThrows(BmsLoadException.class, () -> {
 			var bms =
 					"#TITLE hogehoge";
 			testHandler(new BmsLoadHandler() {
@@ -643,7 +664,7 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// TEST_META, true
 	@Test
-	public void testParseError_008() throws Exception {
+	public void testParseError_TestMeta_True() throws Exception {
 		var callCount = new int[] { 0 };
 		var bms =
 				"#GENRE Eurobeat\n" +
@@ -666,8 +687,8 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// TEST_CHANNEL, false
 	@Test
-	public void testParseError_009() throws Exception {
-		var e = assertThrows(BmsException.class, () -> {
+	public void testParseError_TestChannel_False() throws Exception {
+		var e = assertThrows(BmsLoadException.class, () -> {
 			var bms =
 					"#00007:01020304";
 			testHandler(new BmsLoadHandler() {
@@ -686,7 +707,7 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// TEST_CHANNEL, true
 	@Test
-	public void testParseError_010() throws Exception {
+	public void testParseError_TestChannel_True() throws Exception {
 		var callCount = new int[] { 0 };
 		var bms =
 				"#00001:2500\n" +
@@ -709,8 +730,8 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// UNKNOWN_META, false
 	@Test
-	public void testParseError_011() throws Exception {
-		var e = assertThrows(BmsException.class, () -> {
+	public void testParseError_UnknownMeta_False() throws Exception {
+		var e = assertThrows(BmsLoadException.class, () -> {
 			var bms =
 					"#UNKNOWN_META_NAME hogehoge";
 			testHandler(new BmsLoadHandler() {
@@ -726,7 +747,7 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// UNKNOWN_META, true
 	@Test
-	public void testParseError_012() throws Exception {
+	public void testParseError_UnknownMeta_True() throws Exception {
 		var callCount = new int[] { 0 };
 		var bms =
 				"#UNKNOWN_META1 hogehoge\n" +
@@ -746,8 +767,8 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// UNKNOWN_CHANNEL, false
 	@Test
-	public void testParseError_013() throws Exception {
-		var e = assertThrows(BmsException.class, () -> {
+	public void testParseError_UnknownChannel_False() throws Exception {
+		var e = assertThrows(BmsLoadException.class, () -> {
 			var bms =
 					"#000XY:AA";
 			testHandler(new BmsLoadHandler() {
@@ -763,7 +784,7 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// UNKNOWN_CHANNEL, true
 	@Test
-	public void testParseError_014() throws Exception {
+	public void testParseError_UnknownChannel_True() throws Exception {
 		var callCount = new int[] { 0 };
 		var bms =
 				"#000YZ:AABBCCDD\n" +
@@ -785,8 +806,8 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// WRONG_DATA, false
 	@Test
-	public void testParseError_015() throws Exception {
-		var e = assertThrows(BmsException.class, () -> {
+	public void testParseError_WrongData_False() throws Exception {
+		var e = assertThrows(BmsLoadException.class, () -> {
 			var bms =
 					"#BPM TypeMismatch";
 			testHandler(new BmsLoadHandler() {
@@ -802,7 +823,7 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// WRONG_DATA, true
 	@Test
-	public void testParseError_016() throws Exception {
+	public void testParseError_WrongData_True() throws Exception {
 		var callCount = new int[] { 0 };
 		var bms =
 				"#BPM StringType\n" +
@@ -824,8 +845,8 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// COMMENT_NOT_CLOSED, false
 	@Test
-	public void testParseError_017() throws Exception {
-		var e = assertThrows(BmsException.class, () -> {
+	public void testParseError_CommentNotClosed_False() throws Exception {
+		var e = assertThrows(BmsLoadException.class, () -> {
 			var bms =
 					"/* \n" +
 					" * This is a multi line comment.\n" +
@@ -843,7 +864,7 @@ public class BmsLoadHandlerTest {
 	// parseError(BmsScriptError)
 	// COMMENT_NOT_CLOSED, true
 	@Test
-	public void testParseError_018() throws Exception {
+	public void testParseError_CommentNotClosed_True() throws Exception {
 		var callCount = new int[] { 0 };
 		var bms =
 				";?bms key=\"value\"\n" +
@@ -866,61 +887,23 @@ public class BmsLoadHandlerTest {
 	}
 
 	// parseError(BmsScriptError)
-	// PANIC, false
+	// I/F内で例外をスローすると、当該例外を内包したBmsHandleExceptionがスローされること
 	@Test
-	public void testParseError_019() throws Exception {
-		assertThrows(BmsLoadException.class, () -> {
-			var bms =
-					"#TITLE my song";
-			testHandler(new BmsLoadHandler() {
-				@Override public boolean parseError(BmsScriptError error) {
-					assertEquals(BmsErrorType.PANIC, error.getType());
-					return false;
-				}
-				@Override public BmsTestResult testMeta(BmsMeta meta, int index, Object value) {
-					return null;
-				}
-			}, bms);
-		});
-	}
-
-	// parseError(BmsScriptError)
-	// PANIC, true
-	@Test
-	public void testParseError_020() throws Exception {
-		var callCount = new int[] { 0 };
-		var bms =
-				";?bms key=\"value\"\n" +
-				"#TITLE MySong\n" +
-				"#00001:999\n" +
-				"#00007:ZZ";
-		var content = testHandler(new BmsLoadHandler() {
+	public void testParseError_UnexpectedException() throws Exception {
+		var bms = "#XXXUNKNOWNXXX value";
+		var ex = assertThrows(BmsHandleException.class, () -> testHandler(new BmsLoadHandler() {
 			@Override public boolean parseError(BmsScriptError error) {
-				assertEquals(BmsErrorType.PANIC, error.getType());
-				callCount[0]++;
-				return true;
-			}
-			@Override public BmsTestResult testDeclaration(String key, String value) {
-				return null;
-			}
-			@Override public BmsTestResult testMeta(BmsMeta meta, int index, Object value) {
-				return null;
-			}
-			@Override public BmsTestResult testChannel(BmsChannel channel, int index, int measure, Object value) {
-				return null;
-			}
-		}, bms);
-		assertEquals(4, callCount[0]);
-		assertFalse(content.containsDeclaration("key"));
-		assertFalse(content.containsSingleMeta("#title"));
-		assertFalse(content.containsMeasureValue(1, 0));
-		assertNull(content.getNote(7, 0, 0));
+				assertEquals(BmsErrorType.UNKNOWN_META, error.getType());
+				throw new IllegalArgumentException("EXCEPTION");
+			};
+		}, bms));
+		assertEquals(IllegalArgumentException.class, ex.getCause().getClass());
 	}
 
 	// testDeclaration(String, String)
 	// OKを返すと当該データがBMSコンテンツに格納されること
 	@Test
-	public void testTestDeclaration_001() throws Exception {
+	public void testTestDeclaration_ReturnOk() throws Exception {
 		var bms =
 				";?bms key1=\"value1\" key2=\"value2\"";
 		var content = testHandler(new BmsLoadHandler() {
@@ -937,7 +920,7 @@ public class BmsLoadHandlerTest {
 	// testDeclaration(String, String)
 	// FAILを返すとparseErrorが呼ばれ、そこでtrueを返すとBMS読み込みが続行されること
 	@Test
-	public void testTestDeclaration_002() throws Exception {
+	public void testTestDeclaration_ReturnFail_ParseErrorTrue() throws Exception {
 		var callCount = new int[] { 0 };
 		var bms =
 				";?bms key1=\"value1\" key2=\"value2\"";
@@ -956,9 +939,9 @@ public class BmsLoadHandlerTest {
 	}
 
 	// testDeclaration(String, String)
-	// FAILを返すとparseErrorが呼ばれ、そこでfalseを返すとload()がBmsAbortExceptionをスローすること
+	// FAILを返すとparseErrorが呼ばれ、そこでfalseを返すとload()がBmsLoadExceptionをスローすること
 	@Test
-	public void testTestDeclaration_003() throws Exception {
+	public void testTestDeclaration_ReturnFail_ParseErrorFalse() throws Exception {
 		var called = new boolean[] { false };
 		assertThrows(BmsLoadException.class, () -> {
 			var bms =
@@ -979,7 +962,7 @@ public class BmsLoadHandlerTest {
 	// testDeclaration(String, String)
 	// THROUGHを返すとparseErrorは呼ばれずにBMS読み込みが続行され、当該データがBMSコンテンツに格納されないこと
 	@Test
-	public void testTestDeclaration_004() throws Exception {
+	public void testTestDeclaration_ReturnThrough() throws Exception {
 		var called = new boolean[] { false };
 		var bms =
 				";?bms key1=\"value1\" key2=\"value2\"";
@@ -998,29 +981,22 @@ public class BmsLoadHandlerTest {
 	}
 
 	// testDeclaration(String, String)
-	// nullを返すとparseErrorが呼ばれ、エラー種別がPANICになること
+	// nullを返すとBmsHandleExceptionがスローされること
 	@Test
-	public void testTestDeclaration_005() throws Exception {
-		var called = new boolean[] { false };
+	public void testTestDeclaration_ReturnNull() throws Exception {
 		var bms =
 				";?bms key=\"value\"";
-		testHandler(new BmsLoadHandler() {
-			@Override public boolean parseError(BmsScriptError error) {
-				called[0] = true;
-				assertEquals(error.getType(), BmsErrorType.PANIC);
-				return true;
-			}
+		assertThrows(BmsHandleException.class, () -> testHandler(new BmsLoadHandler() {
 			@Override public BmsTestResult testDeclaration(String key, String value) {
 				return null;
 			}
-		}, bms);
-		assertTrue(called[0]);
+		}, bms));
 	}
 
 	// testDeclaration(String, String)
 	// OKを返すと当該データがBMSコンテンツに格納されること(Single)
 	@Test
-	public void testTestMeta_001_Single() throws Exception {
+	public void testTestMeta_ReturnOk_Single() throws Exception {
 		var bms =
 				"#GENRE MyGenre\n" +
 				"#TITLE MySong";
@@ -1036,7 +1012,7 @@ public class BmsLoadHandlerTest {
 	// testMeta(BmsMeta, int, Object)
 	// OKを返すと当該データがBMSコンテンツに格納されること(Multiple)
 	@Test
-	public void testTestMeta_001_Multiple() throws Exception {
+	public void testTestMeta_ReturnOk_Multiple() throws Exception {
 		var bms =
 				"#SUBARTIST Sato\n" +
 				"#SUBARTIST Suzuki\n" +
@@ -1055,7 +1031,7 @@ public class BmsLoadHandlerTest {
 	// testMeta(BmsMeta, int, Object)
 	// OKを返すと当該データがBMSコンテンツに格納されること(Indexed)
 	@Test
-	public void testTestMeta_001_Indexed() throws Exception {
+	public void testTestMeta_ReturnOk_Indexed() throws Exception {
 		var bms =
 				"#ISTRING01 hoge\n" +
 				"#ISTRINGAB hage\n" +
@@ -1074,7 +1050,7 @@ public class BmsLoadHandlerTest {
 	// testMeta(BmsMeta, int, Object)
 	// FAILを返すとparseErrorが呼ばれ、そこでtrueを返すとBMS読み込みが続行されること
 	@Test
-	public void testTestMeta_002() throws Exception {
+	public void testTestMeta_ReturnFail_ParseErrorTrue() throws Exception {
 		var callCount = new int[] { 0 };
 		var bms =
 				"#GENRE MyGenre\n" +
@@ -1094,9 +1070,9 @@ public class BmsLoadHandlerTest {
 	}
 
 	// testMeta(BmsMeta, int, Object)
-	// FAILを返すとparseErrorが呼ばれ、そこでfalseを返すとload()がBmsAbortExceptionをスローすること
+	// FAILを返すとparseErrorが呼ばれ、そこでfalseを返すとload()がBmsLoadExceptionをスローすること
 	@Test
-	public void testTestMeta_003() throws Exception {
+	public void testTestMeta_ReturnFail_ParseErrorFalse() throws Exception {
 		var called = new boolean[] { false };
 		assertThrows(BmsLoadException.class, () -> {
 			var bms =
@@ -1117,7 +1093,7 @@ public class BmsLoadHandlerTest {
 	// testMeta(BmsMeta, int, Object)
 	// THROUGHを返すとparseErrorは呼ばれずにBMS読み込みが続行され、当該データがBMSコンテンツに格納されないこと
 	@Test
-	public void testTestMeta_004() throws Exception {
+	public void testTestMeta_ReturnThrough() throws Exception {
 		var called = new boolean[] { false };
 		var bms =
 				"#GENRE MyGenre\n" +
@@ -1137,29 +1113,22 @@ public class BmsLoadHandlerTest {
 	}
 
 	// testMeta(BmsMeta, int, Object)
-	// nullを返すとparseErrorが呼ばれ、エラー種別がPANICになること
+	// nullを返すとBmsHandleExceptionがスローされること
 	@Test
-	public void testTestMeta_005() throws Exception {
-		var called = new boolean[] { false };
+	public void testTestMeta_ReturnNull() throws Exception {
 		var bms =
 				"#TITLE MySong";
-		testHandler(new BmsLoadHandler() {
-			@Override public boolean parseError(BmsScriptError error) {
-				called[0] = true;
-				assertEquals(error.getType(), BmsErrorType.PANIC);
-				return true;
-			}
+		assertThrows(BmsHandleException.class, () -> testHandler(new BmsLoadHandler() {
 			@Override public BmsTestResult testMeta(BmsMeta meta, int index, Object value) {
 				return null;
 			}
-		}, bms);
-		assertTrue(called[0]);
+		}, bms));
 	}
 
 	// testChannel(BmsChannel, int, int, Object)
 	// OKを返すと当該データがBMSコンテンツに格納されること
 	@Test
-	public void testTestChannel_ValueType_001() throws Exception {
+	public void testTestChannel_ValueType_ReturnOk() throws Exception {
 		var bms =
 				"#00001:180\n" +
 				"#00003:String";
@@ -1175,7 +1144,7 @@ public class BmsLoadHandlerTest {
 	// testChannel(BmsChannel, int, int, Object)
 	// FAILを返すとparseErrorが呼ばれ、そこでtrueを返すとBMS読み込みが続行されること
 	@Test
-	public void testTestChannel_ValueType_002() throws Exception {
+	public void testTestChannel_ValueType_ReturnFail_ParseErrorTrue() throws Exception {
 		var callCount = new int[] { 0 };
 		var bms =
 				"#00001:180\n" +
@@ -1195,9 +1164,9 @@ public class BmsLoadHandlerTest {
 	}
 
 	// testChannel(BmsChannel, int, int, Object)
-	// FAILを返すとparseErrorが呼ばれ、そこでfalseを返すとload()がBmsAbortExceptionをスローすること
+	// FAILを返すとparseErrorが呼ばれ、そこでfalseを返すとload()がBmsLoadExceptionをスローすること
 	@Test
-	public void testTestChannel_ValueType_003() throws Exception {
+	public void testTestChannel_ValueType_ReturnFail_ParseErrorFalse() throws Exception {
 		var called = new boolean[] { false };
 		assertThrows(BmsLoadException.class, () -> {
 			var bms =
@@ -1218,7 +1187,7 @@ public class BmsLoadHandlerTest {
 	// testChannel(BmsChannel, int, int, Object)
 	// THROUGHを返すとparseErrorは呼ばれずにBMS読み込みが続行され、当該データがBMSコンテンツに格納されないこと
 	@Test
-	public void testTestChannel_ValueType_004() throws Exception {
+	public void testTestChannel_ValueType_ReturnThrough() throws Exception {
 		var called = new boolean[] { false };
 		var bms =
 				"#00001:180\n" +
@@ -1238,29 +1207,22 @@ public class BmsLoadHandlerTest {
 	}
 
 	// testChannel(BmsChannel, int, int, Object)
-	// nullを返すとparseErrorが呼ばれ、エラー種別がPANICになること
+	// nullを返すとBmsHandleExceptionがスローされること
 	@Test
-	public void testTestChannel_ValueType_005() throws Exception {
-		var called = new boolean[] { false };
+	public void testTestChannel_ValueType_ReturnNull() throws Exception {
 		var bms =
 				"#00001:180";
-		testHandler(new BmsLoadHandler() {
-			@Override public boolean parseError(BmsScriptError error) {
-				called[0] = true;
-				assertEquals(error.getType(), BmsErrorType.PANIC);
-				return true;
-			}
+		assertThrows(BmsHandleException.class, () -> testHandler(new BmsLoadHandler() {
 			@Override public BmsTestResult testChannel(BmsChannel channel, int index, int measure, Object value) {
 				return null;
 			}
-		}, bms);
-		assertTrue(called[0]);
+		}, bms));
 	}
 
 	// testChannel(BmsChannel, int, int, Object)
 	// OKを返すと当該データがBMSコンテンツに格納されること
 	@Test
-	public void testTestChannel_ArrayType_001() throws Exception {
+	public void testTestChannel_ArrayType_ReturnOk() throws Exception {
 		var bms =
 				"#00007:AA\n" +
 				"#00107:BB";
@@ -1276,7 +1238,7 @@ public class BmsLoadHandlerTest {
 	// testChannel(BmsChannel, int, int, Object)
 	// FAILを返すとparseErrorが呼ばれ、そこでtrueを返すとBMS読み込みが続行されること
 	@Test
-	public void testTestChannel_ArrayType_002() throws Exception {
+	public void testTestChannel_ArrayType_ReturnFail_ParseErrorTrue() throws Exception {
 		var callCount = new int[] { 0 };
 		var bms =
 				"#00007:AA\n" +
@@ -1296,9 +1258,9 @@ public class BmsLoadHandlerTest {
 	}
 
 	// testChannel(BmsChannel, int, int, Object)
-	// FAILを返すとparseErrorが呼ばれ、そこでfalseを返すとload()がBmsAbortExceptionをスローすること
+	// FAILを返すとparseErrorが呼ばれ、そこでfalseを返すとload()がBmsLoadExceptionをスローすること
 	@Test
-	public void testTestChannel_ArrayType_003() throws Exception {
+	public void testTestChannel_ArrayType_ReturnFail_ParseErrorFalse() throws Exception {
 		var called = new boolean[] { false };
 		assertThrows(BmsLoadException.class, () -> {
 			var bms =
@@ -1319,7 +1281,7 @@ public class BmsLoadHandlerTest {
 	// testChannel(BmsChannel, int, int, Object)
 	// THROUGHを返すとparseErrorは呼ばれずにBMS読み込みが続行され、当該データがBMSコンテンツに格納されないこと
 	@Test
-	public void testTestChannel_ArrayType_004() throws Exception {
+	public void testTestChannel_ArrayType_ReturnThrough() throws Exception {
 		var called = new boolean[] { false };
 		var bms =
 				"#00007:AA\n" +
@@ -1339,27 +1301,19 @@ public class BmsLoadHandlerTest {
 	}
 
 	// testChannel(BmsChannel, int, int, Object)
-	// nullを返すとparseErrorが呼ばれ、エラー種別がPANICになること
+	// nullを返すとBmsHandleExceptionがスローされること
 	@Test
-	public void testTestChannel_ArrayType_005() throws Exception {
-		var called = new boolean[] { false };
+	public void testTestChannel_ArrayType_ReturnNull() throws Exception {
 		var bms =
 				"#00007:AA";
-		testHandler(new BmsLoadHandler() {
-			@Override public boolean parseError(BmsScriptError error) {
-				called[0] = true;
-				assertEquals(error.getType(), BmsErrorType.PANIC);
-				return true;
-			}
+		assertThrows(BmsHandleException.class, () -> testHandler(new BmsLoadHandler() {
 			@Override public BmsTestResult testChannel(BmsChannel channel, int index, int measure, Object value) {
 				return null;
 			}
-		}, bms);
-
-		assertTrue(called[0]);
+		}, bms));
 	}
 
-	private static BmsContent testHandler(BmsLoadHandler handler, String bms) throws BmsException {
+	private static BmsContent testHandler(BmsLoadHandler handler, String bms) throws IOException {
 		var loader = new BmsStandardLoader()
 				.setSpec(BmsTest.createTestSpec())
 				.setHandler(handler)

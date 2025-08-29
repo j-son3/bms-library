@@ -1,13 +1,16 @@
 package com.lmt.lib.bms.bemusic;
 
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collection;
 
 import com.lmt.lib.bms.BmsChannel;
 import com.lmt.lib.bms.BmsContent;
-import com.lmt.lib.bms.BmsException;
+import com.lmt.lib.bms.BmsHandleException;
+import com.lmt.lib.bms.BmsLoadException;
 import com.lmt.lib.bms.BmsMeta;
+import com.lmt.lib.bms.BmsPanicException;
 import com.lmt.lib.bms.BmsSpec;
 import com.lmt.lib.bms.BmsSpecBuilder;
 
@@ -40,9 +43,9 @@ public class BeMusicSpec {
 	 * @param objectMetas BMS仕様に含める任意型メタ情報のリスト
 	 * @param userChannels BMS仕様に含めるユーザーチャンネルのリスト
 	 * @return BeMusic用のBMS仕様
-	 * @exception IllegalArgumentException specVersionに未知の値を指定した
-	 * @exception IllegalArgumentException objectMetasのリスト内に任意型以外のメタ情報が含まれていた
-	 * @exception IllegalArgumentException userChannelsのリスト内に仕様チャンネルが含まれていた
+	 * @throws IllegalArgumentException specVersionに未知の値を指定した
+	 * @throws IllegalArgumentException objectMetasのリスト内に任意型以外のメタ情報が含まれていた
+	 * @throws IllegalArgumentException userChannelsのリスト内に仕様チャンネルが含まれていた
 	 */
 	public static BmsSpec create(int specVersion, BmsMeta[] objectMetas, BmsChannel[] userChannels) {
 		switch (specVersion) {
@@ -56,8 +59,8 @@ public class BeMusicSpec {
 	 * @param objectMetas BMS仕様に含める任意型メタ情報のリスト
 	 * @param userChannels BMS仕様に含めるユーザーチャンネルのリスト
 	 * @return BeMusic用のBMS仕様
-	 * @exception IllegalArgumentException objectMetasのリスト内に任意型以外のメタ情報が含まれていた
-	 * @exception IllegalArgumentException userChannelsのリスト内に仕様チャンネルが含まれていた
+	 * @throws IllegalArgumentException objectMetasのリスト内に任意型以外のメタ情報が含まれていた
+	 * @throws IllegalArgumentException userChannelsのリスト内に仕様チャンネルが含まれていた
 	 */
 	public static BmsSpec createV1(BmsMeta[] objectMetas, BmsChannel[] userChannels) {
 		assertArgObjectMetas(objectMetas);
@@ -198,10 +201,10 @@ public class BeMusicSpec {
 	 * @param objectMetas 任意型メタ情報のコレクション
 	 * @param userChannels ユーザーチャンネルのコレクション
 	 * @return 最新バージョンのBe-Music用BMS仕様
-	 * @exception NullPointerException objectMetasのコレクション内にnullが含まれていた
-	 * @exception NullPointerException userChannelsのコレクション内にnullが含まれていた
-	 * @exception IllegalArgumentException objectMetasのコレクション内に任意型以外のメタ情報が含まれていた
-	 * @exception IllegalArgumentException userChannelsのコレクション内に仕様チャンネルが含まれていた
+	 * @throws NullPointerException objectMetasのコレクション内にnullが含まれていた
+	 * @throws NullPointerException userChannelsのコレクション内にnullが含まれていた
+	 * @throws IllegalArgumentException objectMetasのコレクション内に任意型以外のメタ情報が含まれていた
+	 * @throws IllegalArgumentException userChannelsのコレクション内に仕様チャンネルが含まれていた
 	 * @since 0.7.0
 	 */
 	public static BmsSpec createLatest(Collection<BmsMeta> objectMetas, Collection<BmsChannel> userChannels) {
@@ -217,21 +220,24 @@ public class BeMusicSpec {
 	 * @param path 読み込み対象のBMSファイルのパス
 	 * @param strictly 厳格なフォーマットチェックを行うかどうか
 	 * @return 最新バージョンのBe-Music用BMS仕様で読み込まれたBMSコンテンツ
-	 * @exception NullPointerException pathがnull
-	 * @exception IOException 指定されたファイルが見つからない、読み取り権限がない、または読み取り中に異常を検出した
-	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
+	 * @throws NullPointerException pathがnull
+	 * @throws NoSuchFileException 指定されたパスのファイルが存在しない
+	 * @throws IOException 何らかの理由によりデータ読み取り異常が発生した
+	 * @throws BmsHandleException ユーザープログラムの処理異常を検出した
+	 * @throws BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
+	 * @throws BmsPanicException 内部処理異常による処理の強制停止が発生した
 	 * @see BeMusic#loadContentFrom(Path, Long, boolean)
 	 * @deprecated 当メソッドはBMS Library ver.0.7.0以降、非推奨になりました。
 	 */
 	@Deprecated(since = "0.7.0")
-	public static BmsContent loadContentFrom(Path path, boolean strictly) throws BmsException, IOException {
+	public static BmsContent loadContentFrom(Path path, boolean strictly) throws IOException {
 		return BeMusic.loadContentFrom(path, null, strictly);
 	}
 
 	/**
 	 * 任意型メタ情報リストのアサーション。
 	 * @param objectMetas 任意型メタ情報のリスト
-	 * @exception IllegalArgumentException objectMetasのリスト内に任意型以外のメタ情報が含まれていた
+	 * @throws IllegalArgumentException objectMetasのリスト内に任意型以外のメタ情報が含まれていた
 	 */
 	private static void assertArgObjectMetas(BmsMeta[] objectMetas) {
 		if (objectMetas == null) {
@@ -248,7 +254,7 @@ public class BeMusicSpec {
 	/**
 	 * ユーザーチャンネルリストのアサーション。
 	 * @param userChannels ユーザーチャンネルのリスト
-	 * @exception IllegalArgumentException userChannelsのリスト内に仕様チャンネルが含まれていた
+	 * @throws IllegalArgumentException userChannelsのリスト内に仕様チャンネルが含まれていた
 	 */
 	private static void assertArgUserChannels(BmsChannel[] userChannels) {
 		if (userChannels == null) {

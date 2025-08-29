@@ -1,5 +1,7 @@
 package com.lmt.lib.bms;
 
+import java.io.IOException;
+
 /**
  * BMSライブラリ特有の例外です。
  *
@@ -19,7 +21,7 @@ package com.lmt.lib.bms;
  *
  * @since 0.0.1
  */
-public class BmsException extends Exception {
+public class BmsException extends IOException {
 	/**
 	 * BMS例外を生成します。
 	 */

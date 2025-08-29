@@ -18,7 +18,7 @@ import java.util.regex.PatternSyntaxException;
  * @see BmsChannel
  * @since 0.0.1
  */
-public final class BmsType {
+public class BmsType {
 	/** Integerから各データ型への変換処理 */
 	private static final ArrayList<BiFunction<BmsType, Object, Object>> CASTERS_INTEGER = new ArrayList<>();
 	/** Longから各データ型への変換処理 */
@@ -262,8 +262,8 @@ public final class BmsType {
 	 * それ以外の振る舞いは文字列型と同様です。
 	 * @param pattern 正規表現パターン
 	 * @return 指定した正規表現パターン制約のある文字列型
-	 * @exception NullPointerException patternがnull
-	 * @exception PatternSyntaxException 正規表現の構文が無効である場合
+	 * @throws NullPointerException patternがnull
+	 * @throws PatternSyntaxException 正規表現の構文が無効である場合
 	 */
 	public static BmsType REGEX(String pattern) {
 		return new BmsType(TYPE_STRING, "REGEX", "re", pattern, 0, NTYPE_STRING, null);
@@ -351,8 +351,8 @@ public final class BmsType {
 	 * @param base 基数
 	 * @param nativeType ネイティブデータ型
 	 * @param rangeChecker 数値型の範囲チェッカー
-	 * @exception NullPointerException patternがnull
-	 * @exception PatternSyntaxException 表現の構文が無効である場合
+	 * @throws NullPointerException patternがnull
+	 * @throws PatternSyntaxException 表現の構文が無効である場合
 	 */
 	BmsType(int typeId, String name, String shortName, String pattern, int base, int nativeType,
 			Predicate<Number> rangeChecker) {
@@ -400,7 +400,7 @@ public final class BmsType {
 	 * データ型の名称を取得します。
 	 * @return データ型の名称
 	 */
-	public final String getName() {
+	public String getName() {
 		return mName;
 	}
 
@@ -408,7 +408,7 @@ public final class BmsType {
 	 * 文字列解析時の許容正規表現パターンを取得します。
 	 * @return 文字列解析時の許容正規表現パターン
 	 */
-	public final Pattern getPattern() {
+	public Pattern getPattern() {
 		return mPattern;
 	}
 
@@ -422,7 +422,7 @@ public final class BmsType {
 	 * それ以外の型は全て0を示します。</p>
 	 * @return 数値データの基数
 	 */
-	public final int getBase() {
+	public int getBase() {
 		return mBase;
 	}
 
@@ -430,7 +430,7 @@ public final class BmsType {
 	 * BMSデータ型を示すためのデータのネイティブなデータ型を取得します。
 	 * @return ネイティブデータ型
 	 */
-	public final int getNativeType() {
+	public int getNativeType() {
 		return mNativeType;
 	}
 
@@ -439,7 +439,7 @@ public final class BmsType {
 	 * @return 整数型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isIntegerType() {
+	public boolean isIntegerType() {
 		return mTypeId == TYPE_INTEGER;
 	}
 
@@ -448,7 +448,7 @@ public final class BmsType {
 	 * @return 実数型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isFloatType() {
+	public boolean isFloatType() {
 		return mTypeId == TYPE_FLOAT;
 	}
 
@@ -457,7 +457,7 @@ public final class BmsType {
 	 * @return 文字列型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isStringType() {
+	public boolean isStringType() {
 		return mTypeId == TYPE_STRING;
 	}
 
@@ -466,7 +466,7 @@ public final class BmsType {
 	 * @return 16進数値型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isBase16Type() {
+	public boolean isBase16Type() {
 		return mTypeId == TYPE_BASE16;
 	}
 
@@ -475,7 +475,7 @@ public final class BmsType {
 	 * @return 36進数値型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isBase36Type() {
+	public boolean isBase36Type() {
 		return mTypeId == TYPE_BASE36;
 	}
 
@@ -484,7 +484,7 @@ public final class BmsType {
 	 * @return 62進数値型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isBase62Type() {
+	public boolean isBase62Type() {
 		return mTypeId == TYPE_BASE62;
 	}
 
@@ -493,7 +493,7 @@ public final class BmsType {
 	 * @return 16進数値配列型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isArray16Type() {
+	public boolean isArray16Type() {
 		return mTypeId == TYPE_ARRAY16;
 	}
 
@@ -502,7 +502,7 @@ public final class BmsType {
 	 * @return 36進数値配列型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isArray36Type() {
+	public boolean isArray36Type() {
 		return mTypeId == TYPE_ARRAY36;
 	}
 
@@ -511,7 +511,7 @@ public final class BmsType {
 	 * @return 62進数値配列型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isArray62Type() {
+	public boolean isArray62Type() {
 		return mTypeId == TYPE_ARRAY62;
 	}
 
@@ -520,7 +520,7 @@ public final class BmsType {
 	 * @return 任意型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isObjectType() {
+	public boolean isObjectType() {
 		return mTypeId == TYPE_OBJECT;
 	}
 
@@ -530,7 +530,7 @@ public final class BmsType {
 	 * @return 数値型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isNumberType() {
+	public boolean isNumberType() {
 		return mIsNumberType;
 	}
 
@@ -540,7 +540,7 @@ public final class BmsType {
 	 * @return 配列型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isArrayType() {
+	public boolean isArrayType() {
 		return mIsArrayType;
 	}
 
@@ -550,7 +550,7 @@ public final class BmsType {
 	 * @return 値型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isValueType() {
+	public boolean isValueType() {
 		return mIsValueType;
 	}
 
@@ -560,7 +560,7 @@ public final class BmsType {
 	 * @see #BASE
 	 * @since 0.8.0
 	 */
-	public final boolean isSelectableBaseType() {
+	public boolean isSelectableBaseType() {
 		return mTypeId == TYPE_BASE;
 	}
 
@@ -570,7 +570,7 @@ public final class BmsType {
 	 * @see #ARRAY
 	 * @since 0.8.0
 	 */
-	public final boolean isSelectableArrayType() {
+	public boolean isSelectableArrayType() {
 		return mTypeId == TYPE_ARRAY;
 	}
 
@@ -581,7 +581,7 @@ public final class BmsType {
 	 * @see #isSelectableArrayType()
 	 * @since 0.8.0
 	 */
-	public final boolean isSelectable() {
+	public boolean isSelectable() {
 		return isSelectableArrayType() || isSelectableBaseType();
 	}
 
@@ -592,7 +592,7 @@ public final class BmsType {
 	 * @return BMSデータ型が通常型である場合はtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isNormalType() {
+	public boolean isNormalType() {
 		return mTypeId != TYPE_OBJECT;
 	}
 
@@ -600,9 +600,9 @@ public final class BmsType {
 	 * 指定文字列が許容正規表現パターンにマッチするかどうかをテストします。
 	 * @param data テストする文字列
 	 * @return マッチする場合はtrue
-	 * @exception NullPointerException dataがnull
+	 * @throws NullPointerException dataがnull
 	 */
-	public final boolean test(String data) {
+	public boolean test(String data) {
 		assertArgNotNull(data, "data");
 		return mPattern.matcher(data).matches();
 	}
@@ -617,10 +617,10 @@ public final class BmsType {
 	 * <p>任意型への変換を行った場合、変換処理は行われず、戻り値はsrcと同じ参照を返します。</p>
 	 * @param src 変換元オブジェクト
 	 * @return 変換後オブジェクト
-	 * @exception NullPointerException srcがnull
-	 * @exception ClassCastException srcの変換に失敗、または数値が表現可能範囲を超えた
+	 * @throws NullPointerException srcがnull
+	 * @throws ClassCastException srcの変換に失敗、または数値が表現可能範囲を超えた
 	 */
-	public final Object cast(Object src) {
+	public Object cast(Object src) {
 		return cast(src, this);
 	}
 
@@ -635,9 +635,9 @@ public final class BmsType {
 	 * @param src 変換元オブジェクト
 	 * @param require 要求データ型
 	 * @return 変換後オブジェクト
-	 * @exception NullPointerException srcがnull
-	 * @exception NullPointerException requireがnull
-	 * @exception ClassCastException srcの変換に失敗、またはrequireの表現可能範囲を超えた
+	 * @throws NullPointerException srcがnull
+	 * @throws NullPointerException requireがnull
+	 * @throws ClassCastException srcの変換に失敗、またはrequireの表現可能範囲を超えた
 	 */
 	public static Object cast(Object src, BmsType require) {
 		// アサーション
@@ -713,7 +713,7 @@ public final class BmsType {
 	 * @param src キャストに失敗したデータ
 	 * @param require 呼び出し元が要求したデータ型
 	 * @param cause 例外をスローするに至った原因(nullの場合もある)
-	 * @exception ClassCastException メソッドは必ずこの例外をスローする
+	 * @throws ClassCastException メソッドは必ずこの例外をスローする
 	 */
 	private static void castException(Object src, BmsType require, Exception cause) {
 		var causeMsg = "";

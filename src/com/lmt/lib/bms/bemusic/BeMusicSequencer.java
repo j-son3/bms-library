@@ -149,10 +149,10 @@ public abstract class BeMusicSequencer {
 		 * @param duration 再生時間
 		 * @param sleepTime ループ待機時間(秒)
 		 * @param processor 楽曲位置情報処理関数
-		 * @exception NullPointerException chartがnull
-		 * @exception IllegalArgumentException durationがマイナス値
-		 * @exception IllegalArgumentException sleepTimeが{@link #SLEEP_TIME_MAX}超過
-		 * @exception NullPointerException processorがnull
+		 * @throws NullPointerException chartがnull
+		 * @throws IllegalArgumentException durationがマイナス値
+		 * @throws IllegalArgumentException sleepTimeが{@link #SLEEP_TIME_MAX}超過
+		 * @throws NullPointerException processorがnull
 		 */
 		SimpleSequencer(BeMusicChart chart, double duration, double sleepTime, Consumer<BeMusicPoint> processor) {
 			super(chart, duration);
@@ -179,7 +179,7 @@ public abstract class BeMusicSequencer {
 	 * 新しいシーケンサオブジェクトを構築します。
 	 * <p>当コンストラクタを使用すると、再生時間は指定されたBMS譜面の {@link BeMusicChart#getPlayTime()} から取得します。</p>
 	 * @param chart 再生対象のBMS譜面
-	 * @exception NullPointerException chartがnull
+	 * @throws NullPointerException chartがnull
 	 * @see #BeMusicSequencer(BeMusicChart, double)
 	 */
 	protected BeMusicSequencer(BeMusicChart chart) {
@@ -192,8 +192,8 @@ public abstract class BeMusicSequencer {
 	 * アプリケーションでシーケンサを実装する際はオブジェクト構築時にこれらを指定できるように設計してください。</p>
 	 * @param chart 再生対象のBMS譜面
 	 * @param duration 再生時間
-	 * @exception NullPointerException chartがnull
-	 * @exception IllegalArgumentException durationがマイナス値
+	 * @throws NullPointerException chartがnull
+	 * @throws IllegalArgumentException durationがマイナス値
 	 */
 	protected BeMusicSequencer(BeMusicChart chart, double duration) {
 		setup(chart, duration);
@@ -233,8 +233,8 @@ public abstract class BeMusicSequencer {
 	 * <p>再生位置の設定を再生が完了している状態で実行しても再生位置は更新されません。
 	 * 例外はスローされないので再生位置を更新可能な状態かどうかは {@link #isCompleted()} で調べてください。</p>
 	 * @param newPosition 新しい再生位置(秒)
-	 * @exception IllegalArgumentException newPositionがマイナス値または再生時間超過
-	 * @exception IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
+	 * @throws IllegalArgumentException newPositionがマイナス値または再生時間超過
+	 * @throws IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
 	 */
 	public void setPosition(double newPosition) {
 		assertArgRange(newPosition, 0.0, mDuration, "newPosition");
@@ -290,8 +290,8 @@ public abstract class BeMusicSequencer {
 	 * <p>当メソッドと {@link #update()} は相互排他の関係にあり、どちらかが実行されている間はもう片方を実行できません。
 	 * また、複数スレッドによる当メソッドの多重実行もできません。</p>
 	 * @param exitWhenComplete シーケンサの状態が「再生終了」になった時ループ処理を終了するかどうか
-	 * @exception IllegalStateException 別スレッドがループ処理を実行中
-	 * @exception IllegalStateException {@link #update()} を実行中
+	 * @throws IllegalStateException 別スレッドがループ処理を実行中
+	 * @throws IllegalStateException {@link #update()} を実行中
 	 * @see #update()
 	 */
 	public void loop(boolean exitWhenComplete) {
@@ -328,8 +328,8 @@ public abstract class BeMusicSequencer {
 	 * 間隔が空きすぎると正確なサウンドの再生タイミングが確保できなくなります。</p>
 	 * <p>当メソッドと {@link #loop(boolean)} は相互排他の関係にあり、どちらかが実行されている間はもう片方を実行できません。
 	 * また、複数スレッドによる当メソッドの多重実行もできません。</p>
-	 * @exception IllegalStateException 別スレッドが時間経過処理を実行中
-	 * @exception IllegalStateException {@link #loop(boolean)} を実行中
+	 * @throws IllegalStateException 別スレッドが時間経過処理を実行中
+	 * @throws IllegalStateException {@link #loop(boolean)} を実行中
 	 */
 	public void update() {
 		lockUpdate();
@@ -347,7 +347,7 @@ public abstract class BeMusicSequencer {
 	 * 要求が受理されると現在の再生位置から時間経過のカウントを開始し、{@link #onPlay()} が呼び出されます。</p>
 	 * <p>当メソッドが作用するのはシーケンサの状態が「初期状態」の時のみです。それ以外の状態では何も行われません。
 	 * 例外はスローされないので再生可能な状態かどうかは {@link #isStopped()} で調べてください。</p>
-	 * @exception IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
+	 * @throws IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
 	 */
 	public void play() {
 		requestControl(Request.PLAY);
@@ -360,7 +360,7 @@ public abstract class BeMusicSequencer {
 	 * 要求が受理されると再生位置が0にリセットされ、{@link #onStop()} が呼び出されます。</p>
 	 * <p>既に停止されている状態で当メソッドを呼び出しても何も行われません。
 	 * 例外はスローされないので停止可能な状態かどうかは {@link #isStopped()} で調べてください。</p>
-	 * @exception IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
+	 * @throws IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
 	 */
 	public void stop() {
 		requestControl(Request.STOP);
@@ -373,7 +373,7 @@ public abstract class BeMusicSequencer {
 	 * 要求が受理されると時間経過処理による再生位置のカウントが停止され、{@link #onPause()} が呼び出されます。</p>
 	 * <p>当メソッドが作用するのはシーケンサの状態が「再生中」の時のみです。それ以外の状態では何も行われません。
 	 * 例外はスローされないので一時停止可能な状態かどうかは {@link #isPlaying()} で調べてください。</p>
-	 * @exception IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
+	 * @throws IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
 	 */
 	public void pause() {
 		requestControl(Request.PAUSE);
@@ -386,7 +386,7 @@ public abstract class BeMusicSequencer {
 	 * 要求が受理されると時間経過処理による再生位置のカウントが再開され、{@link #onResume()} が呼び出されます。</p>
 	 * <p>当メソッドが作用するのはシーケンサの状態が「一時停止中」の時のみです。それ以外の状態では何も行われません。
 	 * 例外はスローされないので再開可能な状態かどうかは {@link #isPausing()} で調べてください。</p>
-	 * @exception IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
+	 * @throws IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
 	 */
 	public void resume() {
 		requestControl(Request.RESUME);
@@ -400,8 +400,8 @@ public abstract class BeMusicSequencer {
 	 * 指定したBMS譜面を時間まで再生後、当メソッドが終了します。</p>
 	 * @param chart 再生対象のBMS譜面
 	 * @param processor 再生位置に到達した楽曲位置情報を処理する関数
-	 * @exception NullPointerException chartがnull
-	 * @exception NullPointerException processorがnull
+	 * @throws NullPointerException chartがnull
+	 * @throws NullPointerException processorがnull
 	 */
 	public static void play(BeMusicChart chart, Consumer<BeMusicPoint> processor) {
 		play(chart, chart.getPlayTime(), SLEEP_TIME_DEFAULT, processor);
@@ -416,10 +416,10 @@ public abstract class BeMusicSequencer {
 	 * @param duration 再生時間
 	 * @param sleepTime ループ処理の待機時間
 	 * @param processor 再生位置に到達した楽曲位置情報を処理する関数
-	 * @exception NullPointerException chartがnull
-	 * @exception IllegalArgumentException durationがマイナス値
-	 * @exception IllegalArgumentException sleepTimeが{@link #SLEEP_TIME_MAX}超過
-	 * @exception NullPointerException processorがnull
+	 * @throws NullPointerException chartがnull
+	 * @throws IllegalArgumentException durationがマイナス値
+	 * @throws IllegalArgumentException sleepTimeが{@link #SLEEP_TIME_MAX}超過
+	 * @throws NullPointerException processorがnull
 	 */
 	public static void play(BeMusicChart chart, double duration, double sleepTime, Consumer<BeMusicPoint> processor) {
 		var sequencer = new SimpleSequencer(chart, duration, sleepTime, processor);
@@ -567,8 +567,8 @@ public abstract class BeMusicSequencer {
 	 * 初期化処理
 	 * @param chart 再生対象のBMS譜面
 	 * @param duration 再生時間
-	 * @exception NullPointerException chartがnull
-	 * @exception IllegalArgumentException durationがマイナス値
+	 * @throws NullPointerException chartがnull
+	 * @throws IllegalArgumentException durationがマイナス値
 	 */
 	private void setup(BeMusicChart chart, double duration) {
 		assertArgNotNull(chart, "chart");
@@ -580,7 +580,7 @@ public abstract class BeMusicSequencer {
 
 	/**
 	 * 時間経過処理の排他開始
-	 * @exception IllegalStateException 既に時間経過処理が排他状態になっている
+	 * @throws IllegalStateException 既に時間経過処理が排他状態になっている
 	 */
 	private void lockUpdate() {
 		if (!mUpdateSemaphore.tryAcquire()) {
@@ -598,7 +598,7 @@ public abstract class BeMusicSequencer {
 	/**
 	 * 再生制御要求の受理
 	 * @param request 再生制御種別
-	 * @exception IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
+	 * @throws IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
 	 */
 	private void requestControl(Request request) {
 		requestControl(request, 0.0);
@@ -608,7 +608,7 @@ public abstract class BeMusicSequencer {
 	 * 再生制御要求の受理
 	 * @param request 再生制御種別
 	 * @param fParam パラメータ(double)
-	 * @exception IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
+	 * @throws IllegalStateException 再生制御要求キューに空きがなく要求が受理できなかった
 	 */
 	private void requestControl(Request request, double fParam) {
 		var rc = new RequestControl();

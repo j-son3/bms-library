@@ -39,7 +39,7 @@ public enum DsDebugMode {
 	 * デバッグ出力の開始を示す出力が必要かどうか
 	 * @return 必要であればtrue
 	 */
-	final boolean isStarterNecessary() {
+	boolean isStarterNecessary() {
 		return mNeedStarter;
 	}
 
@@ -47,7 +47,7 @@ public enum DsDebugMode {
 	 * デバッグ出力の終了を示す出力が必要かどうか
 	 * @return 必要であればtrue
 	 */
-	final boolean isFinisherNecessary() {
+	boolean isFinisherNecessary() {
 		return mNeedFinisher;
 	}
 }

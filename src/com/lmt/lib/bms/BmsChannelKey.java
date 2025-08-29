@@ -22,7 +22,7 @@ public class BmsChannelKey implements Comparable<BmsChannelKey> {
 	/**
 	 * チャンネルキーオブジェクトを構築します。
 	 * @param number チャンネル番号
-	 * @exception IllegalArgumentException numberに登録できないチャンネル番号を指定した
+	 * @throws IllegalArgumentException numberに登録できないチャンネル番号を指定した
 	 */
 	public BmsChannelKey(int number) {
 		initialize(number);
@@ -31,9 +31,9 @@ public class BmsChannelKey implements Comparable<BmsChannelKey> {
 	/**
 	 * チャンネルキーオブジェクトを構築します。
 	 * @param number チャンネル番号(36進数で指定)
-	 * @exception NullPointerException numberがnull
-	 * @exception NumberFormatException numberの内容が36進数ではない
-	 * @exception IllegalArgumentException numberに登録できないチャンネル番号を指定した
+	 * @throws NullPointerException numberがnull
+	 * @throws NumberFormatException numberの内容が36進数ではない
+	 * @throws IllegalArgumentException numberに登録できないチャンネル番号を指定した
 	 */
 	public BmsChannelKey(String number) {
 		assertArgNotNull(number, "number");
@@ -79,14 +79,14 @@ public class BmsChannelKey implements Comparable<BmsChannelKey> {
 	 * チャンネル番号を取得します。
 	 * @return チャンネル番号
 	 */
-	public final int getNumber() {
+	public int getNumber() {
 		return mNumber;
 	}
 
 	/**
 	 * チャンネル番号を設定する。
 	 * @param number チャンネル番号
-	 * @exception IllegalArgumentException numberに登録できないチャンネル番号を指定した
+	 * @throws IllegalArgumentException numberに登録できないチャンネル番号を指定した
 	 */
 	protected void setNumber(int number) {
 		initialize(number);
@@ -95,7 +95,7 @@ public class BmsChannelKey implements Comparable<BmsChannelKey> {
 	/**
 	 * 初期化処理。
 	 * @param number チャンネル番号
-	 * @exception IllegalArgumentException numberに登録できないチャンネル番号を指定した
+	 * @throws IllegalArgumentException numberに登録できないチャンネル番号を指定した
 	 */
 	private void initialize(int number) {
 		assertChannelRange(number);

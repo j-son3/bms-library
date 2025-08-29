@@ -22,8 +22,8 @@ public class BmsMetaKey {
 	 * 新しいメタ情報キーを生成します。
 	 * @param name メタ情報の名称
 	 * @param unit 構成単位
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
 	 */
 	public BmsMetaKey(String name, BmsUnit unit) {
 		assertArgNotNull(name, "name");
@@ -81,7 +81,7 @@ public class BmsMetaKey {
 	 * @return 構成単位が単体であればtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isSingleUnit() {
+	public boolean isSingleUnit() {
 		return mUnit == BmsUnit.SINGLE;
 	}
 
@@ -91,7 +91,7 @@ public class BmsMetaKey {
 	 * @return 構成単位が複数であればtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isMultipleUnit() {
+	public boolean isMultipleUnit() {
 		return mUnit == BmsUnit.MULTIPLE;
 	}
 
@@ -101,7 +101,7 @@ public class BmsMetaKey {
 	 * @return 構成単位が索引付きであればtrue
 	 * @since 0.8.0
 	 */
-	public final boolean isIndexedUnit() {
+	public boolean isIndexedUnit() {
 		return mUnit == BmsUnit.INDEXED;
 	}
 }

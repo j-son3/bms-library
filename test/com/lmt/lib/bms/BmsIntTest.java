@@ -369,10 +369,10 @@ public class BmsIntTest {
 		BmsInt.box(3844);
 		BmsInt.box(BmsChx.toInt(1, 0));
 		BmsInt.box(BmsChx.toInt(1, 1));
-		BmsInt.box(BmsChx.toInt(1295, 4));
-		BmsInt.box(BmsChx.toInt(1295, 5));
-		BmsInt.box(BmsChx.toInt(1295, 6));
-		BmsInt.box(BmsChx.toInt(1295, 7));
+		BmsInt.box(BmsChx.toInt(1295, 16));
+		BmsInt.box(BmsChx.toInt(1295, 17));
+		BmsInt.box(BmsChx.toInt(1295, 18));
+		BmsInt.box(BmsChx.toInt(1295, 19));
 		BmsInt.box(-1);
 		BmsInt.box(BmsChx.toInt(1296, 0));
 		assertArrayEquals(new long[] { 12, 5, 4, 3, 6, 2 }, BmsInt.cacheSnapshotResult());
@@ -437,11 +437,14 @@ public class BmsIntTest {
 	}
 
 	// box(int)
-	// チャンネルインデックス4以上を指定すると新しいインスタンスの整数値オブジェクトが返ること
+	// チャンネルインデックス16以上を指定すると新しいインスタンスの整数値オブジェクトが返ること
 	@Test
 	public void testBoxInt_ChannelIndexOutOfRange() {
-		var n = BmsChx.toInt(1295, 4);
+		var n = BmsChx.toInt(1295, 15);
 		var o = BmsInt.box(n);
+		assertSame(o, BmsInt.box(n));
+		n = BmsChx.toInt(1295, 16);
+		o = BmsInt.box(n);
 		assertNotSame(o, BmsInt.box(n));
 		n = BmsChx.toInt(1295, 65535);
 		o = BmsInt.box(n);

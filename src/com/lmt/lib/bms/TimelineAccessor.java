@@ -70,10 +70,10 @@ class TimelineAccessor {
 	 * @param channel チャンネル番号
 	 * @param measure 小節番号
 	 * @return
-	 * @exception IllegalArgumentException 小節データ・ノートを登録できないチャンネル番号
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節データ・ノートを登録できないチャンネル番号
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
 	 */
-	final int getChannelDataCount(int channel, int measure) {
+	int getChannelDataCount(int channel, int measure) {
 		// アサーション
 		assertChannelIndex(channel, 0);
 		assertArgMeasureWithinRange(measure);
@@ -101,12 +101,12 @@ class TimelineAccessor {
 	 * 後ろにずれることになる。</p>
 	 * @param measureWhere 挿入位置の小節番号
 	 * @param count 挿入小節数
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException ノート・小節データが存在し得ない小節番号
-	 * @exception IllegalArgumentException countがマイナス値
-	 * @exception IllegalArgumentException 挿入処理により小節数が{@link BmsSpec#MEASURE_MAX_COUNT}を超過する
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException ノート・小節データが存在し得ない小節番号
+	 * @throws IllegalArgumentException countがマイナス値
+	 * @throws IllegalArgumentException 挿入処理により小節数が{@link BmsSpec#MEASURE_MAX_COUNT}を超過する
 	 */
-	final void insert(int measureWhere, int count) {
+	void insert(int measureWhere, int count) {
 		// アサーション
 		assertIsEditMode();
 		assertArgMeasureWithinRange(measureWhere, mTl.getMeasureCount());
@@ -132,12 +132,12 @@ class TimelineAccessor {
 	 * 指定の小節番号の小節から指定個数の小節データを消去し、それ以降の小節データを詰める。
 	 * @param measureWhere 消去開始位置の小節番号
 	 * @param count 消去する小節データの件数
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException ノート・小節データが存在し得ない小節番号
-	 * @exception IllegalArgumentException countがマイナス値
-	 * @exception IllegalArgumentException 存在する小節データを超えて小節データを消去しようとした
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException ノート・小節データが存在し得ない小節番号
+	 * @throws IllegalArgumentException countがマイナス値
+	 * @throws IllegalArgumentException 存在する小節データを超えて小節データを消去しようとした
 	 */
-	final void remove(int measureWhere, int count) {
+	void remove(int measureWhere, int count) {
 		// アサーション
 		assertIsEditMode();
 		assertArgMeasureWithinRange(measureWhere, mTl.getMeasureCount() - 1);
@@ -162,20 +162,20 @@ class TimelineAccessor {
 	 * @param value ノートが持つ値
 	 * @param createNote ノートオブジェクトを生成する関数
 	 * @return 登録されたノートオブジェクト
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
-	 * @exception IllegalArgumentException ノート・小節データが存在し得ない小節番号
-	 * @exception IllegalArgumentException 小節番号がBMS仕様の許容範囲外
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
-	 * @exception IllegalArgumentException ノートの値に0を指定した
-	 * @exception NullPointerException createNoteがnull
-	 * @exception IllegalArgumentException createNoteの結果がnull
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
+	 * @throws IllegalArgumentException ノート・小節データが存在し得ない小節番号
+	 * @throws IllegalArgumentException 小節番号がBMS仕様の許容範囲外
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
+	 * @throws IllegalArgumentException ノートの値に0を指定した
+	 * @throws NullPointerException createNoteがnull
+	 * @throws IllegalArgumentException createNoteの結果がnull
 	 */
 	@SuppressWarnings("unchecked")
-	final <T extends BmsNote> T putNote(int channel, int index, int measure, double tick, int value,
+	<T extends BmsNote> T putNote(int channel, int index, int measure, double tick, int value,
 			Supplier<BmsNote> createNote) {
 		// アサーション
 		assertIsEditMode();
@@ -203,15 +203,15 @@ class TimelineAccessor {
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
 	 * @return 消去した場合true、消去しなかった場合false
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
-	final boolean removeNote(int channel, int index, int measure, double tick) {
+	boolean removeNote(int channel, int index, int measure, double tick) {
 		// アサーション
 		assertIsEditMode();
 		assertChannelIndex(channel, index);
@@ -229,11 +229,11 @@ class TimelineAccessor {
 	 * @param measureEnd 消去終了小節番号(この小節を含まない)
 	 * @param isRemoveTarget ノート消去の是非を判定するテスター
 	 * @return 消去されたノートの個数
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException {@link TimelineAccessor#enumNotes}
-	 * @exception NullPointerException isRemoveTargetがnull
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException {@link TimelineAccessor#enumNotes}
+	 * @throws NullPointerException isRemoveTargetがnull
 	 */
-	final int removeNote(int channelBegin, int channelEnd, int measureBegin, int measureEnd,
+	int removeNote(int channelBegin, int channelEnd, int measureBegin, int measureEnd,
 			Predicate<BmsNote> isRemoveTarget) {
 		// アサーション
 		assertIsEditMode();
@@ -261,15 +261,15 @@ class TimelineAccessor {
 	 * @param index チャンネルインデックス
 	 * @param measure 小節番号
 	 * @param value 設定値。nullを指定した場合は破棄。
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号を指定した
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定した
-	 * @exception IllegalArgumentException チャンネルのデータ型が値型ではない
-	 * @exception ClassCastException valueをチャンネルのデータ型に変換できない
-	 * @exception IllegalArgumentException 小節長に{@link BmsSpec#LENGTH_MIN}未満または{@link BmsSpec#LENGTH_MAX}超過の値を設定しようとした
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号を指定した
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定した
+	 * @throws IllegalArgumentException チャンネルのデータ型が値型ではない
+	 * @throws ClassCastException valueをチャンネルのデータ型に変換できない
+	 * @throws IllegalArgumentException 小節長に{@link BmsSpec#LENGTH_MIN}未満または{@link BmsSpec#LENGTH_MAX}超過の値を設定しようとした
 	 */
-	final void setValue(int channel, int index, int measure, Object value) {
+	void setValue(int channel, int index, int measure, Object value) {
 		// アサーション
 		assertIsEditMode();
 		assertChannelIndex(channel, index);
@@ -297,14 +297,14 @@ class TimelineAccessor {
 	 * @param requiredType 要求するデータ型。型変換不要の場合はnull。
 	 * @param nullIfNotExist データ未登録の場合に初期値ではなくnullを返す場合はtrue
 	 * @return 要求データ型に変換された小節データ。当該小節に小節データ未登録の場合はそのチャンネルの初期値を返す。
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が値型ではない
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
-	 * @exception ClassCastException データを要求型に変換できない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が値型ではない
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws ClassCastException データを要求型に変換できない
 	 */
-	final Object getValue(int channel, int index, int measure, BmsType requiredType, boolean nullIfNotExist) {
+	Object getValue(int channel, int index, int measure, BmsType requiredType, boolean nullIfNotExist) {
 		// アサーション
 		assertChannelIndex(channel, index);
 		assertChannelNotArrayType(channel);
@@ -329,7 +329,7 @@ class TimelineAccessor {
 	 * @param first 対象の最小小節番号
 	 * @param last 対象の最大小節番号
 	 */
-	final void updateRecalcRange(int first, int last) {
+	void updateRecalcRange(int first, int last) {
 		mTl.updateRecalcRange(first, last);
 	}
 
@@ -337,7 +337,7 @@ class TimelineAccessor {
 	 * 時間・BPM再計算対象の小節データの再計算処理。
 	 * @return 小節データの再計算を行った場合true
 	 */
-	final boolean recalculateTime() {
+	boolean recalculateTime() {
 		return mTl.recalculateTime(this);
 	}
 
@@ -347,14 +347,14 @@ class TimelineAccessor {
 	 * @param index1 入れ替え対象1のチャンネルインデックス
 	 * @param channel2 入れ替え対象2のチャンネル番号
 	 * @param index2 入れ替え対象2のチャンネルインデックス
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
-	 * @exception IllegalArgumentException 指定チャンネルが小節長変更・BPM変更・譜面停止のいずれか
-	 * @exception IllegalArgumentException チャンネル1,2のデータ型が一致しない
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
+	 * @throws IllegalArgumentException 指定チャンネルが小節長変更・BPM変更・譜面停止のいずれか
+	 * @throws IllegalArgumentException チャンネル1,2のデータ型が一致しない
 	 */
-	final void swapChannel(int channel1, int index1, int channel2, int index2) {
+	void swapChannel(int channel1, int index1, int channel2, int index2) {
 		// アサーション
 		assertIsEditMode();
 		assertChannelIndex(channel1, index1);
@@ -389,14 +389,14 @@ class TimelineAccessor {
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
 	 * @return 指定位置のノートオブジェクト。ノートが存在しない場合はnull。
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
-	final BmsNote getNote(int channel, int index, int measure, double tick) {
+	BmsNote getNote(int channel, int index, int measure, double tick) {
 		// アサーション
 		assertChannelIndex(channel, index);
 		assertPointAllowOverMeasureCount(measure, tick);
@@ -416,10 +416,10 @@ class TimelineAccessor {
 	 * @param tickEnd 取得終了刻み位置(この位置を含まない)
 	 * @param isCollect 当該ノートの取得是非を判定するテスター
 	 * @return 取得したノートオブジェクトのリスト。取得結果が0件でもnullにはならない。
-	 * @exception IllegalArgumentException {@link TimelineAccessor#enumNotes}
-	 * @exception NullPointerException isCollectがnull
+	 * @throws IllegalArgumentException {@link TimelineAccessor#enumNotes}
+	 * @throws NullPointerException isCollectがnull
 	 */
-	final List<BmsNote> listNotes(int channelBegin, int channelEnd,
+	List<BmsNote> listNotes(int channelBegin, int channelEnd,
 			int measureBegin, double tickBegin, int measureEnd, double tickEnd, Predicate<BmsNote> isCollect) {
 		// アサーション
 		assertChannelRange(channelBegin);
@@ -438,10 +438,10 @@ class TimelineAccessor {
 	 * @param tick 取得対象の刻み位置
 	 * @param isCollect ノートの取得是非を判定するテスター
 	 * @return 取得したノートオブジェクトのリスト。取得結果が0件でもnullにはならない。
-	 * @exception NullPointerException isCollectがnull
-	 * @exception * {@link #enumNotes(int, int, BmsNote.Tester)}を参照
+	 * @throws NullPointerException isCollectがnull
+	 * @throws * {@link #enumNotes(int, int, BmsNote.Tester)}を参照
 	 */
-	final List<BmsNote> listNotes(int measure, double tick, Predicate<BmsNote> isCollect) {
+	List<BmsNote> listNotes(int measure, double tick, Predicate<BmsNote> isCollect) {
 		assertPoint(measure, tick);
 		assertArgNotNull(isCollect, "isCollect");
 
@@ -462,7 +462,7 @@ class TimelineAccessor {
 	 * @param outList リスト化したノートを格納するリストインスタンス
 	 * @return パラメータで指定したリストインスタンス
 	 */
-	final List<BmsNote> listNotes(int channel, int index, int measure, List<BmsNote> outList) {
+	List<BmsNote> listNotes(int channel, int index, int measure, List<BmsNote> outList) {
 		return mTl.listNotes(channel, index, measure, outList);
 	}
 
@@ -475,14 +475,14 @@ class TimelineAccessor {
 	 * @param direction 検索方向。1以上で前方検索、0以下で後方検索。
 	 * @param inclusive 指定位置を検索対象に含めるかどうか
 	 * @return 見つかったノートオブジェクト。見つからなかった場合はnull。
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
-	 * @exception IllegalArgumentException 小節番号がマイナス値または小節数以上
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
+	 * @throws IllegalArgumentException 小節番号がマイナス値または小節数以上
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
-	final BmsNote getNearerNote(int channel, int index, int measure, double tick, int direction, boolean inclusive) {
+	BmsNote getNearerNote(int channel, int index, int measure, double tick, int direction, boolean inclusive) {
 		// アサーション
 		assertChannelIndex(channel, index);
 		assertPoint(measure, tick);
@@ -506,9 +506,9 @@ class TimelineAccessor {
 	 * @param tickEnd カウント対象の終了刻み位置(この位置を含まない)
 	 * @param isCounting ノートを検査するテスター
 	 * @return テストを通過したノートの数
-	 * @exception IllegalArgumentException {@link TimelineAccessor#enumNotes}
+	 * @throws IllegalArgumentException {@link TimelineAccessor#enumNotes}
 	 */
-	final int countNotes(int channelBegin, int channelEnd, int measureBegin,
+	int countNotes(int channelBegin, int channelEnd, int measureBegin,
 			double tickBegin, int measureEnd, double tickEnd, Predicate<BmsNote> isCounting) {
 		// アサーション
 		assertChannelRange(channelBegin);
@@ -526,10 +526,10 @@ class TimelineAccessor {
 	 * @param tick カウント対象の刻み位置
 	 * @param isCounting カウント対象のノートを判定するテスター
 	 * @return 判定に合格したノートの数
-	 * @exception NullPointerException isCountingがnull
-	 * @exception * {@link #enumNotes(int, int, BmsNote.Tester)}を参照
+	 * @throws NullPointerException isCountingがnull
+	 * @throws * {@link #enumNotes(int, int, BmsNote.Tester)}を参照
 	 */
-	final int countNotes(int measure, double tick, Predicate<BmsNote> isCounting) {
+	int countNotes(int measure, double tick, Predicate<BmsNote> isCounting) {
 		assertPoint(measure, tick);
 		assertArgNotNull(isCounting, "isCounting");
 
@@ -551,15 +551,15 @@ class TimelineAccessor {
 	 * @param measureEnd 列挙終了小節番号
 	 * @param tickEnd 列挙終了刻み位置(この位置を含まない)
 	 * @param enumNote 列挙されたノートの通知を受ける関数
-	 * @exception IllegalArgumentException channelBeginが小節データ・ノートを登録できないチャンネル番号
-	 * @exception IllegalArgumentException channelEnd - 1が小節データ・ノートを登録できないチャンネル番号
-	 * @exception IllegalArgumentException measureBeginがノート・小節データの存在し得ない小節番号
-	 * @exception IllegalArgumentException tickBeginがマイナス値または当該小節の刻み数以上
-	 * @exception IllegalArgumentException measureEndがノート・小節データが存在し得ない小節番号
-	 * @exception IllegalArgumentException tickEndがマイナス値、当該小節の刻み数以上、または最終小節+1の時に0以外
-	 * @exception NullPointerException enumNoteがnull
+	 * @throws IllegalArgumentException channelBeginが小節データ・ノートを登録できないチャンネル番号
+	 * @throws IllegalArgumentException channelEnd - 1が小節データ・ノートを登録できないチャンネル番号
+	 * @throws IllegalArgumentException measureBeginがノート・小節データの存在し得ない小節番号
+	 * @throws IllegalArgumentException tickBeginがマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException measureEndがノート・小節データが存在し得ない小節番号
+	 * @throws IllegalArgumentException tickEndがマイナス値、当該小節の刻み数以上、または最終小節+1の時に0以外
+	 * @throws NullPointerException enumNoteがnull
 	 */
-	final void enumNotes(int channelBegin, int channelEnd,
+	void enumNotes(int channelBegin, int channelEnd,
 			int measureBegin, double tickBegin, int measureEnd, double tickEnd, Consumer<BmsNote> enumNote) {
 		// アサーション
 		assertChannelRange(channelBegin);
@@ -579,11 +579,11 @@ class TimelineAccessor {
 	 * @param measure 小節番号
 	 * @param tick 刻み位置
 	 * @param enumNote 列挙されたノートの通知を受ける関数
-	 * @exception IllegalArgumentException measureがマイナス値または小節数以上
-	 * @exception IllegalArgumentException tickがマイナス値または当該小節の刻み数以上
-	 * @exception NullPointerException enumNoteがnull
+	 * @throws IllegalArgumentException measureがマイナス値または小節数以上
+	 * @throws IllegalArgumentException tickがマイナス値または当該小節の刻み数以上
+	 * @throws NullPointerException enumNoteがnull
 	 */
-	final void enumNotes(int measure, double tick, Consumer<BmsNote> enumNote) {
+	void enumNotes(int measure, double tick, Consumer<BmsNote> enumNote) {
 		assertPoint(measure, tick);
 		assertArgNotNull(enumNote, "enumNote");
 
@@ -604,10 +604,10 @@ class TimelineAccessor {
 	 * @param offsetTick オフセットする刻み数。プラス値で前方、マイナス値で後方へオフセットする。
 	 * @param outPoint オフセット後の楽曲位置を格納する楽曲位置オブジェクト
 	 * @return 引数で指定した楽曲位置オブジェクト
-	 * @exception IllegalArgumentException 小節番号がマイナス値または小節数以上
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException 小節番号がマイナス値または小節数以上
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
 	 */
-	final BmsPoint seekPoint(int measure, double tick, double offsetTick, BmsPoint outPoint) {
+	BmsPoint seekPoint(int measure, double tick, double offsetTick, BmsPoint outPoint) {
 		// アサーション
 		assertPoint(measure, tick);
 
@@ -629,12 +629,12 @@ class TimelineAccessor {
 	 * @param chTester 検索対象のチャンネルを判定するテスター
 	 * @param outPoint 検索した楽曲位置を格納する{@link BmsPoint}の参照
 	 * @return outPointと同じ参照
-	 * @exception IllegalArgumentException 小節番号がマイナス値または小節数以上
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
-	 * @exception NullPointerException chTesterがnull
-	 * @exception NullPointerException outPointがnull
+	 * @throws IllegalArgumentException 小節番号がマイナス値または小節数以上
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws NullPointerException chTesterがnull
+	 * @throws NullPointerException outPointがnull
 	 */
-	final BmsPoint seekNextPoint(int measure, double tick, boolean inclusiveFrom, IntPredicate chTester,
+	BmsPoint seekNextPoint(int measure, double tick, boolean inclusiveFrom, IntPredicate chTester,
 			BmsPoint outPoint) {
 		assertArgNotNull(chTester, "chTester");
 		assertArgNotNull(outPoint, "outPoint");
@@ -655,11 +655,11 @@ class TimelineAccessor {
 	 * @param measure 走査楽曲位置の小節番号
 	 * @param tick 走査楽曲位置の小節の刻み位置
 	 * @return タイムラインの指定楽曲位置を走査するストリーム
-	 * @exception IllegalArgumentException 楽曲位置の小節番号がマイナス値
-	 * @exception IllegalArgumentException 楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
-	 * @exception IllegalArgumentException 楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 * @throws IllegalArgumentException 楽曲位置の小節番号がマイナス値
+	 * @throws IllegalArgumentException 楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
+	 * @throws IllegalArgumentException 楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
 	 */
-	final Stream<BmsTimelineElement> timeline(int measure, double tick) {
+	Stream<BmsTimelineElement> timeline(int measure, double tick) {
 		if ((mTl.getMeasureCount() == 0) && (measure == BmsSpec.MEASURE_MIN) && (tick == BmsSpec.TICK_MIN)) {
 			// 空タイムラインでタイムライン先頭指定時は空ストリームを返す
 			return Stream.empty();
@@ -677,13 +677,13 @@ class TimelineAccessor {
 	 * @param measureEnd 走査終了楽曲位置の小節番号
 	 * @param tickEnd 走査終了楽曲位置の小節の刻み位置(この位置を含まない)
 	 * @return タイムラインの指定楽曲位置の範囲を走査するストリーム
-	 * @exception IllegalArgumentException 走査開始/終了楽曲位置の小節番号がマイナス値
-	 * @exception IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
-	 * @exception IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
-	 * @exception IllegalArgumentException 走査開始/終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
-	 * @exception IllegalArgumentException 走査終了楽曲位置が走査開始楽曲位置と同じまたは手前の楽曲位置を示している
+	 * @throws IllegalArgumentException 走査開始/終了楽曲位置の小節番号がマイナス値
+	 * @throws IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
+	 * @throws IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
+	 * @throws IllegalArgumentException 走査開始/終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 * @throws IllegalArgumentException 走査終了楽曲位置が走査開始楽曲位置と同じまたは手前の楽曲位置を示している
 	 */
-	final Stream<BmsTimelineElement> timeline(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
+	Stream<BmsTimelineElement> timeline(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
 		// 空タイムラインで走査開始/終了楽曲位置がタイムライン先頭を指している場合は空ストリームを返す
 		if (mTl.getMeasureCount() == 0) {
 			if ((measureBegin == BmsSpec.MEASURE_MIN) && (tickBegin == BmsSpec.TICK_MIN) &&
@@ -709,10 +709,10 @@ class TimelineAccessor {
 	/**
 	 * 指定したメタ情報要素をBMSコンテンツに追加
 	 * @param timeline タイムライン要素
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException timelineがnull
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException timelineがnull
 	 */
-	final void putTimeline(BmsTimelineElement timeline) {
+	void putTimeline(BmsTimelineElement timeline) {
 		assertIsEditMode();
 		assertArgNotNull(timeline, "timeline");
 		var channel = timeline.getChannel();
@@ -815,11 +815,11 @@ class TimelineAccessor {
 	 * @param tickFrom 検索開始刻み位置
 	 * @param judge ノートを検査するテスター
 	 * @return 検索で見つかった最初のノート。見つからなかった場合はnull。
-	 * @exception IllegalArgumentException ノート・小節データが存在し得ない小節番号
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
-	 * @exception NullPointerException judgeがnull
+	 * @throws IllegalArgumentException ノート・小節データが存在し得ない小節番号
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws NullPointerException judgeがnull
 	 */
-	final BmsNote pointOf(int measureFrom, double tickFrom, Predicate<BmsNote> judge) {
+	BmsNote pointOf(int measureFrom, double tickFrom, Predicate<BmsNote> judge) {
 		assertPoint(measureFrom, tickFrom);
 		assertArgNotNull(judge, "judge");
 
@@ -831,7 +831,7 @@ class TimelineAccessor {
 	 * 小節データ数を取得する。
 	 * @return 小節データ数
 	 */
-	final int getCount() {
+	int getCount() {
 		return mTl.getMeasureCount();
 	}
 
@@ -839,9 +839,9 @@ class TimelineAccessor {
 	 * 指定小節番号の小節の刻み数を取得する。
 	 * @param measure 小節番号
 	 * @return 当該小節の刻み数
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
 	 */
-	final double getTickCount(int measure) {
+	double getTickCount(int measure) {
 		assertArgMeasureWithinRange(measure);
 		return mTl.getMeasureTickCount(measure);
 	}
@@ -852,10 +852,10 @@ class TimelineAccessor {
 	 * @param timeSec 時間(sec)
 	 * @param outPoint 変換後の楽曲位置を格納する楽曲位置オブジェクト
 	 * @return 引数で指定した楽曲位置オブジェクト
-	 * @exception IllegalStateException 動作モードが参照モードではない
-	 * @exception IllegalArgumentException 指定時間がマイナス値
+	 * @throws IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalArgumentException 指定時間がマイナス値
 	 */
-	final BmsPoint timeToPoint(double timeSec, BmsPoint outPoint) {
+	BmsPoint timeToPoint(double timeSec, BmsPoint outPoint) {
 		// アサーション
 		assertIsReferenceMode();
 		assertArg(timeSec >= 0.0, "Argument 'timeSec' is minus value. actual=%f", timeSec);
@@ -1000,11 +1000,11 @@ class TimelineAccessor {
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
 	 * @return 時間(sec)
-	 * @exception IllegalStateException 動作モードが参照モードではない
-	 * @exception IllegalArgumentException 小節番号がマイナス値、小節数以上、または小節数と同値で刻み位置が0以外
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalArgumentException 小節番号がマイナス値、小節数以上、または小節数と同値で刻み位置が0以外
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
 	 */
-	final double pointToTime(int measure, double tick) {
+	double pointToTime(int measure, double tick) {
 		// アサーション
 		assertIsReferenceMode();
 		assertPointAllowTerm(measure, tick);
@@ -1033,14 +1033,14 @@ class TimelineAccessor {
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
 	 * @return ノートに該当するメタ情報の値。チャンネルに参照先メタ情報のない場合はノートの値をINTEGERで返す。
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
-	final Object getResolvedNoteValue(int channel, int index, int measure, double tick) {
+	Object getResolvedNoteValue(int channel, int index, int measure, double tick) {
 		var note = getNote(channel, index, measure, tick);
 		if (note != null) {
 			// ノートを取得できた場合はそのノートの値を使用してメタ情報の値を抽出する
@@ -1056,9 +1056,9 @@ class TimelineAccessor {
 	 * 指定ノートに該当するメタ情報の値を取得する。
 	 * @param note ノート
 	 * @return ノートに該当するメタ情報の値。チャンネルに参照先メタ情報のない場合はノートの値をINTEGERで返す。
-	 * @exception NullPointerException noteがnull
+	 * @throws NullPointerException noteがnull
 	 */
-	final Object getResolvedNoteValue(BmsNote note) {
+	Object getResolvedNoteValue(BmsNote note) {
 		assertArgNotNull(note, "note");
 		return getResolvedNoteValueCore(note.getChannel(), note.getValue());
 	}
@@ -1260,9 +1260,9 @@ class TimelineAccessor {
 	 * チャンネル番号とチャンネルインデックスの整合性をテストするアサーション
 	 * @param channel チャンネル番号
 	 * @param index チャンネルインデックス
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定
 	 */
 	private void assertChannelIndex(int channel, int index) {
 		var channelSpec = mSpec.getChannel(channel);
@@ -1281,7 +1281,7 @@ class TimelineAccessor {
 	/**
 	 * チャンネルが配列型であることをテストするアサーション
 	 * @param channel チャンネル番号
-	 * @exception  チャンネルが配列型ではない
+	 * @throws IllegalArgumentException チャンネルが配列型ではない
 	 */
 	private void assertChannelArrayType(int channel) {
 		var ch = mSpec.getChannel(channel);
@@ -1294,7 +1294,7 @@ class TimelineAccessor {
 	/**
 	 * チャンネルが配列型ではないことをテストするアサーション
 	 * @param channel チャンネル番号
-	 * @exception IllegalArgumentException チャンネルが配列型
+	 * @throws IllegalArgumentException チャンネルが配列型
 	 */
 	private void assertChannelNotArrayType(int channel) {
 		var ch = mSpec.getChannel(channel);
@@ -1309,8 +1309,8 @@ class TimelineAccessor {
 	 * <p>当メソッドでのアサーションは、小節番号が小節数未満であることを要求する。</p>
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
-	 * @exception IllegalArgumentException 小節番号がマイナス値または小節数以上
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException 小節番号がマイナス値または小節数以上
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
 	 */
 	private void assertPoint(int measure, double tick) {
 		assertArgMeasureWithinRange(measure, mTl.getMeasureCount() - 1, tick);
@@ -1323,8 +1323,8 @@ class TimelineAccessor {
 	 * <p>当メソッドでのアサーションは、小節番号が小節数の範囲内であることを要求する。</p>
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
-	 * @exception IllegalArgumentException 小節番号がマイナス値、小節数以上、または小節数と同値で刻み位置が0以外
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException 小節番号がマイナス値、小節数以上、または小節数と同値で刻み位置が0以外
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
 	 */
 	private void assertPointAllowTerm(int measure, double tick) {
 		var measureMax = mTl.getMeasureCount();
@@ -1337,8 +1337,8 @@ class TimelineAccessor {
 	 * 小節番号と小節の刻み位置の整合性をテストするアサーション。
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
 	 */
 	private void assertPointAllowOverMeasureCount(int measure, double tick) {
 		assertArgMeasureWithinRange(measure, BmsSpec.MEASURE_MAX, tick);
@@ -1351,7 +1351,7 @@ class TimelineAccessor {
 	 * @param channel チャンネル
 	 * @param measure 小節番号
 	 * @param value 小節長
-	 * @exception IllegalArgumentException 小節長に{@link BmsSpec#LENGTH_MIN}未満または{@link BmsSpec#LENGTH_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException 小節長に{@link BmsSpec#LENGTH_MIN}未満または{@link BmsSpec#LENGTH_MAX}超過の値を設定しようとした
 	 */
 	private void assertMeasureLength(BmsChannel channel, int measure, Object value) {
 		if (channel.isLength()) {
@@ -1368,7 +1368,7 @@ class TimelineAccessor {
 
 	/**
 	 * 動作モードが編集モードかどうかをテストするアサーション
-	 * @exception IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalStateException 動作モードが編集モードではない
 	 */
 	private void assertIsEditMode() {
 		if (!mFnIsEditMode.getAsBoolean()) {
@@ -1378,7 +1378,7 @@ class TimelineAccessor {
 
 	/**
 	 * 動作モードが参照モードかどうかをテストするアサーション
-	 * @exception IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalStateException 動作モードが参照モードではない
 	 */
 	private void assertIsReferenceMode() {
 		if (mFnIsEditMode.getAsBoolean()) {

@@ -1552,20 +1552,14 @@ public class BmsStandardSaverTest {
 	}
 
 	// onWrite(BmsContent, OutputStream)
-	// BmsException BMSに関連する要因、または出力処理で例外がスローされエラー終了した
+	// @throws BmsHandleException ユーザープログラムの処理異常を検出した
 	@Test
 	public void testOnWrite_Unexpected() throws Exception {
 		var content = content(c -> {
 			c.putDeclaration("key", "value");
 		});
-		try {
-			write(content, new RuntimeExceptionOutputStream());
-			fail("Expects throw BmsException, but not thrown.");
-		} catch (BmsException e) {
-			assertEquals(RuntimeException.class, e.getCause().getClass());
-		} catch (Exception e) {
-			fail(String.format("Expects throw BmsException, but other. (%s)", e.getClass().getSimpleName()));
-		}
+		var ex = assertThrows(BmsHandleException.class, () -> write(content, new RuntimeExceptionOutputStream()));
+		assertEquals(RuntimeException.class, ex.getCause().getClass());
 	}
 
 	// isCompatible(BmsContent)

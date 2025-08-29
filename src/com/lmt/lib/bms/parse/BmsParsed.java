@@ -32,7 +32,7 @@ public abstract class BmsParsed {
 	 * 解析済み要素の種別を取得します。
 	 * @return 解析済み要素の種別
 	 */
-	public final BmsParsedType getType() {
+	public BmsParsedType getType() {
 		return mType;
 	}
 
@@ -40,7 +40,7 @@ public abstract class BmsParsed {
 	 * この要素がエラー要素かどうかを返します。
 	 * @return エラー要素であればtrue、そうでなければfalse
 	 */
-	public final boolean isErrorType() {
+	public boolean isErrorType() {
 		return mType == BmsParsedType.ERROR;
 	}
 }

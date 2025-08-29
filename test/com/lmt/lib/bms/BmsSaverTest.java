@@ -17,19 +17,19 @@ public class BmsSaverTest {
 	private static Path sTestDataDir;
 
 	private static class NormalSaver extends BmsSaver {
-		@Override protected void onWrite(BmsContent content, OutputStream dst) throws IOException, BmsException {
+		@Override protected void onWrite(BmsContent content, OutputStream dst) throws IOException {
 			dst.write('a');
 		}
 	}
 
 	private static class IOExceptionSaver extends BmsSaver {
-		@Override protected void onWrite(BmsContent content, OutputStream dst) throws IOException, BmsException {
+		@Override protected void onWrite(BmsContent content, OutputStream dst) throws IOException {
 			throw new IOException();
 		}
 	}
 
 	private static class RuntimeExceptionSaver extends BmsSaver {
-		@Override protected void onWrite(BmsContent content, OutputStream dst) throws IOException, BmsException {
+		@Override protected void onWrite(BmsContent content, OutputStream dst) throws IOException {
 			throw new RuntimeException();
 		}
 	}
@@ -101,20 +101,14 @@ public class BmsSaverTest {
 	}
 
 	// save(BmsContent Path)
-	// BmsException BMSコンテンツ出力時、BMSに関連する要因で出力処理がエラー終了した
+	// BmsHandleException ユーザープログラムの処理異常を検出した
 	@Test
 	public void testSaveBmsContentPath_Unexpected() throws Exception {
 		var path = sTestDataDir.resolve("testSaveBmsContentPath_Unexpected");
 		var content = new BmsContent(BmsTest.createTestSpec());
 		var saver = new RuntimeExceptionSaver();
-		try {
-			saver.save(content, path);
-			fail("Expects throw BmsException, but not thrown.");
-		} catch (BmsException e) {
-			assertEquals(RuntimeException.class, e.getCause().getClass());
-		} catch (Exception e) {
-			fail(String.format("Expects throw BmsException, but other. (%s)", e.getClass().getSimpleName()));
-		}
+		var ex = assertThrows(BmsHandleException.class, () -> saver.save(content, path));
+		assertEquals(RuntimeException.class, ex.getCause().getClass());
 	}
 
 	// save(BmsContent, File)
@@ -174,20 +168,14 @@ public class BmsSaverTest {
 	}
 
 	// save(BmsContent, File)
-	// BmsException BMSコンテンツ出力時、BMSに関連する要因で出力処理がエラー終了した
+	// BmsHandleException ユーザープログラムの処理異常を検出した
 	@Test
 	public void testSaveBmsContentFile_Unexpected() throws Exception {
 		var path = sTestDataDir.resolve("testSaveBmsContentFile_Unexpected");
 		var content = new BmsContent(BmsTest.createTestSpec());
 		var saver = new RuntimeExceptionSaver();
-		try {
-			saver.save(content, path.toFile());
-			fail("Expects throw BmsException, but not thrown.");
-		} catch (BmsException e) {
-			assertEquals(RuntimeException.class, e.getCause().getClass());
-		} catch (Exception e) {
-			fail(String.format("Expects throw BmsException, but other. (%s)", e.getClass().getSimpleName()));
-		}
+		var ex = assertThrows(BmsHandleException.class, () -> saver.save(content, path.toFile()));
+		assertEquals(RuntimeException.class, ex.getCause().getClass());
 	}
 
 	// save(BmsContent, OutputStream)
@@ -237,18 +225,12 @@ public class BmsSaverTest {
 	}
 
 	// save(BmsContent, OutputStream)
-	// BmsException BMSコンテンツ出力時、BMSに関連する要因で出力処理がエラー終了した
+	// BmsHandleException ユーザープログラムの処理異常を検出した
 	@Test
 	public void testSaveBmsContentOutputStream_Unexpected() throws Exception {
 		var content = new BmsContent(BmsTest.createTestSpec());
 		var saver = new RuntimeExceptionSaver();
-		try {
-			saver.save(content, new ByteArrayOutputStream());
-			fail("Expects throw BmsException, but not thrown.");
-		} catch (BmsException e) {
-			assertEquals(RuntimeException.class, e.getCause().getClass());
-		} catch (Exception e) {
-			fail(String.format("Expects throw BmsException, but other. (%s)", e.getClass().getSimpleName()));
-		}
+		var ex = assertThrows(BmsHandleException.class, () -> saver.save(content, new ByteArrayOutputStream()));
+		assertEquals(RuntimeException.class, ex.getCause().getClass());
 	}
 }

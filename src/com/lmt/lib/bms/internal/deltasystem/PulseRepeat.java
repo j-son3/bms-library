@@ -26,7 +26,7 @@ class PulseRepeat {
 	 * リピートしているかどうか判定
 	 * @return リピートしている(リピート2回以上)の場合true
 	 */
-	final boolean hasRepeat() {
+	boolean hasRepeat() {
 		return repeatCount > 1;
 	}
 }

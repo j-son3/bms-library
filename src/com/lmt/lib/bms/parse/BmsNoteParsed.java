@@ -55,7 +55,7 @@ public class BmsNoteParsed extends BmsTimelineParsed {
 	 * @param array 配列データ
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsNoteParsed set(int lineNumber, Object line, int measure, int number, List<Integer> array) {
+	public BmsNoteParsed set(int lineNumber, Object line, int measure, int number, List<Integer> array) {
 		this.lineNumber = lineNumber;
 		this.line = line;
 		this.measure = measure;
@@ -74,7 +74,7 @@ public class BmsNoteParsed extends BmsTimelineParsed {
 	 * @param array 配列データ(2文字の16, 36, 62進数値の羅列文字列)
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsNoteParsed set(int lineNumber, Object line, int measure, int number, String array) {
+	public BmsNoteParsed set(int lineNumber, Object line, int measure, int number, String array) {
 		this.lineNumber = lineNumber;
 		this.line = line;
 		this.measure = measure;

@@ -175,7 +175,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 	 * @param isEnable CONTROL FLOW有効状態
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BeMusicLoadHandler setEnableControlFlow(boolean isEnable) {
+	public BeMusicLoadHandler setEnableControlFlow(boolean isEnable) {
 		mRandomEnable = isEnable;
 		return this;
 	}
@@ -190,7 +190,7 @@ public class BeMusicLoadHandler implements BmsLoadHandler {
 	 * @param value 強制する乱数の値
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BeMusicLoadHandler setForceRandomValue(Long value) {
+	public BeMusicLoadHandler setForceRandomValue(Long value) {
 		mRandomValueForce = value;
 		return this;
 	}

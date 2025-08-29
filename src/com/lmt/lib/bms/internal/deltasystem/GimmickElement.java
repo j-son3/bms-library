@@ -23,7 +23,7 @@ class GimmickElement extends RatingElement {
 	 * 速度変更範囲取得
 	 * @return 速度変更範囲
 	 */
-	final GimmickRange.Speed getRange() {
+	GimmickRange.Speed getRange() {
 		return mRange;
 	}
 
@@ -31,7 +31,7 @@ class GimmickElement extends RatingElement {
 	 * 速度変更範囲設定
 	 * @param range 速度変更範囲
 	 */
-	final void setRange(GimmickRange.Speed range) {
+	void setRange(GimmickRange.Speed range) {
 		mRange = range;
 	}
 

@@ -35,7 +35,7 @@ public class BmsPoint implements BmsAt, Comparable<BmsAt> {
 	/**
 	 * 指定した楽曲位置と同じ新しい楽曲位置オブジェクトを構築します。
 	 * @param at 楽曲位置
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
 	public BmsPoint(BmsAt at) {
 		assertArgNotNull(at, "at");
@@ -87,7 +87,7 @@ public class BmsPoint implements BmsAt, Comparable<BmsAt> {
 	 * <p>比較処理の詳細については{@link BmsAt#compare(BmsAt, BmsAt)}を参照してください。</p>
 	 * @param at 比較対象楽曲位置
 	 * @return 楽曲位置の比較結果
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
 	@Override
 	public int compareTo(BmsAt at) {
@@ -104,7 +104,7 @@ public class BmsPoint implements BmsAt, Comparable<BmsAt> {
 	 * 小節番号を設定します。
 	 * @param measure 小節番号
 	 */
-	final void setMeasure(int measure) {
+	void setMeasure(int measure) {
 		mMeasure = measure;
 	}
 
@@ -118,7 +118,7 @@ public class BmsPoint implements BmsAt, Comparable<BmsAt> {
 	 * 小節の刻み位置を設定します。
 	 * @param tick 小節の刻み位置
 	 */
-	final void setTick(double tick) {
+	void setTick(double tick) {
 		mTick = tick;
 	}
 
@@ -127,7 +127,7 @@ public class BmsPoint implements BmsAt, Comparable<BmsAt> {
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
 	 */
-	final void set(int measure, double tick) {
+	void set(int measure, double tick) {
 		mMeasure = measure;
 		mTick = tick;
 	}
@@ -135,7 +135,7 @@ public class BmsPoint implements BmsAt, Comparable<BmsAt> {
 	/**
 	 * 指定された楽曲位置と同じ新しい楽曲位置オブジェクトを構築します。
 	 * @param at 楽曲位置
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 * @return 楽曲位置オブジェクト
 	 */
 	public static BmsPoint of(BmsAt at) {

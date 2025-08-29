@@ -68,7 +68,7 @@ public class BeMusicStatisticsBuilder {
 	 * ヘッダ情報と譜面データの生成処理には相応のCPU負荷がかかるため、これらを他の処理で再利用する想定があるケースでは
 	 * {@link #BeMusicStatisticsBuilder(BeMusicHeader, BeMusicChart)} を使用することを推奨します。</p>
 	 * @param content BMSコンテンツ
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @since 0.8.0
 	 */
 	public BeMusicStatisticsBuilder(BmsContent content) {
@@ -86,7 +86,7 @@ public class BeMusicStatisticsBuilder {
 	 * 生成されたものでない場合、譜面統計情報は予期しない集計を行うことになりますので注意してください。</p>
 	 * @param header ヘッダ情報
 	 * @param chart 譜面データ
-	 * @exception NullPointerException headerまたはchartがnull
+	 * @throws NullPointerException headerまたはchartがnull
 	 */
 	public BeMusicStatisticsBuilder(BeMusicHeader header, BeMusicChart chart) {
 		setup(header, chart);
@@ -101,7 +101,7 @@ public class BeMusicStatisticsBuilder {
 	 * @return このオブジェクトのインスタンス
 	 * @see BeMusicTimeSpan
 	 */
-	public final BeMusicStatisticsBuilder setSpanLength(double length) {
+	public BeMusicStatisticsBuilder setSpanLength(double length) {
 		mLength = length;
 		return this;
 	}
@@ -116,7 +116,7 @@ public class BeMusicStatisticsBuilder {
 	 * @return このオブジェクトのインスタンス
 	 * @see BeMusicNoteLayout
 	 */
-	public final BeMusicStatisticsBuilder setNoteLayout(BeMusicNoteLayout layout) {
+	public BeMusicStatisticsBuilder setNoteLayout(BeMusicNoteLayout layout) {
 		mLayout = layout;
 		return this;
 	}
@@ -136,7 +136,7 @@ public class BeMusicStatisticsBuilder {
 	 * @see BeMusicRatingType
 	 * @since 0.5.0
 	 */
-	public final BeMusicStatisticsBuilder addRating(BeMusicRatingType...ratingTypes) {
+	public BeMusicStatisticsBuilder addRating(BeMusicRatingType...ratingTypes) {
 		Stream.of(ratingTypes).filter(r -> !Objects.isNull(r) && !mRatings.contains(r)).forEach(r -> mRatings.add(r));
 		return this;
 	}
@@ -149,11 +149,11 @@ public class BeMusicStatisticsBuilder {
 	 * @param <C> レーティング種別一覧のコレクション
 	 * @param ratingTypes レーティング種別一覧
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException ratingTypesがnull
+	 * @throws NullPointerException ratingTypesがnull
 	 * @see BeMusicRatingType
 	 * @since 0.8.0
 	 */
-	public final <C extends Collection<BeMusicRatingType>> BeMusicStatisticsBuilder addRating(C ratingTypes) {
+	public <C extends Collection<BeMusicRatingType>> BeMusicStatisticsBuilder addRating(C ratingTypes) {
 		assertArgNotNull(ratingTypes, "ratingTypes");
 		ratingTypes.stream().filter(Objects::nonNull).filter(t -> !mRatings.contains(t)).forEach(mRatings::add);
 		return this;
@@ -166,12 +166,12 @@ public class BeMusicStatisticsBuilder {
 	 * ビルダーの新しいインスタンスを生成し、そのビルダーで集計を行ってください。</p>
 	 * <p>譜面統計情報の詳しい内容については{@link BeMusicStatistics}を参照してください。</p>
 	 * @return 譜面統計情報の集計結果
-	 * @exception IllegalStateException 集計を行ったビルダーで再度集計を行おうとした
-	 * @exception IllegalStateException 期間統計情報の長さが{@link BeMusicTimeSpan#MIN_SPAN}未満または{@link BeMusicTimeSpan#MAX_SPAN}超過
-	 * @exception IllegalStateException ノートレイアウトがnull
+	 * @throws IllegalStateException 集計を行ったビルダーで再度集計を行おうとした
+	 * @throws IllegalStateException 期間統計情報の長さが{@link BeMusicTimeSpan#MIN_SPAN}未満または{@link BeMusicTimeSpan#MAX_SPAN}超過
+	 * @throws IllegalStateException ノートレイアウトがnull
 	 * @see BeMusicStatistics
 	 */
-	public final BeMusicStatistics statistics() {
+	public BeMusicStatistics statistics() {
 		// アサーション
 		assertField(!mUsed, "This builder is already used");
 		assertField((mLength >= BeMusicTimeSpan.MIN_SPAN) && (mLength <= BeMusicTimeSpan.MAX_SPAN),
@@ -199,7 +199,7 @@ public class BeMusicStatisticsBuilder {
 	 * 初期化処理
 	 * @param header ヘッダ情報
 	 * @param chart 譜面データ
-	 * @exception NullPointerException headerまたはchartがnull
+	 * @throws NullPointerException headerまたはchartがnull
 	 */
 	private void setup(BeMusicHeader header, BeMusicChart chart) {
 		assertArgNotNull(header, "header");

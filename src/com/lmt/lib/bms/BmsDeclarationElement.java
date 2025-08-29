@@ -25,7 +25,7 @@ public class BmsDeclarationElement {
 	 * BMS宣言の名前を取得します。
 	 * @return BMS宣言の名前
 	 */
-	public final String getName() {
+	public String getName() {
 		return mName;
 	}
 
@@ -33,7 +33,7 @@ public class BmsDeclarationElement {
 	 * BMS宣言の値を取得します。
 	 * @return BMS宣言の値
 	 */
-	public final String getValue() {
+	public String getValue() {
 		return mValue;
 	}
 

@@ -2,6 +2,7 @@ package com.lmt.lib.bms.bemusic;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,40 +22,40 @@ public enum BeMusicNoteType {
 	 * ノートがないことを示します。
 	 * <p>ノート種別がこの値を示す場合、そこには何もないことを意味するためアプリケーションは何も行うべきではありません。</p>
 	 */
-	NONE(0, false, false, false, false, false, false),
+	NONE(0, false, false, false, false, false, false, dev -> false),
 	/**
 	 * 入力デバイスを1回操作するべきノートであることを示します。(短押しノート)
 	 */
-	BEAT(1, true, false, false, true, true, true),
+	BEAT(1, true, false, false, true, true, true, dev -> true),
 	/**
 	 * 長押しノートの操作が継続中であることを示します。
 	 * <p>このノートが登場する間は、{@link #LONG_ON}で開始した操作を継続することを求めます。</p>
 	 */
-	LONG(2, false, true, false, false, false, false),
+	LONG(2, false, true, false, false, false, false, dev -> false),
 	/**
 	 * 入力デバイスの操作を行い、その操作の継続を開始するノートであることを示します。(長押しノート)
 	 * <p>この操作は、スイッチであれば押しっぱなし、スクラッチであれば単一方向に動かしっぱなしすることを求めます。</p>
 	 */
-	LONG_ON(3, true, true, false, true, false, true),
+	LONG_ON(3, true, true, false, true, false, true, dev -> true),
 	/**
 	 * 長押しノートの操作を終了するノートであることを示します。
 	 * <p>この操作は、スイッチであれば押すのをやめ、スクラッチであれば動かすのをやめることを求めます。</p>
 	 * <p>この種別はログノートモードが{@link BeMusicLongNoteMode#LN}の時の終端であることを示します。</p>
 	 */
-	LONG_OFF(4, false, true, true, true, true, false),
+	LONG_OFF(4, false, true, true, true, true, false, dev -> false),
 	/**
 	 * 長押しノートの操作を終了するノートであることを示します。
 	 * <p>この操作は、スイッチであれば押すのをやめ、スクラッチであれば動かすのをやめることを求めます。</p>
 	 * <p>この種別はロングノートモードが{@link BeMusicLongNoteMode#CN}または{@link BeMusicLongNoteMode#HCN}
 	 * の時の終端であることを示します。</p>
 	 */
-	CHARGE_OFF(5, true, true, true, true, true, false),
+	CHARGE_OFF(5, true, true, true, true, true, false, dev -> dev.isScratch()),
 	/**
 	 * 地雷オブジェであることを示します。
 	 * <p>プレイヤーはこのオブジェ付近で入力デバイスを操作してはなりません。スイッチであれば押すとミス、
 	 * スクラッチであればどちらか単一の方向に動かすとミスと判定されます。</p>
 	 */
-	MINE(6, false, false, false, true, false, false);
+	MINE(6, false, false, false, true, false, false, dev -> false);
 
 	/** Be Musicにおけるノート種別の数 */
 	public static final int COUNT = 7;
@@ -79,6 +80,8 @@ public enum BeMusicNoteType {
 	private boolean mHasDownAction;
 	/** 何らかの操作を伴うかどうか */
 	private boolean mHasMovement;
+	/** サウンド再生を伴う可能性があるかどうかの判定関数 */
+	private Predicate<BeMusicDevice> mFnHasSound;
 
 	/**
 	 * コンストラクタ
@@ -89,9 +92,10 @@ public enum BeMusicNoteType {
 	 * @param isPlayable 操作可能ノートであるかどうか
 	 * @param hasUpAction 解放操作を伴うかどうか
 	 * @param hasDownAction 押下操作を伴うかどうか
+	 * @param fnHasSound サウンド再生を伴う可能性があるかどうかの判定関数
 	 */
 	private BeMusicNoteType(int id, boolean isCountNotes, boolean isLongNoteType, boolean isLongNoteTail,
-			boolean isPlayable, boolean hasUpAction, boolean hasDownAction) {
+			boolean isPlayable, boolean hasUpAction, boolean hasDownAction, Predicate<BeMusicDevice> fnHasSound) {
 		mId = id;
 		mIsCountNotes = isCountNotes;
 		mIsLongNoteType = isLongNoteType;
@@ -100,6 +104,7 @@ public enum BeMusicNoteType {
 		mHasUpAction = hasUpAction;
 		mHasDownAction = hasDownAction;
 		mHasMovement = hasUpAction || hasDownAction;
+		mFnHasSound = fnHasSound;
 	}
 
 	/**
@@ -108,7 +113,7 @@ public enum BeMusicNoteType {
 	 * 値が変化しないことを保証します。</p>
 	 * @return ノート種別のID
 	 */
-	public final int getId() {
+	public int getId() {
 		return mId;
 	}
 
@@ -116,7 +121,7 @@ public enum BeMusicNoteType {
 	 * このノート種別がノート数としてカウントされるかどうかを判定します。
 	 * @return ノート数としてカウントされるべき場合はtrue、そうでない場合はfalse
 	 */
-	public final boolean isCountNotes() {
+	public boolean isCountNotes() {
 		return mIsCountNotes;
 	}
 
@@ -126,7 +131,7 @@ public enum BeMusicNoteType {
 	 * @return 長押し継続中の場合はtrue、そうでない場合はfalse
 	 * @since 0.5.0
 	 */
-	public final boolean isHolding() {
+	public boolean isHolding() {
 		return this == LONG;
 	}
 
@@ -136,7 +141,7 @@ public enum BeMusicNoteType {
 	 * @return 長押し開始の場合はtrue、そうでない場合はfalse
 	 * @since 0.6.0
 	 */
-	public final boolean isLongNoteHead() {
+	public boolean isLongNoteHead() {
 		return this == LONG_ON;
 	}
 
@@ -147,7 +152,7 @@ public enum BeMusicNoteType {
 	 * @see BeMusicLongNoteMode
 	 * @since 0.6.0
 	 */
-	public final boolean isLongNoteTail() {
+	public boolean isLongNoteTail() {
 		return mIsLongNoteTail;
 	}
 
@@ -157,7 +162,7 @@ public enum BeMusicNoteType {
 	 * @return ロングノートに関連する種別の場合はtrue、そうでない場合はfalse
 	 * @since 0.6.0
 	 */
-	public final boolean isLongNoteType() {
+	public boolean isLongNoteType() {
 		return mIsLongNoteType;
 	}
 
@@ -165,7 +170,7 @@ public enum BeMusicNoteType {
 	 * このノート種別が操作可能ノートであるかどうかを判定します。
 	 * @return 操作可能ノートである場合はtrue、そうでない場合はfalse
 	 */
-	public final boolean isPlayable() {
+	public boolean isPlayable() {
 		return mIsPlayable;
 	}
 
@@ -173,7 +178,7 @@ public enum BeMusicNoteType {
 	 * このノート種別が視覚効果を持つノートであるかどうかを判定します。
 	 * @return 視覚効果を持つノートである場合はtrue、そうでない場合はfalse
 	 */
-	public final boolean hasVisualEffect() {
+	public boolean hasVisualEffect() {
 		return this != NONE;
 	}
 
@@ -184,7 +189,7 @@ public enum BeMusicNoteType {
 	 * @return 解放操作を伴うノートである場合はtrue、そうでない場合はfalse
 	 * @since 0.5.0
 	 */
-	public final boolean hasUpAction() {
+	public boolean hasUpAction() {
 		return mHasUpAction;
 	}
 
@@ -195,7 +200,7 @@ public enum BeMusicNoteType {
 	 * @return 押下操作を伴うノートである場合はtrue、そうでない場合はfalse
 	 * @since 0.5.0
 	 */
-	public final boolean hasDownAction() {
+	public boolean hasDownAction() {
 		return mHasDownAction;
 	}
 
@@ -207,8 +212,21 @@ public enum BeMusicNoteType {
 	 * @see #hasDownAction()
 	 * @since 0.5.0
 	 */
-	public final boolean hasMovement() {
+	public boolean hasMovement() {
 		return mHasMovement;
+	}
+
+	/**
+	 * サウンド再生を伴う可能性があるかどうかを判定します。
+	 * <p>サウンド再生の有無は通常、ノート種別によって決定しますが一部の種別では入力デバイスごとに再生有無が異なります。
+	 * 当メソッドはこのノート種別・入力デバイスにおいてサウンド再生を伴う可能性があるかどうかを判定します。</p>
+	 * @param device 入力デバイス
+	 * @return サウンド再生を伴う可能性がある場合 true
+	 * @throws NullPointerException device が null ※入力デバイスを参照する場合のみ
+	 * @since 0.10.0
+	 */
+	public boolean hasSound(BeMusicDevice device) {
+		return mFnHasSound.test(device);
 	}
 
 	/**

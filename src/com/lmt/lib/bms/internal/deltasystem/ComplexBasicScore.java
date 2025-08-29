@@ -40,7 +40,7 @@ abstract class ComplexBasicScore {
 	/**
 	 * コンストラクタ
 	 * @param scores 基本評価点テーブル
-	 * @exception IllegalArgumentException 基本評価点テーブルサイズ不正
+	 * @throws IllegalArgumentException 基本評価点テーブルサイズ不正
 	 */
 	protected ComplexBasicScore(double[] scores) {
 		// 定義ミスを避けるために基本評価点テーブルのサイズをチェックする
@@ -66,7 +66,7 @@ abstract class ComplexBasicScore {
 	 * @param elem COMPLEXの分析データ
 	 * @return 基本評価点
 	 */
-	final double get(BeMusicLane lane, ComplexElement elem) {
+	double get(BeMusicLane lane, ComplexElement elem) {
 		return mScores[index(lane, elem)];
 	}
 

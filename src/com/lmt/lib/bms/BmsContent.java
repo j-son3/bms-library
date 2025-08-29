@@ -256,7 +256,7 @@ public class BmsContent {
 	 * <p>BMSコンテンツ構築直後のデータは空になっています。データを構築するには本クラスの各種メソッドを使用しますが、
 	 * BMSファイルを読み込んでBMSコンテンツを生成する場合は{@link BmsLoader}を使用することを推奨します。</p>
 	 * @param spec コンテンツに関連付けるBMS仕様
-	 * @exception NullPointerException specがnull
+	 * @throws NullPointerException specがnull
 	 */
 	public BmsContent(BmsSpec spec) {
 		initialSetup(spec);
@@ -268,8 +268,8 @@ public class BmsContent {
 	 * 指定されたBMSコンテンツと同じ内容になるように初期化します。</p>
 	 * <p>入力BMSコンテンツは参照モードでなければなりません。編集モードのBMSコンテンツを指定すると例外をスローします。</p>
 	 * @param src コピー元BMSコンテンツ
-	 * @exception NullPointerException srcがnull
-	 * @exception IllegalArgumentException srcが編集モード
+	 * @throws NullPointerException srcがnull
+	 * @throws IllegalArgumentException srcが編集モード
 	 * @since 0.8.0
 	 */
 	public BmsContent(BmsContent src) {
@@ -296,21 +296,21 @@ public class BmsContent {
 	 * @param cnvMeta メタ情報変換関数またはnull
 	 * @param cnvMv 小節データ変換関数またはnull
 	 * @param cnvNote ノート変換関数またはnull
-	 * @exception NullPointerException srcがnull
-	 * @exception IllegalArgumentException srcが編集モード
-	 * @exception ClassCastException メタ情報・小節データの変換で、当該要素のデータ型に適合しないデータを返した
-	 * @exception IllegalArgumentException メタ情報の変換で、初期BPMメタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
-	 * @exception IllegalArgumentException メタ情報の変換で、BPM変更メタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
-	 * @exception IllegalArgumentException メタ情報の変換で、譜面停止時間メタ情報に{@link BmsSpec#STOP_MIN}未満または{@link BmsSpec#STOP_MAX}超過の値を設定しようとした
-	 * @exception IllegalArgumentException 小節データの変換で、小節長に{@link BmsSpec#LENGTH_MIN}未満または{@link BmsSpec#LENGTH_MAX}超過の値を設定しようとした
-	 * @exception IllegalArgumentException ノートの変換で、{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}超過のチャンネル番号を返した
-	 * @exception IllegalArgumentException ノートの変換で、BMS仕様に存在しないチャンネル番号を返した
-	 * @exception IllegalArgumentException ノートの変換で、配列型以外のチャンネル番号を返した
-	 * @exception IndexOutOfBoundsException ノートの変換で、コピー先の重複不可チャンネルへチャンネルインデックスが1以上のノートをコピーしようとした
-	 * @exception IllegalArgumentException ノートの変換で、小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
-	 * @exception IllegalArgumentException ノートの変換で、小節の刻み位置がマイナス値または当該小節の刻み数以上
-	 * @exception IllegalArgumentException ノートの変換で、ノートの値に0を指定した
-	 * @exception IllegalArgumentException ノートの変換で、ノートの値に{@link BmsSpec#VALUE_MIN}未満または{@link BmsSpec#VALUE_MAX}超過の値を指定した
+	 * @throws NullPointerException srcがnull
+	 * @throws IllegalArgumentException srcが編集モード
+	 * @throws ClassCastException メタ情報・小節データの変換で、当該要素のデータ型に適合しないデータを返した
+	 * @throws IllegalArgumentException メタ情報の変換で、初期BPMメタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException メタ情報の変換で、BPM変更メタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException メタ情報の変換で、譜面停止時間メタ情報に{@link BmsSpec#STOP_MIN}未満または{@link BmsSpec#STOP_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException 小節データの変換で、小節長に{@link BmsSpec#LENGTH_MIN}未満または{@link BmsSpec#LENGTH_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException ノートの変換で、{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}超過のチャンネル番号を返した
+	 * @throws IllegalArgumentException ノートの変換で、BMS仕様に存在しないチャンネル番号を返した
+	 * @throws IllegalArgumentException ノートの変換で、配列型以外のチャンネル番号を返した
+	 * @throws IndexOutOfBoundsException ノートの変換で、コピー先の重複不可チャンネルへチャンネルインデックスが1以上のノートをコピーしようとした
+	 * @throws IllegalArgumentException ノートの変換で、小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException ノートの変換で、小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException ノートの変換で、ノートの値に0を指定した
+	 * @throws IllegalArgumentException ノートの変換で、ノートの値に{@link BmsSpec#VALUE_MIN}未満または{@link BmsSpec#VALUE_MAX}超過の値を指定した
 	 * @since 0.8.0
 	 */
 	public BmsContent(BmsContent src,
@@ -372,7 +372,7 @@ public class BmsContent {
 	 * BMSコンテンツに関連付けたBMS仕様を取得します。
 	 * @return BMS仕様
 	 */
-	public final BmsSpec getSpec() {
+	public BmsSpec getSpec() {
 		return mSpec;
 	}
 
@@ -384,13 +384,13 @@ public class BmsContent {
 	 * 値に使用する文字で、必要なものはエスケープしなければなりません。(例：\")</p>
 	 * @param name BMS宣言の名称
 	 * @param value 値
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException valueがnull
-	 * @exception IllegalArgumentException nameの書式が不正
-	 * @exception IllegalArgumentException valueの書式が不正
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException valueがnull
+	 * @throws IllegalArgumentException nameの書式が不正
+	 * @throws IllegalArgumentException valueの書式が不正
 	 */
-	public final void putDeclaration(String name, String value) {
+	public void putDeclaration(String name, String value) {
 		assertIsEditMode();
 		assertArgNotNull(name, "name");
 		assertArg(PATTERN_DECL_NAME.matcher(name).matches(), "Wrong declaration name. name='%s'", name);
@@ -403,11 +403,11 @@ public class BmsContent {
 	 * 指定したBMS宣言を追加します。
 	 * <p>同じ名前のBMS宣言が存在する場合は新しい値で上書きします。</p>
 	 * @param declaration 追加対象のBMS宣言
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException declarationがnull
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException declarationがnull
 	 * @since 0.8.0
 	 */
-	public final void putDeclaration(BmsDeclarationElement declaration) {
+	public void putDeclaration(BmsDeclarationElement declaration) {
 		assertIsEditMode();
 		assertArgNotNull(declaration, "declaration");
 		mBmsDeclarations.put(declaration.getName(), declaration);
@@ -417,10 +417,10 @@ public class BmsContent {
 	 * 指定した名前のBMS宣言を消去します。
 	 * @param name BMS宣言の名称
 	 * @return 該当するBMS宣言を消去した場合はtrue、BMS宣言が存在しない場合はfalse
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException nameがnull
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException nameがnull
 	 */
-	public final boolean removeDeclaration(String name) {
+	public boolean removeDeclaration(String name) {
 		assertIsEditMode();
 		assertArgNotNull(name, "name");
 		return mBmsDeclarations.remove(name) != null;
@@ -430,9 +430,9 @@ public class BmsContent {
 	 * 指定した名前のBMS宣言が存在するかを判定します。
 	 * @param name BMS宣言の名称
 	 * @return 該当するBMS宣言が存在する場合はtrue、存在しない場合はfalse
-	 * @exception NullPointerException nameがnull
+	 * @throws NullPointerException nameがnull
 	 */
-	public final boolean containsDeclaration(String name) {
+	public boolean containsDeclaration(String name) {
 		assertArgNotNull(name, "name");
 		return mBmsDeclarations.containsKey(name);
 	}
@@ -441,9 +441,9 @@ public class BmsContent {
 	 * 指定した名前のBMS宣言の値を取得します。
 	 * @param name BMS宣言の名称
 	 * @return 該当するBMS宣言の値、存在しない場合はnull
-	 * @exception NullPointerException nameがnull
+	 * @throws NullPointerException nameがnull
 	 */
-	public final String getDeclaration(String name) {
+	public String getDeclaration(String name) {
 		assertArgNotNull(name, "name");
 		var element = mBmsDeclarations.get(name);
 		return (element == null) ? null : element.getValue();
@@ -456,7 +456,7 @@ public class BmsContent {
 	 * <p>BMS宣言は{@link #putDeclaration(String, String)}等で登録された順で一覧化されます。</p>
 	 * @return BMS宣言の名前と値のマップ
 	 */
-	public final Map<String, String> getDeclarations() {
+	public Map<String, String> getDeclarations() {
 		return mBmsDeclarations.values().stream().collect(Collectors.toMap(
 				e -> e.getName(), e -> e.getValue(), (o, n) -> n, LinkedHashMap::new));
 	}
@@ -466,7 +466,7 @@ public class BmsContent {
 	 * @return BMS宣言を走査するストリーム
 	 * @since 0.8.0
 	 */
-	public final Stream<BmsDeclarationElement> declarations() {
+	public Stream<BmsDeclarationElement> declarations() {
 		return mBmsDeclarations.values().stream();
 	}
 
@@ -482,14 +482,14 @@ public class BmsContent {
 	 * 詳細な動作仕様については{@link BmsStandardSaver}を参照してください。</p>
 	 * @param name メタ情報の名称
 	 * @param value 設定する値
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
-	 * @exception ClassCastException valueが設定先メタ情報のデータ型に変換できない
-	 * @exception IllegalArgumentException 初期BPMメタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
-	 * @exception IllegalArgumentException 基数選択メタ情報にnull, 16, 36, 62以外の値を設定しようとした
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws ClassCastException valueが設定先メタ情報のデータ型に変換できない
+	 * @throws IllegalArgumentException 初期BPMメタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException 基数選択メタ情報にnull, 16, 36, 62以外の値を設定しようとした
 	 */
-	public final void setSingleMeta(String name, Object value) {
+	public void setSingleMeta(String name, Object value) {
 		mMetas.setSingleMeta(name, value);
 	}
 
@@ -504,13 +504,13 @@ public class BmsContent {
 	 * @param name メタ情報の名称
 	 * @param index 設定位置を示すインデックス
 	 * @param value 設定する値
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception ClassCastException valueが設定先メタ情報のデータ型に変換できない
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws ClassCastException valueが設定先メタ情報のデータ型に変換できない
 	 */
-	public final void setMultipleMeta(String name, int index, Object value) {
+	public void setMultipleMeta(String name, int index, Object value) {
 		mMetas.setMultipleMeta(name, index, value);
 	}
 
@@ -521,15 +521,15 @@ public class BmsContent {
 	 * @param name メタ情報の名称
 	 * @param index 設定箇所を示すインデックス
 	 * @param value 設定する値
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception ClassCastException valueが設定先メタ情報のデータ型に変換できない
-	 * @exception IllegalArgumentException BPM変更メタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
-	 * @exception IllegalArgumentException 譜面停止時間メタ情報に{@link BmsSpec#STOP_MIN}未満または{@link BmsSpec#STOP_MAX}超過の値を設定しようとした
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws ClassCastException valueが設定先メタ情報のデータ型に変換できない
+	 * @throws IllegalArgumentException BPM変更メタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException 譜面停止時間メタ情報に{@link BmsSpec#STOP_MIN}未満または{@link BmsSpec#STOP_MAX}超過の値を設定しようとした
 	 */
-	public final void setIndexedMeta(String name, int index, Object value) {
+	public void setIndexedMeta(String name, int index, Object value) {
 		mMetas.setIndexedMeta(name, index, value);
 	}
 
@@ -542,15 +542,15 @@ public class BmsContent {
 	 * @see #setIndexedMeta
 	 * @param key メタ情報キー
 	 * @param value 設定する値
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
-	 * @exception ClassCastException valueが設定先メタ情報のデータ型に変換できない
-	 * @exception IllegalArgumentException 初期BPMメタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
-	 * @exception IllegalArgumentException BPM変更メタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
-	 * @exception IllegalArgumentException 譜面停止時間メタ情報に{@link BmsSpec#STOP_MIN}未満または{@link BmsSpec#STOP_MAX}超過の値を設定しようとした
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
+	 * @throws ClassCastException valueが設定先メタ情報のデータ型に変換できない
+	 * @throws IllegalArgumentException 初期BPMメタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException BPM変更メタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException 譜面停止時間メタ情報に{@link BmsSpec#STOP_MIN}未満または{@link BmsSpec#STOP_MAX}超過の値を設定しようとした
 	 */
-	public final void setMeta(BmsMetaKey key, Object value) {
+	public void setMeta(BmsMetaKey key, Object value) {
 		assertArgNotNull(key, "key");
 		mMetas.setMeta(key.getName(), key.getUnit(), 0, value);
 	}
@@ -565,18 +565,18 @@ public class BmsContent {
 	 * @param key メタ情報キー
 	 * @param index 設定先のインデックス
 	 * @param value 設定する値
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException 構成単位が単体の時、indexが0以外
-	 * @exception IndexOutOfBoundsException 構成単位が複数の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception IndexOutOfBoundsException 構成単位が索引付きの時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception ClassCastException valueが設定先メタ情報のデータ型に変換できない
-	 * @exception IllegalArgumentException 初期BPMメタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
-	 * @exception IllegalArgumentException BPM変更メタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
-	 * @exception IllegalArgumentException 譜面停止時間メタ情報に{@link BmsSpec#STOP_MIN}未満または{@link BmsSpec#STOP_MAX}超過の値を設定しようとした
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException 構成単位が単体の時、indexが0以外
+	 * @throws IndexOutOfBoundsException 構成単位が複数の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IndexOutOfBoundsException 構成単位が索引付きの時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws ClassCastException valueが設定先メタ情報のデータ型に変換できない
+	 * @throws IllegalArgumentException 初期BPMメタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException BPM変更メタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException 譜面停止時間メタ情報に{@link BmsSpec#STOP_MIN}未満または{@link BmsSpec#STOP_MAX}超過の値を設定しようとした
 	 */
-	public final void setMeta(BmsMetaKey key, int index, Object value) {
+	public void setMeta(BmsMetaKey key, int index, Object value) {
 		assertArgNotNull(key, "key");
 		mMetas.setMeta(key.getName(), key.getUnit(), index, value);
 	}
@@ -592,19 +592,19 @@ public class BmsContent {
 	 * @param unit メタ情報の単位
 	 * @param index 設定先のインデックス
 	 * @param value 設定する値
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
-	 * @exception IllegalArgumentException name, unitに合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#SINGLE SINGLE}の時、indexが0以外
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#MULTIPLE MULTIPLE}の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#INDEXED INDEXED}の時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception ClassCastException valueが設定先メタ情報のデータ型に変換できない
-	 * @exception IllegalArgumentException 初期BPMメタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
-	 * @exception IllegalArgumentException BPM変更メタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
-	 * @exception IllegalArgumentException 譜面停止時間メタ情報に{@link BmsSpec#STOP_MIN}未満または{@link BmsSpec#STOP_MAX}超過の値を設定しようとした
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
+	 * @throws IllegalArgumentException name, unitに合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#SINGLE SINGLE}の時、indexが0以外
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#MULTIPLE MULTIPLE}の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#INDEXED INDEXED}の時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws ClassCastException valueが設定先メタ情報のデータ型に変換できない
+	 * @throws IllegalArgumentException 初期BPMメタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException BPM変更メタ情報に{@link BmsSpec#BPM_MIN}未満または{@link BmsSpec#BPM_MAX}超過の値を設定しようとした
+	 * @throws IllegalArgumentException 譜面停止時間メタ情報に{@link BmsSpec#STOP_MIN}未満または{@link BmsSpec#STOP_MAX}超過の値を設定しようとした
 	 */
-	public final void setMeta(String name, BmsUnit unit, int index, Object value) {
+	public void setMeta(String name, BmsUnit unit, int index, Object value) {
 		mMetas.setMeta(name, unit, index, value);
 	}
 
@@ -617,12 +617,12 @@ public class BmsContent {
 	 * また、複数・索引付きメタ情報で、当該メタ情報のデータが0個を表すメタ情報要素({@link BmsMetaElement#getIndex()}がマイナス値を示す)
 	 * を指定した場合、当メソッドは何も行いません。</p>
 	 * @param meta メタ情報要素
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException metaがnull
-	 * @exception ClassCastException メタ情報の値が設定先メタ情報のデータ型に変換できない
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException metaがnull
+	 * @throws ClassCastException メタ情報の値が設定先メタ情報のデータ型に変換できない
 	 * @since 0.8.0
 	 */
-	public final void putMeta(BmsMetaElement meta) {
+	public void putMeta(BmsMetaElement meta) {
 		assertArgNotNull(meta, "meta");
 		if (meta.getIndex() >= 0) {
 			mMetas.setMeta(meta.getName(), meta.getUnit(), meta.getIndex(), meta.getRawValue());
@@ -634,14 +634,14 @@ public class BmsContent {
 	 * <p>このメソッドでは、値にnullを指定することによる消去は行えません。</p>
 	 * @param name メタ情報の名称
 	 * @param value 設定する値
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException valueがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException リストが一杯でこれ以上値を挿入できない
-	 * @exception ClassCastException valueが設定先メタ情報のデータ型に変換できない
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException valueがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException リストが一杯でこれ以上値を挿入できない
+	 * @throws ClassCastException valueが設定先メタ情報のデータ型に変換できない
 	 */
-	public final void putMultipleMeta(String name, Object value) {
+	public void putMultipleMeta(String name, Object value) {
 		assertArgNotNull(value, "value");
 		mMetas.setMultipleMeta(name, mMetas.getMultipleMetaCount(name), value);
 	}
@@ -655,11 +655,11 @@ public class BmsContent {
 	 * @param <T> メタ情報のデータ型
 	 * @param name メタ情報の名称
 	 * @return メタ情報の値
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T> T getSingleMeta(String name) {
+	public <T> T getSingleMeta(String name) {
 		return (T)mMetas.getSingleMeta(name);
 	}
 
@@ -673,12 +673,12 @@ public class BmsContent {
 	 * @param name メタ情報の名称
 	 * @param index インデックス
 	 * @return メタ情報の値
-	 * @exception NullPointerException nameがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T> T getMultipleMeta(String name, int index) {
+	public <T> T getMultipleMeta(String name, int index) {
 		return (T)mMetas.getMultipleMeta(name, index);
 	}
 
@@ -692,12 +692,12 @@ public class BmsContent {
 	 * @param name メタ情報の名称
 	 * @param index インデックス
 	 * @return メタ情報の値
-	 * @exception NullPointerException nameがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T> T getIndexedMeta(String name, int index) {
+	public <T> T getIndexedMeta(String name, int index) {
 		return (T)mMetas.getIndexedMeta(name, index);
 	}
 
@@ -711,11 +711,11 @@ public class BmsContent {
 	 * @param <T> メタ情報のデータ型
 	 * @param key メタ情報キー
 	 * @return メタ情報の値
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T> T getMeta(BmsMetaKey key) {
+	public <T> T getMeta(BmsMetaKey key) {
 		assertArgNotNull(key, "key");
 		return (T)mMetas.getMeta(key.getName(), key.getUnit(), 0);
 	}
@@ -731,14 +731,14 @@ public class BmsContent {
 	 * @param key メタ情報キー
 	 * @param index 設定先のインデックス
 	 * @return メタ情報の値
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException 構成単位が単体の時、indexが0以外
-	 * @exception IndexOutOfBoundsException 構成単位が複数の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception IndexOutOfBoundsException 構成単位が索引付きの時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException 構成単位が単体の時、indexが0以外
+	 * @throws IndexOutOfBoundsException 構成単位が複数の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IndexOutOfBoundsException 構成単位が索引付きの時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T> T getMeta(BmsMetaKey key, int index) {
+	public <T> T getMeta(BmsMetaKey key, int index) {
 		assertArgNotNull(key, "key");
 		return (T)mMetas.getMeta(key.getName(), key.getUnit(), index);
 	}
@@ -755,15 +755,15 @@ public class BmsContent {
 	 * @param unit メタ情報の単位
 	 * @param index 設定先のインデックス
 	 * @return メタ情報の値
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
-	 * @exception IllegalArgumentException name, unitに合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#SINGLE SINGLE}の時、indexが0以外
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#MULTIPLE MULTIPLE}の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#INDEXED INDEXED}の時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
+	 * @throws IllegalArgumentException name, unitに合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#SINGLE SINGLE}の時、indexが0以外
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#MULTIPLE MULTIPLE}の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#INDEXED INDEXED}の時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T> T getMeta(String name, BmsUnit unit, int index) {
+	public <T> T getMeta(String name, BmsUnit unit, int index) {
 		return (T)mMetas.getMeta(name, unit, index);
 	}
 
@@ -772,11 +772,11 @@ public class BmsContent {
 	 * @param <T> メタ情報のデータ型
 	 * @param name メタ情報の名称
 	 * @return 重複可能メタ情報の値リスト
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T> List<T> getMultipleMetas(String name) {
+	public <T> List<T> getMultipleMetas(String name) {
 		return (List<T>)mMetas.getMultipleMetas(name);
 	}
 
@@ -788,11 +788,11 @@ public class BmsContent {
 	 * @param <T> メタ情報のデータ型
 	 * @param name メタ情報の名称
 	 * @return 索引付きメタ情報の値マップ
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T> Map<Integer, T> getIndexedMetas(String name) {
+	public <T> Map<Integer, T> getIndexedMetas(String name) {
 		return (Map<Integer, T>)mMetas.getIndexedMetas(name);
 	}
 
@@ -801,10 +801,10 @@ public class BmsContent {
 	 * <p>単体メタ情報は1件のデータからなる情報です。値が設定されている場合に1を返します。</p>
 	 * @param name メタ情報の名称
 	 * @return メタ情報の数
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	public final int getSingleMetaCount(String name) {
+	public int getSingleMetaCount(String name) {
 		return mMetas.getSingleMetaCount(name);
 	}
 
@@ -812,10 +812,10 @@ public class BmsContent {
 	 * 重複可能メタ情報の数を取得します。
 	 * @param name メタ情報の名称
 	 * @return メタ情報の数
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	public final int getMultipleMetaCount(String name) {
+	public int getMultipleMetaCount(String name) {
 		return mMetas.getMultipleMetaCount(name);
 	}
 
@@ -823,10 +823,10 @@ public class BmsContent {
 	 * 索引付きメタ情報の数を取得します。
 	 * @param name メタ情報の名称
 	 * @return メタ情報の数
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	public final int getIndexedMetaCount(String name) {
+	public int getIndexedMetaCount(String name) {
 		return mMetas.getIndexedMetaCount(name);
 	}
 
@@ -838,10 +838,10 @@ public class BmsContent {
 	 * @see #getIndexedMetaCount
 	 * @param key メタ情報キー
 	 * @return メタ情報の数
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
 	 */
-	public final int getMetaCount(BmsMetaKey key) {
+	public int getMetaCount(BmsMetaKey key) {
 		assertArgNotNull(key, "key");
 		return mMetas.getMetaCount(key.getName(), key.getUnit());
 	}
@@ -855,11 +855,11 @@ public class BmsContent {
 	 * @param name メタ情報の名称
 	 * @param unit メタ情報の単位
 	 * @return メタ情報の数
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	public final int getMetaCount(String name, BmsUnit unit) {
+	public int getMetaCount(String name, BmsUnit unit) {
 		return mMetas.getMetaCount(name, unit);
 	}
 
@@ -867,10 +867,10 @@ public class BmsContent {
 	 * 単体メタ情報に値が設定されているかどうかを判定します。
 	 * @param name メタ情報の名称
 	 * @return 値が設定されている場合true
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
 	 */
-	public final boolean containsSingleMeta(String name) {
+	public boolean containsSingleMeta(String name) {
 		return mMetas.containsSingleMeta(name);
 	}
 
@@ -879,11 +879,11 @@ public class BmsContent {
 	 * @param name メタ情報の名称
 	 * @param index インデックス
 	 * @return 値が設定されている場合true
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
 	 */
-	public final boolean containsMultipleMeta(String name, int index) {
+	public boolean containsMultipleMeta(String name, int index) {
 		return mMetas.containsMultipleMeta(name, index);
 	}
 
@@ -892,11 +892,11 @@ public class BmsContent {
 	 * @param name メタ情報の名称
 	 * @param index インデックス
 	 * @return 値が設定されている場合true
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException 名称に合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException 名称に合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 */
-	public final boolean containsIndexedMeta(String name, int index) {
+	public boolean containsIndexedMeta(String name, int index) {
 		return mMetas.containsIndexedMeta(name, index);
 	}
 
@@ -906,10 +906,10 @@ public class BmsContent {
 	 * 値が設定されていればtrueを返します。登録先インデックスの値は問いません。</p>
 	 * @param key メタ情報キー
 	 * @return 値が設定されている場合true
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
 	 */
-	public final boolean containsMeta(BmsMetaKey key) {
+	public boolean containsMeta(BmsMetaKey key) {
 		assertArgNotNull(key, "key");
 		return mMetas.containsMeta(key.getName(), key.getUnit());
 	}
@@ -924,13 +924,13 @@ public class BmsContent {
 	 * @param key メタ情報キー
 	 * @param index インデックス
 	 * @return 値が設定されている場合true
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException 構成単位が単体の時、indexが0以外
-	 * @exception IndexOutOfBoundsException 構成単位が複数の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception IndexOutOfBoundsException 構成単位が索引付きの時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalArgumentException メタ情報キーに合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException 構成単位が単体の時、indexが0以外
+	 * @throws IndexOutOfBoundsException 構成単位が複数の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IndexOutOfBoundsException 構成単位が索引付きの時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 */
-	public final boolean containsMeta(BmsMetaKey key, int index) {
+	public boolean containsMeta(BmsMetaKey key, int index) {
 		assertArgNotNull(key, "key");
 		return mMetas.containsMeta(key.getName(), key.getUnit(), index);
 	}
@@ -946,14 +946,14 @@ public class BmsContent {
 	 * @param unit メタ情報の単位
 	 * @param index インデックス
 	 * @return 値が設定されている場合true
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
-	 * @exception IllegalArgumentException 名称・単位に合致するメタ情報が存在しない
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#SINGLE SINGLE}の時、indexが0以外
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#MULTIPLE MULTIPLE}の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception IndexOutOfBoundsException unitが{@link BmsUnit#INDEXED INDEXED}の時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
+	 * @throws IllegalArgumentException 名称・単位に合致するメタ情報が存在しない
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#SINGLE SINGLE}の時、indexが0以外
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#MULTIPLE MULTIPLE}の時、indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IndexOutOfBoundsException unitが{@link BmsUnit#INDEXED INDEXED}の時、indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 */
-	public final boolean containsMeta(String name, BmsUnit unit, int index) {
+	public boolean containsMeta(String name, BmsUnit unit, int index) {
 		return mMetas.containsMeta(name, unit, index);
 	}
 
@@ -964,11 +964,11 @@ public class BmsContent {
 	 * @param name メタ情報の名称
 	 * @param unit メタ情報の単位
 	 * @return 値が設定されている場合true
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
-	 * @exception IllegalArgumentException 名称・単位に合致するメタ情報が存在しない
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
+	 * @throws IllegalArgumentException 名称・単位に合致するメタ情報が存在しない
 	 */
-	public final boolean containsMeta(String name, BmsUnit unit) {
+	public boolean containsMeta(String name, BmsUnit unit) {
 		return mMetas.containsMeta(name, unit);
 	}
 
@@ -985,10 +985,10 @@ public class BmsContent {
 	 * <p>当メソッドは編集モード時には使用できません。使用すると例外をスローします。
 	 * また、走査を行っている最中に編集モードに遷移してメタ情報を更新した場合、走査中の結果がどのようになるかは未定義です。</p>
 	 * @return メタ情報を走査するストリーム
-	 * @exception IllegalStateException 動作モードが編集モード
+	 * @throws IllegalStateException 動作モードが編集モード
 	 * @since 0.8.0
 	 */
-	public final Stream<BmsMetaElement> metas() {
+	public Stream<BmsMetaElement> metas() {
 		return mMetas.metas();
 	}
 
@@ -1001,10 +1001,10 @@ public class BmsContent {
 	 * <p>当メソッドは編集モード時には使用できません。使用すると例外をスローします。
 	 * また、走査を行っている最中に編集モードに遷移して単体メタ情報を更新した場合、走査中の結果がどのようになるかは未定義です。</p>
 	 * @return 単体メタ情報を走査するストリーム
-	 * @exception IllegalStateException 動作モードが編集モード
+	 * @throws IllegalStateException 動作モードが編集モード
 	 * @since 0.8.0
 	 */
-	public final Stream<BmsMetaElement> singleMetas() {
+	public Stream<BmsMetaElement> singleMetas() {
 		return mMetas.singleMetas();
 	}
 
@@ -1019,10 +1019,10 @@ public class BmsContent {
 	 * <p>当メソッドは編集モード時には使用できません。使用すると例外をスローします。
 	 * また、走査を行っている最中に編集モードに遷移して複数メタ情報を更新した場合、走査中の結果がどのようになるかは未定義です。</p>
 	 * @return 複数メタ情報を走査するストリーム
-	 * @exception IllegalStateException 動作モードが編集モード
+	 * @throws IllegalStateException 動作モードが編集モード
 	 * @since 0.8.0
 	 */
-	public final Stream<BmsMetaElement> multipleMetas() {
+	public Stream<BmsMetaElement> multipleMetas() {
 		return mMetas.multipleMetas();
 	}
 
@@ -1036,12 +1036,12 @@ public class BmsContent {
 	 * また、走査を行っている最中に編集モードに遷移して複数メタ情報を更新した場合、走査中の結果がどのようになるかは未定義です。</p>
 	 * @param name 走査対象の複数メタ情報の名前
 	 * @return 複数メタ情報を走査するストリーム
-	 * @exception IllegalStateException 動作モードが編集モード
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException nameに該当する複数メタ情報がBMS仕様に存在しない
+	 * @throws IllegalStateException 動作モードが編集モード
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException nameに該当する複数メタ情報がBMS仕様に存在しない
 	 * @since 0.8.0
 	 */
-	public final Stream<BmsMetaElement> multipleMetas(String name) {
+	public Stream<BmsMetaElement> multipleMetas(String name) {
 		return mMetas.multipleMetas(name);
 	}
 
@@ -1056,10 +1056,10 @@ public class BmsContent {
 	 * <p>当メソッドは編集モード時には使用できません。使用すると例外をスローします。
 	 * また、走査を行っている最中に編集モードに遷移して索引付きメタ情報を更新した場合、走査中の結果がどのようになるかは未定義です。</p>
 	 * @return 索引付きメタ情報を走査するストリーム
-	 * @exception IllegalStateException 動作モードが編集モード
+	 * @throws IllegalStateException 動作モードが編集モード
 	 * @since 0.8.0
 	 */
-	public final Stream<BmsMetaElement> indexedMetas() {
+	public Stream<BmsMetaElement> indexedMetas() {
 		return mMetas.indexedMetas();
 	}
 
@@ -1073,12 +1073,12 @@ public class BmsContent {
 	 * また、走査を行っている最中に編集モードに遷移して索引付きメタ情報を更新した場合、走査中の結果がどのようになるかは未定義です。</p>
 	 * @param name 走査対象の索引付きメタ情報の名前
 	 * @return 索引付きメタ情報を走査するストリーム
-	 * @exception IllegalStateException 動作モードが編集モード
-	 * @exception NullPointerException nameがnull
-	 * @exception IllegalArgumentException nameに該当する索引付きメタ情報がBMS仕様に存在しない
+	 * @throws IllegalStateException 動作モードが編集モード
+	 * @throws NullPointerException nameがnull
+	 * @throws IllegalArgumentException nameに該当する索引付きメタ情報がBMS仕様に存在しない
 	 * @since 0.8.0
 	 */
-	public final Stream<BmsMetaElement> indexedMetas(String name) {
+	public Stream<BmsMetaElement> indexedMetas(String name) {
 		return mMetas.indexedMetas(name);
 	}
 
@@ -1088,7 +1088,7 @@ public class BmsContent {
 	 * {@link #getSingleMeta(String)}を呼び出して初期BPMメタ情報から値を取得した時と同等の処理を行います。</p>
 	 * @return 初期BPM
 	 */
-	public final double getInitialBpm() {
+	public double getInitialBpm() {
 		return mMetas.getInitialBpm();
 	}
 
@@ -1098,10 +1098,10 @@ public class BmsContent {
 	 * {@link #setSingleMeta(String, Object)}を呼び出して初期BPMメタ情報に値を設定した時と同等の
 	 * 処理を行います。</p>
 	 * @param bpm 初期BPM
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException bpmが{@link BmsSpec#BPM_MIN}未満、または{@link BmsSpec#BPM_MAX}超過
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException bpmが{@link BmsSpec#BPM_MIN}未満、または{@link BmsSpec#BPM_MAX}超過
 	 */
-	public final void setInitialBpm(double bpm) {
+	public void setInitialBpm(double bpm) {
 		mMetas.setInitialBpm(bpm);
 	}
 
@@ -1109,9 +1109,9 @@ public class BmsContent {
 	 * 最小BPMを取得します。
 	 * <p>この値は参照モードの場合のみ取得可能です。</p>
 	 * @return 最小BPM
-	 * @exception IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalStateException 動作モードが参照モードではない
 	 */
-	public final double getMinBpm() {
+	public double getMinBpm() {
 		assertIsReferenceMode();
 		return mMinBpm;
 	}
@@ -1120,9 +1120,9 @@ public class BmsContent {
 	 * 最大BPMを取得します。
 	 * <p>この値は参照モードの場合のみ取得可能です。</p>
 	 * @return 最大BPM
-	 * @exception IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalStateException 動作モードが参照モードではない
 	 */
-	public final double getMaxBpm() {
+	public double getMaxBpm() {
 		assertIsReferenceMode();
 		return mMaxBpm;
 	}
@@ -1131,9 +1131,9 @@ public class BmsContent {
 	 * BPM変化回数を取得します。
 	 * <p>この値は参照モードの場合のみ取得可能です。</p>
 	 * @return BPM変化回数
-	 * @exception IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalStateException 動作モードが参照モードではない
 	 */
-	public final long getChangeBpmCount() {
+	public long getChangeBpmCount() {
 		assertIsReferenceMode();
 		return mChangeBpmCount;
 	}
@@ -1142,9 +1142,9 @@ public class BmsContent {
 	 * 譜面停止回数を取得します。
 	 * <p>この値は参照モードの場合のみ取得可能です。</p>
 	 * @return 譜面停止回数
-	 * @exception IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalStateException 動作モードが参照モードではない
 	 */
-	public final long getStopCount() {
+	public long getStopCount() {
 		assertIsReferenceMode();
 		return mStopCount;
 	}
@@ -1154,9 +1154,9 @@ public class BmsContent {
 	 * <p>このメソッドを呼び出すことでBMSコンテンツに対するデータの更新が行えるようになります。それと同時に、
 	 * いくつかのメソッドの呼び出しが制限されます。</p>
 	 * <p>既に編集モードになっている状態でこのメソッドを呼び出してはいけません。</p>
-	 * @exception IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalStateException 動作モードが参照モードではない
 	 */
-	public final void beginEdit() {
+	public void beginEdit() {
 		// 動作モード変更が禁止されている場合は何もしない
 		if (mIsLockChangeMode) {
 			return;
@@ -1183,9 +1183,9 @@ public class BmsContent {
 	 * メタ情報とノートから楽曲の時間とBPMに関する情報の再計算が行われ、呼び出し制限のかかっていたメソッドが
 	 * 再び呼び出せるようになります。
 	 * <p>既に参照モードになっている状態でこのメソッドを呼び出してはいけません。</p>
-	 * @exception IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalStateException 動作モードが編集モードではない
 	 */
-	public final void endEdit() {
+	public void endEdit() {
 		// 動作モード変更が禁止されている場合は何もしない
 		if (mIsLockChangeMode) {
 			return;
@@ -1219,11 +1219,11 @@ public class BmsContent {
 	 * 例えば、以下のような編集を行いたい場合に有効な選択肢となります。</p>
 	 * <pre>c.edit(() -&gt; c.setSingleMeta("#TITLE", "My Love Song"));</pre>
 	 * @param editor 編集を行うエディタ関数
-	 * @exception IllegalStateException 動作モードが参照モードではない
-	 * @exception NullPointerException editorがnull
+	 * @throws IllegalStateException 動作モードが参照モードではない
+	 * @throws NullPointerException editorがnull
 	 * @since 0.8.0
 	 */
-	public final void edit(Runnable editor) {
+	public void edit(Runnable editor) {
 		assertIsReferenceMode();
 		assertArgNotNull(editor, "editor");
 		var thrownError = false;
@@ -1251,7 +1251,7 @@ public class BmsContent {
 	 * @see #beginEdit
 	 * @see #endEdit
 	 */
-	public final boolean isReferenceMode() {
+	public boolean isReferenceMode() {
 		return (mIsEditMode == false);
 	}
 
@@ -1261,7 +1261,7 @@ public class BmsContent {
 	 * @see #beginEdit
 	 * @see #endEdit
 	 */
-	public final boolean isEditMode() {
+	public boolean isEditMode() {
 		return (mIsEditMode == true);
 	}
 
@@ -1296,7 +1296,7 @@ public class BmsContent {
 	 * @return 小節データ
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T> T getMeasureValue(int channel, int measure) {
+	public <T> T getMeasureValue(int channel, int measure) {
 		return (T)mTlAccessor.getValue(channel, 0, measure, null, false);
 	}
 
@@ -1311,14 +1311,14 @@ public class BmsContent {
 	 * @param index チャンネルインデックス
 	 * @param measure 小節番号
 	 * @return 小節データ
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号を指定した
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定した
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が値型ではない
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号を指定した
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定した
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が値型ではない
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T> T getMeasureValue(int channel, int index, int measure) {
+	public <T> T getMeasureValue(int channel, int index, int measure) {
 		return (T)mTlAccessor.getValue(channel, index, measure, null, false);
 	}
 
@@ -1330,7 +1330,7 @@ public class BmsContent {
 	 * @param measure 小節番号
 	 * @param value 設定値
 	 */
-	public final void setMeasureValue(int channel, int measure, Object value) {
+	public void setMeasureValue(int channel, int measure, Object value) {
 		mTlAccessor.setValue(channel, 0, measure, value);
 	}
 
@@ -1347,16 +1347,16 @@ public class BmsContent {
 	 * @param index チャンネルインデックス
 	 * @param measure 小節番号
 	 * @param value 設定値
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号を指定した
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException データ重複不許可のチャンネルで0以外のインデックスを指定した
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
-	 * @exception IllegalArgumentException チャンネルのデータ型が値型、任意型ではない
-	 * @exception ClassCastException valueをチャンネルのデータ型に変換できない
-	 * @exception IllegalArgumentException 小節長に{@link BmsSpec#LENGTH_MIN}未満または{@link BmsSpec#LENGTH_MAX}超過の値を設定しようとした
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号を指定した
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException データ重複不許可のチャンネルで0以外のインデックスを指定した
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException チャンネルのデータ型が値型、任意型ではない
+	 * @throws ClassCastException valueをチャンネルのデータ型に変換できない
+	 * @throws IllegalArgumentException 小節長に{@link BmsSpec#LENGTH_MIN}未満または{@link BmsSpec#LENGTH_MAX}超過の値を設定しようとした
 	 */
-	public final void setMeasureValue(int channel, int index, int measure, Object value) {
+	public void setMeasureValue(int channel, int index, int measure, Object value) {
 		mTlAccessor.setValue(channel, index, measure, value);
 	}
 
@@ -1368,7 +1368,7 @@ public class BmsContent {
 	 * @param measure 小節番号
 	 * @return 指定小節に小節データが存在する場合true
 	 */
-	public final boolean containsMeasureValue(int channel, int measure) {
+	public boolean containsMeasureValue(int channel, int measure) {
 		return mTlAccessor.getValue(channel, 0, measure, null, true) != null;
 	}
 
@@ -1379,13 +1379,13 @@ public class BmsContent {
 	 * @param index チャンネルインデックス
 	 * @param measure 小節番号
 	 * @return 指定小節に小節データが存在する場合true
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号を指定した
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定した
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が値型ではない
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号を指定した
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定した
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が値型ではない
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
 	 */
-	public final boolean containsMeasureValue(int channel, int index, int measure) {
+	public boolean containsMeasureValue(int channel, int index, int measure) {
 		return mTlAccessor.getValue(channel, index, measure, null, true) != null;
 	}
 
@@ -1397,9 +1397,9 @@ public class BmsContent {
 	 * @param channel チャンネル番号
 	 * @param at 楽曲位置
 	 * @return ノート
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final BmsNote getNote(int channel, BmsAt at) {
+	public BmsNote getNote(int channel, BmsAt at) {
 		return mTlAccessor.getNote(channel, 0, at.getMeasure(), at.getTick());
 	}
 
@@ -1411,9 +1411,9 @@ public class BmsContent {
 	 * @param index チャンネルインデックス
 	 * @param at 楽曲位置
 	 * @return ノート
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final BmsNote getNote(int channel, int index, BmsAt at) {
+	public BmsNote getNote(int channel, int index, BmsAt at) {
 		return mTlAccessor.getNote(channel, index, at.getMeasure(), at.getTick());
 	}
 
@@ -1426,7 +1426,7 @@ public class BmsContent {
 	 * @param tick 小節の刻み位置
 	 * @return ノート
 	 */
-	public final BmsNote getNote(int channel, int measure, double tick) {
+	public BmsNote getNote(int channel, int measure, double tick) {
 		return mTlAccessor.getNote(channel, 0, measure, tick);
 	}
 
@@ -1437,14 +1437,14 @@ public class BmsContent {
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
 	 * @return ノート
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号を指定した
-	 * @exception IndexOutOfBoundsException チャンネルインデックスにマイナス値を指定した
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のチャンネルインデックスを指定した
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
-	 * @exception IllegalArgumentException 小節の刻み位置にマイナス値または当該小節の刻み数以上の値を指定した
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号を指定した
+	 * @throws IndexOutOfBoundsException チャンネルインデックスにマイナス値を指定した
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のチャンネルインデックスを指定した
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節の刻み位置にマイナス値または当該小節の刻み数以上の値を指定した
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
-	public final BmsNote getNote(int channel, int index, int measure, double tick) {
+	public BmsNote getNote(int channel, int index, int measure, double tick) {
 		return mTlAccessor.getNote(channel, index, measure, tick);
 	}
 
@@ -1457,9 +1457,9 @@ public class BmsContent {
 	 * @param at 楽曲位置
 	 * @param inclusiveFrom 指定位置を検索対象に含めるかどうか
 	 * @return 見つかったノート
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final BmsNote getPreviousNote(int channel, BmsAt at, boolean inclusiveFrom) {
+	public BmsNote getPreviousNote(int channel, BmsAt at, boolean inclusiveFrom) {
 		return mTlAccessor.getNearerNote(channel, 0, at.getMeasure(), at.getTick(), -1, inclusiveFrom);
 	}
 
@@ -1472,9 +1472,9 @@ public class BmsContent {
 	 * @param at 楽曲位置
 	 * @param inclusiveFrom 指定位置を検索対象に含めるかどうか
 	 * @return 見つかったノート
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final BmsNote getPreviousNote(int channel, int index, BmsAt at, boolean inclusiveFrom) {
+	public BmsNote getPreviousNote(int channel, int index, BmsAt at, boolean inclusiveFrom) {
 		return mTlAccessor.getNearerNote(channel, index, at.getMeasure(), at.getTick(), -1, inclusiveFrom);
 	}
 
@@ -1488,7 +1488,7 @@ public class BmsContent {
 	 * @param inclusiveFrom 指定位置を検索対象に含めるかどうか
 	 * @return 見つかったノート
 	 */
-	public final BmsNote getPreviousNote(int channel, int measure, double tick, boolean inclusiveFrom) {
+	public BmsNote getPreviousNote(int channel, int measure, double tick, boolean inclusiveFrom) {
 		return mTlAccessor.getNearerNote(channel, 0, measure, tick, -1, inclusiveFrom);
 	}
 
@@ -1500,14 +1500,14 @@ public class BmsContent {
 	 * @param tick 小節の刻み位置
 	 * @param inclusiveFrom 指定位置を検索対象に含めるかどうか
 	 * @return 見つかったノート
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号を指定した
-	 * @exception IndexOutOfBoundsException チャンネルインデックスにマイナス値を指定した
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のチャンネルインデックスを指定した
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または小節数以上
-	 * @exception IllegalArgumentException 小節の刻み位置にマイナス値または当該小節の刻み数以上を指定した
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号を指定した
+	 * @throws IndexOutOfBoundsException チャンネルインデックスにマイナス値を指定した
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のチャンネルインデックスを指定した
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または小節数以上
+	 * @throws IllegalArgumentException 小節の刻み位置にマイナス値または当該小節の刻み数以上を指定した
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
-	public final BmsNote getPreviousNote(int channel, int index, int measure, double tick, boolean inclusiveFrom) {
+	public BmsNote getPreviousNote(int channel, int index, int measure, double tick, boolean inclusiveFrom) {
 		return mTlAccessor.getNearerNote(channel, index, measure, tick, -1, inclusiveFrom);
 	}
 
@@ -1520,9 +1520,9 @@ public class BmsContent {
 	 * @param at 楽曲位置
 	 * @param inclusiveFrom 指定位置を検索対象に含めるかどうか
 	 * @return 見つかったノート
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final BmsNote getNextNote(int channel, BmsAt at, boolean inclusiveFrom) {
+	public BmsNote getNextNote(int channel, BmsAt at, boolean inclusiveFrom) {
 		return mTlAccessor.getNearerNote(channel, 0, at.getMeasure(), at.getTick(), 1, inclusiveFrom);
 	}
 
@@ -1535,9 +1535,9 @@ public class BmsContent {
 	 * @param at 楽曲位置
 	 * @param inclusiveFrom 指定位置を検索対象に含めるかどうか
 	 * @return 見つかったノート
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final BmsNote getNextNote(int channel, int index, BmsAt at, boolean inclusiveFrom) {
+	public BmsNote getNextNote(int channel, int index, BmsAt at, boolean inclusiveFrom) {
 		return mTlAccessor.getNearerNote(channel, index, at.getMeasure(), at.getTick(), 1, inclusiveFrom);
 	}
 
@@ -1551,7 +1551,7 @@ public class BmsContent {
 	 * @param inclusiveFrom 指定位置を検索対象に含めるかどうか
 	 * @return 見つかったノート
 	 */
-	public final BmsNote getNextNote(int channel, int measure, double tick, boolean inclusiveFrom) {
+	public BmsNote getNextNote(int channel, int measure, double tick, boolean inclusiveFrom) {
 		return mTlAccessor.getNearerNote(channel, 0, measure, tick, 1, inclusiveFrom);
 	}
 
@@ -1563,14 +1563,14 @@ public class BmsContent {
 	 * @param tick 小節の刻み位置
 	 * @param inclusiveFrom 指定位置を検索対象に含めるかどうか
 	 * @return 見つかったノート
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号を指定した
-	 * @exception IndexOutOfBoundsException チャンネルインデックスにマイナス値を指定した
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のチャンネルインデックスを指定した
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または小節数以上
-	 * @exception IllegalArgumentException 小節の刻み位置にマイナス値または当該小節の刻み数以上を指定した
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号を指定した
+	 * @throws IndexOutOfBoundsException チャンネルインデックスにマイナス値を指定した
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のチャンネルインデックスを指定した
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または小節数以上
+	 * @throws IllegalArgumentException 小節の刻み位置にマイナス値または当該小節の刻み数以上を指定した
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
-	public final BmsNote getNextNote(int channel, int index, int measure, double tick, boolean inclusiveFrom) {
+	public BmsNote getNextNote(int channel, int index, int measure, double tick, boolean inclusiveFrom) {
 		return mTlAccessor.getNearerNote(channel, index, measure, tick, 1, inclusiveFrom);
 	}
 
@@ -1580,9 +1580,9 @@ public class BmsContent {
 	 * それ以外の処理は{@link #getResolvedNoteValue(int, int, int, double)}と同じです。</p>
 	 * @param note ノート
 	 * @return 参照先メタ情報から取り出したデータ
-	 * @exception NullPointerException noteがnull
+	 * @throws NullPointerException noteがnull
 	 */
-	public final Object getResolvedNoteValue(BmsNote note) {
+	public Object getResolvedNoteValue(BmsNote note) {
 		return mTlAccessor.getResolvedNoteValue(note);
 	}
 
@@ -1594,9 +1594,9 @@ public class BmsContent {
 	 * @param channel チャンネル番号
 	 * @param at 楽曲位置
 	 * @return 参照先メタ情報から取り出したデータ
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final Object getResolvedNoteValue(int channel, BmsAt at) {
+	public Object getResolvedNoteValue(int channel, BmsAt at) {
 		assertArgNotNull(at, "at");
 		return mTlAccessor.getResolvedNoteValue(channel, 0, at.getMeasure(), at.getTick());
 	}
@@ -1609,9 +1609,9 @@ public class BmsContent {
 	 * @param index チャンネルインデックス
 	 * @param at 楽曲位置
 	 * @return 参照先メタ情報から取り出したデータ
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final Object getResolvedNoteValue(int channel, int index, BmsAt at) {
+	public Object getResolvedNoteValue(int channel, int index, BmsAt at) {
 		assertArgNotNull(at, "at");
 		return mTlAccessor.getResolvedNoteValue(channel, index, at.getMeasure(), at.getTick());
 	}
@@ -1625,7 +1625,7 @@ public class BmsContent {
 	 * @param tick 小節の刻み位置
 	 * @return 参照先メタ情報から取り出したデータ
 	 */
-	public final Object getResolvedNoteValue(int channel, int measure, double tick) {
+	public Object getResolvedNoteValue(int channel, int measure, double tick) {
 		return mTlAccessor.getResolvedNoteValue(channel, 0, measure, tick);
 	}
 
@@ -1639,14 +1639,14 @@ public class BmsContent {
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
 	 * @return 参照先メタ情報から取り出したデータ
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号を指定した
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のチャンネルインデックスを指定した
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
-	 * @exception IllegalArgumentException マイナス値または当該小節の刻み数以上の刻み位置を指定した
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号を指定した
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のチャンネルインデックスを指定した
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException マイナス値または当該小節の刻み数以上の刻み位置を指定した
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
-	public final Object getResolvedNoteValue(int channel, int index, int measure, double tick) {
+	public Object getResolvedNoteValue(int channel, int index, int measure, double tick) {
 		return mTlAccessor.getResolvedNoteValue(channel, index, measure, tick);
 	}
 
@@ -1657,9 +1657,9 @@ public class BmsContent {
 	 * @param atFrom 楽曲位置
 	 * @param judge 条件一致判定を行うテスター
 	 * @return 最初に条件に一致したノート。見つからなかった場合はnull。
-	 * @exception NullPointerException atFromがnull
+	 * @throws NullPointerException atFromがnull
 	 */
-	public final BmsNote pointOf(BmsAt atFrom, Predicate<BmsNote> judge) {
+	public BmsNote pointOf(BmsAt atFrom, Predicate<BmsNote> judge) {
 		return mTlAccessor.pointOf(atFrom.getMeasure(), atFrom.getTick(), judge);
 	}
 
@@ -1670,11 +1670,11 @@ public class BmsContent {
 	 * @param tickFrom 検索開始位置を示す刻み位置
 	 * @param judge 条件一致判定を行うテスター
 	 * @return 最初に条件に一致したノート。見つからなかった場合はnull。
-	 * @exception IllegalArgumentException 検索開始位置の小節番号にノート・小節データが存在し得ない値を指定した
-	 * @exception IllegalArgumentException 検索開始位置の刻み位置にマイナス値または当該小節の刻み数以上の値を指定した
-	 * @exception NullPointerException judgeがnull
+	 * @throws IllegalArgumentException 検索開始位置の小節番号にノート・小節データが存在し得ない値を指定した
+	 * @throws IllegalArgumentException 検索開始位置の刻み位置にマイナス値または当該小節の刻み数以上の値を指定した
+	 * @throws NullPointerException judgeがnull
 	 */
-	public final BmsNote pointOf(int measureFrom, double tickFrom, Predicate<BmsNote> judge) {
+	public BmsNote pointOf(int measureFrom, double tickFrom, Predicate<BmsNote> judge) {
 		return mTlAccessor.pointOf(measureFrom, tickFrom, judge);
 	}
 
@@ -1683,9 +1683,9 @@ public class BmsContent {
 	 * <p>全てのノートを列挙対象とします。<br>
 	 * それ以外の処理は{@link #enumNotes(int, int, int, double, int, double, Consumer)}と同じです。</p>
 	 * @param enumNote ノートを通知する関数
-	 * @exception NullPointerException enumNoteがnull
+	 * @throws NullPointerException enumNoteがnull
 	 */
-	public final void enumNotes(Consumer<BmsNote> enumNote) {
+	public void enumNotes(Consumer<BmsNote> enumNote) {
 		mTlAccessor.enumNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX + 1,
 				0, 0,
@@ -1699,9 +1699,9 @@ public class BmsContent {
 	 * それ以外の処理は{@link #enumNotes(int, double, Consumer)}と同じです。</p>
 	 * @param at 楽曲位置
 	 * @param enumNote ノートを通知する関数
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final void enumNotes(BmsAt at, Consumer<BmsNote> enumNote) {
+	public void enumNotes(BmsAt at, Consumer<BmsNote> enumNote) {
 		assertArgNotNull(at, "at");
 		mTlAccessor.enumNotes(at.getMeasure(), at.getTick(), enumNote);
 	}
@@ -1713,11 +1713,11 @@ public class BmsContent {
 	 * @param measure 列挙対象とする小節番号
 	 * @param tick 列挙対象とする刻み位置
 	 * @param enumNote ノートを通知する関数
-	 * @exception IllegalArgumentException measureがマイナス値または小節数以上
-	 * @exception IllegalArgumentException tickがマイナス値または当該小節の刻み数以上
-	 * @exception NullPointerException enumNoteがnull
+	 * @throws IllegalArgumentException measureがマイナス値または小節数以上
+	 * @throws IllegalArgumentException tickがマイナス値または当該小節の刻み数以上
+	 * @throws NullPointerException enumNoteがnull
 	 */
-	public final void enumNotes(int measure, double tick, Consumer<BmsNote> enumNote) {
+	public void enumNotes(int measure, double tick, Consumer<BmsNote> enumNote) {
 		mTlAccessor.enumNotes(measure, tick, enumNote);
 	}
 
@@ -1731,7 +1731,7 @@ public class BmsContent {
 	 * @param tickEnd 列挙範囲を示す最大の小節番号の刻み位置(この位置を含まない)
 	 * @param enumNote ノートを通知する関数
 	 */
-	public final void enumNotes(int measureBegin, double tickBegin, int measureEnd, double tickEnd,
+	public void enumNotes(int measureBegin, double tickBegin, int measureEnd, double tickEnd,
 			Consumer<BmsNote> enumNote) {
 		mTlAccessor.enumNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
@@ -1748,10 +1748,10 @@ public class BmsContent {
 	 * @param atBegin 列挙範囲を示す最小の楽曲位置
 	 * @param atEnd 列挙範囲を示す最大の楽曲位置(この位置を含まない)
 	 * @param enumNote ノートを通知する関数
-	 * @exception NullPointerException atBeginがnull
-	 * @exception NullPointerException atEndがnull
+	 * @throws NullPointerException atBeginがnull
+	 * @throws NullPointerException atEndがnull
 	 */
-	public final void enumNotes(BmsAt atBegin, BmsAt atEnd, Consumer<BmsNote> enumNote) {
+	public void enumNotes(BmsAt atBegin, BmsAt atEnd, Consumer<BmsNote> enumNote) {
 		assertArgNotNull(atBegin, "atBegin");
 		assertArgNotNull(atEnd, "atEnd");
 		mTlAccessor.enumNotes(
@@ -1770,10 +1770,10 @@ public class BmsContent {
 	 * @param atBegin 列挙範囲を示す最小の楽曲位置
 	 * @param atEnd 列挙範囲を示す最大の楽曲位置(この位置を含まない)
 	 * @param enumNote ノートを通知する関数
-	 * @exception NullPointerException atBeginがnull
-	 * @exception NullPointerException atEndがnull
+	 * @throws NullPointerException atBeginがnull
+	 * @throws NullPointerException atEndがnull
 	 */
-	public final void enumNotes(int channelBegin, int channelEnd, BmsAt atBegin, BmsAt atEnd,
+	public void enumNotes(int channelBegin, int channelEnd, BmsAt atBegin, BmsAt atEnd,
 			Consumer<BmsNote> enumNote) {
 		assertArgNotNull(atBegin, "atBegin");
 		assertArgNotNull(atEnd, "atEnd");
@@ -1795,15 +1795,15 @@ public class BmsContent {
 	 * @param measureEnd 列挙範囲を示す最大の小節番号
 	 * @param tickEnd 列挙範囲を示す最大の小節番号の刻み位置(この位置を含まない)
 	 * @param enumNote ノートを通知する関数
-	 * @exception IllegalArgumentException channelBeginに小節データ・ノートを登録できないチャンネル番号を指定した
-	 * @exception IllegalArgumentException channelEndに{@link BmsSpec#CHANNEL_MAX}を超える値を指定した
-	 * @exception IllegalArgumentException measureBeginに{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過の値を指定した
-	 * @exception IllegalArgumentException tickBeginにマイナス値または当該小節の刻み数以上の値を指定した
-	 * @exception IllegalArgumentException measureEndに{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過の値を指定した
-	 * @exception IllegalArgumentException tickEndにマイナス値、当該小節の刻み数以上、または小節番号==小節数の時に0以外の値を指定した
-	 * @exception NullPointerException enumNoteがnull
+	 * @throws IllegalArgumentException channelBeginに小節データ・ノートを登録できないチャンネル番号を指定した
+	 * @throws IllegalArgumentException channelEndに{@link BmsSpec#CHANNEL_MAX}を超える値を指定した
+	 * @throws IllegalArgumentException measureBeginに{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過の値を指定した
+	 * @throws IllegalArgumentException tickBeginにマイナス値または当該小節の刻み数以上の値を指定した
+	 * @throws IllegalArgumentException measureEndに{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過の値を指定した
+	 * @throws IllegalArgumentException tickEndにマイナス値、当該小節の刻み数以上、または小節番号==小節数の時に0以外の値を指定した
+	 * @throws NullPointerException enumNoteがnull
 	 */
-	public final void enumNotes(int channelBegin, int channelEnd,
+	public void enumNotes(int channelBegin, int channelEnd,
 			int measureBegin, double tickBegin, int measureEnd, double tickEnd, Consumer<BmsNote> enumNote) {
 		mTlAccessor.enumNotes(
 				channelBegin, channelEnd,
@@ -1819,7 +1819,7 @@ public class BmsContent {
 	 * @param isCollect 取得有無を決定するテスター
 	 * @return ノートのリスト
 	 */
-	public final List<BmsNote> listNotes(Predicate<BmsNote> isCollect) {
+	public List<BmsNote> listNotes(Predicate<BmsNote> isCollect) {
 		assertArgNotNull(isCollect, "isCollect");
 		var measureCount = mTlAccessor.getCount();
 		return (measureCount == 0) ? Collections.emptyList() : mTlAccessor.listNotes(
@@ -1836,9 +1836,9 @@ public class BmsContent {
 	 * @param at 楽曲位置
 	 * @param isCollect 取得有無を決定するテスター
 	 * @return ノートのリスト
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final List<BmsNote> listNotes(BmsAt at, Predicate<BmsNote> isCollect) {
+	public List<BmsNote> listNotes(BmsAt at, Predicate<BmsNote> isCollect) {
 		assertArgNotNull(at, "at");
 		return mTlAccessor.listNotes(at.getMeasure(), at.getTick(), isCollect);
 	}
@@ -1852,11 +1852,11 @@ public class BmsContent {
 	 * @param tick 取得対象とする刻み位置
 	 * @param isCollect 取得有無を決定するテスター
 	 * @return ノートのリスト
-	 * @exception IllegalArgumentException measureがマイナス値または小節数以上
-	 * @exception IllegalArgumentException tickがマイナス値または当該小節の刻み数以上
-	 * @exception NullPointerException isCollectがnull
+	 * @throws IllegalArgumentException measureがマイナス値または小節数以上
+	 * @throws IllegalArgumentException tickがマイナス値または当該小節の刻み数以上
+	 * @throws NullPointerException isCollectがnull
 	 */
-	public final List<BmsNote> listNotes(int measure, double tick, Predicate<BmsNote> isCollect) {
+	public List<BmsNote> listNotes(int measure, double tick, Predicate<BmsNote> isCollect) {
 		return mTlAccessor.listNotes(measure, tick, isCollect);
 	}
 
@@ -1869,10 +1869,10 @@ public class BmsContent {
 	 * @param atEnd 取得対象範囲を示す最大の楽曲位置(この位置を含まない)
 	 * @param isCollect 取得有無を決定するテスター
 	 * @return ノートのリスト
-	 * @exception NullPointerException atBeginがnull
-	 * @exception NullPointerException atEndがnull
+	 * @throws NullPointerException atBeginがnull
+	 * @throws NullPointerException atEndがnull
 	 */
-	public final List<BmsNote> listNotes(BmsAt atBegin, BmsAt atEnd, Predicate<BmsNote> isCollect) {
+	public List<BmsNote> listNotes(BmsAt atBegin, BmsAt atEnd, Predicate<BmsNote> isCollect) {
 		return mTlAccessor.listNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
 				atBegin.getMeasure(), atBegin.getTick(),
@@ -1890,10 +1890,10 @@ public class BmsContent {
 	 * @param atEnd 取得対象範囲を示す最大の楽曲位置(この位置を含まない)
 	 * @param isCollect 取得有無を決定するテスター
 	 * @return ノートのリスト
-	 * @exception NullPointerException atBeginがnull
-	 * @exception NullPointerException atEndがnull
+	 * @throws NullPointerException atBeginがnull
+	 * @throws NullPointerException atEndがnull
 	 */
-	public final List<BmsNote> listNotes(int channelBegin, int channelEnd, BmsAt atBegin, BmsAt atEnd,
+	public List<BmsNote> listNotes(int channelBegin, int channelEnd, BmsAt atBegin, BmsAt atEnd,
 			Predicate<BmsNote> isCollect) {
 		return mTlAccessor.listNotes(
 				channelBegin, channelEnd,
@@ -1913,7 +1913,7 @@ public class BmsContent {
 	 * @param isCollect 取得有無を決定するテスター
 	 * @return ノートのリスト
 	 */
-	public final List<BmsNote> listNotes(int measureBegin, double tickBegin, int measureEnd, double tickEnd,
+	public List<BmsNote> listNotes(int measureBegin, double tickBegin, int measureEnd, double tickEnd,
 			Predicate<BmsNote> isCollect) {
 		return mTlAccessor.listNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
@@ -1933,15 +1933,15 @@ public class BmsContent {
 	 * @param tickEnd 取得対象範囲を示す最大の小節番号の刻み位置(この位置を含まない)
 	 * @param isCollect 取得有無を決定するテスター
 	 * @return ノートのリスト
-	 * @exception IllegalArgumentException channelBeginに{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}を超える値を指定した
-	 * @exception IllegalArgumentException channelEndに{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}+1を超える値を指定した
-	 * @exception IllegalArgumentException measureBeginに{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過の値を指定した
-	 * @exception IllegalArgumentException tickBeginにマイナス値または当該小節の刻み数以上の値を指定した
-	 * @exception IllegalArgumentException measureEndに{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過の値を指定した
-	 * @exception IllegalArgumentException tickEndにマイナス値、当該小節の刻み数以上、または小節番号==小節数の時に0以外の値を指定した
-	 * @exception NullPointerException isCollectがnull
+	 * @throws IllegalArgumentException channelBeginに{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}を超える値を指定した
+	 * @throws IllegalArgumentException channelEndに{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}+1を超える値を指定した
+	 * @throws IllegalArgumentException measureBeginに{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過の値を指定した
+	 * @throws IllegalArgumentException tickBeginにマイナス値または当該小節の刻み数以上の値を指定した
+	 * @throws IllegalArgumentException measureEndに{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過の値を指定した
+	 * @throws IllegalArgumentException tickEndにマイナス値、当該小節の刻み数以上、または小節番号==小節数の時に0以外の値を指定した
+	 * @throws NullPointerException isCollectがnull
 	 */
-	public final List<BmsNote> listNotes(int channelBegin, int channelEnd,
+	public List<BmsNote> listNotes(int channelBegin, int channelEnd,
 			int measureBegin, double tickBegin, int measureEnd, double tickEnd, Predicate<BmsNote> isCollect) {
 		return mTlAccessor.listNotes(
 				channelBegin, channelEnd,
@@ -1957,7 +1957,7 @@ public class BmsContent {
 	 * @param isCounting カウント有無を決定するテスター
 	 * @return 条件に一致したノートの数
 	 */
-	public final int countNotes(Predicate<BmsNote> isCounting) {
+	public int countNotes(Predicate<BmsNote> isCounting) {
 		assertArgNotNull(isCounting, "isCounting");
 		var measureCount = mTlAccessor.getCount();
 		return (measureCount == 0) ? 0 : mTlAccessor.countNotes(
@@ -1974,9 +1974,9 @@ public class BmsContent {
 	 * @param at 楽曲位置
 	 * @param isCounting カウント有無を決定するテスター
 	 * @return 条件に一致したノートの数
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final int countNotes(BmsAt at, Predicate<BmsNote> isCounting) {
+	public int countNotes(BmsAt at, Predicate<BmsNote> isCounting) {
 		assertArgNotNull(at, "at");
 		return mTlAccessor.countNotes(at.getMeasure(), at.getTick(), isCounting);
 	}
@@ -1988,11 +1988,11 @@ public class BmsContent {
 	 * @param tick カウント対象とする刻み位置
 	 * @param isCounting カウント有無を決定するテスター
 	 * @return 条件に一致したノートの数
-	 * @exception IllegalArgumentException measureがマイナス値または小節数以上
-	 * @exception IllegalArgumentException tickがマイナス値または当該小節の刻み数以上
-	 * @exception NullPointerException isCountingがnull
+	 * @throws IllegalArgumentException measureがマイナス値または小節数以上
+	 * @throws IllegalArgumentException tickがマイナス値または当該小節の刻み数以上
+	 * @throws NullPointerException isCountingがnull
 	 */
-	public final int countNotes(int measure, double tick, Predicate<BmsNote> isCounting) {
+	public int countNotes(int measure, double tick, Predicate<BmsNote> isCounting) {
 		return mTlAccessor.countNotes(measure, tick, isCounting);
 	}
 
@@ -2005,10 +2005,10 @@ public class BmsContent {
 	 * @param atEnd カウント範囲を示す最大の楽曲位置(この位置を含まない)
 	 * @param isCounting カウント有無を決定するテスター
 	 * @return 条件に一致したノートの数
-	 * @exception NullPointerException atBeginがnull
-	 * @exception NullPointerException atEndがnull
+	 * @throws NullPointerException atBeginがnull
+	 * @throws NullPointerException atEndがnull
 	 */
-	public final int countNotes(BmsAt atBegin, BmsAt atEnd, Predicate<BmsNote> isCounting) {
+	public int countNotes(BmsAt atBegin, BmsAt atEnd, Predicate<BmsNote> isCounting) {
 		return mTlAccessor.countNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
 				atBegin.getMeasure(), atBegin.getTick(),
@@ -2026,10 +2026,10 @@ public class BmsContent {
 	 * @param atEnd カウント範囲を示す最大の楽曲位置(この位置を含まない)
 	 * @param isCounting カウント有無を決定するテスター
 	 * @return 条件に一致したノートの数
-	 * @exception NullPointerException atBeginがnull
-	 * @exception NullPointerException atEndがnull
+	 * @throws NullPointerException atBeginがnull
+	 * @throws NullPointerException atEndがnull
 	 */
-	public final int countNotes(int channelBegin, int channelEnd, BmsAt atBegin, BmsAt atEnd,
+	public int countNotes(int channelBegin, int channelEnd, BmsAt atBegin, BmsAt atEnd,
 			Predicate<BmsNote> isCounting) {
 		return mTlAccessor.countNotes(
 				channelBegin, channelEnd,
@@ -2049,7 +2049,7 @@ public class BmsContent {
 	 * @param isCounting カウント有無を決定するテスター
 	 * @return 条件に一致したノートの数
 	 */
-	public final int countNotes(int measureBegin, double tickBegin, int measureEnd, double tickEnd,
+	public int countNotes(int measureBegin, double tickBegin, int measureEnd, double tickEnd,
 			Predicate<BmsNote> isCounting) {
 		return mTlAccessor.countNotes(
 				BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX,
@@ -2069,15 +2069,15 @@ public class BmsContent {
 	 * @param tickEnd カウント範囲を示す最大の小節番号の刻み位置(この位置を含まない)
 	 * @param isCounting カウント有無を決定するテスター
 	 * @return 条件に一致したノートの数
-	 * @exception IllegalArgumentException channelBeginに{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}を超える値を指定した
-	 * @exception IllegalArgumentException channelEndに{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}+1を超える値を指定した
-	 * @exception IllegalArgumentException measureBeginに{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過の値を指定した
-	 * @exception IllegalArgumentException tickBeginにマイナス値または当該小節の刻み数以上の値を指定した
-	 * @exception IllegalArgumentException measureEndに{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過の値を指定した
-	 * @exception IllegalArgumentException tickEndにマイナス値、当該小節の刻み数以上、または小節番号==小節数の時に0以外の値を指定した
-	 * @exception NullPointerException isCountingがnull
+	 * @throws IllegalArgumentException channelBeginに{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}を超える値を指定した
+	 * @throws IllegalArgumentException channelEndに{@link BmsSpec#CHANNEL_MIN}未満または{@link BmsSpec#CHANNEL_MAX}+1を超える値を指定した
+	 * @throws IllegalArgumentException measureBeginに{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過の値を指定した
+	 * @throws IllegalArgumentException tickBeginにマイナス値または当該小節の刻み数以上の値を指定した
+	 * @throws IllegalArgumentException measureEndに{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過の値を指定した
+	 * @throws IllegalArgumentException tickEndにマイナス値、当該小節の刻み数以上、または小節番号==小節数の時に0以外の値を指定した
+	 * @throws NullPointerException isCountingがnull
 	 */
-	public final int countNotes(int channelBegin, int channelEnd,
+	public int countNotes(int channelBegin, int channelEnd,
 			int measureBegin, double tickBegin, int measureEnd, double tickEnd, Predicate<BmsNote> isCounting) {
 		return mTlAccessor.countNotes(
 				channelBegin, channelEnd,
@@ -2098,7 +2098,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 * @see #putNote(int, int, int, double, int, Supplier)
 	 */
-	public final BmsNote putNote(int channel, int measure, double tick, int value) {
+	public BmsNote putNote(int channel, int measure, double tick, int value) {
 		return mTlAccessor.putNote(channel, 0, measure, tick, value, BmsNote.DEFAULT_CREATOR);
 	}
 
@@ -2114,7 +2114,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 * @see #putNote(int, int, int, double, int, Supplier)
 	 */
-	public final BmsNote putNote(int channel, BmsAt at, int value) {
+	public BmsNote putNote(int channel, BmsAt at, int value) {
 		return mTlAccessor.putNote(channel, 0, at.getMeasure(), at.getTick(), value, BmsNote.DEFAULT_CREATOR);
 	}
 
@@ -2130,7 +2130,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 * @see #putNote(int, int, int, double, int, Supplier)
 	 */
-	public final BmsNote putNote(int channel, int index, int measure, double tick, int value) {
+	public BmsNote putNote(int channel, int index, int measure, double tick, int value) {
 		return mTlAccessor.putNote(channel, index, measure, tick, value, BmsNote.DEFAULT_CREATOR);
 	}
 
@@ -2146,7 +2146,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 * @see #putNote(int, int, int, double, int, Supplier)
 	 */
-	public final BmsNote putNote(int channel, int index, BmsAt at, int value) {
+	public BmsNote putNote(int channel, int index, BmsAt at, int value) {
 		return mTlAccessor.putNote(channel, index, at.getMeasure(), at.getTick(), value, BmsNote.DEFAULT_CREATOR);
 	}
 
@@ -2163,7 +2163,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 * @see #putNote(int, int, int, double, int, Supplier)
 	 */
-	public final <T extends BmsNote> T putNote(int channel, int measure, double tick, int value,
+	public <T extends BmsNote> T putNote(int channel, int measure, double tick, int value,
 			Supplier<BmsNote> createNote) {
 		return mTlAccessor.putNote(channel, 0, measure, tick, value, createNote);
 	}
@@ -2181,7 +2181,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 * @see #putNote(int, int, int, double, int, Supplier)
 	 */
-	public final <T extends BmsNote> T putNote(int channel, BmsAt at, int value, Supplier<BmsNote> createNote) {
+	public <T extends BmsNote> T putNote(int channel, BmsAt at, int value, Supplier<BmsNote> createNote) {
 		return mTlAccessor.putNote(channel, 0, at.getMeasure(), at.getTick(), value, createNote);
 	}
 
@@ -2198,7 +2198,7 @@ public class BmsContent {
 	 * @return 譜面に追加された新しいノートオブジェクト
 	 * @see #putNote(int, int, int, double, int, Supplier)
 	 */
-	public final <T extends BmsNote> T putNote(int channel, int index, BmsAt at, int value, Supplier<BmsNote> createNote) {
+	public <T extends BmsNote> T putNote(int channel, int index, BmsAt at, int value, Supplier<BmsNote> createNote) {
 		return mTlAccessor.putNote(channel, index, at.getMeasure(), at.getTick(), value, createNote);
 	}
 
@@ -2229,18 +2229,18 @@ public class BmsContent {
 	 * @param value ノートの値
 	 * @param createNote ノートオブジェクトを生成する関数
 	 * @return 譜面に追加された新しいノートオブジェクト
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号を指定した
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のチャンネルインデックスを指定した
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
-	 * @exception IllegalArgumentException ノートの値に0を指定した
-	 * @exception NullPointerException createNoteがnull
-	 * @exception IllegalArgumentException createNoteの結果がnull
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号を指定した
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のチャンネルインデックスを指定した
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
+	 * @throws IllegalArgumentException ノートの値に0を指定した
+	 * @throws NullPointerException createNoteがnull
+	 * @throws IllegalArgumentException createNoteの結果がnull
 	 */
-	public final <T extends BmsNote> T putNote(int channel, int index, int measure, double tick, int value,
+	public <T extends BmsNote> T putNote(int channel, int index, int measure, double tick, int value,
 			Supplier<BmsNote> createNote) {
 		return mTlAccessor.putNote(channel, index, measure, tick, value, createNote);
 	}
@@ -2254,7 +2254,7 @@ public class BmsContent {
 	 * @param tick 小節の刻み位置
 	 * @return 指定位置にノートが存在し消去した場合はtrue、それ以外はfalse。
 	 */
-	public final boolean removeNote(int channel, int measure, double tick) {
+	public boolean removeNote(int channel, int measure, double tick) {
 		return mTlAccessor.removeNote(channel, 0, measure, tick);
 	}
 
@@ -2266,9 +2266,9 @@ public class BmsContent {
 	 * @param channel チャンネル番号
 	 * @param at 楽曲位置
 	 * @return 指定位置にノートが存在し消去した場合はtrue、それ以外はfalse。
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final boolean removeNote(int channel, BmsAt at) {
+	public boolean removeNote(int channel, BmsAt at) {
 		return mTlAccessor.removeNote(channel, 0, at.getMeasure(), at.getTick());
 	}
 
@@ -2280,9 +2280,9 @@ public class BmsContent {
 	 * @param index チャンネルインデックス
 	 * @param at 楽曲位置
 	 * @return 指定位置にノートが存在し消去した場合はtrue、それ以外はfalse。
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final boolean removeNote(int channel, int index, BmsAt at) {
+	public boolean removeNote(int channel, int index, BmsAt at) {
 		return mTlAccessor.removeNote(channel, index, at.getMeasure(), at.getTick());
 	}
 
@@ -2296,15 +2296,15 @@ public class BmsContent {
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
 	 * @return 指定位置にノートが存在し消去した場合はtrue、それ以外はfalse。
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号を指定した
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定した
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
-	 * @exception IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号を指定した
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定した
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws IllegalArgumentException 指定チャンネルのデータ型が配列型ではない
 	 */
-	public final boolean removeNote(int channel, int index, int measure, double tick) {
+	public boolean removeNote(int channel, int index, int measure, double tick) {
 		return mTlAccessor.removeNote(channel, index, measure, tick);
 	}
 
@@ -2312,10 +2312,10 @@ public class BmsContent {
 	 * 選択されたノートを消去します。
 	 * @param isRemoveTarget 消去対象ノートを選択するテスター
 	 * @return 消去されたノートの個数
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException isRemoveTargetがnull
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException isRemoveTargetがnull
 	 */
-	public final int removeNote(Predicate<BmsNote> isRemoveTarget) {
+	public int removeNote(Predicate<BmsNote> isRemoveTarget) {
 		return mTlAccessor.removeNote(1, BmsSpec.CHANNEL_MAX + 1, 0, mTlAccessor.getCount(), isRemoveTarget);
 	}
 
@@ -2328,7 +2328,7 @@ public class BmsContent {
 	 * @param isRemoveTarget 指定範囲で消去対象を選択するテスター
 	 * @return 消去されたノートの個数
 	 */
-	public final int removeNote(int measureBegin, int measureEnd, Predicate<BmsNote> isRemoveTarget) {
+	public int removeNote(int measureBegin, int measureEnd, Predicate<BmsNote> isRemoveTarget) {
 		return mTlAccessor.removeNote(BmsSpec.CHANNEL_MIN, BmsSpec.CHANNEL_MAX, measureBegin, measureEnd, isRemoveTarget);
 	}
 
@@ -2340,14 +2340,14 @@ public class BmsContent {
 	 * @param measureEnd 消去対象の最大小節番号(この小節を含まない)
 	 * @param isRemoveTarget 指定範囲で消去対象を選択するテスター
 	 * @return 消去されたノートの個数
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException channelBeginに小節データ・ノートを登録できないチャンネル番号を指定した
-	 * @exception IllegalArgumentException channelEndに{@link BmsSpec#CHANNEL_MAX}より大きいチャンネル番号を指定した
-	 * @exception IllegalArgumentException measureBeginにノート・小節データの存在し得ない小節番号を指定した
-	 * @exception IllegalArgumentException measureEndに現在の小節数より大きい小節番号を指定した
-	 * @exception NullPointerException isRemoveTargetがnull
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException channelBeginに小節データ・ノートを登録できないチャンネル番号を指定した
+	 * @throws IllegalArgumentException channelEndに{@link BmsSpec#CHANNEL_MAX}より大きいチャンネル番号を指定した
+	 * @throws IllegalArgumentException measureBeginにノート・小節データの存在し得ない小節番号を指定した
+	 * @throws IllegalArgumentException measureEndに現在の小節数より大きい小節番号を指定した
+	 * @throws NullPointerException isRemoveTargetがnull
 	 */
-	public final int removeNote(int channelBegin, int channelEnd, int measureBegin, int measureEnd,
+	public int removeNote(int channelBegin, int channelEnd, int measureBegin, int measureEnd,
 			Predicate<BmsNote> isRemoveTarget) {
 		return mTlAccessor.removeNote(channelBegin, channelEnd, measureBegin, measureEnd, isRemoveTarget);
 	}
@@ -2356,7 +2356,7 @@ public class BmsContent {
 	 * 楽曲の小節数を取得します。
 	 * @return 小節数
 	 */
-	public final int getMeasureCount() {
+	public int getMeasureCount() {
 		return mTlAccessor.getCount();
 	}
 
@@ -2367,9 +2367,9 @@ public class BmsContent {
 	 * 小節長に極端に小さい値を設定すると計算上の小節の刻み数が1未満になることがあります。</p>
 	 * @param measure 小節番号
 	 * @return 小節の刻み数
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
 	 */
-	public final double getMeasureTickCount(int measure) {
+	public double getMeasureTickCount(int measure) {
 		return mTlAccessor.getTickCount(measure);
 	}
 
@@ -2381,10 +2381,10 @@ public class BmsContent {
 	 * @param channel チャンネル番号
 	 * @param measure 小節番号
 	 * @return データの数
-	 * @exception IllegalArgumentException 小節データ・ノートを登録できないチャンネル番号を指定した
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節データ・ノートを登録できないチャンネル番号を指定した
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
 	 */
-	public final int getChannelDataCount(int channel, int measure) {
+	public int getChannelDataCount(int channel, int measure) {
 		return mTlAccessor.getChannelDataCount(channel, measure);
 	}
 
@@ -2394,7 +2394,7 @@ public class BmsContent {
 	 * それ以外の処理は{@link #insertMeasure(int, int)}と同じです。</p>
 	 * @param measureWhere 挿入位置の小節番号
 	 */
-	public final void insertMeasure(int measureWhere) {
+	public void insertMeasure(int measureWhere) {
 		mTlAccessor.insert(measureWhere, 1);
 	}
 
@@ -2405,12 +2405,12 @@ public class BmsContent {
 	 * <p>挿入の結果、小節の数が{@link BmsSpec#MEASURE_MAX_COUNT}を超えないように注意してください。</p>
 	 * @param measureWhere 挿入位置の小節番号
 	 * @param count 挿入する小節数
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException 挿入位置に現在の小節数より大きい小節番号を指定した
-	 * @exception IllegalArgumentException 挿入する小節数にマイナス値を指定した
-	 * @exception IllegalArgumentException 挿入により小節数が{@link BmsSpec#MEASURE_MAX_COUNT}を超える
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException 挿入位置に現在の小節数より大きい小節番号を指定した
+	 * @throws IllegalArgumentException 挿入する小節数にマイナス値を指定した
+	 * @throws IllegalArgumentException 挿入により小節数が{@link BmsSpec#MEASURE_MAX_COUNT}を超える
 	 */
-	public final void insertMeasure(int measureWhere, int count) {
+	public void insertMeasure(int measureWhere, int count) {
 		mTlAccessor.insert(measureWhere, count);
 	}
 
@@ -2420,7 +2420,7 @@ public class BmsContent {
 	 * それ以外の処理は{@link #removeMeasure(int, int)}と同じです。</p>
 	 * @param measureWhere 消去位置の小節番号
 	 */
-	public final void removeMeasure(int measureWhere) {
+	public void removeMeasure(int measureWhere) {
 		mTlAccessor.remove(measureWhere, 1);
 	}
 
@@ -2430,12 +2430,12 @@ public class BmsContent {
 	 * <p>小節の存在しない領域を巻き込んで消去しないように注意してください。</p>
 	 * @param measureWhere 消去位置の小節番号
 	 * @param count 消去する小節数
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException 消去位置に現在の小節数より大きい小節番号を指定した
-	 * @exception IllegalArgumentException 消去する小節数にマイナス値を指定した
-	 * @exception IllegalArgumentException 存在しない小節を消去しようとした
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException 消去位置に現在の小節数より大きい小節番号を指定した
+	 * @throws IllegalArgumentException 消去する小節数にマイナス値を指定した
+	 * @throws IllegalArgumentException 存在しない小節を消去しようとした
 	 */
-	public final void removeMeasure(int measureWhere, int count) {
+	public void removeMeasure(int measureWhere, int count) {
 		mTlAccessor.remove(measureWhere, count);
 	}
 
@@ -2446,7 +2446,7 @@ public class BmsContent {
 	 * @param channel1 入れ替え対象チャンネル1の番号
 	 * @param channel2 入れ替え対象チャンネル2の番号
 	 */
-	public final void swapChannel(int channel1, int channel2) {
+	public void swapChannel(int channel1, int channel2) {
 		mTlAccessor.swapChannel(channel1, 0, channel2, 0);
 	}
 
@@ -2458,14 +2458,14 @@ public class BmsContent {
 	 * @param index1 入れ替え対象チャンネル1のインデックス
 	 * @param channel2 入れ替え対象チャンネル2の番号
 	 * @param index2 入れ替え対象チャンネル2のインデックス
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception IllegalArgumentException BMS仕様にないチャンネル番号を指定した
-	 * @exception IndexOutOfBoundsException チャンネルインデックスがマイナス値
-	 * @exception IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定した
-	 * @exception IllegalArgumentException 指定チャンネルが小節長変更・BPM変更・譜面停止のいずれかだった
-	 * @exception IllegalArgumentException チャンネル1,2のデータ型が一致しない
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalArgumentException BMS仕様にないチャンネル番号を指定した
+	 * @throws IndexOutOfBoundsException チャンネルインデックスがマイナス値
+	 * @throws IndexOutOfBoundsException 重複不許可のチャンネルで0以外のインデックスを指定した
+	 * @throws IllegalArgumentException 指定チャンネルが小節長変更・BPM変更・譜面停止のいずれかだった
+	 * @throws IllegalArgumentException チャンネル1,2のデータ型が一致しない
 	 */
-	public final void swapChannel(int channel1, int index1, int channel2, int index2) {
+	public void swapChannel(int channel1, int index1, int channel2, int index2) {
 		mTlAccessor.swapChannel(channel1, index1, channel2, index2);
 	}
 
@@ -2478,9 +2478,9 @@ public class BmsContent {
 	 * @param offsetTick 移動量を示す刻み数
 	 * @param outPoint 移動後の楽曲位置を格納する楽曲位置オブジェクト
 	 * @return 引数で指定した楽曲位置オブジェクト
-	 * @exception NullPointerException atFromがnull
+	 * @throws NullPointerException atFromがnull
 	 */
-	public final BmsPoint seekPoint(BmsAt atFrom, double offsetTick, BmsPoint outPoint) {
+	public BmsPoint seekPoint(BmsAt atFrom, double offsetTick, BmsPoint outPoint) {
 		assertArgNotNull(outPoint, "outPoint");
 		return mTlAccessor.seekPoint(atFrom.getMeasure(), atFrom.getTick(), offsetTick, outPoint);
 	}
@@ -2497,11 +2497,11 @@ public class BmsContent {
 	 * @param offsetTick 移動量を示す刻み数
 	 * @param outPoint 移動後の楽曲位置を格納する楽曲位置オブジェクト
 	 * @return 引数で指定した楽曲位置オブジェクト
-	 * @exception IllegalArgumentException 原点の小節番号にノート・小節データが存在し得ない値を指定した
-	 * @exception IllegalArgumentException 原点の刻み位置にマイナス値または当該小節の刻み数以上の値を指定した
-	 * @exception NullPointerException outPointがnull
+	 * @throws IllegalArgumentException 原点の小節番号にノート・小節データが存在し得ない値を指定した
+	 * @throws IllegalArgumentException 原点の刻み位置にマイナス値または当該小節の刻み数以上の値を指定した
+	 * @throws NullPointerException outPointがnull
 	 */
-	public final BmsPoint seekPoint(int measureFrom, double tickFrom, double offsetTick, BmsPoint outPoint) {
+	public BmsPoint seekPoint(int measureFrom, double tickFrom, double offsetTick, BmsPoint outPoint) {
 		assertArgNotNull(outPoint, "outPoint");
 		return mTlAccessor.seekPoint(measureFrom, tickFrom, offsetTick, outPoint);
 	}
@@ -2515,9 +2515,9 @@ public class BmsContent {
 	 * @param inclusiveFrom 指定楽曲位置を検索対象に含めるかどうか
 	 * @param outPoint 直近のノートの楽曲位置
 	 * @return 引数outPointが示すBmsPointオブジェクトの参照
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final BmsPoint seekNextPoint(BmsAt at, boolean inclusiveFrom, BmsPoint outPoint) {
+	public BmsPoint seekNextPoint(BmsAt at, boolean inclusiveFrom, BmsPoint outPoint) {
 		assertArgNotNull(at, "at");
 		return mTlAccessor.seekNextPoint(at.getMeasure(), at.getTick(), inclusiveFrom, c -> true, outPoint);
 	}
@@ -2532,7 +2532,7 @@ public class BmsContent {
 	 * @param outPoint 直近のノートの楽曲位置
 	 * @return 引数outPointが示すBmsPointオブジェクトの参照
 	 */
-	public final BmsPoint seekNextPoint(int measure, double tick, boolean inclusiveFrom, BmsPoint outPoint) {
+	public BmsPoint seekNextPoint(int measure, double tick, boolean inclusiveFrom, BmsPoint outPoint) {
 		return mTlAccessor.seekNextPoint(measure, tick, inclusiveFrom, c -> true, outPoint);
 	}
 
@@ -2545,9 +2545,9 @@ public class BmsContent {
 	 * @param chTester チャンネルを検索対象とするかを判定するテスター
 	 * @param outPoint 直近のノートの楽曲位置
 	 * @return 引数outPointが示すBmsPointオブジェクトの参照
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final BmsPoint seekNextPoint(BmsAt at, boolean inclusiveFrom, IntPredicate chTester, BmsPoint outPoint) {
+	public BmsPoint seekNextPoint(BmsAt at, boolean inclusiveFrom, IntPredicate chTester, BmsPoint outPoint) {
 		assertArgNotNull(at, "at");
 		return mTlAccessor.seekNextPoint(at.getMeasure(), at.getTick(), inclusiveFrom, chTester, outPoint);
 	}
@@ -2570,12 +2570,12 @@ public class BmsContent {
 	 * @param chTester チャンネルを検索対象とするかを判定するテスター
 	 * @param outPoint 直近のノートの楽曲位置
 	 * @return 引数outPointが示すBmsPointオブジェクトの参照
-	 * @exception IllegalArgumentException 小節番号がマイナス値または小節数以上
-	 * @exception IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
-	 * @exception NullPointerException chTesterがnull
-	 * @exception NullPointerException outPointがnull
+	 * @throws IllegalArgumentException 小節番号がマイナス値または小節数以上
+	 * @throws IllegalArgumentException 小節の刻み位置がマイナス値または当該小節の刻み数以上
+	 * @throws NullPointerException chTesterがnull
+	 * @throws NullPointerException outPointがnull
 	 */
-	public final BmsPoint seekNextPoint(int measure, double tick, boolean inclusiveFrom, IntPredicate chTester,
+	public BmsPoint seekNextPoint(int measure, double tick, boolean inclusiveFrom, IntPredicate chTester,
 			BmsPoint outPoint) {
 		return mTlAccessor.seekNextPoint(measure, tick, inclusiveFrom, chTester, outPoint);
 	}
@@ -2588,14 +2588,14 @@ public class BmsContent {
 	 * <p>ストリームの利用方法についてはJavaリファレンスのストリームAPI(java.util.stream)を参照してください。</p>
 	 * @param at 楽曲位置
 	 * @return 指定楽曲位置のみを走査するストリーム
-	 * @exception NullPointerException atがnull
-	 * @exception IllegalArgumentException 小節番号がマイナス値
-	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
-	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
-	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 * @throws NullPointerException atがnull
+	 * @throws IllegalArgumentException 小節番号がマイナス値
+	 * @throws IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
+	 * @throws IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
+	 * @throws IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
 	 * @since 0.1.0
 	 */
-	public final Stream<BmsTimelineElement> timeline(BmsAt at) {
+	public Stream<BmsTimelineElement> timeline(BmsAt at) {
 		assertArgNotNull(at, "at");
 		return mTlAccessor.timeline(at.getMeasure(), at.getTick());
 	}
@@ -2609,13 +2609,13 @@ public class BmsContent {
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
 	 * @return 指定楽曲位置のみを走査するストリーム
-	 * @exception IllegalArgumentException 小節番号がマイナス値
-	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
-	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
-	 * @exception IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 * @throws IllegalArgumentException 小節番号がマイナス値
+	 * @throws IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
+	 * @throws IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
+	 * @throws IllegalArgumentException 小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
 	 * @since 0.1.0
 	 */
-	public final Stream<BmsTimelineElement> timeline(int measure, double tick) {
+	public Stream<BmsTimelineElement> timeline(int measure, double tick) {
 		return mTlAccessor.timeline(measure, tick);
 	}
 
@@ -2629,7 +2629,7 @@ public class BmsContent {
 	 * @return タイムライン全体を操作するストリーム
 	 * @since 0.1.0
 	 */
-	public final Stream<BmsTimelineElement> timeline() {
+	public Stream<BmsTimelineElement> timeline() {
 		return mTlAccessor.timeline(BmsSpec.MEASURE_MIN, BmsSpec.TICK_MIN, mTlAccessor.getCount(), BmsSpec.TICK_MIN);
 	}
 
@@ -2642,15 +2642,15 @@ public class BmsContent {
 	 * @param atBegin 走査開始楽曲位置
 	 * @param atEnd 走査終了楽曲位置(この楽曲位置の小節の刻み位置を含まない)
 	 * @return タイムラインの指定楽曲位置の範囲を走査するストリーム
-	 * @exception NullPointerException atBeginまたはatEndがnull
-	 * @exception IllegalArgumentException 走査開始/終了楽曲位置の小節番号がマイナス値
-	 * @exception IllegalArgumentException 走査終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
-	 * @exception IllegalArgumentException 走査終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
-	 * @exception IllegalArgumentException 走査開始/終了楽曲位置の楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
-	 * @exception IllegalArgumentException atEndがatBeginと同じまたは手前の楽曲位置を示している
+	 * @throws NullPointerException atBeginまたはatEndがnull
+	 * @throws IllegalArgumentException 走査開始/終了楽曲位置の小節番号がマイナス値
+	 * @throws IllegalArgumentException 走査終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
+	 * @throws IllegalArgumentException 走査終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
+	 * @throws IllegalArgumentException 走査開始/終了楽曲位置の楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 * @throws IllegalArgumentException atEndがatBeginと同じまたは手前の楽曲位置を示している
 	 * @since 0.1.0
 	 */
-	public final Stream<BmsTimelineElement> timeline(BmsAt atBegin, BmsAt atEnd) {
+	public Stream<BmsTimelineElement> timeline(BmsAt atBegin, BmsAt atEnd) {
 		assertArgNotNull(atBegin, "atBegin");
 		assertArgNotNull(atEnd, "atEnd");
 		var measureBegin = atBegin.getMeasure();
@@ -2671,14 +2671,14 @@ public class BmsContent {
 	 * @param measureEnd 走査終了楽曲位置の小節番号
 	 * @param tickEnd 走査終了楽曲位置の小節の刻み位置(この位置を含まない)
 	 * @return タイムラインの指定楽曲位置の範囲を走査するストリーム
-	 * @exception IllegalArgumentException 走査開始/終了楽曲位置の小節番号がマイナス値
-	 * @exception IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
-	 * @exception IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
-	 * @exception IllegalArgumentException 走査開始/終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
-	 * @exception IllegalArgumentException 走査終了楽曲位置が走査開始楽曲位置と同じまたは手前の楽曲位置を示している
+	 * @throws IllegalArgumentException 走査開始/終了楽曲位置の小節番号がマイナス値
+	 * @throws IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}以外の時、小節番号が小節数以上
+	 * @throws IllegalArgumentException 走査楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}の時、小節番号が小節数超過
+	 * @throws IllegalArgumentException 走査開始/終了楽曲位置の小節の刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 * @throws IllegalArgumentException 走査終了楽曲位置が走査開始楽曲位置と同じまたは手前の楽曲位置を示している
 	 * @since 0.1.0
 	 */
-	public final Stream<BmsTimelineElement> timeline(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
+	public Stream<BmsTimelineElement> timeline(int measureBegin, double tickBegin, int measureEnd, double tickEnd) {
 		return mTlAccessor.timeline(measureBegin, tickBegin, measureEnd, tickEnd);
 	}
 
@@ -2692,13 +2692,13 @@ public class BmsContent {
 	 * それぞれの要素追加の仕様については関連項目に記載のメソッドを参照してください。
 	 * 基本的には例外も前述のメソッドに準拠した形でスローされます。</p>
 	 * @param timeline タイムライン要素
-	 * @exception IllegalStateException 動作モードが編集モードではない
-	 * @exception NullPointerException timelineがnull
+	 * @throws IllegalStateException 動作モードが編集モードではない
+	 * @throws NullPointerException timelineがnull
 	 * @see #setMeasureValue(int, int, int, Object)
 	 * @see #putNote(int, int, int, double, int, Supplier)
 	 * @since 0.8.0
 	 */
-	public final void putTimeline(BmsTimelineElement timeline) {
+	public void putTimeline(BmsTimelineElement timeline) {
 		mTlAccessor.putTimeline(timeline);
 	}
 
@@ -2708,9 +2708,9 @@ public class BmsContent {
 	 * それ以外の処理は{@link #pointToTime(int, double)}と同じです。</p>
 	 * @param at 楽曲位置
 	 * @return 時間(秒)
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final double pointToTime(BmsAt at) {
+	public double pointToTime(BmsAt at) {
 		assertArgNotNull(at, "at");
 		return mTlAccessor.pointToTime(at.getMeasure(), at.getTick());
 	}
@@ -2723,12 +2723,12 @@ public class BmsContent {
 	 * @param measure 小節番号
 	 * @param tick 小節の刻み位置
 	 * @return 時間(秒)
-	 * @exception IllegalStateException 動作モードが参照モードではない
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MAX_COUNT}の時、小節の刻み位置に0以外を指定した
-	 * @exception IllegalArgumentException 小節の刻み位置にマイナス値または当該小節の刻み数以上の値を指定した
+	 * @throws IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MAX_COUNT}の時、小節の刻み位置に0以外を指定した
+	 * @throws IllegalArgumentException 小節の刻み位置にマイナス値または当該小節の刻み数以上の値を指定した
 	 */
-	public final double pointToTime(int measure, double tick) {
+	public double pointToTime(int measure, double tick) {
 		return mTlAccessor.pointToTime(measure, tick);
 	}
 
@@ -2739,11 +2739,11 @@ public class BmsContent {
 	 * @param timeSec 時間(秒)
 	 * @param outPoint 楽曲位置を格納する楽曲位置オブジェクト
 	 * @return 引数で指定した楽曲位置オブジェクト
-	 * @exception IllegalStateException 動作モードが参照モードではない
-	 * @exception IllegalArgumentException 時間にマイナス値を指定した
-	 * @exception NullPointerException outPointがnull
+	 * @throws IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalArgumentException 時間にマイナス値を指定した
+	 * @throws NullPointerException outPointがnull
 	 */
-	public final BmsPoint timeToPoint(double timeSec, BmsPoint outPoint) {
+	public BmsPoint timeToPoint(double timeSec, BmsPoint outPoint) {
 		assertArgNotNull(outPoint, "outPoint");
 		return mTlAccessor.timeToPoint(timeSec, outPoint);
 	}
@@ -2783,11 +2783,11 @@ public class BmsContent {
 	 * @param includeMetas メタ情報を含めるかどうか
 	 * @param includeTimeline タイムラインを含めるかどうか
 	 * @return このBMSコンテンツのハッシュ値
-	 * @exception IllegalStateException 動作モードが参照モードではない
-	 * @exception IllegalArgumentException includeMetas と includeTimeline の両方が false
+	 * @throws IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalArgumentException includeMetas と includeTimeline の両方が false
 	 * @since 0.9.0
 	 */
-	public final byte[] generateHash(boolean includeSpec, boolean includeMetas, boolean includeTimeline) {
+	public byte[] generateHash(boolean includeSpec, boolean includeMetas, boolean includeTimeline) {
 		return generateHashSeed(includeSpec, includeMetas, includeTimeline).toHash();
 	}
 
@@ -2797,11 +2797,11 @@ public class BmsContent {
 	 * <p><strong>当メソッドはバージョン0.9.0以前から使用できますが、0.9.0以降と以前でハッシュ値の互換性がありません。
 	 * 0.9.0以降のハッシュ値が正式版となります。</strong></p>
 	 * @return このBMSコンテンツのハッシュ値
-	 * @exception IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalStateException 動作モードが参照モードではない
 	 * @see #generateHash(boolean, boolean, boolean)
 	 * @since 0.9.0
 	 */
-	public final byte[] generateHash() {
+	public byte[] generateHash() {
 		return generateHashSeed(true, true, true).toHash();
 	}
 
@@ -2811,8 +2811,8 @@ public class BmsContent {
 	 * @param includeMetas メタ情報を含めるかどうか
 	 * @param includeTimeline タイムラインを含めるかどうか
 	 * @return ハッシュ値出力用の入力データ
-	 * @exception IllegalStateException 動作モードが参照モードではない
-	 * @exception IllegalArgumentException includeMetas と includeTimeline の両方が false
+	 * @throws IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalArgumentException includeMetas と includeTimeline の両方が false
 	 */
 	HashSeed generateHashSeed(boolean includeSpec, boolean includeMetas, boolean includeTimeline) {
 		assertArg(includeMetas || includeTimeline, "Must include metas or timeline");
@@ -3006,7 +3006,7 @@ public class BmsContent {
 
 	/**
 	 * 動作モードが参照モードかどうかをテストするアサーション
-	 * @exception IllegalStateException 動作モードが参照モードではない
+	 * @throws IllegalStateException 動作モードが参照モードではない
 	 */
 	protected void assertIsReferenceMode() {
 		if (mIsEditMode) {
@@ -3016,7 +3016,7 @@ public class BmsContent {
 
 	/**
 	 * 動作モードが編集モードかどうかをテストするアサーション
-	 * @exception IllegalStateException 動作モードが編集モードではない
+	 * @throws IllegalStateException 動作モードが編集モードではない
 	 */
 	protected void assertIsEditMode() {
 		if (!mIsEditMode) {

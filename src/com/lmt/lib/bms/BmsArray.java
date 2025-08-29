@@ -18,7 +18,7 @@ import java.util.Arrays;
  *
  * @since 0.0.1
  */
-public final class BmsArray extends AbstractList<Integer> {
+public class BmsArray extends AbstractList<Integer> {
 	/** 基数に応じた整数オブジェクト */
 	private BmsInt mInt;
 	/** 整数配列 */
@@ -27,7 +27,7 @@ public final class BmsArray extends AbstractList<Integer> {
 	/**
 	 * 指定された基数の空の配列を生成します。
 	 * @param base 入力元データの基数(16, 36, 62のいずれかのみサポートしています)
-	 * @exception IllegalArgumentException radixが16, 36, 62以外
+	 * @throws IllegalArgumentException radixが16, 36, 62以外
 	 */
 	public BmsArray(int base) {
 		setup(base, "");
@@ -46,10 +46,10 @@ public final class BmsArray extends AbstractList<Integer> {
 	 * 構文誤りのデータを入力しないよう注意してください。</p>
 	 * @param src 入力元データ
 	 * @param base 入力元データの基数(16, 36, 62のみサポートしています)
-	 * @exception NullPointerException srcがnull
-	 * @exception IllegalArgumentException srcの文字数が2で割り切れず、最後の文字が"0"ではない
-	 * @exception IllegalArgumentException srcに解析不可能な文字が含まれる
-	 * @exception IllegalArgumentException radixが16, 36, 62以外
+	 * @throws NullPointerException srcがnull
+	 * @throws IllegalArgumentException srcの文字数が2で割り切れず、最後の文字が"0"ではない
+	 * @throws IllegalArgumentException srcに解析不可能な文字が含まれる
+	 * @throws IllegalArgumentException radixが16, 36, 62以外
 	 */
 	public BmsArray(String src, int base) {
 		setup(base, src);
@@ -59,7 +59,7 @@ public final class BmsArray extends AbstractList<Integer> {
 	 * 指定された配列と同等の配列を生成します。
 	 * <p>新しく生成された配列オブジェクトは、入力元配列と同じ基数、要素数、データ内容を返すようになります。</p>
 	 * @param array 入力元配列
-	 * @exception NullPointerException arrayがnull
+	 * @throws NullPointerException arrayがnull
 	 */
 	public BmsArray(BmsArray array) {
 		assertArgNotNull(array, "array");
@@ -71,10 +71,10 @@ public final class BmsArray extends AbstractList<Integer> {
 	 * BmsArrayオブジェクトをセットアップする
 	 * @param base 基数
 	 * @param src 変換元文字列
-	 * @exception NullPointerException srcがnullの場合
-	 * @exception IllegalArgumentException radixが16, 36, 62以外
-	 * @exception IllegalArgumentException srcの文字数が2で割り切れず、最後の文字が"0"ではない
-	 * @exception IllegalArgumentException srcに解析不可能な文字が含まれている
+	 * @throws NullPointerException srcがnullの場合
+	 * @throws IllegalArgumentException radixが16, 36, 62以外
+	 * @throws IllegalArgumentException srcの文字数が2で割り切れず、最後の文字が"0"ではない
+	 * @throws IllegalArgumentException srcに解析不可能な文字が含まれている
 	 */
 	private void setup(int base, String src) {
 		assertArgNotNull(src, "src");
@@ -130,9 +130,9 @@ public final class BmsArray extends AbstractList<Integer> {
 	 * <p>{@link #get(int)}とは異なり、プリミティブ型として値を取得します。</p>
 	 * @param index インデックス
 	 * @return 指定された位置の数値
-	 * @exception IndexOutOfBoundsException インデックスが0未満または配列の要素数以上
+	 * @throws IndexOutOfBoundsException インデックスが0未満または配列の要素数以上
 	 */
-	public final int getValue(int index) {
+	public int getValue(int index) {
 		return mArray[index];
 	}
 

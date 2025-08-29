@@ -48,7 +48,7 @@ public enum BeMusicPlayer {
 	 * 当該列挙値が示す実際の値(#PLAYERに設定される値)を取得します。
 	 * @return 実際の値
 	 */
-	public final long getNativeValue() {
+	public long getNativeValue() {
 		return mNativeValue;
 	}
 
@@ -56,7 +56,7 @@ public enum BeMusicPlayer {
 	 * 当該列挙値が示す文字列表記を取得します。
 	 * @return 文字列表記
 	 */
-	public final String getString() {
+	public String getString() {
 		return mString;
 	}
 
@@ -64,7 +64,7 @@ public enum BeMusicPlayer {
 	 * シングルプレーかどうかを判定します。
 	 * @return true:シングルプレー false:ダブルプレー
 	 */
-	public final boolean isSinglePlay() {
+	public boolean isSinglePlay() {
 		return !mIsDp;
 	}
 
@@ -72,7 +72,7 @@ public enum BeMusicPlayer {
 	 * ダブルプレーかどうかを判定します。
 	 * @return true:ダブルプレー false:シングルプレー
 	 */
-	public final boolean isDoublePlay() {
+	public boolean isDoublePlay() {
 		return mIsDp;
 	}
 

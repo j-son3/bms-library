@@ -45,7 +45,7 @@ public abstract class RatingAnalyzer {
 	 * レーティング種別取得
 	 * @return レーティング種別
 	 */
-	public final BeMusicRatingType getRatingType() {
+	public BeMusicRatingType getRatingType() {
 		return mRatingType;
 	}
 
@@ -68,7 +68,7 @@ public abstract class RatingAnalyzer {
 	 * @param elems レーティング要素リスト
 	 * @param values その他、デバッグ出力のために必要なオブジェクトのリスト
 	 */
-	protected final void debugOut(DsContext ctx, int rating, List<? extends RatingElement> elems, Object...values) {
+	protected void debugOut(DsContext ctx, int rating, List<? extends RatingElement> elems, Object...values) {
 		var debugMode = Ds.getDebugMode();
 		if (debugMode == DsDebugMode.NONE) {
 			// なし

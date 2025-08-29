@@ -35,7 +35,7 @@ import java.util.TreeMap;
  * @see BmsSpec
  * @since 0.0.1
  */
-public final class BmsSpecBuilder {
+public class BmsSpecBuilder {
 	/** 単体メタ情報一式 */
 	private Map<String, BmsMeta> mSingleMetas = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	/** 重複定義可能メタ情報一式 */
@@ -70,14 +70,14 @@ public final class BmsSpecBuilder {
 	 * BMS仕様にメタ情報を登録します。
 	 * @param meta 登録するメタ情報
 	 * @return BMS仕様ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
-	 * @exception NullPointerException metaがnull
-	 * @exception IllegalArgumentException メタ情報単位が{@link BmsUnit#SINGLE SINGLE}または{@link BmsUnit#MULTIPLE MULTIPLE}の時、
+	 * @throws IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @throws NullPointerException metaがnull
+	 * @throws IllegalArgumentException メタ情報単位が{@link BmsUnit#SINGLE SINGLE}または{@link BmsUnit#MULTIPLE MULTIPLE}の時、
 	 *                                       同じ名前のメタ情報がSINGLE/MULTIPLEのいずれかに登録済み
-	 * @exception IllegalArgumentException メタ情報単位が{@link BmsUnit#INDEXED INDEXED}の時、同じ名前のメタ情報が
+	 * @throws IllegalArgumentException メタ情報単位が{@link BmsUnit#INDEXED INDEXED}の時、同じ名前のメタ情報が
 	 *                                       INDEXEDに登録済み
 	 */
-	public final BmsSpecBuilder addMeta(BmsMeta meta) {
+	public BmsSpecBuilder addMeta(BmsMeta meta) {
 		assertIsNotCreated();
 		assertArgNotNull(meta, "meta");
 
@@ -110,11 +110,11 @@ public final class BmsSpecBuilder {
 	 * 再利用することができ、独自のデータ構造を定義せずに目的の処理を実装できる可能性があります。</p>
 	 * @param channel 登録するチャンネル
 	 * @return BMS仕様ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
-	 * @exception NullPointerException channelがnull
-	 * @exception IllegalArgumentException 同じチャンネル番号のチャンネルが登録済み
+	 * @throws IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @throws NullPointerException channelがnull
+	 * @throws IllegalArgumentException 同じチャンネル番号のチャンネルが登録済み
 	 */
-	public final BmsSpecBuilder addChannel(BmsChannel channel) {
+	public BmsSpecBuilder addChannel(BmsChannel channel) {
 		// エラーチェック
 		assertIsNotCreated();
 		assertArgNotNull(channel, "channel");
@@ -131,11 +131,11 @@ public final class BmsSpecBuilder {
 	 * @param name メタ情報の名称
 	 * @param unit メタ情報の単位
 	 * @return メタ情報。該当するメタ情報が存在しない場合はnull。
-	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
+	 * @throws IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
 	 */
-	public final BmsMeta getMeta(String name, BmsUnit unit) {
+	public BmsMeta getMeta(String name, BmsUnit unit) {
 		assertIsNotCreated();
 		assertArgNotNull(name, "name");
 		assertArgNotNull(unit, "unit");
@@ -146,9 +146,9 @@ public final class BmsSpecBuilder {
 	 * 登録済みのチャンネルを取得します。
 	 * @param number チャンネル番号
 	 * @return チャンネル。該当するチャンネルが存在しない場合はnull。
-	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @throws IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
 	 */
-	public final BmsChannel getChannel(int number) {
+	public BmsChannel getChannel(int number) {
 		assertIsNotCreated();
 		return mChannels.get(BmsInt.box(number));
 	}
@@ -158,11 +158,11 @@ public final class BmsSpecBuilder {
 	 * @param name メタ情報の名称
 	 * @param unit メタ情報の単位
 	 * @return 該当するメタ情報が登録済みの場合はtrue
-	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
+	 * @throws IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
 	 */
-	public final boolean containsMeta(String name, BmsUnit unit) {
+	public boolean containsMeta(String name, BmsUnit unit) {
 		assertIsNotCreated();
 		assertArgNotNull(name, "name");
 		assertArgNotNull(unit, "unit");
@@ -173,9 +173,9 @@ public final class BmsSpecBuilder {
 	 * 指定されたチャンネルが登録されているかどうかを返します。
 	 * @param number チャンネル番号
 	 * @return 該当するチャンネルが登録済みの場合はtrue
-	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @throws IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
 	 */
-	public final boolean containsChannel(int number) {
+	public boolean containsChannel(int number) {
 		assertIsNotCreated();
 		return getChannel(number) != null;
 	}
@@ -193,9 +193,9 @@ public final class BmsSpecBuilder {
 	 * </table>
 	 * @param name 初期BPMのメタ情報名称
 	 * @return BMS仕様ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @throws IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
 	 */
-	public final BmsSpecBuilder setInitialBpmMeta(String name) {
+	public BmsSpecBuilder setInitialBpmMeta(String name) {
 		assertIsNotCreated();
 		mBpmMetaName = name;
 		return this;
@@ -224,10 +224,10 @@ public final class BmsSpecBuilder {
 	 * ※デフォルトでnullに設定されています</p>
 	 * @param name 基数選択メタ情報のメタ情報名称
 	 * @return BMS仕様ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @throws IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
 	 * @since 0.8.0
 	 */
-	public final BmsSpecBuilder setBaseChangerMeta(String name) {
+	public BmsSpecBuilder setBaseChangerMeta(String name) {
 		assertIsNotCreated();
 		mBaseChangerMetaName = name;
 		return this;
@@ -237,9 +237,9 @@ public final class BmsSpecBuilder {
 	 * 小節長変更チャンネルのチャンネル番号を設定します。
 	 * @param number チャンネル番号。nullを指定すると小節長変更チャンネルのないBMS仕様になります。
 	 * @return BMS仕様ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @throws IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
 	 */
-	public final BmsSpecBuilder setLengthChannel(Integer number) {
+	public BmsSpecBuilder setLengthChannel(Integer number) {
 		assertIsNotCreated();
 		mLengthChannelNumber = number;
 		return this;
@@ -254,9 +254,9 @@ public final class BmsSpecBuilder {
 	 * 当メソッドを使用しないことをお勧めします。</p>
 	 * @param numbers チャンネル番号
 	 * @return BMS仕様ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @throws IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
 	 */
-	public final BmsSpecBuilder setBpmChannel(Integer...numbers) {
+	public BmsSpecBuilder setBpmChannel(Integer...numbers) {
 		assertIsNotCreated();
 		if ((numbers.length == 0) || ((numbers.length == 1) && (numbers[0] == null))) {
 			// チャンネル番号0個、または1個でnull指定の場合はBPM変更なし
@@ -277,9 +277,9 @@ public final class BmsSpecBuilder {
 	 * 当メソッドを使用しないことをお勧めします。</p>
 	 * @param numbers チャンネル番号
 	 * @return BMS仕様ビルダーオブジェクトのインスタンス
-	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @throws IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
 	 */
-	public final BmsSpecBuilder setStopChannel(Integer...numbers) {
+	public BmsSpecBuilder setStopChannel(Integer...numbers) {
 		assertIsNotCreated();
 		if ((numbers.length == 0) || ((numbers.length == 1) && (numbers[0] == null))) {
 			// チャンネル番号0個、または1個でnull指定の場合は譜面停止なし
@@ -304,8 +304,8 @@ public final class BmsSpecBuilder {
 	 * 先述の条件を満たすチャンネルが不可欠だからです。BMSライブラリでは、そのチャンネルが1個もないBMS仕様は
 	 * 不適切であると位置付けているため、生成を許可していません。</p>
 	 * @return {@link BmsSpec}オブジェクト
-	 * @exception IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
-	 * @exception IllegalStateException ビルダーへの登録内容に以下の整合性違反があった場合
+	 * @throws IllegalStateException BMS仕様生成後にこのメソッドを呼び出した
+	 * @throws IllegalStateException ビルダーへの登録内容に以下の整合性違反があった場合
 	 * <ul>
 	 * <li>チャンネルが1件も存在しない</li>
 	 * <li>同一性チェック対象の配列型仕様チャンネルが1件も存在しない</li>
@@ -348,7 +348,7 @@ public final class BmsSpecBuilder {
 	 * <li>指定された譜面停止チャンネルの参照先メタ情報の初期値が{@link BmsSpec#STOP_MIN}～{@link BmsSpec#STOP_MAX}の範囲外</li>
 	 * </ul>
 	 */
-	public final BmsSpec create() {
+	public BmsSpec create() {
 		assertIsNotCreated();
 
 		// チャンネルが1件以上存在すること
@@ -531,7 +531,7 @@ public final class BmsSpecBuilder {
 
 	/**
 	 * BMS仕様未生成であることをチェックするアサーション。
-	 * @exception IllegalStateException BMS仕様生成済み
+	 * @throws IllegalStateException BMS仕様生成済み
 	 */
 	private void assertIsNotCreated() {
 		if (mIsCreated) {

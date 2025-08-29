@@ -138,7 +138,7 @@ public enum BeMusicRatingType {
 	 * このレーティング種別のインデックスを取得します。
 	 * @return インデックス
 	 */
-	public final int getIndex() {
+	public int getIndex() {
 		return mIndex;
 	}
 
@@ -146,7 +146,7 @@ public enum BeMusicRatingType {
 	 * このレーティング種別の最大レーティング値取得
 	 * @return 最大レーティング値
 	 */
-	public final int getMax() {
+	public int getMax() {
 		return mMax;
 	}
 
@@ -157,7 +157,7 @@ public enum BeMusicRatingType {
 	 * @param rating レーティング値
 	 * @return レーティング値が有効である場合true
 	 */
-	public final boolean isValid(int rating) {
+	public boolean isValid(int rating) {
 		return (rating >= 0) && (rating <= getMax());
 	}
 
@@ -168,7 +168,7 @@ public enum BeMusicRatingType {
 	 * @return レーティング値が無効である場合true
 	 * @see #isValid(int)
 	 */
-	public final boolean isUnknown(int rating) {
+	public boolean isUnknown(int rating) {
 		return !isValid(rating);
 	}
 
@@ -177,7 +177,7 @@ public enum BeMusicRatingType {
 	 * <p>具体的には{@link #DELTA}以外であればtrueとなります。</p>
 	 * @return 譜面傾向を表すレーティング種別であればtrue
 	 */
-	public final boolean isTendency() {
+	public boolean isTendency() {
 		return this != DELTA;
 	}
 
@@ -188,7 +188,7 @@ public enum BeMusicRatingType {
 	 * @see BeMusicRatings#tendencyAsDouble(int)
 	 * @see BeMusicRatings#deltaAsDouble(int)
 	 */
-	public final double toValue(int rating) {
+	public double toValue(int rating) {
 		return mToValue.applyAsDouble(rating);
 	}
 
@@ -199,7 +199,7 @@ public enum BeMusicRatingType {
 	 * @see BeMusicRatings#tendencyAsString(int, boolean)
 	 * @see BeMusicRatings#deltaAsString(int, boolean)
 	 */
-	public final String toString(int rating) {
+	public String toString(int rating) {
 		return mToString.apply(rating);
 	}
 
@@ -207,7 +207,7 @@ public enum BeMusicRatingType {
 	 * レーティング分析処理オブジェクト生成
 	 * @return レーティング分析処理オブジェクト
 	 */
-	final RatingAnalyzer createAnalyzer() {
+	RatingAnalyzer createAnalyzer() {
 		return mCreator.get();
 	}
 
@@ -215,7 +215,7 @@ public enum BeMusicRatingType {
 	 * インデックス値に対応するレーティング種別を取得します。
 	 * @param index インデックス
 	 * @return レーティング種別
-	 * @exception IndexOutOfBoundsException インデックスが有効範囲外
+	 * @throws IndexOutOfBoundsException インデックスが有効範囲外
 	 * @see #getIndex()
 	 */
 	public static BeMusicRatingType fromIndex(int index) {

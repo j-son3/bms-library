@@ -46,7 +46,7 @@ public abstract class MutableNumber implements Comparable<MutableNumber> {
 	 * 8ビット整数値取得
 	 * @return 8ビット整数値
 	 */
-	public final byte byteValue() {
+	public byte byteValue() {
 		return (byte)intValue();
 	}
 
@@ -54,7 +54,7 @@ public abstract class MutableNumber implements Comparable<MutableNumber> {
 	 * 16ビット整数値取得
 	 * @return 16ビット整数値
 	 */
-	public final short shortValue() {
+	public short shortValue() {
 		return (short)intValue();
 	}
 

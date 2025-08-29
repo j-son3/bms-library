@@ -97,7 +97,7 @@ class Gimmick {
 		 * 譜面停止の視覚効果影響率取得
 		 * @return 譜面停止の視覚効果影響率
 		 */
-		final double stopAreaRate() {
+		double stopAreaRate() {
 			return (playTime == 0.0) ? 0.0 : (stopAreaTime / playTime);
 		}
 
@@ -105,7 +105,7 @@ class Gimmick {
 		 * 譜面停止の視覚効果影響率(%)取得
 		 * @return 譜面停止の視覚効果影響率(%)
 		 */
-		final double stopAreaRatePer() {
+		double stopAreaRatePer() {
 			return stopAreaRate() * 100.0;
 		}
 
@@ -113,7 +113,7 @@ class Gimmick {
 		 * 地雷範囲影響率取得
 		 * @return 地雷範囲影響率
 		 */
-		final double mineEffectiveRate() {
+		double mineEffectiveRate() {
 			return (playTime == 0.0) ? 0.0 : (mineEffectiveTime / playTime);
 		}
 
@@ -121,7 +121,7 @@ class Gimmick {
 		 * 地雷範囲影響率(%)取得
 		 * @return 地雷範囲影響率(%)
 		 */
-		final double mineEffectiveRatePer() {
+		double mineEffectiveRatePer() {
 			return mineEffectiveRate() * 100.0;
 		}
 	}

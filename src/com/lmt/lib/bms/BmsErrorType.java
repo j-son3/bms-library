@@ -99,12 +99,6 @@ public enum BmsErrorType {
 	COMMENT_NOT_CLOSED,
 
 	/**
-	 * 想定外のエラーが発生したことを表します。
-	 * <p>このエラーを検出した場合はBMSの読み込みを続行するべきではありません。</p>
-	 */
-	PANIC,
-
-	/**
 	 * 汎用エラー情報であることを表します。
 	 * <p>このエラーはBMS読み込み時のエラーのように行番号・行文字列等の付加的なエラー情報を持ちません。
 	 * BMS読み込み時以外で発生したBMS関連のエラーをBMSエラー情報として扱いたい場合に用いることを想定しています。</p>
@@ -115,7 +109,7 @@ public enum BmsErrorType {
 	 * このエラー種別がBMSの記述内容に起因するエラーかどうかを判定します。
 	 * @return BMSの記述内容に起因するエラーであればtrue、そうでなければfalse
 	 */
-	public final boolean isScriptError() {
+	public boolean isScriptError() {
 		return (this != COMMON);
 	}
 
@@ -123,7 +117,7 @@ public enum BmsErrorType {
 	 * このエラー種別が汎用エラーであるかどうかを判定します。
 	 * @return 汎用エラーであればtrue、そうでなければfalse
 	 */
-	public final boolean isCommonError() {
+	public boolean isCommonError() {
 		return (this == COMMON);
 	}
 }

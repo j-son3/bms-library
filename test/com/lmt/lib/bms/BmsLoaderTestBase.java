@@ -67,7 +67,7 @@ public abstract class BmsLoaderTestBase implements UseTestData {
 		try {
 			var path = testDataPath(2);
 			return loader(errHandler, charsets).load(path);
-		} catch (BmsException | IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			fail("Failed to load test bms.");
 			return null;

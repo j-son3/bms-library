@@ -7,12 +7,18 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.BiPredicate;
+import java.util.function.IntPredicate;
+import java.util.function.IntToDoubleFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.lmt.lib.bms.BmsAt;
+import com.lmt.lib.bms.BmsInt;
 import com.lmt.lib.bms.internal.Utility;
 
 /**
@@ -138,11 +144,11 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @param list 楽曲位置情報リスト
 	 * @param creator BMS譜面オブジェクトクリエータ
 	 * @return BMS譜面オブジェクト
-	 * @exception NullPointerException listがnull
-	 * @exception NullPointerException creatorがnull
-	 * @exception NullPointerException creatorがnullを返した
-	 * @exception IllegalArgumentException 楽曲位置情報リストで小節番号・刻み位置が後退した
-	 * @exception IllegalArgumentException 楽曲位置情報リストで時間が後退した
+	 * @throws NullPointerException listがnull
+	 * @throws NullPointerException creatorがnull
+	 * @throws NullPointerException creatorがnullを返した
+	 * @throws IllegalArgumentException 楽曲位置情報リストで小節番号・刻み位置が後退した
+	 * @throws IllegalArgumentException 楽曲位置情報リストで時間が後退した
 	 * @see BeMusicChartBuilder
 	 * @see #create(List)
 	 */
@@ -158,9 +164,9 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 楽曲位置情報を取得します。
 	 * @param index インデックス
 	 * @return 楽曲位置情報
-	 * @exception IndexOutOfBoundsException indexがマイナス値または{@link #getPointCount()}以上
+	 * @throws IndexOutOfBoundsException indexがマイナス値または{@link #getPointCount()}以上
 	 */
-	public final BeMusicPoint getPoint(int index) {
+	public BeMusicPoint getPoint(int index) {
 		assertArgIndexRange(index, mPoints.size(), "index");
 		return mPoints.get(index);
 	}
@@ -171,7 +177,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 頻繁に実行するとアプリケーションのパフォーマンスが大幅に低下する可能性がありますので注意が必要です。</p>
 	 * @return 楽曲位置情報リスト
 	 */
-	public final List<BeMusicPoint> getPoints() {
+	public List<BeMusicPoint> getPoints() {
 		var points = new ArrayList<BeMusicPoint>(mPoints.size());
 		mPoints.forEach(p -> points.add(new BeMusicPoint(p)));
 		return points;
@@ -181,7 +187,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 楽曲位置情報の数を取得します。
 	 * @return 楽曲位置情報の数
 	 */
-	public final int getPointCount() {
+	public int getPointCount() {
 		return mPoints.size();
 	}
 
@@ -189,7 +195,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 総ノート数を取得します。
 	 * @return 総ノート数
 	 */
-	public final int getNoteCount() {
+	public int getNoteCount() {
 		return mNoteCount;
 	}
 
@@ -197,10 +203,10 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定レーンの総ノート数を取得します。
 	 * @param lane レーン
 	 * @return 指定レーンの総ノート数
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
-	public final int getNoteCount(BeMusicLane lane) {
+	public int getNoteCount(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return mNoteCountsLane[lane.getIndex()];
 	}
@@ -209,9 +215,9 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定入力デバイスの総ノート数を取得します。
 	 * @param device 入力デバイス
 	 * @return 指定入力デバイスの総ノート数
-	 * @exception NullPointerException deviceがnull
+	 * @throws NullPointerException deviceがnull
 	 */
-	public final int getNoteCount(BeMusicDevice device) {
+	public int getNoteCount(BeMusicDevice device) {
 		assertArgNotNull(device, "device");
 		return mNoteCountsDevice[device.getIndex()];
 	}
@@ -220,7 +226,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * ロングノート数を取得します。
 	 * @return ロングノート数
 	 */
-	public final int getLongNoteCount() {
+	public int getLongNoteCount() {
 		return mLnCount;
 	}
 
@@ -228,10 +234,10 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定レーンのロングノート数を取得します。
 	 * @param lane レーン
 	 * @return 指定レーンのロングノート数
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
-	public final int getLongNoteCount(BeMusicLane lane) {
+	public int getLongNoteCount(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return mLnCountsLane[lane.getIndex()];
 	}
@@ -240,9 +246,9 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定入力デバイスのロングノート数を取得します。
 	 * @param device 入力デバイス
 	 * @return 指定入力デバイスのロングノート数
-	 * @exception NullPointerException deviceがnull
+	 * @throws NullPointerException deviceがnull
 	 */
-	public final int getLongNoteCount(BeMusicDevice device) {
+	public int getLongNoteCount(BeMusicDevice device) {
 		assertArgNotNull(device, "device");
 		return mLnCountsDevice[device.getIndex()];
 	}
@@ -251,7 +257,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 地雷オブジェの数を取得します。
 	 * @return 地雷オブジェの数
 	 */
-	public final int getMineCount() {
+	public int getMineCount() {
 		return mLmCount;
 	}
 
@@ -259,10 +265,10 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定レーンの地雷オブジェ数を取得します。
 	 * @param lane レーン
 	 * @return 指定レーンの地雷オブジェ数
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
-	public final int getMineCount(BeMusicLane lane) {
+	public int getMineCount(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return mLmCountsLane[lane.getIndex()];
 	}
@@ -271,9 +277,9 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定入力デバイスの地雷オブジェ数を取得します。
 	 * @param device 入力デバイス
 	 * @return 指定入力デバイスの地雷オブジェ数
-	 * @exception NullPointerException deviceがnull
+	 * @throws NullPointerException deviceがnull
 	 */
-	public final int getMineCount(BeMusicDevice device) {
+	public int getMineCount(BeMusicDevice device) {
 		assertArgNotNull(device, "device");
 		return mLmCountsDevice[device.getIndex()];
 	}
@@ -283,9 +289,12 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * <p>当メソッドが返す演奏時間は譜面の先頭から最後の操作可能ノートに到達するまでの時間を表します。
 	 * それ以降のBGM/BGA等の有無や音声の再生状態は演奏時間には含まれません。</p>
 	 * <p>操作可能ノートのない譜面、または譜面が空の場合は演奏時間は0になります。</p>
+	 * <p>使用するサウンドの再生時間を考慮した演奏時間を計算したい場合は
+	 * {@link #computeActualPlayTime(IntToDoubleFunction)} を使用してください。</p>
 	 * @return この譜面の演奏時間
+	 * @see #computeActualPlayTime(IntToDoubleFunction)
 	 */
-	public final double getPlayTime() {
+	public double getPlayTime() {
 		return  mPoints.isEmpty() ? 0.0 : mPoints.get(mLastPlayableIndex).getTime();
 	}
 
@@ -294,7 +303,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @return スクロール速度の変化回数
 	 * @since 0.6.0
 	 */
-	public final int getChangeScrollCount() {
+	public int getChangeScrollCount() {
 		return mChgScrollCount;
 	}
 
@@ -302,7 +311,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * BPM変化回数を取得します。
 	 * @return BPM変化回数
 	 */
-	public final int getChangeBpmCount() {
+	public int getChangeBpmCount() {
 		return mChgBpmCount;
 	}
 
@@ -310,7 +319,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 譜面停止回数を取得します。
 	 * @return 譜面停止回数
 	 */
-	public final int getStopCount() {
+	public int getStopCount() {
 		return mStopCount;
 	}
 
@@ -323,7 +332,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @return 推奨TOTAL値
 	 * @since 0.3.0
 	 */
-	public final double getRecommendTotal1() {
+	public double getRecommendTotal1() {
 		return mRecommendTotal1;
 	}
 
@@ -338,7 +347,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @return 推奨TOTAL値
 	 * @since 0.3.0
 	 */
-	public final double getRecommendTotal2() {
+	public double getRecommendTotal2() {
 		return mRecommendTotal2;
 	}
 
@@ -347,7 +356,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @return スクラッチモード
 	 * @since 0.7.0
 	 */
-	public final BeMusicScratchMode getScratchMode() {
+	public BeMusicScratchMode getScratchMode() {
 		return mScratchMode;
 	}
 
@@ -355,7 +364,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * ロングノート有無を取得します。
 	 * @return ロングノート有無
 	 */
-	public final boolean hasLongNote() {
+	public boolean hasLongNote() {
 		return (mLnCount > 0);
 	}
 
@@ -363,10 +372,10 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定レーンのロングノート有無を取得します。
 	 * @param lane レーン
 	 * @return 指定レーンにロングノートが含まれていればtrue
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
-	public final boolean hasLongNote(BeMusicLane lane) {
+	public boolean hasLongNote(BeMusicLane lane) {
 		return (getLongNoteCount(lane) > 0);
 	}
 
@@ -374,10 +383,10 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定入力デバイスのロングノート有無を取得します。
 	 * @param device 入力デバイス
 	 * @return 指定入力デバイスにロングノートが含まれていればtrue
-	 * @exception NullPointerException deviceがnull
+	 * @throws NullPointerException deviceがnull
 	 * @since 0.9.0
 	 */
-	public final boolean hasLongNote(BeMusicDevice device) {
+	public boolean hasLongNote(BeMusicDevice device) {
 		return (getLongNoteCount(device) > 0);
 	}
 
@@ -385,7 +394,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 地雷オブジェ有無を取得します。
 	 * @return 地雷オブジェ有無
 	 */
-	public final boolean hasMine() {
+	public boolean hasMine() {
 		return (mLmCount > 0);
 	}
 
@@ -393,10 +402,10 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定レーンの地雷オブジェ有無を取得します。
 	 * @param lane レーン
 	 * @return 指定レーンに地雷オブジェが含まれていればtrue
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
-	public final boolean hasMine(BeMusicLane lane) {
+	public boolean hasMine(BeMusicLane lane) {
 		return (getMineCount(lane) > 0);
 	}
 
@@ -404,10 +413,10 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定入力デバイスの地雷オブジェ有無を取得します。
 	 * @param device 入力デバイス
 	 * @return 指定入力デバイスに地雷オブジェが含まれていればtrue
-	 * @exception NullPointerException deviceがnull
+	 * @throws NullPointerException deviceがnull
 	 * @since 0.9.0
 	 */
-	public final boolean hasMine(BeMusicDevice device) {
+	public boolean hasMine(BeMusicDevice device) {
 		return (getMineCount(device) > 0);
 	}
 
@@ -415,7 +424,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * BGM有無を取得します。
 	 * @return BGM有無
 	 */
-	public final boolean hasBgm() {
+	public boolean hasBgm() {
 		return mHasBgm;
 	}
 
@@ -423,7 +432,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * BGA有無を取得します。
 	 * @return BGA有無
 	 */
-	public final boolean hasBga() {
+	public boolean hasBga() {
 		return mHasBga;
 	}
 
@@ -432,7 +441,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @return スクロール速度の変化有無
 	 * @since 0.6.0
 	 */
-	public final boolean hasChangeScroll() {
+	public boolean hasChangeScroll() {
 		return (mChgScrollCount > 0);
 	}
 
@@ -440,7 +449,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * BPM変化有無を取得します。
 	 * @return BPM変化有無
 	 */
-	public final boolean hasChangeBpm() {
+	public boolean hasChangeBpm() {
 		return (mChgBpmCount > 0);
 	}
 
@@ -452,7 +461,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @see #hasChangeScroll()
 	 * @since 0.6.0
 	 */
-	public final boolean hasChangeSpeed() {
+	public boolean hasChangeSpeed() {
 		return mChgSpeed;
 	}
 
@@ -460,7 +469,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 譜面停止有無を取得します。
 	 * @return 譜面停止有無
 	 */
-	public final boolean hasStop() {
+	public boolean hasStop() {
 		return (mStopCount > 0);
 	}
 
@@ -476,13 +485,13 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @see #hasMine()
 	 * @since 0.6.0
 	 */
-	public final boolean hasGimmick() {
+	public boolean hasGimmick() {
 		return mGimmick;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public final Iterator<BeMusicPoint> iterator() {
+	public Iterator<BeMusicPoint> iterator() {
 		return new PointIterator();
 	}
 
@@ -492,7 +501,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @return 楽曲位置情報リストを走査するストリーム
 	 * @since 0.1.0
 	 */
-	public final Stream<BeMusicPoint> points() {
+	public Stream<BeMusicPoint> points() {
 		return mPoints.stream();
 	}
 
@@ -502,11 +511,11 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @param start 走査を開始する楽曲位置情報リストのインデックス(この値を含む)
 	 * @param end 走査を終了する楽曲位置情報リストのインデックス(この値を含まない)
 	 * @return 楽曲位置情報リストを走査するストリーム
-	 * @exception IndexOutOfBoundsException startが 0～{@link #getPointCount()}-1 の範囲外
-	 * @exception IndexOutOfBoundsException endが 0～{@link #getPointCount()} の範囲外
+	 * @throws IndexOutOfBoundsException startが 0～{@link #getPointCount()}-1 の範囲外
+	 * @throws IndexOutOfBoundsException endが 0～{@link #getPointCount()} の範囲外
 	 * @since 0.8.0
 	 */
-	public final Stream<BeMusicPoint> points(int start, int end) {
+	public Stream<BeMusicPoint> points(int start, int end) {
 		var count = mPoints.size();
 		assertArgIndexRange(start, count, "start");
 		assertArgIndexRange(end, count + 1, "end");
@@ -520,7 +529,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @return 指定条件に最初に該当した楽曲位置情報のインデックス。条件に該当する楽曲位置情報がない場合-1。
 	 * @see #indexOf(int, int, Predicate)
 	 */
-	public final int indexOf(Predicate<BeMusicPoint> tester) {
+	public int indexOf(Predicate<BeMusicPoint> tester) {
 		return indexOf(0, getPointCount(), tester);
 	}
 
@@ -530,11 +539,11 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @param endIndex テスト範囲TO(このインデックスを含まない)
 	 * @param tester 条件のテスター
 	 * @return 指定条件に最初に該当した楽曲位置情報のインデックス。条件に該当する楽曲位置情報がない場合-1。
-	 * @exception IndexOutOfBoundsException beginIndexがマイナス値または{@link #getPointCount()}超過
-	 * @exception IndexOutOfBoundsException endIndexがマイナス値または{@link #getPointCount()}超過
-	 * @exception NullPointerException testerがnull
+	 * @throws IndexOutOfBoundsException beginIndexがマイナス値または{@link #getPointCount()}超過
+	 * @throws IndexOutOfBoundsException endIndexがマイナス値または{@link #getPointCount()}超過
+	 * @throws NullPointerException testerがnull
 	 */
-	public final int indexOf(int beginIndex, int endIndex, Predicate<BeMusicPoint> tester) {
+	public int indexOf(int beginIndex, int endIndex, Predicate<BeMusicPoint> tester) {
 		assertArgIndexRange(beginIndex, mPoints.size() + 1, "beginIndex");
 		assertArgIndexRange(endIndex, mPoints.size() + 1, "endIndex");
 		assertArgNotNull(tester, "tester");
@@ -549,7 +558,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @return 指定条件に最後に該当した楽曲位置情報のインデックス。条件に該当する楽曲位置情報がない場合-1。
 	 * @see #lastIndexOf(int, int, Predicate)
 	 */
-	public final int lastIndexOf(Predicate<BeMusicPoint> tester) {
+	public int lastIndexOf(Predicate<BeMusicPoint> tester) {
 		return lastIndexOf(0, getPointCount(), tester);
 	}
 
@@ -559,11 +568,11 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @param endIndex テスト範囲TO(このインデックスを含まない)
 	 * @param tester 条件のテスター
 	 * @return 指定条件に最後に該当した楽曲位置情報のインデックス。条件に該当する楽曲位置情報がない場合-1。
-	 * @exception IndexOutOfBoundsException beginIndexがマイナス値または{@link #getPointCount()}超過
-	 * @exception IndexOutOfBoundsException endIndexがマイナス値または{@link #getPointCount()}超過
-	 * @exception NullPointerException testerがnull
+	 * @throws IndexOutOfBoundsException beginIndexがマイナス値または{@link #getPointCount()}超過
+	 * @throws IndexOutOfBoundsException endIndexがマイナス値または{@link #getPointCount()}超過
+	 * @throws NullPointerException testerがnull
 	 */
-	public final int lastIndexOf(int beginIndex, int endIndex, Predicate<BeMusicPoint> tester) {
+	public int lastIndexOf(int beginIndex, int endIndex, Predicate<BeMusicPoint> tester) {
 		assertArgIndexRange(beginIndex, mPoints.size() + 1, "beginIndex");
 		assertArgIndexRange(endIndex, mPoints.size() + 1, "endIndex");
 		assertArgNotNull(tester, "tester");
@@ -575,9 +584,9 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定楽曲位置以前(この位置を含む)で最大の楽曲位置を持つ楽曲位置情報のインデックスを返します。
 	 * @param at 楽曲位置
 	 * @return 条件に該当するインデックス。そのような楽曲位置情報がない場合-1。
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final int floorPointOf(BmsAt at) {
+	public int floorPointOf(BmsAt at) {
 		assertArgNotNull(at, "at");
 		return floorPointOf(at.getMeasure(), at.getTick());
 	}
@@ -588,7 +597,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @param tick 小節の刻み位置
 	 * @return 条件に該当するインデックス。そのような楽曲位置情報がない場合-1。
 	 */
-	public final int floorPointOf(int measure, double tick) {
+	public int floorPointOf(int measure, double tick) {
 		return Utility.bsearchFloor(mPoints, p -> BmsAt.compare2(p.getMeasure(), p.getTick(), measure, tick));
 	}
 
@@ -596,9 +605,9 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定時間以前(この時間を含む)で最大の時間を持つ楽曲位置情報のインデックスを返します。
 	 * @param time 時間
 	 * @return 条件に該当するインデックス。そのような楽曲位置情報がない場合-1。
-	 * @exception IllegalArgumentException timeがマイナス値
+	 * @throws IllegalArgumentException timeがマイナス値
 	 */
-	public final int floorPointOf(double time) {
+	public int floorPointOf(double time) {
 		assertArg(time >= 0.0, "Argument:time is minus value. [%f]", time);
 		return Utility.bsearchFloor(mPoints, p -> Double.compare(p.getTime(), time));
 	}
@@ -607,9 +616,9 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定楽曲位置以降(この位置を含む)で最小の楽曲位置を持つ楽曲位置情報のインデックスを返します。
 	 * @param at 楽曲位置
 	 * @return 条件に該当するインデックス。そのような楽曲位置情報がない場合-1。
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
-	public final int ceilPointOf(BmsAt at) {
+	public int ceilPointOf(BmsAt at) {
 		assertArgNotNull(at, "at");
 		return ceilPointOf(at.getMeasure(), at.getTick());
 	}
@@ -620,7 +629,7 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * @param tick 小節の刻み位置
 	 * @return 条件に該当するインデックス。そのような楽曲位置情報がない場合-1。
 	 */
-	public final int ceilPointOf(int measure, double tick) {
+	public int ceilPointOf(int measure, double tick) {
 		return Utility.bsearchCeil(mPoints, p -> BmsAt.compare2(p.getMeasure(), p.getTick(), measure, tick));
 	}
 
@@ -628,18 +637,374 @@ public class BeMusicChart implements Iterable<BeMusicPoint> {
 	 * 指定時間以降(この時間を含む)で最小の時間を持つ楽曲位置情報のインデックスを返します。
 	 * @param time 時間
 	 * @return 条件に該当するインデックス。そのような楽曲位置情報がない場合-1。
-	 * @exception IllegalArgumentException timeがマイナス値
+	 * @throws IllegalArgumentException timeがマイナス値
 	 */
-	public final int ceilPointOf(double time) {
+	public int ceilPointOf(double time) {
 		assertArg(time >= 0.0, "Argument:time is minus value. [%f]", time);
 		return Utility.bsearchCeil(mPoints, p -> Double.compare(p.getTime(), time));
+	}
+
+	/**
+	 * サウンドのトラックIDを収集します。
+	 * <p>当メソッドは以下のコードと等価です。</p>
+	 * <pre>chart.collectSoundTracks(0, Math.max(0, chart.getPointCount() - 1), isCollect);</pre>
+	 * @param isCollect ノートのトラックIDを収集するかを決定するテスト関数
+	 * @return 昇順ソートされたトラックIDセット
+	 * @throws NullPointerException isCollect が null
+	 * @see #collectSoundTracks(int, int, IntPredicate)
+	 * @since 0.10.0
+	 */
+	public Set<Integer> collectSoundTracks(IntPredicate isCollect) {
+		return collectSoundTracks(0, Math.max(0, mPoints.size() - 1), isCollect);
+	}
+
+	/**
+	 * 指定した範囲の楽曲位置情報に記録されているサウンドのトラックIDを収集します。
+	 * <p>当メソッドは以下のコードと等価です。</p>
+	 * <pre>
+	 * int start = chart.ceilPointOf(timeBegin);
+	 * int last = chart.floorPointOf(timeLast);
+	 * chart.collectSoundTracks(
+	 *     (start == -1) ? Integer.MAX_VALUE : start,
+	 *     (last == -1) ? 0 : last,
+	 *     isCollect
+	 * );</pre>
+	 * @param timeBegin 収集開始時間(この時間を含む)
+	 * @param timeLast 収集終了時間(この時間を含む)
+	 * @param isCollect ノートのトラックIDを収集するかを決定するテスト関数
+	 * @return 昇順ソートされたトラックIDセット
+	 * @throws IllegalArgumentException timeBegin, timeEnd が負の値
+	 * @throws NullPointerException isCollect が null
+	 * @see #collectSoundTracks(int, int, IntPredicate)
+	 * @since 0.10.0
+	 */
+	public Set<Integer> collectSoundTracks(double timeBegin, double timeLast, IntPredicate isCollect) {
+		var start = ceilPointOf(timeBegin);
+		var last = floorPointOf(timeLast);
+		return collectSoundTracks((start == -1) ? Integer.MAX_VALUE : start, (last == -1) ? 0 : last, isCollect);
+	}
+
+	/**
+	 * 指定した範囲の楽曲位置情報に記録されているサウンドのトラックIDを収集します。
+	 * <p>当メソッドは以下のコードと等価です。</p>
+	 * <pre>
+	 * int start = chart.ceilPointOf(atBegin);
+	 * int last = chart.floorPointOf(atLast);
+	 * chart.collectSoundTracks(
+	 *     (start == -1) ? Integer.MAX_VALUE : start,
+	 *     (last == -1) ? 0 : last,
+	 *     isCollect
+	 * );</pre>
+	 * @param atBegin 収集開始楽曲位置(この位置を含む)
+	 * @param atLast 収集終了楽曲位置(この位置を含む)
+	 * @param isCollect ノートのトラックIDを収集するかを決定するテスト関数
+	 * @return 昇順ソートされたトラックIDセット
+	 * @throws NullPointerException atBegin, atLast, isCollect が null
+	 * @see #collectSoundTracks(int, int, IntPredicate)
+	 * @since 0.10.0
+	 */
+	public Set<Integer> collectSoundTracks(BmsAt atBegin, BmsAt atLast, IntPredicate isCollect) {
+		assertArgNotNull(atBegin, "atBegin");
+		assertArgNotNull(atLast, "atEnd");
+		var start = ceilPointOf(atBegin);
+		var last = floorPointOf(atLast);
+		return collectSoundTracks((start == -1) ? Integer.MAX_VALUE : start, (last == -1) ? 0 : last, isCollect);
+	}
+
+	/**
+	 * 指定した範囲の楽曲位置情報に記録されているサウンドのトラックIDを収集します。
+	 * <p>当メソッドは以下のコードと等価です。</p>
+	 * <pre>
+	 * int start = chart.ceilPointOf(measureBegin, tickBegin);
+	 * int last = chart.floorPointOf(measureLast, tickLast);
+	 * chart.collectSoundTracks(
+	 *     (start == -1) ? Integer.MAX_VALUE : start,
+	 *     (last == -1) ? 0 : last,
+	 *     isCollect
+	 * );</pre>
+	 * @param measureBegin 収集開始小節番号(この小節を含む)
+	 * @param tickBegin 収集開始刻み位置(この刻み位置を含む)
+	 * @param measureLast 収集終了小節番号(この小節を含む)
+	 * @param tickLast 収集終了刻み位置(この刻み位置を含む)
+	 * @param isCollect ノートのトラックIDを収集するかを決定するテスト関数
+	 * @return 昇順ソートされたトラックIDセット
+	 * @throws NullPointerException isCollect が null
+	 * @see #collectSoundTracks(int, int, IntPredicate)
+	 * @since 0.10.0
+	 */
+	public Set<Integer> collectSoundTracks(int measureBegin, double tickBegin, int measureLast, double tickLast,
+			IntPredicate isCollect) {
+		var start = ceilPointOf(measureBegin, tickBegin);
+		var last = floorPointOf(measureLast, tickLast);
+		return collectSoundTracks((start == -1) ? Integer.MAX_VALUE : start, (last == -1) ? 0 : last, isCollect);
+	}
+
+	/**
+	 * 指定した範囲の楽曲位置情報に記録されているサウンドのトラックIDを収集します。
+	 * <p>具体的には「可視オブジェ」、「不可視オブジェ」、「BGM」のトラックIDが収集対象となります。</p>
+	 * <p>可視オブジェでは操作を伴うノート({@link BeMusicNoteType#hasMovement()} が true を返すノート)
+	 * が収集対象となり、それ以外のノートは収集されません。</p>
+	 * <p>トラックIDセットに含めるかどうかは isCollect 関数のテスト結果によって決定されます。
+	 * この関数の入力値はノートの生値になっているため、このノートから各種属性値を得るには
+	 * {@link BeMusicSound} を使用してください。関数が false を返すと収集の対象外になります。</p>
+	 * <p>返されたトラックIDセットは、走査すると昇順ソートされています。また、このセットの変更可否については
+	 * 未定義となりますのでセットの変更を行う場合は別インスタンスへコピーしてください。</p>
+	 * @param start 収集開始インデックス(この値を含む)
+	 * @param last 収集終了インデックス(この値を含む)
+	 * @param isCollect ノートのトラックIDを収集するかを決定するテスト関数
+	 * @return 昇順ソートされたトラックIDセット
+	 * @throws IllegalArgumentException start, last が負の値
+	 * @throws NullPointerException isCollect が null
+	 * @since 0.10.0
+	 */
+	public Set<Integer> collectSoundTracks(int start, int last, IntPredicate isCollect) {
+		assertArg(start >= 0, "Argument 'start' is negative value");
+		assertArg(last >= 0, "Argument 'last' is negative value");
+		assertArgNotNull(isCollect, "isCollect");
+
+		// 指定範囲のトラックIDを収集する
+		var iLast = Math.min(last, mPoints.size() - 1);
+		var trackIds = new TreeSet<Integer>();
+		for (var i = start; i <= iLast; i++) {
+			// 可視オブジェのトラックIDを収集する
+			var pt = mPoints.get(i);
+			if (pt.getNotePos(RawNotes.VISIBLE) != BeMusicPoint.NA) {
+				for (var j = 0; j < BeMusicDevice.COUNT; j++) {
+					var raw = pt.getRawNote(RawNotes.VISIBLE, j);
+					var id = BeMusicSound.getTrackId(raw);
+					if ((id != 0) && BeMusicSound.getNoteType(raw).hasMovement() && isCollect.test(raw)) {
+						trackIds.add(BmsInt.box(id));
+					}
+				}
+			}
+			// 不可視オブジェのトラックIDを収集する
+			if (pt.getNotePos(RawNotes.INVISIBLE) != BeMusicPoint.NA) {
+				for (var j = 0; j < BeMusicDevice.COUNT; j++) {
+					var raw = pt.getRawNote(RawNotes.INVISIBLE, j);
+					var id = BeMusicSound.getTrackId(raw);
+					if ((id != 0) && isCollect.test(raw)) {
+						trackIds.add(BmsInt.box(id));
+					}
+				}
+			}
+			// BGMのトラックIDを収集する
+			if (pt.getNotePos(RawNotes.BGM) != BeMusicPoint.NA) {
+				var numBgm = pt.getBgmCount();
+				for (var j = 0; j < numBgm; j++) {
+					var raw = pt.getRawNote(RawNotes.BGM, j);
+					var id = BeMusicSound.getTrackId(raw);
+					if ((id != 0) && isCollect.test(raw)) {
+						trackIds.add(BmsInt.box(id));
+					}
+				}
+			}
+		}
+
+		return trackIds;
+	}
+
+	/**
+	 * イメージのトラックIDを収集します。
+	 * <p>当メソッドは以下のコードと等価です。</p>
+	 * <pre>chart.collectImageTracks(0, Math.max(0, chart.getPointCount() - 1), isCollect);</pre>
+	 * @param isCollect イメージのトラックIDを収集するかを決定するテスト関数
+	 * @return 昇順ソートされたトラックIDセット
+	 * @throws NullPointerException isCollect が null
+	 * @see #collectImageTracks(int, int, BiPredicate)
+	 * @since 0.10.0
+	 */
+	public Set<Integer> collectImageTracks(BiPredicate<Integer, Integer> isCollect) {
+		return collectImageTracks(0, Math.max(0, mPoints.size() - 1), isCollect);
+	}
+
+	/**
+	 * 指定した範囲の楽曲位置情報に記録されているイメージのトラックIDを収集します。
+	 * <p>当メソッドは以下のコードと等価です。</p>
+	 * <pre>
+	 * int start = chart.ceilPointOf(timeBegin);
+	 * int last = chart.floorPointOf(timeLast);
+	 * chart.collectImageTracks(
+	 *     (start == -1) ? Integer.MAX_VALUE : start,
+	 *     (last == -1) ? 0 : last,
+	 *     isCollect
+	 * );</pre>
+	 * @param timeBegin 収集開始時間(この時間を含む)
+	 * @param timeLast 収集終了時間(この時間を含む)
+	 * @param isCollect イメージのトラックIDを収集するかを決定するテスト関数
+	 * @return 昇順ソートされたトラックIDセット
+	 * @throws IllegalArgumentException timeBegin, timeEnd が負の値
+	 * @throws NullPointerException isCollect が null
+	 * @see #collectImageTracks(int, int, BiPredicate)
+	 * @since 0.10.0
+	 */
+	public Set<Integer> collectImageTracks(double timeBegin, double timeLast, BiPredicate<Integer, Integer> isCollect) {
+		var start = ceilPointOf(timeBegin);
+		var last = floorPointOf(timeLast);
+		return collectImageTracks((start == -1) ? Integer.MAX_VALUE : start, (last == -1) ? 0 : last, isCollect);
+	}
+
+	/**
+	 * 指定した範囲の楽曲位置情報に記録されているイメージのトラックIDを収集します。
+	 * <p>当メソッドは以下のコードと等価です。</p>
+	 * <pre>
+	 * int start = chart.ceilPointOf(atBegin);
+	 * int last = chart.floorPointOf(atLast);
+	 * chart.collectImageTracks(
+	 *     (start == -1) ? Integer.MAX_VALUE : start,
+	 *     (last == -1) ? 0 : last,
+	 *     isCollect
+	 * );</pre>
+	 * @param atBegin 収集開始楽曲位置(この位置を含む)
+	 * @param atLast 収集終了楽曲位置(この位置を含む)
+	 * @param isCollect イメージのトラックIDを収集するかを決定するテスト関数
+	 * @return 昇順ソートされたトラックIDセット
+	 * @throws NullPointerException atBegin, atLast, isCollect が null
+	 * @see #collectImageTracks(int, int, BiPredicate)
+	 * @since 0.10.0
+	 */
+	public Set<Integer> collectImageTracks(BmsAt atBegin, BmsAt atLast, BiPredicate<Integer, Integer> isCollect) {
+		assertArgNotNull(atBegin, "atBegin");
+		assertArgNotNull(atLast, "atEnd");
+		var start = ceilPointOf(atBegin);
+		var last = floorPointOf(atLast);
+		return collectImageTracks((start == -1) ? Integer.MAX_VALUE : start, (last == -1) ? 0 : last, isCollect);
+	}
+
+	/**
+	 * 指定した範囲の楽曲位置情報に記録されているイメージのトラックIDを収集します。
+	 * <p>当メソッドは以下のコードと等価です。</p>
+	 * <pre>
+	 * int start = chart.ceilPointOf(measureBegin, tickBegin);
+	 * int last = chart.floorPointOf(measureLast, tickLast);
+	 * chart.collectImageTracks(
+	 *     (start == -1) ? Integer.MAX_VALUE : start,
+	 *     (last == -1) ? 0 : last,
+	 *     isCollect
+	 * );</pre>
+	 * @param measureBegin 収集開始小節番号(この小節を含む)
+	 * @param tickBegin 収集開始刻み位置(この刻み位置を含む)
+	 * @param measureLast 収集終了小節番号(この小節を含む)
+	 * @param tickLast 収集終了刻み位置(この刻み位置を含む)
+	 * @param isCollect イメージのトラックIDを収集するかを決定するテスト関数
+	 * @return 昇順ソートされたトラックIDセット
+	 * @throws NullPointerException isCollect が null
+	 * @see #collectImageTracks(int, int, BiPredicate)
+	 * @since 0.10.0
+	 */
+	public Set<Integer> collectImageTracks(int measureBegin, double tickBegin, int measureLast, double tickLast,
+			BiPredicate<Integer, Integer> isCollect) {
+		var start = ceilPointOf(measureBegin, tickBegin);
+		var last = floorPointOf(measureLast, tickLast);
+		return collectImageTracks((start == -1) ? Integer.MAX_VALUE : start, (last == -1) ? 0 : last, isCollect);
+	}
+
+	/**
+	 * 指定した範囲の楽曲位置情報に記録されているイメージのトラックIDを収集します。
+	 * <p>具体的には「BGA」、「BGAレイヤー」、「プレーミス画像」のトラックIDが収集対象となります。</p>
+	 * <p>トラックIDセットに含めるかどうかは isCollect 関数のテスト結果によって決定されます。
+	 * この関数の入力値は第1引数がイメージ種別を表す整数値、第2引数がそのイメージのトラックIDとなっています。
+	 * イメージ種別は 0=BGA, 1=BGAレイヤー, 2=プレーミス画像 となっています。種別によって収集有無を決定したい場合は
+	 * この値を参照してください。関数が false を返すと収集の対象外になります。</p>
+	 * <p>返されたトラックIDセットは、走査すると昇順ソートされています。また、このセットの変更可否については
+	 * 未定義となりますのでセットの変更を行う場合は別インスタンスへコピーしてください。</p>
+	 * @param start 収集開始インデックス(この値を含む)
+	 * @param last 収集終了インデックス(この値を含む)
+	 * @param isCollect イメージのトラックIDを収集するかを決定するテスト関数
+	 * @return 昇順ソートされたトラックIDセット
+	 * @throws IllegalArgumentException start, last が負の値
+	 * @throws NullPointerException isCollect が null
+	 * @since 0.10.0
+	 */
+	public Set<Integer> collectImageTracks(int start, int last, BiPredicate<Integer, Integer> isCollect) {
+		assertArg(start >= 0, "Argument 'start' is negative value");
+		assertArg(last >= 0, "Argument 'last' is negative value");
+		assertArgNotNull(isCollect, "isCollect");
+
+		// 指定範囲のトラックIDを収集する
+		var iLast = Math.min(last, mPoints.size() - 1);
+		var trackIds = new TreeSet<Integer>();
+		for (var i = start; i <= iLast; i++) {
+			// BGAのトラックIDを収集する
+			var pt = mPoints.get(i);
+			var bgaId = BmsInt.box(pt.getBgaValue());
+			if ((bgaId != 0) && isCollect.test(0, bgaId)) {
+				trackIds.add(bgaId);
+			}
+			// BGAレイヤーのトラックIDを収集する
+			var layerId = BmsInt.box(pt.getLayerValue());
+			if ((layerId != 0) && isCollect.test(1, layerId)) {
+				trackIds.add(layerId);
+			}
+			// プレーミス画像のトラックIDを収集する
+			var missId = BmsInt.box(pt.getMissValue());
+			if ((missId != 0) && isCollect.test(2, missId)) {
+				trackIds.add(missId);
+			}
+		}
+
+		return trackIds;
+	}
+
+	/**
+	 * サウンド再生時間を考慮した実際の演奏時間を計算します。
+	 * <p>当メソッドは {@link #getPlayTime()} とは異なり、実際のサウンドの再生時間を参照して最後のサウンドが
+	 * 再生し終えるまでの時間を計算します。利用者はノートの生値から対応するサウンドの再生時間を秒単位で返す
+	 * 関数を引数で渡してください。対応するサウンドを再生しない、または何らかの理由により再生時間が決定できない場合は
+	 * 0 を返すようにし、負の値を返さないようにしてください。負の値を返した場合の計算結果は未定義となり、
+	 * 期待する演奏時間を得られなくなる可能性があります。</p>
+	 * <p>ノートの生値からサウンドのトラックIDを取得するには {@link BeMusicSound#getTrackId(int)} を使用します。</p>
+	 * @param getSoundTime 指定されたノートの生値に対応するサウンドの再生時間を返す関数
+	 * @return 最後のサウンドが再生し終えるまでの時間(秒単位)
+	 * @throws NullPointerException getSoundTime が null
+	 * @see #getPlayTime()
+	 * @see BeMusicSound
+	 * @since 0.10.0
+	 */
+	public double computeActualPlayTime(IntToDoubleFunction getSoundTime) {
+		assertArgNotNull(getSoundTime, "getSoundTime");
+		var time = 0.0;
+		var numPoint = mPoints.size();
+		for (var i = 0; i < numPoint; i++) {
+			// 可視オブジェのサウンド再生時間を計算する
+			var pt = mPoints.get(i);
+			if (pt.getNotePos(RawNotes.VISIBLE) != BeMusicPoint.NA) {
+				for (var j = 0; j < BeMusicDevice.COUNT; j++) {
+					var dev = BeMusicDevice.fromIndex(j);
+					var raw = pt.getRawNote(RawNotes.VISIBLE, j);
+					var id = BeMusicSound.getTrackId(raw);
+					if ((id != 0) && BeMusicSound.getNoteType(raw).hasSound(dev)) {
+						time = Math.max(time, pt.getTime() + getSoundTime.applyAsDouble(raw));
+					}
+				}
+			}
+			// 不可視オブジェのサウンド再生時間を計算する
+			if (pt.getNotePos(RawNotes.INVISIBLE) != BeMusicPoint.NA) {
+				for (var j = 0; j < BeMusicDevice.COUNT; j++) {
+					var raw = pt.getRawNote(RawNotes.INVISIBLE, j);
+					if (BeMusicSound.getTrackId(raw) != 0) {
+						time = Math.max(time, pt.getTime() + getSoundTime.applyAsDouble(raw));
+					}
+				}
+			}
+			// BGMのサウンド再生時間を計算する
+			if (pt.getNotePos(RawNotes.BGM) != BeMusicPoint.NA) {
+				var numBgm = pt.getBgmCount();
+				for (var j = 0; j < numBgm; j++) {
+					var raw = pt.getRawNote(RawNotes.BGM, j);
+					if (BeMusicSound.getTrackId(raw) != 0) {
+						time = Math.max(time, pt.getTime() + getSoundTime.applyAsDouble(raw));
+					}
+				}
+			}
+		}
+		return time;
 	}
 
 	/**
 	 * BMS譜面オブジェクトのセットアップ。
 	 * @param list 楽曲位置情報リスト
 	 */
-	final void setup(List<BeMusicPoint> list) {
+	void setup(List<BeMusicPoint> list) {
 		// 初期設定
 		mPoints = list;
 		mNoteCount = 0;

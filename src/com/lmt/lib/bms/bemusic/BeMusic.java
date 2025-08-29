@@ -3,12 +3,15 @@ package com.lmt.lib.bms.bemusic;
 import static com.lmt.lib.bms.internal.Assertion.*;
 
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
 import com.lmt.lib.bms.BmsContent;
 import com.lmt.lib.bms.BmsError;
 import com.lmt.lib.bms.BmsException;
+import com.lmt.lib.bms.BmsLoadException;
 import com.lmt.lib.bms.BmsLoader;
+import com.lmt.lib.bms.BmsPanicException;
 import com.lmt.lib.bms.BmsStandardLoader;
 
 /**
@@ -27,7 +30,7 @@ public class BeMusic {
 	 * 拡張子の大文字・小文字は区別されません。生成されたローダの各設定内容はデフォルトの状態で返されます。</p>
 	 * @param path ファイルパス
 	 * @return ファイルパスに対応する適切なBMSローダ
-	 * @exception NullPointerException pathがnull
+	 * @throws NullPointerException pathがnull
 	 */
 	public static BmsLoader createLoaderFor(Path path) {
 		assertArgNotNull(path, "path");
@@ -79,16 +82,17 @@ public class BeMusic {
 	 * @param randomValue 乱数を固定化する場合の値、またはnull
 	 * @param strictly 厳格なフォーマットチェックを行うかどうか
 	 * @return 最新バージョンのBe-Music用BMS仕様で読み込まれたBMSコンテンツ
-	 * @exception NullPointerException pathがnull
-	 * @exception IOException 指定されたファイルが見つからない、読み取り権限がない、または読み取り中に異常を検出した
-	 * @exception BmsException 読み込み処理中に想定外の例外がスローされた
+	 * @throws NullPointerException pathがnull
+	 * @throws NoSuchFileException 指定されたパスのファイルが存在しない
+	 * @throws IOException 何らかの理由によりデータ読み取り異常が発生した
+	 * @throws BmsLoadException BMSコンテンツの読み込みが中止された
+	 * @throws BmsPanicException 内部処理異常による処理の強制停止が発生した
 	 * @see BmsStandardLoader
 	 * @see BeMusicBmsonLoader
 	 * @see BmsError
 	 * @see BeMusicLoadHandler
 	 */
-	public static BmsContent loadContentFrom(Path path, Long randomValue, boolean strictly)
-			throws BmsException, IOException {
+	public static BmsContent loadContentFrom(Path path, Long randomValue, boolean strictly) throws IOException {
 		assertArgNotNull(path, "path");
 		var handler = new BeMusicLoadHandler()
 				.setEnableControlFlow(true)

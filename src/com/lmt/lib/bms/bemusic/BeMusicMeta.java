@@ -966,9 +966,9 @@ public class BeMusicMeta {
 	 * #BASEを設定します。
 	 * @param content BMSコンテンツ
 	 * @param base #BASEの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
-	 * @exception IllegalArgumentException baseがnull, 16, 36, 62以外
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws IllegalArgumentException baseがnull, 16, 36, 62以外
 	 * @see #BASE
 	 * @since 0.8.0
 	 */
@@ -980,7 +980,7 @@ public class BeMusicMeta {
 	 * #BASEを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #BASEの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #BASE
 	 * @since 0.8.0
 	 */
@@ -992,8 +992,8 @@ public class BeMusicMeta {
 	 * #GENREを設定します。
 	 * @param content BMSコンテンツ
 	 * @param genre #GENREの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #GENRE
 	 */
 	public static void setGenre(BmsContent content, String genre) {
@@ -1004,7 +1004,7 @@ public class BeMusicMeta {
 	 * #GENREを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #GENREの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #GENRE
 	 */
 	public static String getGenre(BmsContent content) {
@@ -1015,8 +1015,8 @@ public class BeMusicMeta {
 	 * #TITLEを設定します。
 	 * @param content BMSコンテンツ
 	 * @param title #TITLEの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #TITLE
 	 */
 	public static void setTitle(BmsContent content, String title) {
@@ -1027,7 +1027,7 @@ public class BeMusicMeta {
 	 * #TITLEを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #TITLEの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #TITLE
 	 */
 	public static String getTitle(BmsContent content) {
@@ -1038,8 +1038,8 @@ public class BeMusicMeta {
 	 * #SUBTITLEを設定します。
 	 * @param content BMSコンテンツ
 	 * @param subTitle #SUBTITLEの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #SUBTITLE
 	 */
 	public static void setSubTitle(BmsContent content, String subTitle) {
@@ -1050,7 +1050,7 @@ public class BeMusicMeta {
 	 * #SUBTITLEを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #SUBTITLEの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #SUBTITLE
 	 */
 	public static String getSubTitle(BmsContent content) {
@@ -1061,8 +1061,8 @@ public class BeMusicMeta {
 	 * #ARTISTを設定します。
 	 * @param content BMSコンテンツ
 	 * @param artist #ARTISTの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #ARTIST
 	 */
 	public static void setArtist(BmsContent content, String artist) {
@@ -1073,7 +1073,7 @@ public class BeMusicMeta {
 	 * #ARTISTを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #ARTISTの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #ARTIST
 	 */
 	public static String getArtist(BmsContent content) {
@@ -1085,9 +1085,9 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @param subArtist #SUBARTISTの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #SUBARTIST
 	 */
 	public static void setSubArtist(BmsContent content, int index, String subArtist) {
@@ -1098,7 +1098,7 @@ public class BeMusicMeta {
 	 * #SUBARTISTのリストを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #SUBARTISTのリスト
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #SUBARTIST
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1112,8 +1112,8 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @return #SUBARTISTの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
 	 * @see #SUBARTIST
 	 */
 	public static String getSubArtist(BmsContent content, int index) {
@@ -1125,8 +1125,8 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param player #PLAYERの値
 	 * @see BeMusicPlayer
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #PLAYER
 	 */
 	public static void setPlayer(BmsContent content, BeMusicPlayer player) {
@@ -1138,7 +1138,7 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @return #PLAYERの値
 	 * @see BeMusicPlayer
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #PLAYER
 	 */
 	public static BeMusicPlayer getPlayer(BmsContent content) {
@@ -1150,8 +1150,8 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param rank #RANKの値
 	 * @see BeMusicRank
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #RANK
 	 */
 	public static void setRank(BmsContent content, BeMusicRank rank) {
@@ -1163,7 +1163,7 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @return #RANKの値
 	 * @see BeMusicRank
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #RANK
 	 */
 	public static BeMusicRank getRank(BmsContent content) {
@@ -1174,8 +1174,8 @@ public class BeMusicMeta {
 	 * #DEFEXRANKを設定します。
 	 * @param content BMSコンテンツ
 	 * @param defExRank #DEFEXRANKの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #DEFEXRANK
 	 * @since 0.7.0
 	 */
@@ -1187,7 +1187,7 @@ public class BeMusicMeta {
 	 * #DEFEXRANKを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #DEFEXRANKの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #DEFEXRANK
 	 * @since 0.7.0
 	 */
@@ -1199,8 +1199,8 @@ public class BeMusicMeta {
 	 * #TOTALを設定します。
 	 * @param content BMSコンテンツ
 	 * @param total #TOTALの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #TOTAL
 	 */
 	public static void setTotal(BmsContent content, Double total) {
@@ -1211,7 +1211,7 @@ public class BeMusicMeta {
 	 * #TOTALを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #TOTALの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #TOTAL
 	 */
 	public static double getTotal(BmsContent content) {
@@ -1222,8 +1222,8 @@ public class BeMusicMeta {
 	 * #COMMENTを設定します。
 	 * @param content BMSコンテンツ
 	 * @param comment #COMMENTの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #COMMENT
 	 * @since 0.5.0
 	 */
@@ -1235,7 +1235,7 @@ public class BeMusicMeta {
 	 * #COMMENTを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #COMMENTの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #COMMENT
 	 * @since 0.5.0
 	 */
@@ -1247,8 +1247,8 @@ public class BeMusicMeta {
 	 * #STAGEFILEを設定します。
 	 * @param content BMSコンテンツ
 	 * @param stageFile #STAGEFILEの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #STAGEFILE
 	 */
 	public static void setStageFile(BmsContent content, String stageFile) {
@@ -1259,7 +1259,7 @@ public class BeMusicMeta {
 	 * #STAGEFILEを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #STAGEFILEの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #STAGEFILE
 	 */
 	public static String getStageFile(BmsContent content) {
@@ -1270,8 +1270,8 @@ public class BeMusicMeta {
 	 * #BANNERを設定します。
 	 * @param content BMSコンテンツ
 	 * @param banner #BANNERの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #BANNER
 	 */
 	public static void setBanner(BmsContent content, String banner) {
@@ -1282,7 +1282,7 @@ public class BeMusicMeta {
 	 * #BANNERを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #BANNERの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #BANNER
 	 */
 	public static String getBanner(BmsContent content) {
@@ -1293,8 +1293,8 @@ public class BeMusicMeta {
 	 * #BACKBMPを設定します。
 	 * @param content BMSコンテンツ
 	 * @param backBmp #BACKBMPの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #BACKBMP
 	 */
 	public static void setBackBmp(BmsContent content, String backBmp) {
@@ -1305,7 +1305,7 @@ public class BeMusicMeta {
 	 * #BACKBMPを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #BACKBMPの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #BACKBMP
 	 */
 	public static String getBackBmp(BmsContent content) {
@@ -1316,8 +1316,8 @@ public class BeMusicMeta {
 	 * #EYECATCHを設定します。
 	 * @param content BMSコンテンツ
 	 * @param eyecatch #EYECATCHの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #EYECATCH
 	 * @since 0.7.0
 	 */
@@ -1329,7 +1329,7 @@ public class BeMusicMeta {
 	 * #EYECATCHを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #EYECATCHの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #EYECATCH
 	 * @since 0.7.0
 	 */
@@ -1341,8 +1341,8 @@ public class BeMusicMeta {
 	 * #PREVIEWを設定します。
 	 * @param content BMSコンテンツ
 	 * @param preview #PREVIEWの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #PREVIEW
 	 * @since 0.2.0
 	 */
@@ -1354,7 +1354,7 @@ public class BeMusicMeta {
 	 * #PREVIEWを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #PREVIEWの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #PREVIEW
 	 * @since 0.2.0
 	 */
@@ -1366,8 +1366,8 @@ public class BeMusicMeta {
 	 * #PLAYLEVELを設定します。
 	 * @param content BMSコンテンツ
 	 * @param playLevel #PLAYLEVELの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #PLAYLEVEL
 	 */
 	public static void setPlayLevel(BmsContent content, Double playLevel) {
@@ -1378,7 +1378,7 @@ public class BeMusicMeta {
 	 * #PLAYLEVELを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #PLAYLEVELの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #PLAYLEVEL
 	 */
 	public static String getPlayLevelRaw(BmsContent content) {
@@ -1401,8 +1401,8 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param difficulty #DIFFICULTYの値
 	 * @see BeMusicDifficulty
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #DIFFICULTY
 	 */
 	public static void setDifficulty(BmsContent content, BeMusicDifficulty difficulty) {
@@ -1413,7 +1413,7 @@ public class BeMusicMeta {
 	 * #DIFFICULTYを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #DIFFICULTYの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #DIFFICULTY
 	 */
 	public static BeMusicDifficulty getDifficulty(BmsContent content) {
@@ -1424,8 +1424,8 @@ public class BeMusicMeta {
 	 * #CHARTNAMEを設定します。
 	 * @param content BMSコンテンツ
 	 * @param chartName #CHARTNAMEの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #CHARTNAME
 	 * @since 0.7.0
 	 */
@@ -1437,7 +1437,7 @@ public class BeMusicMeta {
 	 * #CHARTNAMEを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #CHARTNAMEの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #CHARTNAME
 	 * @since 0.7.0
 	 */
@@ -1450,9 +1450,9 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @param lnObj #LNOBJの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #LNOBJ
 	 */
 	public static void setLnObj(BmsContent content, int index, Long lnObj) {
@@ -1463,7 +1463,7 @@ public class BeMusicMeta {
 	 * #LNOBJのリストを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #LNOBJのリスト
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #LNOBJ
 	 */
 	public static List<Long> getLnObjs(BmsContent content) {
@@ -1475,8 +1475,8 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @return #LNOBJの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#MULTIPLE_META_INDEX_MAX}の範囲外
 	 * @see #LNOBJ
 	 */
 	public static long getLnObj(BmsContent content, int index) {
@@ -1487,8 +1487,8 @@ public class BeMusicMeta {
 	 * #LNMODEを設定します。
 	 * @param content BMSコンテンツ
 	 * @param lnMode #LNMODEの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #LNMODE
 	 * @since 0.3.0
 	 */
@@ -1500,7 +1500,7 @@ public class BeMusicMeta {
 	 * #LNMODEを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #LNMODEの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #LNMODE
 	 * @since 0.3.0
 	 */
@@ -1512,8 +1512,8 @@ public class BeMusicMeta {
 	 * %URLを設定します。
 	 * @param content BMSコンテンツ
 	 * @param url %URLの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #URL
 	 */
 	public static void setUrl(BmsContent content, String url) {
@@ -1524,7 +1524,7 @@ public class BeMusicMeta {
 	 * %URLを取得します。
 	 * @param content BMSコンテンツ
 	 * @return %URLの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #URL
 	 */
 	public static String getUrl(BmsContent content) {
@@ -1535,8 +1535,8 @@ public class BeMusicMeta {
 	 * %EMAILを設定します。
 	 * @param content BMSコンテンツ
 	 * @param email %EMAILの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #EMAIL
 	 */
 	public static void setEmail(BmsContent content, String email) {
@@ -1547,7 +1547,7 @@ public class BeMusicMeta {
 	 * %EMAILを取得します。
 	 * @param content BMSコンテンツ
 	 * @return %EMAILの値
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #EMAIL
 	 */
 	public static String getEmail(BmsContent content) {
@@ -1559,9 +1559,9 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @param bpm #BPMxxの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #BPM
 	 */
 	public static void setBpm(BmsContent content, int index, Double bpm) {
@@ -1573,8 +1573,8 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @return #BPMxxの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 * @see #BPM
 	 */
 	public static double getBpm(BmsContent content, int index) {
@@ -1585,7 +1585,7 @@ public class BeMusicMeta {
 	 * #BPMxxのリストを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #BPMxxのリスト
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #BPM
 	 */
 	public static Map<Integer, Double> getBpms(BmsContent content) {
@@ -1597,9 +1597,9 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @param stop #STOPの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #STOP
 	 */
 	public static void setStop(BmsContent content, int index, Double stop) {
@@ -1611,8 +1611,8 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @return #STOPの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 * @see #STOP
 	 */
 	public static double getStop(BmsContent content, int index) {
@@ -1623,7 +1623,7 @@ public class BeMusicMeta {
 	 * #STOPxxのリストを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #STOPxxのリスト
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #STOP
 	 */
 	public static Map<Integer, Double> getStops(BmsContent content) {
@@ -1635,9 +1635,9 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @param scroll #SCROLLの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #SCROLL
 	 */
 	public static void setScroll(BmsContent content, int index, Double scroll) {
@@ -1649,8 +1649,8 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @return #SCROLLの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 * @see #SCROLL
 	 */
 	public static double getScroll(BmsContent content, int index) {
@@ -1661,7 +1661,7 @@ public class BeMusicMeta {
 	 * #SCROLLxxのリストを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #SCROLLxxのリスト
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #SCROLL
 	 */
 	public static Map<Integer, Double> getScrolls(BmsContent content) {
@@ -1673,9 +1673,9 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @param wav #WAVの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #WAV
 	 */
 	public static void setWav(BmsContent content, int index, String wav) {
@@ -1687,8 +1687,8 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @return #WAVの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 * @see #WAV
 	 */
 	public static String getWav(BmsContent content, int index) {
@@ -1699,7 +1699,7 @@ public class BeMusicMeta {
 	 * #WAVxxのリストを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #WAVxxのリスト
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #WAV
 	 */
 	public static Map<Integer, String> getWavs(BmsContent content) {
@@ -1711,9 +1711,9 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @param bmp #BMPxxの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #BMP
 	 */
 	public static void setBmp(BmsContent content, int index, String bmp) {
@@ -1725,8 +1725,8 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @return #BMPxxの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 * @see #BMP
 	 */
 	public static String getBmp(BmsContent content, int index) {
@@ -1737,7 +1737,7 @@ public class BeMusicMeta {
 	 * #BMPxxのリストを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #BMPxxのリスト
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #BMP
 	 */
 	public static Map<Integer, String> getBmps(BmsContent content) {
@@ -1749,9 +1749,9 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @param text #TEXTxxの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
-	 * @exception IllegalStateException BMSコンテンツが編集モードではない
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws IllegalStateException BMSコンテンツが編集モードではない
 	 * @see #TEXT
 	 */
 	public static void setText(BmsContent content, int index, String text) {
@@ -1763,8 +1763,8 @@ public class BeMusicMeta {
 	 * @param content BMSコンテンツ
 	 * @param index インデックス
 	 * @return #TEXTxxの値
-	 * @exception NullPointerException contentがnull
-	 * @exception IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
+	 * @throws NullPointerException contentがnull
+	 * @throws IndexOutOfBoundsException indexが0～{@link BmsSpec#INDEXED_META_INDEX_MAX}の範囲外
 	 * @see #TEXT
 	 */
 	public static String getText(BmsContent content, int index) {
@@ -1775,7 +1775,7 @@ public class BeMusicMeta {
 	 * #TEXTxxのリストを取得します。
 	 * @param content BMSコンテンツ
 	 * @return #TEXTxxのリスト
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #TEXT
 	 */
 	public static Map<Integer, String> getTexts(BmsContent content) {

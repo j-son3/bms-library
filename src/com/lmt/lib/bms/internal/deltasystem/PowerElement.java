@@ -248,7 +248,7 @@ class PowerElement extends RatingElement {
 	 * @param lane レーン
 	 * @return 要素データ
 	 */
-	final Data getData(BeMusicLane lane) {
+	Data getData(BeMusicLane lane) {
 		return mData[lane.getIndex()];
 	}
 
@@ -257,7 +257,7 @@ class PowerElement extends RatingElement {
 	 * @param lane レーン
 	 * @param data 要素データ
 	 */
-	final void setData(BeMusicLane lane, Data data) {
+	void setData(BeMusicLane lane, Data data) {
 		mData[lane.getIndex()] = data;
 	}
 

@@ -65,7 +65,7 @@ class Holding {
 		 * LN時間比率取得
 		 * @return LN時間比率
 		 */
-		final double lnRate() {
+		double lnRate() {
 			return (numNotesTotal == 0) ? 0.0 : ((double)numLn / (double)numNotesTotal);
 		}
 
@@ -73,7 +73,7 @@ class Holding {
 		 * LN時間比率(%)取得
 		 * @return LN時間比率(%)
 		 */
-		final double lnRatePer() {
+		double lnRatePer() {
 			return lnRate() * 100.0;
 		}
 
@@ -81,7 +81,7 @@ class Holding {
 		 * LN内ノート数比率取得
 		 * @return LN内ノート数比率
 		 */
-		final double notesInLnRate() {
+		double notesInLnRate() {
 			return (numNotesInLn == 0) ? 0.0 : ((double)numNotesInLn / (double)numNotesTotal);
 		}
 
@@ -89,7 +89,7 @@ class Holding {
 		 * LN内ノート数比率(%)取得
 		 * @return LN内ノート数比率(%)
 		 */
-		final double notesInLnRatePer() {
+		double notesInLnRatePer() {
 			return notesInLnRate() * 100.0;
 		}
 
@@ -97,7 +97,7 @@ class Holding {
 		 * LN時間比率取得
 		 * @return LN時間比率
 		 */
-		final double lnTimeRate() {
+		double lnTimeRate() {
 			return (playTime == 0.0) ? 0.0 : (lnTime / playTime);
 		}
 
@@ -105,7 +105,7 @@ class Holding {
 		 * LN時間比率(%)取得
 		 * @return LN時間比率(%)
 		 */
-		final double lnTimeRatePer() {
+		double lnTimeRatePer() {
 			return lnTimeRate() * 100.0;
 		}
 	}

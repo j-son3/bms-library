@@ -160,7 +160,7 @@ public class BeMusicSound {
 	 * @param isRestartTrack 音声データの再開要否
 	 * @param lnMode ロングノートモード(nullを指定すると未定義(0)とする)
 	 * @return サウンドに関連するノートの値
-	 * @exception IllegalArgumentException trackIdが{@link TRACK_ID_MIN}未満、または{@link TRACK_ID_MAX}超過
+	 * @throws IllegalArgumentException trackIdが{@link TRACK_ID_MIN}未満、または{@link TRACK_ID_MAX}超過
 	 */
 	public static int makeValue(int trackId, boolean isRestartTrack, BeMusicLongNoteMode lnMode) {
 		assertArgRange(trackId, TRACK_ID_MIN, TRACK_ID_MAX, "trackId");

@@ -43,7 +43,7 @@ abstract class RatingElement {
 	 * 楽曲位置情報取得
 	 * @return 楽曲位置情報
 	 */
-	final BeMusicPoint getPoint() {
+	BeMusicPoint getPoint() {
 		return mPoint;
 	}
 
@@ -51,7 +51,7 @@ abstract class RatingElement {
 	 * 小節番号取得
 	 * @return 小節番号
 	 */
-	final int getMeasure() {
+	int getMeasure() {
 		return mPoint.getMeasure();
 	}
 
@@ -59,7 +59,7 @@ abstract class RatingElement {
 	 * 楽曲位置の時間取得
 	 * @return 楽曲位置の時間
 	 */
-	final double getTime() {
+	double getTime() {
 		return mPoint.getTime();
 	}
 
@@ -67,7 +67,7 @@ abstract class RatingElement {
 	 * 前の楽曲位置からの時間差分取得
 	 * @return 前の楽曲位置からの時間差分
 	 */
-	final double getTimeDelta() {
+	double getTimeDelta() {
 		return mTimeDelta;
 	}
 
@@ -75,7 +75,7 @@ abstract class RatingElement {
 	 * 前の楽曲位置からの時間差分設定
 	 * @param timeDelta 前の楽曲位置からの時間差分
 	 */
-	final void setTimeDelta(double timeDelta) {
+	void setTimeDelta(double timeDelta) {
 		mTimeDelta = (float)timeDelta;
 	}
 
@@ -84,7 +84,7 @@ abstract class RatingElement {
 	 * @param device 入力デバイス
 	 * @return ノート種別
 	 */
-	final BeMusicNoteType getNoteType(BeMusicDevice device) {
+	BeMusicNoteType getNoteType(BeMusicDevice device) {
 		return BeMusicNoteType.fromId(mNoteTypes[device.getIndex()]);
 	}
 
@@ -93,7 +93,7 @@ abstract class RatingElement {
 	 * @param device 入力デバイス
 	 * @param ntype ノート種別
 	 */
-	final void setNoteType(BeMusicDevice device, BeMusicNoteType ntype) {
+	void setNoteType(BeMusicDevice device, BeMusicNoteType ntype) {
 		mNoteTypes[device.getIndex()] = (byte)ntype.getId();
 	}
 
@@ -170,7 +170,7 @@ abstract class RatingElement {
 	 * コンテキスト取得
 	 * @return コンテキスト
 	 */
-	protected final DsContext getContext() {
+	protected DsContext getContext() {
 		return mCtx;
 	}
 

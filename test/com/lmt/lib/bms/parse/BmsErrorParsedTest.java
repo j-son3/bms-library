@@ -21,7 +21,7 @@ public class BmsErrorParsedTest {
 	// 指定したエラー情報でオブジェクトが生成されること
 	@Test
 	public void testBmsErrorParsed2_Normal() {
-		var err = new BmsScriptError(BmsErrorType.PANIC, 0, "", "msg", null);
+		var err = new BmsScriptError(BmsErrorType.SYNTAX, 0, "", "msg", null);
 		var p = new BmsErrorParsed(err);
 		assertEquals(BmsParsedType.ERROR, p.causeType);
 		assertSame(err, p.error);
@@ -32,7 +32,7 @@ public class BmsErrorParsedTest {
 	@Test
 	public void testBmsErrorParsed3_Normal() {
 		var type = BmsParsedType.NOTE;
-		var err = new BmsScriptError(BmsErrorType.PANIC, 0, "", "msg", null);
+		var err = new BmsScriptError(BmsErrorType.SYNTAX, 0, "", "msg", null);
 		var p = new BmsErrorParsed(type, err);
 		assertEquals(type, p.causeType);
 		assertSame(err, p.error);
@@ -43,7 +43,7 @@ public class BmsErrorParsedTest {
 	@Test
 	public void testSet_Normal() {
 		var type = BmsParsedType.META;
-		var err = new BmsScriptError(BmsErrorType.PANIC, 0, "", "msg", null);
+		var err = new BmsScriptError(BmsErrorType.SYNTAX, 0, "", "msg", null);
 		var p = new BmsErrorParsed();
 		p.set(type, err);
 		assertEquals(type, p.causeType);
@@ -57,7 +57,7 @@ public class BmsErrorParsedTest {
 	// エラー情報が設定されていればfalseが返ること
 	@Test
 	public void testIsOk_HasError() {
-		var err = new BmsScriptError(BmsErrorType.PANIC, 0, "", "msg", null);
+		var err = new BmsScriptError(BmsErrorType.SYNTAX, 0, "", "msg", null);
 		var p = new BmsErrorParsed(err);
 		assertFalse(p.isOk());
 	}
@@ -74,7 +74,7 @@ public class BmsErrorParsedTest {
 	// エラー情報が設定されていればtrueが返ること
 	@Test
 	public void testIsFail_HasError() {
-		var err = new BmsScriptError(BmsErrorType.PANIC, 0, "", "msg", null);
+		var err = new BmsScriptError(BmsErrorType.SYNTAX, 0, "", "msg", null);
 		var p = new BmsErrorParsed(err);
 		assertTrue(p.isFail());
 	}

@@ -26,6 +26,8 @@ public interface BmsLoadHandler {
 	 * パラメータで渡されたオブジェクト以外を渡したBMSコンテンツを返した場合、{@link BmsLoader#load}の以後の処理でエラーとなり
 	 * 読み込み失敗となります。</p>
 	 *
+	 * <p>当メソッドで例外がスローされると、その例外を内包した {@link BmsHandleException} がスローされます。</p>
+	 *
 	 * @param spec BMS仕様
 	 * @return BMSコンテンツオブジェクト
 	 */
@@ -47,7 +49,7 @@ public interface BmsLoadHandler {
 	 * 生成済みのBmsNoteオブジェクトの参照を返却するとオブジェクト内部のデータが上書きされてしまい、当該オブジェクトを持つBMSコンテンツの
 	 * データ不整合が発生してしまいます。</p>
 	 *
-	 * <p>当メソッドで例外をスローした場合、当該例外を内包した{@link BmsException}がスローされます。</p>
+	 * <p>当メソッドで例外がスローされると、その例外を内包した {@link BmsHandleException} がスローされます。</p>
 	 *
 	 * @return ノートオブジェクト
 	 */
@@ -61,8 +63,7 @@ public interface BmsLoadHandler {
 	 * <p>当メソッドは1個のBMSの読み込みが開始される度に、アプリケーション固有の何らかの初期化処理を行いたい場合を想定して
 	 * 用意されています。そのような事情がない場合は何も行う必要はありません。</p>
 	 *
-	 * <p>当メソッドで例外をスローすると、後の処理で呼ばれる検査メソッドは一切呼ばれず、スローされた例外を内包した
-	 * {@link BmsException}がスローされます。</p>
+	 * <p>当メソッドで例外がスローされると、その例外を内包した {@link BmsHandleException} がスローされます。</p>
 	 *
 	 * @param settings BMSローダーの設定
 	 */
@@ -83,7 +84,7 @@ public interface BmsLoadHandler {
 	 * <p>当メソッドでfalseを返し、エラーを無視しない場合は{@link BmsLoader#load}は{@link BmsLoadException}例外を
 	 * スローし、生成中のBMSコンテンツは破棄します。デフォルトの動作では解析エラーは無視しません。</p>
 	 *
-	 * <p>当メソッドで例外をスローした場合、当該例外を内包した{@link BmsException}がスローされます。</p>
+	 * <p>当メソッドで例外がスローされると、その例外を内包した {@link BmsHandleException} がスローされます。</p>
 	 *
 	 * @param error エラー情報
 	 * @return falseを返すと、読み込み続行不可としてBMS読み込みを停止します。
@@ -101,7 +102,7 @@ public interface BmsLoadHandler {
 	 *
 	 * <p>デフォルトの動作では、全てのBMS宣言を受け入れます。</p>
 	 *
-	 * <p>当メソッドで例外をスローした場合、当該例外を内包した{@link BmsException}がスローされます。</p>
+	 * <p>当メソッドで例外がスローされると、その例外を内包した {@link BmsHandleException} がスローされます。</p>
 	 *
 	 * @param key キー(NOT null保証)
 	 * @param value 値(NOT null保証)
@@ -123,7 +124,7 @@ public interface BmsLoadHandler {
 	 *
 	 * <p>BMS仕様にないメタ情報を検出しても当メソッドは呼び出されず、直接{@link #parseError}が呼び出されます。</p>
 	 *
-	 * <p>当メソッドで例外をスローした場合、当該例外を内包した{@link BmsException}がスローされます。</p>
+	 * <p>当メソッドで例外がスローされると、その例外を内包した {@link BmsHandleException} がスローされます。</p>
 	 *
 	 * @param meta メタ情報
 	 * @param index インデックス
@@ -148,7 +149,7 @@ public interface BmsLoadHandler {
 	 *
 	 * <p>BMS仕様にないチャンネルを検出しても当メソッドは呼び出されず、直接{@link #parseError}が呼び出されます。</p>
 	 *
-	 * <p>当メソッドで例外をスローした場合、当該例外を内包した{@link BmsException}がスローされます。</p>
+	 * <p>当メソッドで例外がスローされると、その例外を内包した {@link BmsHandleException} がスローされます。</p>
 	 *
 	 * @param channel チャンネル
 	 * @param index チャンネルインデックス
@@ -176,7 +177,7 @@ public interface BmsLoadHandler {
 	 * BMSコンテンツの読み込み処理失敗と判定されてしまいます。</p>
 	 * <p>当メソッドから返す検査結果に{@link BmsTestResult#RESULT_FAIL}を設定するとBMSコンテンツ読み込みは失敗します。
 	 * それ以外の検査結果は全て読み込み成功と判定されます。</p>
-	 * <p>当メソッドで例外をスローした場合、当該例外を内包した{@link BmsException}がスローされます。</p>
+	 * <p>当メソッドで例外がスローされると、その例外を内包した {@link BmsHandleException} がスローされます。</p>
 	 * <p>当メソッドの既定の動作では{@link BmsTestResult#OK}を返します。</p>
 	 * @param content 読み込みの完了したBMSコンテンツ
 	 * @return 検査結果

@@ -43,7 +43,7 @@ public interface BmsAt {
 	 * @param at1 楽曲位置1
 	 * @param at2 楽曲位置2
 	 * @return 2つの楽曲位置が同じであればtrue
-	 * @exception NullPointerException at1またはat2がnull
+	 * @throws NullPointerException at1またはat2がnull
 	 */
 	public static boolean equals(BmsAt at1, BmsAt at2) {
 		return (at1.getMeasure() == at2.getMeasure()) && (at1.getTick() == at2.getTick());
@@ -54,7 +54,7 @@ public interface BmsAt {
 	 * @param at1 楽曲位置1
 	 * @param at2 楽曲位置2
 	 * @return 楽曲位置1 == 楽曲位置2は0、楽曲位置1 &gt; 楽曲位置2は正の値、楽曲位置1 &lt; 楽曲位置2は負の値
-	 * @exception NullPointerException at1またはat2がnull
+	 * @throws NullPointerException at1またはat2がnull
 	 */
 	public static int compare(BmsAt at1, BmsAt at2) {
 		var comp = Integer.compare(at1.getMeasure(), at2.getMeasure());
@@ -80,7 +80,7 @@ public interface BmsAt {
 	 * 楽曲位置からハッシュコード値を生成します。
 	 * @param at 楽曲位置
 	 * @return ハッシュコード値
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
 	public static int hashCode(BmsAt at) {
 		return Objects.hash(at.getMeasure(), at.getTick());
@@ -90,7 +90,7 @@ public interface BmsAt {
 	 * 楽曲位置の文字列表現を返します。
 	 * @param at 楽曲位置
 	 * @return 楽曲位置の文字列表現
-	 * @exception NullPointerException atがnull
+	 * @throws NullPointerException atがnull
 	 */
 	public static String toString(BmsAt at) {
 		return String.format("{M=%d, T=%.16g}", at.getMeasure(), at.getTick());

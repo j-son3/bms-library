@@ -62,7 +62,7 @@ import java.util.stream.Stream;
  * @see BmsSaver [BmsSaver] BMSコンテンツを外部データに書き込む方法についての説明
  * @since 0.0.1
  */
-public final class BmsSpec {
+public class BmsSpec {
 	/** BMS定義で初期BPMが未定義の場合に使用されるデフォルトのBPM */
 	public static final double BPM_DEFAULT = 130.0;
 	/** BMSライブラリで取り扱い可能な最小のBPMを表します。 */
@@ -221,9 +221,9 @@ public final class BmsSpec {
 	 * 情報単位が{@link BmsUnit#SINGLE SINGLE}のメタ情報を取得します。
 	 * @param name メタ情報の名称
 	 * @return 名称に該当するメタ情報。存在しない場合はnull。
-	 * @exception NullPointerException nameがnull
+	 * @throws NullPointerException nameがnull
 	 */
-	public final BmsMeta getSingleMeta(String name) {
+	public BmsMeta getSingleMeta(String name) {
 		assertArgNotNull(name, "name");
 		return mSingleMetas.get(name);
 	}
@@ -232,9 +232,9 @@ public final class BmsSpec {
 	 * 情報単位が{@link BmsUnit#MULTIPLE MULTIPLE}のメタ情報を取得します。
 	 * @param name メタ情報の名称
 	 * @return 名称に該当するメタ情報。存在しない場合はnull。
-	 * @exception NullPointerException nameがnull
+	 * @throws NullPointerException nameがnull
 	 */
-	public final BmsMeta getMultipleMeta(String name) {
+	public BmsMeta getMultipleMeta(String name) {
 		assertArgNotNull(name, "name");
 		return mMultipleMetas.get(name);
 	}
@@ -243,9 +243,9 @@ public final class BmsSpec {
 	 * 情報単位が{@link BmsUnit#INDEXED INDEXED}のメタ情報を取得します。
 	 * @param name メタ情報の名称
 	 * @return 名称に該当するメタ情報。存在しない場合はnull。
-	 * @exception NullPointerException nameがnull
+	 * @throws NullPointerException nameがnull
 	 */
-	public final BmsMeta getIndexedMeta(String name) {
+	public BmsMeta getIndexedMeta(String name) {
 		assertArgNotNull(name, "name");
 		return mIndexedMetas.get(name);
 	}
@@ -255,9 +255,9 @@ public final class BmsSpec {
 	 * <p>メタ情報キーの名称・構成単位を使用してメタ情報を検索します。</p>
 	 * @param key メタ情報キー
 	 * @return メタ情報キーに該当するメタ情報。存在しない場合はnull。
-	 * @exception NullPointerException keyがnull
+	 * @throws NullPointerException keyがnull
 	 */
-	public final BmsMeta getMeta(BmsMetaKey key) {
+	public BmsMeta getMeta(BmsMetaKey key) {
 		assertArgNotNull(key, "key");
 		return getMeta(key.getName(), key.getUnit());
 	}
@@ -267,10 +267,10 @@ public final class BmsSpec {
 	 * @param name メタ情報の名称
 	 * @param unit 情報単位
 	 * @return 名称・単位に該当するメタ情報。存在しない場合はnull。
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
 	 */
-	public final BmsMeta getMeta(String name, BmsUnit unit) {
+	public BmsMeta getMeta(String name, BmsUnit unit) {
 		assertArgNotNull(name, "name");
 		assertArgNotNull(unit, "unit");
 		switch (unit) {
@@ -290,9 +290,9 @@ public final class BmsSpec {
 	 * <p>メタ情報キーの名称・構成単位を使用してメタ情報の存在チェックを行います。</p>
 	 * @param key メタ情報キー
 	 * @return メタ情報キーに該当するメタ情報が存在する場合はtrue
-	 * @exception NullPointerException keyがnull
+	 * @throws NullPointerException keyがnull
 	 */
-	public final boolean containsMeta(BmsMetaKey key) {
+	public boolean containsMeta(BmsMetaKey key) {
 		assertArgNotNull(key, "key");
 		return containsMeta(key.getName(), key.getUnit());
 	}
@@ -302,10 +302,10 @@ public final class BmsSpec {
 	 * @param name メタ情報の名称
 	 * @param unit 情報単位
 	 * @return 名称・単位に該当するメタ情報が存在する場合はtrue
-	 * @exception NullPointerException nameがnull
-	 * @exception NullPointerException unitがnull
+	 * @throws NullPointerException nameがnull
+	 * @throws NullPointerException unitがnull
 	 */
-	public final boolean containsMeta(String name, BmsUnit unit) {
+	public boolean containsMeta(String name, BmsUnit unit) {
 		return getMeta(name, unit) != null;
 	}
 
@@ -316,7 +316,7 @@ public final class BmsSpec {
 	 * <p>任意型メタ情報はリストには含まれません。</p>
 	 * @return メタ情報のリスト
 	 */
-	public final List<BmsMeta> getMetas() {
+	public List<BmsMeta> getMetas() {
 		return getMetas(false);
 	}
 
@@ -328,7 +328,7 @@ public final class BmsSpec {
 	 * @return メタ情報のリスト
 	 * @since 0.8.0
 	 */
-	public final List<BmsMeta> getMetas(boolean includeObject) {
+	public List<BmsMeta> getMetas(boolean includeObject) {
 		return (includeObject ? metas() : metas().filter(m -> !m.isObjectType())).collect(Collectors.toList());
 	}
 
@@ -339,7 +339,7 @@ public final class BmsSpec {
 	 * @return メタ情報を走査するストリーム
 	 * @since 0.8.0
 	 */
-	public final Stream<BmsMeta> metas() {
+	public Stream<BmsMeta> metas() {
 		return mOrderedMetas.stream();
 	}
 
@@ -348,7 +348,7 @@ public final class BmsSpec {
 	 * @param number チャンネル番号
 	 * @return チャンネル番号に該当するチャンネル。存在しない場合はnull。
 	 */
-	public final BmsChannel getChannel(int number) {
+	public BmsChannel getChannel(int number) {
 		return mChannels.get(BmsInt.box(number));
 	}
 
@@ -357,7 +357,7 @@ public final class BmsSpec {
 	 * @param number チャンネル番号
 	 * @return チャンネル番号に該当するチャンネルが存在する場合はtrue
 	 */
-	public final boolean containsChannel(int number) {
+	public boolean containsChannel(int number) {
 		return mChannels.get(BmsInt.box(number)) != null;
 	}
 
@@ -367,7 +367,7 @@ public final class BmsSpec {
 	 * <p>ユーザーチャンネルはリストには含まれません。</p>
 	 * @return チャンネルのリスト
 	 */
-	public final List<BmsChannel> getChannels() {
+	public List<BmsChannel> getChannels() {
 		return getChannels(false);
 	}
 
@@ -378,7 +378,7 @@ public final class BmsSpec {
 	 * @return チャンネルのリスト
 	 * @since 0.8.0
 	 */
-	public final List<BmsChannel> getChannels(boolean includeUser) {
+	public List<BmsChannel> getChannels(boolean includeUser) {
 		return (includeUser ? channels() : channels().filter(BmsChannel::isSpec)).collect(Collectors.toList());
 	}
 
@@ -388,7 +388,7 @@ public final class BmsSpec {
 	 * @return チャンネルを走査するストリーム
 	 * @since 0.8.0
 	 */
-	public final Stream<BmsChannel> channels() {
+	public Stream<BmsChannel> channels() {
 		return mOrderedChannels.stream();
 	}
 
@@ -396,7 +396,7 @@ public final class BmsSpec {
 	 * 初期BPMメタ情報を取得します。
 	 * @return 初期BPMメタ情報
 	 */
-	public final BmsMeta getInitialBpmMeta() {
+	public BmsMeta getInitialBpmMeta() {
 		return mInitialBpmMeta;
 	}
 
@@ -406,7 +406,7 @@ public final class BmsSpec {
 	 * @return 基数選択メタ情報、またはnull
 	 * @since 0.8.0
 	 */
-	public final BmsMeta getBaseChangerMeta() {
+	public BmsMeta getBaseChangerMeta() {
 		return mBaseChangerMeta;
 	}
 
@@ -415,7 +415,7 @@ public final class BmsSpec {
 	 * @return 基数選択メタ情報が設定されていればtrue
 	 * @since 0.8.0
 	 */
-	public final boolean hasBaseChanger() {
+	public boolean hasBaseChanger() {
 		return mBaseChangerMeta != null;
 	}
 
@@ -424,7 +424,7 @@ public final class BmsSpec {
 	 * <p>BMS仕様として小節長変更が未定義の場合、このメソッドはnullを返します。</p>
 	 * @return 小節長変更チャンネル
 	 */
-	public final BmsChannel getLengthChannel() {
+	public BmsChannel getLengthChannel() {
 		return mLengthChannel;
 	}
 
@@ -433,7 +433,7 @@ public final class BmsSpec {
 	 * @param channel チャンネル
 	 * @return チャンネルが小節長変更チャンネルならtrue
 	 */
-	final boolean isLengthChannel(BmsChannel channel) {
+	boolean isLengthChannel(BmsChannel channel) {
 		return (mLengthChannel != null) && (mLengthChannel == channel);
 	}
 
@@ -443,7 +443,7 @@ public final class BmsSpec {
 	 * @param number チャンネル番号
 	 * @return BPM変更チャンネル。指定したチャンネル番号に該当するBPM変更チャンネルが存在しない場合null
 	 */
-	public final BmsChannel getBpmChannel(int number) {
+	public BmsChannel getBpmChannel(int number) {
 		return getBpmChannel(number, false);
 	}
 
@@ -456,7 +456,7 @@ public final class BmsSpec {
 	 * @param byIndex falseの場合チャンネル番号で、trueの場合インデックス値でチャンネルを取得します。
 	 * @return BPM変更チャンネル。指定した値に該当するBPM変更チャンネルが存在しない場合null
 	 */
-	public final BmsChannel getBpmChannel(int number, boolean byIndex) {
+	public BmsChannel getBpmChannel(int number, boolean byIndex) {
 		if (byIndex) {
 			// インデックスによる検索
 			return ((number < 0) || (number >= mBpmChannels.length)) ? null : mBpmChannels[number];
@@ -473,7 +473,7 @@ public final class BmsSpec {
 	 * BPM変更チャンネルの数を取得します。
 	 * @return BPM変更チャンネルの数
 	 */
-	public final int getBpmChannelCount() {
+	public int getBpmChannelCount() {
 		return mBpmChannels.length;
 	}
 
@@ -481,7 +481,7 @@ public final class BmsSpec {
 	 * BPM変更チャンネルが存在するかを取得します。
 	 * @return BPM変更チャンネルが存在する場合true
 	 */
-	public final boolean hasBpmChannel() {
+	public boolean hasBpmChannel() {
 		return (mBpmChannels.length > 0);
 	}
 
@@ -491,7 +491,7 @@ public final class BmsSpec {
 	 * @param number チャンネル番号
 	 * @return 譜面停止チャンネル。指定したチャンネル番号に該当する譜面停止チャンネルが存在しない場合null
 	 */
-	public final BmsChannel getStopChannel(int number) {
+	public BmsChannel getStopChannel(int number) {
 		return getStopChannel(number, false);
 	}
 
@@ -504,7 +504,7 @@ public final class BmsSpec {
 	 * @param byIndex falseの場合チャンネル番号で、trueの場合インデックス値でチャンネルを取得します。
 	 * @return 譜面停止チャンネル。指定した値に該当する譜面停止チャンネルが存在しない場合null
 	 */
-	public final BmsChannel getStopChannel(int number, boolean byIndex) {
+	public BmsChannel getStopChannel(int number, boolean byIndex) {
 		if (byIndex) {
 			// インデックスによる検索
 			return ((number < 0) || (number >= mStopChannels.length)) ? null : mStopChannels[number];
@@ -521,7 +521,7 @@ public final class BmsSpec {
 	 * 譜面停止チャンネルの数を取得します。
 	 * @return 譜面停止チャンネルの数
 	 */
-	public final int getStopChannelCount() {
+	public int getStopChannelCount() {
 		return mStopChannels.length;
 	}
 
@@ -529,7 +529,7 @@ public final class BmsSpec {
 	 * 譜面停止チャンネルが存在するかを取得します。
 	 * @return 譜面停止チャンネルが存在する場合true
 	 */
-	public final boolean hasStopChannel() {
+	public boolean hasStopChannel() {
 		return (mStopChannels.length > 0);
 	}
 
@@ -552,7 +552,7 @@ public final class BmsSpec {
 	 * @return BMS仕様から生成されたハッシュ値
 	 * @since 0.9.0
 	 */
-	public final byte[] generateHash() {
+	public byte[] generateHash() {
 		return generateHashSeed().toHash();
 	}
 
@@ -621,7 +621,7 @@ public final class BmsSpec {
 	 * 呼び出して文字セットを変更してください。</p>
 	 * <p>この設定が使用されるのはBMSを読み込み、書き込み時です。</p>
 	 * @param cs 標準に設定する文字セット
-	 * @exception NullPointerException csがnull
+	 * @throws NullPointerException csがnull
 	 * @deprecated 当メソッドは非推奨となりました。代わりに{@link BmsLibrary#setDefaultCharsets(Charset...)}
 	 * を使用してください。それにより、ライブラリで扱う文字セットを優先順に複数扱うことができます。
 	 */

@@ -39,7 +39,7 @@ public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	/**
 	 * 指定されたアドレスと同じ新しいアドレスオブジェクトを構築します。
 	 * @param adr アドレス
-	 * @exception NullPointerException adrがnull
+	 * @throws NullPointerException adrがnull
 	 */
 	public BmsAddress(BmsAddress adr) {
 		assertArgNotNull(adr, "adr");
@@ -52,7 +52,7 @@ public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	 * 指定された楽曲位置、CHXで新しいアドレスオブジェクトを構築します。
 	 * @param at 楽曲位置
 	 * @param chx CHX
-	 * @exception NullPointerException atまたはchxがnull
+	 * @throws NullPointerException atまたはchxがnull
 	 */
 	public BmsAddress(BmsAt at, BmsChx chx) {
 		assertArgNotNull(at, "at");
@@ -85,7 +85,7 @@ public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	 * 小節番号設定
 	 * @param measure 小節番号
 	 */
-	final void setMeasure(int measure) {
+	void setMeasure(int measure) {
 		mMeasure = measure;
 	}
 
@@ -99,7 +99,7 @@ public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	 * 小節の刻み位置設定
 	 * @param tick 小節の刻み位置
 	 */
-	final void setTick(double tick) {
+	void setTick(double tick) {
 		mTick = tick;
 	}
 
@@ -120,7 +120,7 @@ public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	 * @param channel チャンネル番号
 	 * @param index チャンネルインデックス
 	 */
-	final void setChx(int channel, int index) {
+	void setChx(int channel, int index) {
 		mChx = BmsChx.toInt(channel, index);
 	}
 
@@ -128,7 +128,7 @@ public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	 * CHX設定
 	 * @param chx CHX値
 	 */
-	final void setChx(int chx) {
+	void setChx(int chx) {
 		mChx = chx;
 	}
 
@@ -168,7 +168,7 @@ public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	 * <p>比較処理の詳細については{@link #compare(BmsAddress, BmsAddress)}を参照してください。</p>
 	 * @param adr 比較対象アドレス
 	 * @return アドレスの比較結果
-	 * @exception NullPointerException adrがnull
+	 * @throws NullPointerException adrがnull
 	 */
 	@Override
 	public int compareTo(BmsAddress adr) {
@@ -180,7 +180,7 @@ public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	 * @param adr1 アドレス1
 	 * @param adr2 アドレス2
 	 * @return 2つのアドレスが同一の場合true
-	 * @exception NullPointerException adr1またはadr2がnull
+	 * @throws NullPointerException adr1またはadr2がnull
 	 */
 	public static boolean equals(BmsAddress adr1, BmsAddress adr2) {
 		return BmsAt.equals(adr1, adr2) && BmsChx.equals(adr1, adr2);
@@ -193,7 +193,7 @@ public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	 * @param adr1 アドレス1
 	 * @param adr2 アドレス2
 	 * @return アドレス1 == アドレス2は0、アドレス1 &gt; アドレス2は正の値、アドレス1 &lt; アドレス2は負の値
-	 * @exception NullPointerException adr1またはadr2がnull
+	 * @throws NullPointerException adr1またはadr2がnull
 	 */
 	public static int compare(BmsAddress adr1, BmsAddress adr2) {
 		var comp = BmsAt.compare(adr1, adr2);
@@ -205,7 +205,7 @@ public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	 * 指定されたアドレスのハッシュコード値を生成します。
 	 * @param adr アドレス
 	 * @return ハッシュコード値
-	 * @exception NullPointerException adrがnull
+	 * @throws NullPointerException adrがnull
 	 */
 	public static int hashCode(BmsAddress adr) {
 		return Objects.hash(adr.getMeasure(), adr.getTick(), BmsChx.toInt(adr));
@@ -214,7 +214,7 @@ public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	/**
 	 * 指定されたアドレスと同じ新しいアドレスオブジェクトを構築します。
 	 * @param adr アドレス
-	 * @exception NullPointerException adrがnull
+	 * @throws NullPointerException adrがnull
 	 * @return アドレスオブジェクト
 	 */
 	public static BmsAddress of(BmsAddress adr) {
@@ -225,7 +225,7 @@ public class BmsAddress implements BmsAt, BmsChx, Comparable<BmsAddress> {
 	 * 指定された楽曲位置、CHXの新しいアドレスオブジェクトを構築します。
 	 * @param at 楽曲位置
 	 * @param chx CHX
-	 * @exception NullPointerException atまたはchxがnull
+	 * @throws NullPointerException atまたはchxがnull
 	 * @return アドレスオブジェクト
 	 */
 	public static BmsAddress of(BmsAt at, BmsChx chx) {

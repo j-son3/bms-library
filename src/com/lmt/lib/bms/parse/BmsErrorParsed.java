@@ -48,7 +48,7 @@ public class BmsErrorParsed extends BmsParsed {
 	 * @param error エラー情報
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsErrorParsed set(BmsParsedType causeType, BmsScriptError error) {
+	public BmsErrorParsed set(BmsParsedType causeType, BmsScriptError error) {
 		this.causeType = causeType;
 		this.error = error;
 		return this;
@@ -58,7 +58,7 @@ public class BmsErrorParsed extends BmsParsed {
 	 * このオブジェクトが「エラーなし」を表すかどうかを判定します。
 	 * @return エラーなしであればtrue、そうでなければfalse
 	 */
-	public final boolean isOk() {
+	public boolean isOk() {
 		return error == null;
 	}
 
@@ -66,7 +66,7 @@ public class BmsErrorParsed extends BmsParsed {
 	 * このオブジェクトが「エラーあり」を表すかどうかを判定します。
 	 * @return エラーありであればtrue、そうでなければfalse
 	 */
-	public final boolean isFail() {
+	public boolean isFail() {
 		return error != null;
 	}
 }

@@ -16,7 +16,7 @@ public abstract class InterpolateFunction {
 	 * 入力値範囲取得
 	 * @return 入力値範囲
 	 */
-	public final double getInRange() {
+	public double getInRange() {
 		return mInRange;
 	}
 
@@ -24,7 +24,7 @@ public abstract class InterpolateFunction {
 	 * 出力値範囲取得
 	 * @return 出力値範囲
 	 */
-	public final double getOutRange() {
+	public double getOutRange() {
 		return mOutRange;
 	}
 

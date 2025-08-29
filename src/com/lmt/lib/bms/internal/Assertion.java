@@ -9,13 +9,13 @@ import com.lmt.lib.bms.BmsSpec;
  * アサーションに失敗した場合、メソッドごとに定められた例外をスローする。これらの例外は基本的には
  * RuntimeExceptionを継承した例外となっている。
  */
-public final class Assertion {
+public class Assertion {
 	/**
 	 * 引数の汎用アサーション
 	 * @param success 評価式の結果
 	 * @param msgFormat アサーション失敗時のメッセージ書式
 	 * @param args メッセージ引数
-	 * @exception IllegalArgumentException アサーションに失敗した
+	 * @throws IllegalArgumentException アサーションに失敗した
 	 */
 	public static void assertArg(boolean success, String msgFormat, Object...args) {
 		if (!success) {
@@ -28,7 +28,7 @@ public final class Assertion {
 	 * @param success 評価式の結果
 	 * @param msgFormat アサーション失敗時のメッセージ書式
 	 * @param arg1 メッセージ引数1
-	 * @exception IllegalArgumentException アサーションに失敗した
+	 * @throws IllegalArgumentException アサーションに失敗した
 	 */
 	public static void assertArg(boolean success, String msgFormat, int arg1) {
 		if (!success) {
@@ -42,7 +42,7 @@ public final class Assertion {
 	 * @param msgFormat アサーション失敗時のメッセージ書式
 	 * @param arg1 メッセージ引数1
 	 * @param arg2 メッセージ引数2
-	 * @exception IllegalArgumentException アサーションに失敗した
+	 * @throws IllegalArgumentException アサーションに失敗した
 	 */
 	public static void assertArg(boolean success, String msgFormat, int arg1, int arg2) {
 		if (!success) {
@@ -57,7 +57,7 @@ public final class Assertion {
 	 * @param arg1 メッセージ引数1
 	 * @param arg2 メッセージ引数2
 	 * @param arg3 メッセージ引数3
-	 * @exception IllegalArgumentException アサーションに失敗した
+	 * @throws IllegalArgumentException アサーションに失敗した
 	 */
 	public static void assertArg(boolean success, String msgFormat, int arg1, int arg2, int arg3) {
 		if (!success) {
@@ -69,7 +69,7 @@ public final class Assertion {
 	 * 引数がnullではないことをテストするアサーション
 	 * @param arg nullチェックを行う引数
 	 * @param argName 引数の名前
-	 * @exception NullPointerException 引数がnullだった
+	 * @throws NullPointerException 引数がnullだった
 	 */
 	public static void assertArgNotNull(Object arg, String argName) {
 		if (arg == null) {
@@ -83,7 +83,7 @@ public final class Assertion {
 	 * @param min 許容最小値
 	 * @param max 許容最大値
 	 * @param valueName 引数の名前
-	 * @exception IllegalArgumentException 引数の値が許容範囲外だった
+	 * @throws IllegalArgumentException 引数の値が許容範囲外だった
 	 */
 	public static void assertArgRange(int value, int min, int max, String valueName) {
 		if ((value < min) || (value > max)) assertArgRangeFail(value, min, max, valueName);
@@ -95,7 +95,7 @@ public final class Assertion {
 	 * @param min 許容最小値
 	 * @param max 許容最大値
 	 * @param valueName 引数の名前
-	 * @exception IllegalArgumentException 引数の値が許容範囲外だった
+	 * @throws IllegalArgumentException 引数の値が許容範囲外だった
 	 */
 	public static void assertArgRange(long value, long min, long max, String valueName) {
 		if ((value < min) || (value > max)) assertArgRangeFail(value, min, max, valueName);
@@ -107,7 +107,7 @@ public final class Assertion {
 	 * @param min 許容最小値
 	 * @param max 許容最大値
 	 * @param valueName 引数の名前
-	 * @exception IllegalArgumentException 引数の値が許容範囲外だった
+	 * @throws IllegalArgumentException 引数の値が許容範囲外だった
 	 */
 	public static void assertArgRange(float value, float min, float max, String valueName) {
 		if ((value < min) || (value > max)) assertArgRangeFail(value, min, max, valueName);
@@ -119,7 +119,7 @@ public final class Assertion {
 	 * @param min 許容最小値
 	 * @param max 許容最大値
 	 * @param valueName 引数の名前
-	 * @exception IllegalArgumentException 引数の値が許容範囲外だった
+	 * @throws IllegalArgumentException 引数の値が許容範囲外だった
 	 */
 	public static void assertArgRange(double value, double min, double max, String valueName) {
 		if ((value < min) || (value > max)) assertArgRangeFail(value, min, max, valueName);
@@ -142,7 +142,7 @@ public final class Assertion {
 	 * @param index インデックス
 	 * @param count 要素の最大数
 	 * @param argName 引数の名前
-	 * @exception IndexOutOfBoundsException インデックスが範囲外
+	 * @throws IndexOutOfBoundsException インデックスが範囲外
 	 */
 	public static void assertArgIndexRange(int index, int count, String argName) {
 		if ((index < 0) || (index >= count)) {
@@ -154,7 +154,7 @@ public final class Assertion {
 	/**
 	 * 小節データ・ノートを登録可能なチャンネルの範囲をテストするアサーション
 	 * @param channel チャンネル番号
-	 * @exception IllegalArgumentException 小節データ・ノートを登録できないチャンネル番号
+	 * @throws IllegalArgumentException 小節データ・ノートを登録できないチャンネル番号
 	 */
 	public static void assertChannelRange(int channel) {
 		if ((channel < BmsSpec.CHANNEL_MIN) || (channel > BmsSpec.CHANNEL_MAX)) {
@@ -167,7 +167,7 @@ public final class Assertion {
 	/**
 	 * チャンネル番号が仕様チャンネルの範囲かどうかをテストするアサーション
 	 * @param channel チャンネル番号
-	 * @exception IllegalArgumentException チャンネル番号が仕様チャンネルではない
+	 * @throws IllegalArgumentException チャンネル番号が仕様チャンネルではない
 	 */
 	public static void assertSpecChannelRange(int channel) {
 		if ((channel < BmsSpec.SPEC_CHANNEL_MIN) || (channel > BmsSpec.SPEC_CHANNEL_MAX)) {
@@ -180,7 +180,7 @@ public final class Assertion {
 	/**
 	 * チャンネル番号がユーザーチャンネルの範囲かどうかをテストするアサーション
 	 * @param channel チャンネル番号
-	 * @exception IllegalArgumentException チャンネル番号がユーザーチャンネルではない
+	 * @throws IllegalArgumentException チャンネル番号がユーザーチャンネルではない
 	 */
 	public static void assertUserChannelRange(int channel) {
 		if ((channel < BmsSpec.USER_CHANNEL_MIN) || (channel > BmsSpec.USER_CHANNEL_MAX)) {
@@ -193,7 +193,7 @@ public final class Assertion {
 	/**
 	 * 小節データ・ノートを登録可能なチャンネルの範囲(終端)をテストするアサーション
 	 * @param channel チャンネル番号
-	 * @exception IllegalArgumentException 小節データ・ノートを登録できないチャンネル番号
+	 * @throws IllegalArgumentException 小節データ・ノートを登録できないチャンネル番号
 	 */
 	public static void assertEndChannelRange(int channel) {
 		final var min = BmsSpec.CHANNEL_MIN;
@@ -208,7 +208,7 @@ public final class Assertion {
 	/**
 	 * BMSコンテンツに設定可能な小節番号の範囲をテストするアサーション
 	 * @param measure 小節番号
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満、または{@link BmsSpec#MEASURE_MAX}超過
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満、または{@link BmsSpec#MEASURE_MAX}超過
 	 */
 	public static void assertArgMeasureWithinRange(int measure) {
 		assertArgMeasureWithinRange(measure, BmsSpec.MEASURE_MAX, Double.MIN_VALUE);
@@ -218,7 +218,7 @@ public final class Assertion {
 	 * BMS仕様としてBMSデータに記述可能な小節番号の範囲をテストするアサーション
 	 * @param measure 小節番号
 	 * @param measureMax 小節番号最大値
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満、または小節番号最大値超過
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満、または小節番号最大値超過
 	 */
 	public static void assertArgMeasureWithinRange(int measure, int measureMax) {
 		assertArgMeasureWithinRange(measure, measureMax, Double.MIN_VALUE);
@@ -229,7 +229,7 @@ public final class Assertion {
 	 * @param measure 小節番号
 	 * @param measureMax 小節番号最大値
 	 * @param tick 刻み位置
-	 * @exception IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満、または小節番号最大値超過
+	 * @throws IllegalArgumentException 小節番号が{@link BmsSpec#MEASURE_MIN}未満、または小節番号最大値超過
 	 */
 	public static void assertArgMeasureWithinRange(int measure, int measureMax, double tick) {
 		if ((measure < BmsSpec.MEASURE_MIN) || (measure > measureMax)) {
@@ -247,7 +247,7 @@ public final class Assertion {
 	 * 小節の刻み位置の範囲をテストするアサーション
 	 * @param tick 刻み位置
 	 * @param measure 小節番号
-	 * @exception IllegalArgumentException 刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
+	 * @throws IllegalArgumentException 刻み位置が{@link BmsSpec#TICK_MIN}未満、または{@link BmsSpec#TICK_MAX}超過
 	 */
 	public static void assertArgTickWithinRange(double tick, int measure) {
 		assertArgTickWithinRange(tick, BmsSpec.TICK_MAX, measure);
@@ -258,7 +258,7 @@ public final class Assertion {
 	 * @param tick 刻み位置
 	 * @param tickMax 刻み位置最大値
 	 * @param measure 小節番号
-	 * @exception IllegalArgumentException 刻み位置が{@link BmsSpec#TICK_MIN}未満、または刻み位置最大値超過
+	 * @throws IllegalArgumentException 刻み位置が{@link BmsSpec#TICK_MIN}未満、または刻み位置最大値超過
 	 */
 	public static void assertArgTickWithinRange(double tick, double tickMax, int measure) {
 		if ((tick < BmsSpec.TICK_MIN) || (tick > tickMax)) {
@@ -272,8 +272,8 @@ public final class Assertion {
 	/**
 	 * ノートの値の範囲をテストするアサーション
 	 * @param value ノートの値
-	 * @exception IllegalArgumentException valueが0
-	 * @exception IllegalArgumentException valueが{@link BmsSpec#VALUE_MIN}未満、または{@link BmsSpec#VALUE_MAX}超過
+	 * @throws IllegalArgumentException valueが0
+	 * @throws IllegalArgumentException valueが{@link BmsSpec#VALUE_MIN}未満、または{@link BmsSpec#VALUE_MAX}超過
 	 */
 	public static void assertValue(int value) {
 		if (value == 0) {
@@ -290,7 +290,7 @@ public final class Assertion {
 	 * @param success クラスフィールドをテストする評価式の結果
 	 * @param format アサーション失敗時のメッセージ書式
 	 * @param args メッセージの引数
-	 * @exception IllegalStateException アサーションに失敗した
+	 * @throws IllegalStateException アサーションに失敗した
 	 */
 	public static void assertField(boolean success, String format, Object...args) {
 		if (!success) {

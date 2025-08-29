@@ -41,7 +41,7 @@ class HoldingRange {
 	 * @param dev 入力デバイス
 	 * @return pos, devに該当するノート評価点。なければnull
 	 */
-	final Double getNoteScore(int pos, BeMusicDevice dev) {
+	Double getNoteScore(int pos, BeMusicDevice dev) {
 		var posMap = evals.get(pos);
 		return (posMap == null) ? null : posMap.get(dev);
 	}
@@ -53,7 +53,7 @@ class HoldingRange {
 	 * @param countNotes ノート数としてカウントするかどうか
 	 * @param score ノート評価点
 	 */
-	final void putNoteScore(int pos, BeMusicDevice dev, boolean countNotes, double score) {
+	void putNoteScore(int pos, BeMusicDevice dev, boolean countNotes, double score) {
 		var posMap = evals.get(pos);
 		if (posMap == null) {
 			posMap = new HashMap<>();

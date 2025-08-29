@@ -37,7 +37,7 @@ public abstract class LinearInterpolateFunction extends InterpolateFunction {
 	 * @param outRange 出力値幅
 	 * @param points 出力値比率点リスト(0～1)
 	 * @return 当クラスのインスタンス
-	 * @exception IllegalArgumentException 出力値比率点に0～1の範囲外の値がある
+	 * @throws IllegalArgumentException 出力値比率点に0～1の範囲外の値がある
 	 */
 	public static LinearInterpolateFunction create(double inRange, double outRange, double...points) {
 		// パラメータの範囲チェック
@@ -90,7 +90,7 @@ public abstract class LinearInterpolateFunction extends InterpolateFunction {
 	 * @param in 入力値
 	 * @return 出力値
 	 */
-	protected final double interpolate(double in) {
+	protected double interpolate(double in) {
 		if (in < 0.0) {
 			// 入力値が下限値未満の場合は最初の補間点の値とする
 			return mPoints[0];

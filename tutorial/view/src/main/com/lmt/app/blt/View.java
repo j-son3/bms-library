@@ -166,14 +166,10 @@ public class View {
 			// BeMusicChart#getPlayTime()は、先頭から最後の操作可能ノートに到達するための時間です。
 			// その時間ではまだ何らかの音が鳴っている場合があるので、最後の音が鳴り止むまでの時間を計算し、
 			// その時間までを再生時間とします。
-			double duration = chart.getPlayTime();
-			for (BeMusicPoint p : chart) {
-				duration = Math.max(duration, p.sounds(true, false, true)
-						.mapToObj(View::getShouldPlaySound)
-						.filter(Objects::nonNull)
-						.mapToDouble(s -> p.getTime() + s.duration())
-						.max().orElse(0.0));
-			}
+			double duration = chart.computeActualPlayTime(rawNote -> {
+				OpenALSound sound = getShouldPlaySound(rawNote);
+				return Objects.nonNull(sound) ? sound.duration() : 0.0;
+			});
 
 			// 簡易シーケンサによって楽曲の再生を行います。
 			// 楽曲の先頭から順に、楽曲位置情報の時間に到達する度にprocessPoint()を呼び出すことを繰り返します。
@@ -278,17 +274,18 @@ public class View {
 	// ファイルなし、読み込みエラー等で該当するトラックIDのサウンドが存在しない場合はnullを返します。
 	private static OpenALSound getShouldPlaySound(int s) {
 		if (BeMusicSound.isVisible(s)) {
-			// 可視オブジェの場合、短押しまたは長押し開始の場合のみ再生するものとします。
+			// 可視オブジェの場合、サウンド再生を伴う可能性があるオブジェのみ再生を行います。
 			// それ以外のノートでは再生を行いません。(そんなのを再生したら曲がえらいことになりますw)
-			switch (BeMusicSound.getNoteType(s)) {
-			case BEAT, LONG_ON: return sounds.get(BeMusicSound.getTrackId(s));
-			default: return null;
-			}
-		} else {
+			BeMusicNoteType type = BeMusicSound.getNoteType(s);
+			BeMusicDevice device = BeMusicSound.getDevice(s);
+			return type.hasSound(device) ? sounds.get(BeMusicSound.getTrackId(s)) : null;
+		} else if (BeMusicSound.isBgm(s)) {
 			// BGMの場合、無条件に当該サウンドを再生します。
+			return sounds.get(BeMusicSound.getTrackId(s));
+		} else {
 			// それ以外(不可視オブジェ)は再生しません。
 			// ※ユーザー操作のない状況では不可視オブジェが再生される契機はありません
-			return BeMusicSound.isBgm(s) ? sounds.get(BeMusicSound.getTrackId(s)) : null;
+			return null;
 		}
 	}
 }

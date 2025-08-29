@@ -11,6 +11,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -1486,11 +1487,11 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(File)
-	// IOException 指定されたファイルが見つからない
+	// NoSuchFileException 指定されたパスのファイルが存在しない
 	@Test
 	public void testLoadFile_FileNotFound() {
 		var l = loader();
-		assertThrows(IOException.class, () -> l.load(new File("temp")));
+		assertThrows(NoSuchFileException.class, () -> l.load(new File("temp")));
 	}
 
 	// load(File)
@@ -1508,7 +1509,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(File)
-	// BmsLoadException ハンドラ(BmsLoadHandler#parseError)がfalseを返した
+	// BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
 	@Test
 	public void testLoadFile_ParseError() {
 		var l = loader();
@@ -1517,12 +1518,19 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(File)
-	// BmsException 読み込み処理中に想定外の例外がスローされた
+	// BmsHandleException ユーザープログラムの処理異常を検出した
 	@Test
-	public void testLoadFile_Unexpected() {
+	public void testLoadFile_IllegalUserProgram() {
 		var l = loader().setHandler(HANDLER_NULL_CONTENT);
 		var f = testDataPath(TEST_FILE_EMPTY).toFile();
-		assertThrows(BmsException.class, () -> l.load(f));
+		assertThrows(BmsHandleException.class, () -> l.load(f));
+	}
+
+	// load(File)
+	// BmsPanicException 内部処理異常による処理の強制停止が発生した
+	@Test
+	public void testLoadFile_Unexpected() {
+		// Do nothing: 試験不可
 	}
 
 	// load(Path)
@@ -1567,11 +1575,11 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(Path)
-	// IOException 指定されたファイルが見つからない
+	// NoSuchFileException 指定されたパスのファイルが存在しない
 	@Test
 	public void testLoadPath_FileNotFound() {
 		var l = loader();
-		assertThrows(IOException.class, () -> l.load(Path.of("temp")));
+		assertThrows(NoSuchFileException.class, () -> l.load(Path.of("temp")));
 	}
 
 	// load(Path)
@@ -1589,7 +1597,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(Path)
-	// BmsLoadException ハンドラ(BmsLoadHandler#parseError)がfalseを返した
+	// BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
 	@Test
 	public void testLoadPath_ParseError() {
 		var l = loader();
@@ -1597,13 +1605,20 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 		assertThrows(BmsLoadException.class, () -> l.load(p));
 	}
 
-	// load(Path)
-	// BmsException 読み込み処理中に想定外の例外がスローされた
+	// load(File)
+	// BmsHandleException ユーザープログラムの処理異常を検出した
 	@Test
-	public void testLoadPath_Unexpected() {
+	public void testLoadPath_IllegalUserProgram() {
 		var l = loader().setHandler(HANDLER_NULL_CONTENT);
 		var p = testDataPath(TEST_FILE_EMPTY);
-		assertThrows(BmsException.class, () -> l.load(p));
+		assertThrows(BmsHandleException.class, () -> l.load(p));
+	}
+
+	// load(Path)
+	// BmsPanicException 内部処理異常による処理の強制停止が発生した
+	@Test
+	public void testLoadPath_Unexpected() {
+		// Do nothing: 試験不可
 	}
 
 	// 正常
@@ -1655,7 +1670,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(InputStream)
-	// BmsLoadException ハンドラ(BmsLoadHandler#parseError)がfalseを返した
+	// BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
 	@Test
 	public void testLoadInputStream_ParseError() throws Exception {
 		var l = loader();
@@ -1666,14 +1681,21 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(InputStream)
-	// BmsException 読み込み処理中に想定外の例外がスローされた
+	// BmsHandleException ユーザープログラムの処理異常を検出した
 	@Test
-	public void testLoadInputStream_Unexpected() throws Exception {
+	public void testLoadInputStream_IllegalUserProgram() throws Exception {
 		var l = loader().setHandler(HANDLER_NULL_CONTENT);
 		var f = testDataPath(TEST_FILE_EMPTY).toFile();
 		try (var s = new FileInputStream(f)) {
-			assertThrows(BmsException.class, () -> l.load(s));
+			assertThrows(BmsHandleException.class, () -> l.load(s));
 		}
+	}
+
+	// load(InputStream)
+	// BmsPanicException 内部処理異常による処理の強制停止が発生した
+	@Test
+	public void testLoadInputStream_Unexpected() throws Exception {
+		// Do nothing: 試験不可
 	}
 
 	// load(byte[])
@@ -1697,7 +1719,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	// load(byte[])
 	// BOM付きUTF-8のBMSが正常に読み込めること
 	@Test
-	public void testLoadByteArray_Utf8WithBom() throws BmsException {
+	public void testLoadByteArray_Utf8WithBom() {
 		var c = load();
 		assertEquals(TITLE_FOR_TEST_DECODE, (String)c.getSingleMeta("#title"));
 	}
@@ -1705,7 +1727,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	// load(byte[])
 	// BOM付きUTF-16LEのBMSが正常に読み込めること
 	@Test
-	public void testLoadByteArray_Utf16leWithBom() throws BmsException {
+	public void testLoadByteArray_Utf16leWithBom() {
 		var c = load();
 		assertEquals(TITLE_FOR_TEST_DECODE, (String)c.getSingleMeta("#title"));
 	}
@@ -1713,7 +1735,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	// load(byte[])
 	// BOM付きUTF-16BEのBMSが正常に読み込めること
 	@Test
-	public void testLoadByteArray_Utf16beWithBom() throws BmsException {
+	public void testLoadByteArray_Utf16beWithBom() {
 		var c = load();
 		assertEquals(TITLE_FOR_TEST_DECODE, (String)c.getSingleMeta("#title"));
 	}
@@ -1721,7 +1743,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	// load(byte[])
 	// デフォルト文字セット使用：最優先文字セットのBMSが正常に読み込めること
 	@Test
-	public void testLoadByteArray_DefaultCharsets_Primary() throws BmsException {
+	public void testLoadByteArray_DefaultCharsets_Primary() {
 		BmsLibrary.setDefaultCharsets(Charset.forName("MS932"), StandardCharsets.UTF_8);
 		var c = load();
 		assertEquals(TITLE_FOR_TEST_DECODE, (String)c.getSingleMeta("#title"));
@@ -1730,7 +1752,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	// load(byte[])
 	// デフォルト文字セット使用：2番目の文字セットのBMSが正常に読み込めること
 	@Test
-	public void testLoadByteArray_DefaultCharsets_Secondary() throws BmsException {
+	public void testLoadByteArray_DefaultCharsets_Secondary() {
 		BmsLibrary.setDefaultCharsets(Charset.forName("MS932"), StandardCharsets.UTF_8);
 		var c = load();
 		assertEquals(TITLE_FOR_TEST_DECODE, (String)c.getSingleMeta("#title"));
@@ -1739,7 +1761,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	// load(byte[])
 	// デフォルト文字セット使用：全文字セットでのデコード失敗で、最優先文字セットでの強制デコードが行われること
 	@Test
-	public void testLoadByteArray_DefaultCharsets_FailedDecode() throws BmsException {
+	public void testLoadByteArray_DefaultCharsets_FailedDecode() {
 		BmsLibrary.setDefaultCharsets(Charset.forName("MS932"), StandardCharsets.UTF_16LE);
 		var c = load();
 		var m = (String)c.getSingleMeta("#title");
@@ -1750,7 +1772,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	// load(byte[])
 	// ローダに文字セット指定：最優先文字セットのBMSが正常に読み込めること
 	@Test
-	public void testLoadByteArray_AddCharsets_Primary() throws BmsException {
+	public void testLoadByteArray_AddCharsets_Primary() {
 		var c = load(Charset.forName("MS932"), StandardCharsets.UTF_8);
 		assertEquals(TITLE_FOR_TEST_DECODE, (String)c.getSingleMeta("#title"));
 	}
@@ -1758,7 +1780,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	// load(byte[])
 	// ローダに文字セット指定：2番目の文字セットのBMSが正常に読み込めること
 	@Test
-	public void testLoadByteArray_AddCharsets_Secondary() throws BmsException {
+	public void testLoadByteArray_AddCharsets_Secondary() {
 		var c = load(Charset.forName("MS932"), StandardCharsets.UTF_8);
 		assertEquals(TITLE_FOR_TEST_DECODE, (String)c.getSingleMeta("#title"));
 	}
@@ -1766,7 +1788,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	// load(byte[])
 	// ローダに文字セット指定：全文字セットでのデコード失敗で、最優先文字セットでの強制デコードが行われること
 	@Test
-	public void testLoadByteArray_AddCharsets_FailedDecode() throws BmsException {
+	public void testLoadByteArray_AddCharsets_FailedDecode() {
 		var c = load(Charset.forName("MS932"), StandardCharsets.UTF_16LE);
 		var m = (String)c.getSingleMeta("#title");
 		assertNotEquals(TITLE_FOR_TEST_DECODE, m);
@@ -1776,7 +1798,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	// load(byte[])
 	// デコードバッファよりも大きいサイズのファイルを正しくデコードできること
 	@Test
-	public void testLoadByteArray_LargerThanDecodeBuffer() throws BmsException {
+	public void testLoadByteArray_LargerThanDecodeBuffer() {
 		var c = load(Charset.forName("MS932"), StandardCharsets.UTF_8);
 		assertEquals(TITLE_FOR_TEST_DECODE, (String)c.getSingleMeta("#title"));
 	}
@@ -1806,7 +1828,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(byte[])
-	// BmsLoadException ハンドラ(BmsLoadHandler#parseError)がfalseを返した
+	// BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
 	@Test
 	public void testLoadByteArray_ParseError() throws Exception {
 		var l = loader();
@@ -1816,13 +1838,20 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(byte[])
-	// BmsException 読み込み処理中に想定外の例外がスローされた
+	// BmsHandleException ユーザープログラムの処理異常を検出した
 	@Test
-	public void testLoadByteArray_Unexpected() throws Exception {
+	public void testLoadByteArray_IllegalUserProgram() throws Exception {
 		var l = loader().setHandler(HANDLER_NULL_CONTENT);
 		var p = testDataPath(TEST_FILE_EMPTY);
 		var a = Files.readAllBytes(p);
-		assertThrows(BmsException.class, () -> l.load(a));
+		assertThrows(BmsHandleException.class, () -> l.load(a));
+	}
+
+	// load(byte[])
+	// BmsPanicException 内部処理異常による処理の強制停止が発生した
+	@Test
+	public void testLoadByteArray_Unexpected() throws Exception {
+		// Do nothing: 試験不可
 	}
 
 	// load(String)
@@ -1879,7 +1908,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(String)
-	// BmsLoadException ハンドラ(BmsLoadHandler#parseError)がfalseを返した
+	// BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
 	@Test
 	public void testLoadString_ParseError() {
 		var l = loader();
@@ -1887,11 +1916,18 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(String)
-	// BmsException 読み込み処理中に想定外の例外がスローされた
+	// BmsHandleException ユーザープログラムの処理異常を検出した
+	@Test
+	public void testLoadString_IllegalUserProgram() {
+		var l = loader().setHandler(HANDLER_NULL_CONTENT);
+		assertThrows(BmsHandleException.class, () -> l.load("#TITLE MySong"));
+	}
+
+	// load(String)
+	// BmsPanicException 内部処理異常による処理の強制停止が発生した
 	@Test
 	public void testLoadString_Unexpected() {
-		var l = loader().setHandler(HANDLER_NULL_CONTENT);
-		assertThrows(BmsException.class, () -> l.load("#TITLE MySong"));
+		// Do nothing: 試験不可
 	}
 
 	// load(Reader)
@@ -1936,7 +1972,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(Reader)
-	// BmsLoadException ハンドラ(BmsLoadHandler#parseError)がfalseを返した
+	// BmsLoadException ユーザープログラムの判断によりBMSコンテンツの読み込みが中止された
 	@Test
 	public void testLoadReader_ParseError() throws Exception {
 		var l = loader();
@@ -1944,11 +1980,18 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(Reader)
-	// BmsException 読み込み処理中に想定外の例外がスローされた
+	// BmsHandleException ユーザープログラムの処理異常を検出した
+	@Test
+	public void testLoadReader_IllegalUserProgram() throws Exception {
+		var l = loader().setHandler(HANDLER_NULL_CONTENT);
+		assertThrows(BmsHandleException.class, () -> l.load(new StringReader("")));
+	}
+
+	// load(Reader)
+	// BmsPanicException 内部処理異常による処理の強制停止が発生した
 	@Test
 	public void testLoadReader_Unexpected() throws Exception {
-		var l = loader().setHandler(HANDLER_NULL_CONTENT);
-		assertThrows(BmsException.class, () -> l.load(new StringReader("")));
+		// Do nothing: 試験不可
 	}
 
 	// load(Any)
@@ -2018,19 +2061,19 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(Any)
-	// 解析開始処理の結果でnullが返るとBmsExceptionがスローされること
+	// 解析開始処理の結果でnullが返るとBmsHandleExceptionがスローされること
 	@Test
-	public void testLoadAny_StartParse_ReturnNull() {
+	public void testLoadAny_BeginParse_ReturnNull() {
 		var l = testParserLoader(new TestParserLoader() {
 			@Override protected BmsErrorParsed beginParse(BmsLoaderSettings settings, BmsSource source) { return null; }
 		});
-		assertThrows(BmsException.class, () -> l.load(""));
+		assertThrows(BmsHandleException.class, () -> l.load(""));
 	}
 
 	// load(Any)
 	// 解析開始処理の結果がエラーありで返るとBmsLoadExceptionがスローされ、返されたエラーが設定されること
 	@Test
-	public void testLoadAny_StartParse_ReturnError() throws Exception {
+	public void testLoadAny_BeginParse_ReturnError() throws Exception {
 		var l = testParserLoader(new TestParserLoader() {
 			@Override protected BmsErrorParsed beginParse(BmsLoaderSettings settings, BmsSource source) {
 				var err = new BmsScriptError(BmsErrorType.SYNTAX, 10, "Line", "Msg", new RuntimeException());
@@ -2048,22 +2091,22 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(Any)
-	// 解析開始処理内で実行時例外がスローされるとBmsExceptionがスローされ、発生した実行時例外が内包されていること
+	// 解析開始処理内で実行時例外がスローされるとBmsHandleExceptionがスローされ、発生した実行時例外が内包されていること
 	@Test
-	public void testLoadAny_StartParse_Exception() throws Exception {
+	public void testLoadAny_BeginParse_Exception() throws Exception {
 		var l = testParserLoader(new TestParserLoader() {
 			@Override protected BmsErrorParsed beginParse(BmsLoaderSettings settings, BmsSource source) {
 				throw new IllegalArgumentException();
 			}
 		});
-		var e = assertThrows(BmsException.class, () -> l.load(""));
+		var e = assertThrows(BmsHandleException.class, () -> l.load(""));
 		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// load(Any)
 	// バイナリフォーマットのローダでは入力データがバイナリになること
 	@Test
-	public void testLoadAny_StartParse_BinaryFormat() throws Exception {
+	public void testLoadAny_BeginParse_BinaryFormat() throws Exception {
 		var b = new byte[16];
 		var l = (TestLoaderBody)(new TestLoaderBody(false, true).setSpec(spec()));
 		var c = l.load(b);
@@ -2075,7 +2118,7 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	// load(Any)
 	// テキストフォーマットのローダでは入力データがテキストになること
 	@Test
-	public void testLoadAny_StartParse_TextFormat() throws Exception {
+	public void testLoadAny_BeginParse_TextFormat() throws Exception {
 		var t = "script";
 		var l = (TestLoaderBody)(new TestLoaderBody(false, false).setSpec(spec()));
 		var c = l.load(t);
@@ -2085,13 +2128,13 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(Any)
-	// 解析終了処理の結果でnullが返るとBmsExceptionがスローされること
+	// 解析終了処理の結果でnullが返るとBmsHandleExceptionがスローされること
 	@Test
 	public void testLoadAny_EndParse_ReturnNull() {
 		var l = testParserLoader(new TestParserLoader() {
 			@Override protected BmsErrorParsed endParse() { return null; }
 		});
-		assertThrows(BmsException.class, () -> l.load(""));
+		assertThrows(BmsHandleException.class, () -> l.load(""));
 	}
 
 	// load(Any)
@@ -2139,24 +2182,24 @@ public class BmsLoaderTest extends BmsLoaderTestBase {
 	}
 
 	// load(Any)
-	// 解析終了処理内で実行時例外がスローされるとBmsExceptionがスローされ、発生した実行時例外が内包されていること
+	// 解析終了処理内で実行時例外がスローされるとBmsHandleExceptionがスローされ、発生した実行時例外が内包されていること
 	@Test
 	public void testLoadAny_EndParse_Exception() throws Exception {
 		var l = testParserLoader(new TestParserLoader() {
 			@Override protected BmsErrorParsed endParse() { throw new IllegalArgumentException(); }
 		});
-		var e = assertThrows(BmsException.class, () -> l.load(""));
+		var e = assertThrows(BmsHandleException.class, () -> l.load(""));
 		assertEquals(IllegalArgumentException.class, e.getCause().getClass());
 	}
 
 	// load(Any)
-	// BMSコンテンツ要素の解析中に実行時例外がスローされるとBmsExceptionがスローされ、発生した実行時例外が内包されていること
+	// BMSコンテンツ要素の解析中に実行時例外がスローされるとBmsHandleExceptionがスローされ、発生した実行時例外が内包されていること
 	@Test
 	public void testLoadAny_NextElement_Exception() throws Exception {
 		var l = testParserLoader(new TestParserLoader() {
 			@Override protected BmsParsed nextElement() { throw new ClassCastException(); }
 		});
-		var e = assertThrows(BmsException.class, () -> l.load(""));
+		var e = assertThrows(BmsHandleException.class, () -> l.load(""));
 		assertEquals(ClassCastException.class, e.getCause().getClass());
 	}
 

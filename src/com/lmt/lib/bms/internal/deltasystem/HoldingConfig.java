@@ -82,7 +82,7 @@ class HoldingConfig extends RatingConfig {
 	 * @param ntype ノート種別
 	 * @return ノート評価点の基本点
 	 */
-	final double noteScoreBase(BeMusicNoteType ntype) {
+	double noteScoreBase(BeMusicNoteType ntype) {
 		switch (ntype) {
 		case BEAT: return noteScoreBaseBeat;
 		case LONG_ON: return noteScoreBaseLongOn;
@@ -97,7 +97,7 @@ class HoldingConfig extends RatingConfig {
 	 * @param ntype ノート種別
 	 * @return ノート評価点倍率
 	 */
-	final double noteScoreRate(BeMusicNoteType ntype) {
+	double noteScoreRate(BeMusicNoteType ntype) {
 		switch (ntype) {
 		case BEAT: return noteScoreRateBeat;
 		case LONG_ON: return noteScoreRateLongOn;
@@ -112,7 +112,7 @@ class HoldingConfig extends RatingConfig {
 	 * @param ntype ノート種別
 	 * @return 抵抗値倍率
 	 */
-	final double resistRate(BeMusicNoteType ntype) {
+	double resistRate(BeMusicNoteType ntype) {
 		return (ntype == BeMusicNoteType.BEAT) ? resistRateBeat : resistRateHolding;
 	}
 

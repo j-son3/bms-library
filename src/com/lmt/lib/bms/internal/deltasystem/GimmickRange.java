@@ -61,7 +61,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * @param elems 要素データリスト
 		 * @return ギアチェン対応猶予時間
 		 */
-		final double timeGearChange(List<GimmickElement> elems) {
+		double timeGearChange(List<GimmickElement> elems) {
 			return Ds.timeDelta(elems, changes.lastKey(), firstMovement);
 		}
 
@@ -70,7 +70,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * @param elems 要素データリスト
 		 * @return 前の速度変更範囲の最終ノートからこの速度変更範囲のギアチェン開始点までの時間
 		 */
-		final double timeBeforeGearChange(List<GimmickElement> elems) {
+		double timeBeforeGearChange(List<GimmickElement> elems) {
 			var indexGearChange = changes.lastKey();
 			if (!hasPrev()) {
 				// 先頭の速度変更範囲の場合はこの範囲の先頭からの時間
@@ -88,7 +88,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * この範囲のスクロール方向が逆かどうか判定
 		 * @return スクロール方向が逆であればtrue
 		 */
-		final boolean isReverseScroll() {
+		boolean isReverseScroll() {
 			return speed < 0.0;
 		}
 
@@ -96,7 +96,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * 速度変更に影響する操作可能ノートの有無判定
 		 * @return 速度変更に影響する操作可能ノートがあればtrue
 		 */
-		final boolean hasMovement() {
+		boolean hasMovement() {
 			return (firstMovement >= 0) && (lastMovement >= 0);
 		}
 
@@ -104,7 +104,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * 速度変更に影響する操作可能ノートの数取得
 		 * @return 速度変更に影響する操作可能ノートの数
 		 */
-		final int numMovementPoint() {
+		int numMovementPoint() {
 			return lastMovement - firstMovement + 1;
 		}
 
@@ -113,7 +113,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * @param pos 要素データリストのインデックス
 		 * @return 指定位置に対応する譜面停止範囲データ、なければnull
 		 */
-		final Stop inboundStop(int pos) {
+		Stop inboundStop(int pos) {
 			var entry = stopMap.floorEntry(pos);
 			return ((entry != null) && (entry.getValue().contains(pos))) ? entry.getValue() : null;
 		}
@@ -123,7 +123,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * @param pos 要素データリストのインデックス
 		 * @return 指定位置に対応する地雷範囲データ、なければnull
 		 */
-		final MineGroup inboundMine(int pos) {
+		MineGroup inboundMine(int pos) {
 			var entry = mineMap.floorEntry(pos);
 			return ((entry != null) && (entry.getValue().contains(pos))) ? entry.getValue() : null;
 		}
@@ -134,7 +134,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * @param time 計算に使用する最大時間
 		 * @return ギアチェン後のノート平均密度
 		 */
-		final double computeGearChangeDensity(List<GimmickElement> elems, double time) {
+		double computeGearChangeDensity(List<GimmickElement> elems, double time) {
 			var notes = 0;
 			var timeLast = elems.get(firstMovement).getTime() + time;
 			for (var i = firstMovement; (i <= lastMovement) && (elems.get(i).getTime() <= timeLast); i++) {
@@ -175,7 +175,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * この譜面停止範囲の最後の譜面停止データが存在する要素データリストのインデックス取得
 		 * @return この譜面停止範囲の最後の譜面停止データが存在する要素データリストのインデックス
 		 */
-		final int lastStopPos() {
+		int lastStopPos() {
 			return stops.lastKey();
 		}
 
@@ -183,7 +183,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * 譜面停止の視覚効果の影響を受ける操作可能ノート有無取得
 		 * @return 譜面停止の視覚効果の影響を受ける操作可能ノートがあればtrue
 		 */
-		final boolean hasInfluence() {
+		boolean hasInfluence() {
 			return firstInfluence != -1;
 		}
 
@@ -192,7 +192,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * @param elems 要素データリスト
 		 * @return 譜面停止の視覚効果の影響を受ける範囲のノート平均密度
 		 */
-		final double computeInfluenceDensity(List<GimmickElement> elems) {
+		double computeInfluenceDensity(List<GimmickElement> elems) {
 			var density = 0.0;
 			if (hasInfluence()) {
 				var time = Ds.timeDelta(elems, firstInfluence, lastInfluence);
@@ -207,7 +207,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * @param minEffectiveTime 譜面停止が視覚効果を持つ最小の時間
 		 * @return 譜面停止範囲の視覚効果有効時間
 		 */
-		final double computeEffectiveRangeTime(List<GimmickElement> elems, double minEffectiveTime) {
+		double computeEffectiveRangeTime(List<GimmickElement> elems, double minEffectiveTime) {
 			// 譜面停止の視覚効果が認知できない譜面停止は、範囲として除外して効果範囲時間を計算する
 			var time = 0.0;
 			if (hasInfluence()) {
@@ -231,7 +231,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 	static class MineGroup extends GimmickRange<MineGroup> {
 		TreeMap<Integer, Mine> mines = new TreeMap<>();
 
-		final void fix() {
+		void fix() {
 			// ※地雷範囲0件は理論上あり得ない
 			first = mines.firstEntry().getValue().first;
 			last = mines.lastEntry().getValue().last;
@@ -274,7 +274,7 @@ abstract class GimmickRange<R> extends RatingRange<R> {
 		 * 操作可能ノート有無取得
 		 * @return 操作可能ノートがあればtrue
 		 */
-		final boolean hasMovement() {
+		boolean hasMovement() {
 			return has;
 		}
 	}

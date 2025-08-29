@@ -73,7 +73,7 @@ public class BeMusicTimeSpan {
 	 * <p>この期間が先頭である場合はこの期間の参照を返します。従って、当メソッドでnullが返ることはありません。</p>
 	 * @return 1つ前の期間統計情報
 	 */
-	public final BeMusicTimeSpan getPrevious() {
+	public BeMusicTimeSpan getPrevious() {
 		return mPrevious;
 	}
 
@@ -90,7 +90,7 @@ public class BeMusicTimeSpan {
 	 * <p>この期間が末尾である場合はこの期間の参照を返します。従って、当メソッドでnullが返ることはありません。</p>
 	 * @return 1つ後の期間統計情報
 	 */
-	public final BeMusicTimeSpan getNext() {
+	public BeMusicTimeSpan getNext() {
 		return mNext;
 	}
 
@@ -108,7 +108,7 @@ public class BeMusicTimeSpan {
 	 * が内部で保有するリストのインデックス値となります。</p>
 	 * @return リスト上のインデックス値
 	 */
-	public final int getIndex() {
+	public int getIndex() {
 		return mIndex;
 	}
 
@@ -124,7 +124,7 @@ public class BeMusicTimeSpan {
 	 * 開始時間を秒単位で取得します。
 	 * @return この期間の開始時間
 	 */
-	public final double getBeginTime() {
+	public double getBeginTime() {
 		return mBeginTime;
 	}
 
@@ -143,7 +143,7 @@ public class BeMusicTimeSpan {
 	 * <p>この期間には終了時間の値に該当する時間の楽曲位置情報は含まれません。</p>
 	 * @return 終了時間
 	 */
-	public final double getEndTime() {
+	public double getEndTime() {
 		return mEndTime;
 	}
 
@@ -161,7 +161,7 @@ public class BeMusicTimeSpan {
 	 * 取得する際に使用することができます。この期間内に楽曲位置情報が1件も含まれない場合は負の値を返します。</p>
 	 * @return 楽曲位置情報の最初のインデックス値
 	 */
-	public final int getFirstPointIndex() {
+	public int getFirstPointIndex() {
 		return mFirstIndex;
 	}
 
@@ -179,7 +179,7 @@ public class BeMusicTimeSpan {
 	 * 取得する際に使用することができます。この期間内に楽曲位置情報が1件も含まれない場合は負の値を返します。</p>
 	 * @return 楽曲位置情報の最後のインデックス値
 	 */
-	public final int getLastPointIndex() {
+	public int getLastPointIndex() {
 		return mLastIndex;
 	}
 
@@ -203,7 +203,7 @@ public class BeMusicTimeSpan {
 	 * ダブルプレーの場合は左側レーンの左端を-1、右側レーンの右端を1とする値を返します。</p>
 	 * @return 注視点
 	 */
-	public final double getGazePoint() {
+	public double getGazePoint() {
 		return mGazePoint;
 	}
 
@@ -215,7 +215,7 @@ public class BeMusicTimeSpan {
 	 * <p>当メソッドで取得できる値はスクラッチがスイッチの右側にある場合の注視点の値です。</p>
 	 * @return 注視点
 	 */
-	public final double getGazePointR() {
+	public double getGazePointR() {
 		return mGazePointR;
 	}
 
@@ -236,7 +236,7 @@ public class BeMusicTimeSpan {
 	 * <p>当メソッドで取得できる値はスクラッチがスイッチの左側、またはダブルプレーの注視点変動係数です。</p>
 	 * @return 注視点変動係数
 	 */
-	public final double getGazeSwingley() {
+	public double getGazeSwingley() {
 		return mGazeSwingley;
 	}
 
@@ -247,7 +247,7 @@ public class BeMusicTimeSpan {
 	 * <p>当メソッドで取得できる値はスクラッチがスイッチの右側にある場合の注視点変動係数です。</p>
 	 * @return 注視点変動係数
 	 */
-	public final double getGazeSwingleyR() {
+	public double getGazeSwingleyR() {
 		return mGazeSwingleyR;
 	}
 
@@ -275,7 +275,7 @@ public class BeMusicTimeSpan {
 	 * 最小値0.1はシングルプレーと同様の定義となります。</p>
 	 * @return 視野幅
 	 */
-	public final double getViewWidth() {
+	public double getViewWidth() {
 		return mViewWidth;
 	}
 
@@ -288,7 +288,7 @@ public class BeMusicTimeSpan {
 	 * <p>当メソッドで取得できる値はスクラッチがスイッチの右側にある場合の視野幅の値です。</p>
 	 * @return 視野幅
 	 */
-	public final double getViewWidthR() {
+	public double getViewWidthR() {
 		return mViewWidthR;
 	}
 
@@ -309,7 +309,7 @@ public class BeMusicTimeSpan {
 	 * <p>当メソッドで取得できる値はスクラッチがスイッチの左側、またはダブルプレーの視野幅変動係数です。</p>
 	 * @return 視野幅変動係数
 	 */
-	public final double getViewSwingley() {
+	public double getViewSwingley() {
 		return mViewSwingley;
 	}
 
@@ -320,7 +320,7 @@ public class BeMusicTimeSpan {
 	 * <p>当メソッドで取得できる値はスクラッチがスイッチの右側にある場合の視野幅変動係数です。</p>
 	 * @return 視野幅変動係数
 	 */
-	public final double getViewSwingleyR() {
+	public double getViewSwingleyR() {
 		return mViewSwingleyR;
 	}
 
@@ -339,7 +339,7 @@ public class BeMusicTimeSpan {
 	 * <p>この値は、期間内の{@link BeMusicNoteType#isCountNotes()}に該当するノートの総数となります。</p>
 	 * @return 総ノート数
 	 */
-	public final int getNoteCount() {
+	public int getNoteCount() {
 		return mNoteCount;
 	}
 
@@ -357,7 +357,7 @@ public class BeMusicTimeSpan {
 	 * 長押し継続、終了はカウントの対象とはなりません。</p>
 	 * @return 総ロングノート数
 	 */
-	public final int getLongNoteCount() {
+	public int getLongNoteCount() {
 		return mLnCount;
 	}
 
@@ -373,7 +373,7 @@ public class BeMusicTimeSpan {
 	 * 地雷オブジェ数を取得します。
 	 * @return 地雷オブジェ数
 	 */
-	public final int getMineCount() {
+	public int getMineCount() {
 		return mMineCount;
 	}
 
@@ -390,7 +390,7 @@ public class BeMusicTimeSpan {
 	 * <p>当メソッドの戻り値がtrueの時、{@link #getIndex()}は0を示します。</p>
 	 * @return この期間が最初の期間統計情報であればtrue
 	 */
-	public final boolean isFirstSpan() {
+	public boolean isFirstSpan() {
 		return this == mPrevious;
 	}
 
@@ -398,7 +398,7 @@ public class BeMusicTimeSpan {
 	 * この期間が最後の期間統計情報かどうかを返します。
 	 * @return この期間が最後の期間統計情報であればtrue
 	 */
-	public final boolean isLastSpan() {
+	public boolean isLastSpan() {
 		return this == mNext;
 	}
 
@@ -408,7 +408,7 @@ public class BeMusicTimeSpan {
 	 * の戻り値は0以上の値を示します。</p>
 	 * @return この期間内に楽曲位置情報が存在する場合true
 	 */
-	public final boolean hasPoint() {
+	public boolean hasPoint() {
 		return mFirstIndex >= 0;
 	}
 
@@ -417,7 +417,7 @@ public class BeMusicTimeSpan {
 	 * <p>当メソッドがtrueを返す時、{@link #getNoteCount()}の戻り値は1以上の値を示します。</p>
 	 * @return この期間内にノート数としてカウントされるノートが存在する場合true
 	 */
-	public final boolean hasCountNote() {
+	public boolean hasCountNote() {
 		return mNoteCount > 0;
 	}
 
@@ -427,7 +427,7 @@ public class BeMusicTimeSpan {
 	 * がtrueを返すノートが1件以上存在します。</p>
 	 * @return この期間内に視覚効果のあるノートが存在する場合true
 	 */
-	public final boolean hasVisualEffect() {
+	public boolean hasVisualEffect() {
 		return (mViewWidth > 0.0) || (mViewWidthR > 0.0);
 	}
 }

@@ -33,7 +33,7 @@ mvn clean install -DskipTests
 <dependency>
     <groupId>com.lmt</groupId>
     <artifactId>bms-library</artifactId>
-    <version>0.9.0</version>
+    <version>0.10.0</version>
 </dependency>
 ```
 

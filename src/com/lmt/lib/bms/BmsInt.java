@@ -151,7 +151,7 @@ public abstract class BmsInt {
 		/** CHX用キャッシュのチャンネル番号最大値 */
 		private static final int CMX = 1296;
 		/** CHX用キャッシュのチャンネルインデックス最大値 */
-		private static final int IMX = 4;
+		private static final int IMX = 16;
 
 		/** 統計フラグ：キャッシュ未使用 */
 		private static final int UNUSE = 0x00;
@@ -313,7 +313,7 @@ public abstract class BmsInt {
 	 * <p>当メソッドでは基数に応じて {@link #to16s(int)}, {@link #to36s(int)}, {@link #to62s(int)} を呼び分けます。</p>
 	 * @param n 変換対象の整数値
 	 * @return 基数に対応した2文字の数値文字列
-	 * @exception IllegalArgumentException nが0未満または{@link #max()}超過
+	 * @throws IllegalArgumentException nが0未満または{@link #max()}超過
 	 * @see #to16s(int)
 	 * @see #to36s(int)
 	 * @see #to62s(int)
@@ -326,9 +326,9 @@ public abstract class BmsInt {
 	 * を呼び分けます。</p>
 	 * @param s 変換対象の文字列
 	 * @return 整数値
-	 * @exception NullPointerException sがnull
-	 * @exception IllegalArgumentException sの長さが2以外
-	 * @exception IllegalArgumentException sに変換不可能な文字がある
+	 * @throws NullPointerException sがnull
+	 * @throws IllegalArgumentException sの長さが2以外
+	 * @throws IllegalArgumentException sに変換不可能な文字がある
 	 * @see #to16i(String)
 	 * @see #to36i(String)
 	 * @see #to62i(String)
@@ -343,11 +343,11 @@ public abstract class BmsInt {
 	 * @param offset 変換開始位置
 	 * @param count 変換数
 	 * @return 基数に対応した数値文字列を羅列した文字列
-	 * @exception NullPointerException aがnull
-	 * @exception IllegalArgumentException offsetが0未満
-	 * @exception IllegalArgumentException countが0未満
-	 * @exception IndexOutOfBoundsException aの範囲外にアクセスした
-	 * @exception IllegalArgumentException a内の変換対象に0未満または{@link #max()}超過の値がある
+	 * @throws NullPointerException aがnull
+	 * @throws IllegalArgumentException offsetが0未満
+	 * @throws IllegalArgumentException countが0未満
+	 * @throws IndexOutOfBoundsException aの範囲外にアクセスした
+	 * @throws IllegalArgumentException a内の変換対象に0未満または{@link #max()}超過の値がある
 	 * @see #to16sa(int[], int, int)
 	 * @see #to36sa(int[], int, int)
 	 * @see #to62sa(int[], int, int)
@@ -362,11 +362,11 @@ public abstract class BmsInt {
 	 * @param offset 変換開始位置
 	 * @param count 変換個数(2文字1個セットの個数)
 	 * @return 整数値配列
-	 * @exception NullPointerException sがnull
-	 * @exception IllegalArgumentException offsetが0未満
-	 * @exception IllegalArgumentException countが0未満
-	 * @exception IndexOutOfBoundsException sの範囲外にアクセスした
-	 * @exception IllegalArgumentException sに変換不可能な文字がある
+	 * @throws NullPointerException sがnull
+	 * @throws IllegalArgumentException offsetが0未満
+	 * @throws IllegalArgumentException countが0未満
+	 * @throws IndexOutOfBoundsException sの範囲外にアクセスした
+	 * @throws IllegalArgumentException sに変換不可能な文字がある
 	 * @see #to16ia(String, int, int)
 	 * @see #to36ia(String, int, int)
 	 * @see #to62ia(String, int, int)
@@ -419,7 +419,7 @@ public abstract class BmsInt {
 	 * <p>サポートしている基数は16, 36, 62のいずれかです。</p>
 	 * @param base 基数
 	 * @return 基数に該当する整数オブジェクト
-	 * @exception IllegalArgumentException baseが16, 36, 62以外
+	 * @throws IllegalArgumentException baseが16, 36, 62以外
 	 * @since 0.8.0
 	 */
 	public static BmsInt of(int base) {
@@ -472,7 +472,7 @@ public abstract class BmsInt {
 	 * <p>Javaでは標準で-127～127のIntegerがキャッシュされていますが、BMSではそれよりも大きい値を扱うことがほとんどであり
 	 * 標準のキャッシュが利用できない場合が大半を占めます。そのままではJavaヒープの確保・解放が頻繁に実行されることとなり
 	 * パフォーマンスに影響が出ることが懸念されるため、BMSライブラリでは独自の整数値キャッシュを保持しています。</p>
-	 * <p>索引付きメタ情報やBMS仕様のチャンネルはそれぞれ0～1295までの値を扱うことが多いことから、それらをキャッシュし
+	 * <p>索引付きメタ情報やBMS仕様のチャンネルはそれぞれ0～3843までの値を扱うことが多いことから、それらをキャッシュし
 	 * 保持しています。また、CHX値は上位16ビットがチャンネル番号、下位16ビットがチャンネルインデックスとなっていますが、
 	 * 頻出するCHX値もキャッシュし保持しています。</p>
 	 * <p>当メソッドで整数値をBOX化しようとする時、上記に示したキャッシュを最初に参照しその整数値オブジェクトを
@@ -490,7 +490,7 @@ public abstract class BmsInt {
 	 * 整数値を2文字の16進文字列に変換します。
 	 * @param n 整数値
 	 * @return 2文字の16進文字列
-	 * @exception IllegalArgumentException nが0未満または255超過
+	 * @throws IllegalArgumentException nが0未満または255超過
 	 */
 	public static String to16s(int n) {
 		assertArgRange(n, 0, 255, "n");
@@ -501,7 +501,7 @@ public abstract class BmsInt {
 	 * 整数値を2文字の36進文字列に変換します。
 	 * @param n 整数値
 	 * @return 2文字の36進文字列
-	 * @exception IllegalArgumentException nが0未満または1295超過
+	 * @throws IllegalArgumentException nが0未満または1295超過
 	 */
 	public static String to36s(int n) {
 		assertArgRange(n, 0, 1295, "n");
@@ -512,7 +512,7 @@ public abstract class BmsInt {
 	 * 整数値を2文字の62進文字列に変換します。
 	 * @param n 整数値
 	 * @return 2文字の62進文字列
-	 * @exception IllegalArgumentException nが0未満または3843超過
+	 * @throws IllegalArgumentException nが0未満または3843超過
 	 * @since 0.8.0
 	 */
 	public static String to62s(int n) {
@@ -524,9 +524,9 @@ public abstract class BmsInt {
 	 * 16進文字列を整数値に変換します。
 	 * @param s 16進文字列
 	 * @return 整数値
-	 * @exception NullPointerException sがnull
-	 * @exception IllegalArgumentException sの長さが2以外
-	 * @exception IllegalArgumentException sに変換不可能な文字がある
+	 * @throws NullPointerException sがnull
+	 * @throws IllegalArgumentException sの長さが2以外
+	 * @throws IllegalArgumentException sに変換不可能な文字がある
 	 */
 	public static int to16i(String s) {
 		assertArgNotNull(s, "s");
@@ -538,9 +538,9 @@ public abstract class BmsInt {
 	 * 36進文字列を整数値に変換します。
 	 * @param s 36進文字列
 	 * @return 整数値
-	 * @exception NullPointerException sがnull
-	 * @exception IllegalArgumentException sの長さが2以外
-	 * @exception IllegalArgumentException sに変換不可能な文字がある
+	 * @throws NullPointerException sがnull
+	 * @throws IllegalArgumentException sの長さが2以外
+	 * @throws IllegalArgumentException sに変換不可能な文字がある
 	 */
 	public static int to36i(String s) {
 		assertArgNotNull(s, "s");
@@ -552,9 +552,9 @@ public abstract class BmsInt {
 	 * 62進文字列を整数値に変換します。
 	 * @param s 62進文字列
 	 * @return 整数値
-	 * @exception NullPointerException sがnull
-	 * @exception IllegalArgumentException sの長さが2以外
-	 * @exception IllegalArgumentException sに変換不可能な文字がある
+	 * @throws NullPointerException sがnull
+	 * @throws IllegalArgumentException sの長さが2以外
+	 * @throws IllegalArgumentException sに変換不可能な文字がある
 	 * @since 0.8.0
 	 */
 	public static int to62i(String s) {
@@ -569,11 +569,11 @@ public abstract class BmsInt {
 	 * @param offset 変換開始位置
 	 * @param count 変換数
 	 * @return 16進文字を羅列した文字列
-	 * @exception NullPointerException aがnull
-	 * @exception IllegalArgumentException offsetが0未満
-	 * @exception IllegalArgumentException countが0未満
-	 * @exception IndexOutOfBoundsException aの範囲外にアクセスした
-	 * @exception IllegalArgumentException a内の変換対象に0未満または255超過の値がある
+	 * @throws NullPointerException aがnull
+	 * @throws IllegalArgumentException offsetが0未満
+	 * @throws IllegalArgumentException countが0未満
+	 * @throws IndexOutOfBoundsException aの範囲外にアクセスした
+	 * @throws IllegalArgumentException a内の変換対象に0未満または255超過の値がある
 	 */
 	public static String to16sa(int[] a, int offset, int count) {
 		assertArgNotNull(a, "a");
@@ -590,11 +590,11 @@ public abstract class BmsInt {
 	 * @param offset 変換開始位置
 	 * @param count 変換数
 	 * @return 36進文字を羅列した文字列
-	 * @exception NullPointerException aがnull
-	 * @exception IllegalArgumentException offsetが0未満
-	 * @exception IllegalArgumentException countが0未満
-	 * @exception IndexOutOfBoundsException aの範囲外にアクセスした
-	 * @exception IllegalArgumentException a内の変換対象に0未満または1295超過の値がある
+	 * @throws NullPointerException aがnull
+	 * @throws IllegalArgumentException offsetが0未満
+	 * @throws IllegalArgumentException countが0未満
+	 * @throws IndexOutOfBoundsException aの範囲外にアクセスした
+	 * @throws IllegalArgumentException a内の変換対象に0未満または1295超過の値がある
 	 */
 	public static String to36sa(int[] a, int offset, int count) {
 		assertArgNotNull(a, "a");
@@ -611,11 +611,11 @@ public abstract class BmsInt {
 	 * @param offset 変換開始位置
 	 * @param count 変換数
 	 * @return 62進文字を羅列した文字列
-	 * @exception NullPointerException aがnull
-	 * @exception IllegalArgumentException offsetが0未満
-	 * @exception IllegalArgumentException countが0未満
-	 * @exception IndexOutOfBoundsException aの範囲外にアクセスした
-	 * @exception IllegalArgumentException a内の変換対象に0未満または3843超過の値がある
+	 * @throws NullPointerException aがnull
+	 * @throws IllegalArgumentException offsetが0未満
+	 * @throws IllegalArgumentException countが0未満
+	 * @throws IndexOutOfBoundsException aの範囲外にアクセスした
+	 * @throws IllegalArgumentException a内の変換対象に0未満または3843超過の値がある
 	 * @since 0.8.0
 	 */
 	public static String to62sa(int[] a, int offset, int count) {
@@ -633,11 +633,11 @@ public abstract class BmsInt {
 	 * @param offset 変換開始位置
 	 * @param count 変換個数(2文字1個セットの個数)
 	 * @return 整数値配列
-	 * @exception NullPointerException sがnull
-	 * @exception IllegalArgumentException offsetが0未満
-	 * @exception IllegalArgumentException countが0未満
-	 * @exception IndexOutOfBoundsException sの範囲外にアクセスした
-	 * @exception IllegalArgumentException sに変換不可能な文字がある
+	 * @throws NullPointerException sがnull
+	 * @throws IllegalArgumentException offsetが0未満
+	 * @throws IllegalArgumentException countが0未満
+	 * @throws IndexOutOfBoundsException sの範囲外にアクセスした
+	 * @throws IllegalArgumentException sに変換不可能な文字がある
 	 */
 	public static int[] to16ia(String s, int offset, int count) {
 		assertArgNotNull(s, "s");
@@ -653,11 +653,11 @@ public abstract class BmsInt {
 	 * @param offset 変換開始位置
 	 * @param count 変換個数(2文字1個セットの個数)
 	 * @return 整数値配列
-	 * @exception NullPointerException sがnull
-	 * @exception IllegalArgumentException offsetが0未満
-	 * @exception IllegalArgumentException countが0未満
-	 * @exception IndexOutOfBoundsException sの範囲外にアクセスした
-	 * @exception IllegalArgumentException sに変換不可能な文字がある
+	 * @throws NullPointerException sがnull
+	 * @throws IllegalArgumentException offsetが0未満
+	 * @throws IllegalArgumentException countが0未満
+	 * @throws IndexOutOfBoundsException sの範囲外にアクセスした
+	 * @throws IllegalArgumentException sに変換不可能な文字がある
 	 */
 	public static int[] to36ia(String s, int offset, int count) {
 		assertArgNotNull(s, "s");
@@ -673,11 +673,11 @@ public abstract class BmsInt {
 	 * @param offset 変換開始位置
 	 * @param count 変換個数(2文字1個セットの個数)
 	 * @return 整数値配列
-	 * @exception NullPointerException sがnull
-	 * @exception IllegalArgumentException offsetが0未満
-	 * @exception IllegalArgumentException countが0未満
-	 * @exception IndexOutOfBoundsException sの範囲外にアクセスした
-	 * @exception IllegalArgumentException sに変換不可能な文字がある
+	 * @throws NullPointerException sがnull
+	 * @throws IllegalArgumentException offsetが0未満
+	 * @throws IllegalArgumentException countが0未満
+	 * @throws IndexOutOfBoundsException sの範囲外にアクセスした
+	 * @throws IllegalArgumentException sに変換不可能な文字がある
 	 * @since 0.8.0
 	 */
 	public static int[] to62ia(String s, int offset, int count) {

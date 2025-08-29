@@ -104,7 +104,7 @@ class HashSeed {
 	 * 生成したハッシュ値の入力データ生成
 	 * <p>入力データは余分な空白・改行のないJSON文字列として返す。</p>
 	 * @return ハッシュ値の入力データ
-	 * @exception IllegalStateException 入力データの編集が完了していない
+	 * @throws IllegalStateException 入力データの編集が完了していない
 	 */
 	@Override
 	public String toString() {
@@ -116,7 +116,7 @@ class HashSeed {
 	 * JSON Array内でのJSON Object型データの開始宣言
 	 * @param omittable 開始したデータの省略可否
 	 * @return このオブジェクトのインスタンス
-	 * @exception IllegalStateException JSON Object型データの編集中
+	 * @throws IllegalStateException JSON Object型データの編集中
 	 */
 	HashSeed beginObject(boolean omittable) {
 		assertIsNotEditingObject();
@@ -129,8 +129,8 @@ class HashSeed {
 	 * @param key 開始するデータのキー名
 	 * @param omittable 開始したデータの省略可否
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalStateException 配列データの編集中
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalStateException 配列データの編集中
 	 */
 	HashSeed beginObject(String key, boolean omittable) {
 		assertArgNotNull(key, "key");
@@ -143,7 +143,7 @@ class HashSeed {
 	 * JSON Object型データの終了宣言
 	 * <p>編集対象のJSON Object型データが省略可能で且つ値が存在しない場合、入力データへの書き出しは行われない。</p>
 	 * @return このオブジェクトのインスタンス
-	 * @exception IllegalStateException JSON Object型データの編集中ではない
+	 * @throws IllegalStateException JSON Object型データの編集中ではない
 	 */
 	HashSeed endObject() {
 		assertIsEditingObject();
@@ -155,7 +155,7 @@ class HashSeed {
 	 * JSON Array内でのJSON Array型データの開始宣言
 	 * @param omittable 開始したデータの省略可否
 	 * @return このオブジェクトのインスタンス
-	 * @exception IllegalStateException JSON Object型データの編集中
+	 * @throws IllegalStateException JSON Object型データの編集中
 	 */
 	HashSeed beginArray(boolean omittable) {
 		assertIsNotEditingObject();
@@ -168,8 +168,8 @@ class HashSeed {
 	 * @param key 開始するデータのキー名
 	 * @param omittable 開始したデータの省略可否
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalStateException 配列データの編集中
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalStateException 配列データの編集中
 	 */
 	HashSeed beginArray(String key, boolean omittable) {
 		assertArgNotNull(key, "key");
@@ -182,7 +182,7 @@ class HashSeed {
 	 * JSON Array型データの終了宣言
 	 * <p>編集対象のJSON Array型データが省略可能で且つ値が存在しない場合、入力データへの書き出しは行われない。</p>
 	 * @return このオブジェクトのインスタンス
-	 * @exception IllegalStateException JSON Array型データの編集中ではない
+	 * @throws IllegalStateException JSON Array型データの編集中ではない
 	 */
 	HashSeed endArray() {
 		assertIsEditingArray();
@@ -194,7 +194,7 @@ class HashSeed {
 	 * JSON Arrayへのlong型データ追加
 	 * @param value long型データ
 	 * @return このオブジェクトのインスタンス
-	 * @exception IllegalStateException JSON Array型データの編集中ではない
+	 * @throws IllegalStateException JSON Array型データの編集中ではない
 	 */
 	HashSeed put(long value) {
 		assertIsEditingArray();
@@ -206,7 +206,7 @@ class HashSeed {
 	 * JSON Arrayへのdouble型データ追加
 	 * @param value double型データ
 	 * @return このオブジェクトのインスタンス
-	 * @exception IllegalStateException JSON Array型データの編集中ではない
+	 * @throws IllegalStateException JSON Array型データの編集中ではない
 	 */
 	HashSeed put(double value) {
 		assertIsEditingArray();
@@ -218,7 +218,7 @@ class HashSeed {
 	 * JSON Arrayへのboolean型データ追加
 	 * @param value boolean型データ
 	 * @return このオブジェクトのインスタンス
-	 * @exception IllegalStateException JSON Array型データの編集中ではない
+	 * @throws IllegalStateException JSON Array型データの編集中ではない
 	 */
 	HashSeed put(boolean value) {
 		assertIsEditingArray();
@@ -230,7 +230,7 @@ class HashSeed {
 	 * JSON Arrayへの文字列型データ追加
 	 * @param value 文字列型データ
 	 * @return このオブジェクトのインスタンス
-	 * @exception IllegalStateException JSON Array型データの編集中ではない
+	 * @throws IllegalStateException JSON Array型データの編集中ではない
 	 */
 	HashSeed put(String value) {
 		assertIsEditingArray();
@@ -243,8 +243,8 @@ class HashSeed {
 	 * @param type データ型
 	 * @param value データ
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException typeがnull
-	 * @exception IllegalStateException JSON Array型データの編集中ではない
+	 * @throws NullPointerException typeがnull
+	 * @throws IllegalStateException JSON Array型データの編集中ではない
 	 */
 	HashSeed put(BmsType type, Object value) {
 		assertArgNotNull(type, "type");
@@ -258,8 +258,8 @@ class HashSeed {
 	 * @param key キー名
 	 * @param value long型データ
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalStateException JSON Object型データの編集中ではない
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalStateException JSON Object型データの編集中ではない
 	 */
 	HashSeed put(String key, long value) {
 		assertArgNotNull(key, "key");
@@ -273,8 +273,8 @@ class HashSeed {
 	 * @param key キー名
 	 * @param value double型データ
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalStateException JSON Object型データの編集中ではない
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalStateException JSON Object型データの編集中ではない
 	 */
 	HashSeed put(String key, double value) {
 		assertArgNotNull(key, "key");
@@ -288,8 +288,8 @@ class HashSeed {
 	 * @param key キー名
 	 * @param value boolean型データ
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalStateException JSON Object型データの編集中ではない
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalStateException JSON Object型データの編集中ではない
 	 */
 	HashSeed put(String key, boolean value) {
 		assertArgNotNull(key, "key");
@@ -303,8 +303,8 @@ class HashSeed {
 	 * @param key キー名
 	 * @param value 文字列型データ
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException keyがnull
-	 * @exception IllegalStateException JSON Object型データの編集中ではない
+	 * @throws NullPointerException keyがnull
+	 * @throws IllegalStateException JSON Object型データの編集中ではない
 	 */
 	HashSeed put(String key, String value) {
 		assertArgNotNull(key, "key");
@@ -319,9 +319,9 @@ class HashSeed {
 	 * @param type データ型
 	 * @param value データ
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException keyがnull
-	 * @exception NullPointerException typeがnull
-	 * @exception IllegalStateException JSON Object型データの編集中ではない
+	 * @throws NullPointerException keyがnull
+	 * @throws NullPointerException typeがnull
+	 * @throws IllegalStateException JSON Object型データの編集中ではない
 	 */
 	HashSeed put(String key, BmsType type, Object value) {
 		assertArgNotNull(key, "key");
@@ -334,7 +334,7 @@ class HashSeed {
 	/**
 	 * ハッシュ値生成
 	 * @return ハッシュ値のバイト配列
-	 * @exception IllegalStateException 入力データの編集が完了していない
+	 * @throws IllegalStateException 入力データの編集が完了していない
 	 * @see #toHash(String)
 	 */
 	byte[] toHash() {
@@ -346,7 +346,7 @@ class HashSeed {
 	 * <p>入力文字列をUTF-8へエンコードし、そのバイトデータを入力データとしてSHA-256のハッシュ値を生成する。</p>
 	 * @param seed 入力データ
 	 * @return ハッシュ値のバイト配列
-	 * @exception NullPointerException seedがnull
+	 * @throws NullPointerException seedがnull
 	 */
 	static byte[] toHash(String seed) {
 		assertArgNotNull(seed, "seed");
@@ -490,7 +490,7 @@ class HashSeed {
 
 	/**
 	 * 現在の階層がルートかどうかを確認するアサーション
-	 * @exception IllegalStateException 現在の階層がルートではない
+	 * @throws IllegalStateException 現在の階層がルートではない
 	 */
 	private void assertIsRoot() {
 		assertField(mCurrentLayer.type == LayerType.ROOT, "BUG! Now is editing yet");
@@ -498,7 +498,7 @@ class HashSeed {
 
 	/**
 	 * 現在の階層がJSON Objectかどうかを確認するアサーション
-	 * @exception IllegalStateException 現在の階層がJSON Objectではない
+	 * @throws IllegalStateException 現在の階層がJSON Objectではない
 	 */
 	private void assertIsEditingObject() {
 		assertField(mCurrentLayer.type == LayerType.OBJECT, "BUG! Now is not editing an object");
@@ -506,7 +506,7 @@ class HashSeed {
 
 	/**
 	 * JSON Objectを編集していないことを確認するアサーション
-	 * @exception IllegalStateException JSON Object編集中
+	 * @throws IllegalStateException JSON Object編集中
 	 */
 	private void assertIsNotEditingObject() {
 		assertField(mCurrentLayer.type != LayerType.OBJECT, "BUG! Now is editing an object");
@@ -514,7 +514,7 @@ class HashSeed {
 
 	/**
 	 * 現在の階層がJSON Arrayかどうかを確認するアサーション
-	 * @exception IllegalStateException 現在の階層がJSON Arrayではない
+	 * @throws IllegalStateException 現在の階層がJSON Arrayではない
 	 */
 	private void assertIsEditingArray() {
 		assertField(mCurrentLayer.type == LayerType.ARRAY, "BUG! Now is not editing an array");
@@ -522,7 +522,7 @@ class HashSeed {
 
 	/**
 	 * JSON Arrayを編集していないことを確認するアサーション
-	 * @exception IllegalStateException JSON Array編集中
+	 * @throws IllegalStateException JSON Array編集中
 	 */
 	private void assertIsNotEditingArray() {
 		assertField(mCurrentLayer.type != LayerType.ARRAY, "BUG! Now is not editing an array");

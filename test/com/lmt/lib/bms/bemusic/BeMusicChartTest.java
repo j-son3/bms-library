@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
@@ -13,7 +15,6 @@ import org.junit.Test;
 
 import com.lmt.lib.bms.BmsAt;
 import com.lmt.lib.bms.BmsContent;
-import com.lmt.lib.bms.BmsException;
 import com.lmt.lib.bms.BmsPoint;
 import com.lmt.lib.bms.BmsStandardLoader;
 import com.lmt.lib.bms.UseTestData;
@@ -1402,6 +1403,868 @@ public class BeMusicChartTest implements UseTestData {
 		assertThrows(IllegalArgumentException.class, () -> { s.ceilPointOf(-0.00000001); });
 	}
 
+	// collectSoundTracks(IntPredicate)
+	// 譜面全体のトラックIDが収集されること
+	@Test
+	public void testCollectSoundTracks1_Normal() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(r -> true);
+		assertEquals(List.of(4, 6, 7, 8, 9), List.copyOf(ids));
+	}
+
+	// collectSoundTracks(IntPredicate)
+	// 楽曲位置情報が0件の時、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks1_Empty() {
+		var c = chartEmpty();
+		var ids = c.collectSoundTracks(r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(IntPredicate)
+	// NullPointerException isCollect が null
+	@Test
+	public void testCollectSoundTracks1_NullIsCollect() {
+		var c = chartForCollectSoundTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectSoundTracks(null));
+	}
+
+	// collectSoundTracks(double, double, IntPredicate)
+	// 終了を含む指定範囲のトラックIDが収集されること
+	@Test
+	public void testCollectSoundTracks2_Normal() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(3.0, 6.0, r -> true);
+		assertEquals(List.of(6, 7, 8), List.copyOf(ids));
+	}
+
+	// collectSoundTracks(double, double, IntPredicate)
+	// 楽曲位置情報が0件の時、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks2_Empty() {
+		var c = chartEmpty();
+		var ids = c.collectSoundTracks(0.0, 10.0, r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(double, double, IntPredicate)
+	// 開始・終了が逆転しても例外はスローされず、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks2_ReverseRange() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(10.0, 0.0, r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(double, double, IntPredicate)
+	// 開始・終了に同じ値を指定すると、その位置と完全に一致する楽曲位置情報のみが収集対象になること
+	@Test
+	public void testCollectSoundTracks2_Pinpoint() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(7.0, 7.0, r -> true);
+		assertEquals(List.of(4, 8), List.copyOf(ids));
+	}
+
+	// collectSoundTracks(double, double, IntPredicate)
+	// 最初の楽曲位置情報より前方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks2_BehindHead() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(0.0, 1.9, r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(double, double, IntPredicate)
+	// 最後の楽曲位置情報より後方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks2_AheadTail() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(8.5, 10.0, r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(double, double, IntPredicate)
+	// IllegalArgumentException timeBegin が負の値
+	@Test
+	public void testCollectSoundTracks2_NegativeTimeBegin() {
+		var c = chartForCollectSoundTracks();
+		var ex = IllegalArgumentException.class;
+		assertThrows(ex, () -> c.collectSoundTracks(-1.0, 8.0, r -> true));
+	}
+
+	// collectSoundTracks(double, double, IntPredicate)
+	// IllegalArgumentException timeEnd が負の値
+	@Test
+	public void testCollectSoundTracks2_NegativeTimeEnd() {
+		var c = chartForCollectSoundTracks();
+		var ex = IllegalArgumentException.class;
+		assertThrows(ex, () -> c.collectSoundTracks(0.0, -1.0, r -> true));
+	}
+
+	// collectSoundTracks(double, double, IntPredicate)
+	// NullPointerException isCollect が null
+	@Test
+	public void testCollectSoundTracks2_NullIsCollect() {
+		var c = chartForCollectSoundTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectSoundTracks(0.0, 8.0, null));
+	}
+
+	// collectSoundTracks(BmsAt, BmsAt, IntPredicate)
+	// 終了を含む指定範囲のトラックIDが収集されること
+	@Test
+	public void testCollectSoundTracks3_Normal() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(BmsPoint.of(1, 96), BmsPoint.of(3, 0), r -> true);
+		assertEquals(List.of(6, 7, 8), List.copyOf(ids));
+	}
+
+	// collectSoundTracks(BmsAt, BmsAt, IntPredicate)
+	// 楽曲位置情報が0件の時、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks3_Empty() {
+		var c = chartEmpty();
+		var ids = c.collectSoundTracks(BmsPoint.of(0, 0), BmsPoint.of(10, 0), r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(BmsAt, BmsAt, IntPredicate)
+	// 開始・終了が逆転しても例外はスローされず、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks3_ReverseRange() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(BmsPoint.of(10, 0), BmsPoint.of(0, 0), r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(BmsAt, BmsAt, IntPredicate)
+	// 開始・終了に同じ値を指定すると、その位置と完全に一致する楽曲位置情報のみが収集対象になること
+	@Test
+	public void testCollectSoundTracks3_Pinpoint() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(BmsPoint.of(3, 96), BmsPoint.of(3, 96), r -> true);
+		assertEquals(List.of(4, 8), List.copyOf(ids));
+	}
+
+	// collectSoundTracks(BmsAt, BmsAt, IntPredicate)
+	// 最初の楽曲位置情報より前方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks3_BehindHead() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(BmsPoint.of(0, 0), BmsPoint.of(0, 191), r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(BmsAt, BmsAt, IntPredicate)
+	// 最後の楽曲位置情報より後方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks3_AheadTail() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(BmsPoint.of(4, 1), BmsPoint.of(10, 0), r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(BmsAt, BmsAt, IntPredicate)
+	// NullPointerException atBegin が null
+	@Test
+	public void testCollectSoundTracks3_NullAtBegin() {
+		var c = chartForCollectSoundTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectSoundTracks(null, BmsPoint.of(10, 0), r -> true));
+	}
+
+	// collectSoundTracks(BmsAt, BmsAt, IntPredicate)
+	// NullPointerException atLast が null
+	@Test
+	public void testCollectSoundTracks3_NullAtLast() {
+		var c = chartForCollectSoundTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectSoundTracks(BmsPoint.of(0, 0), null, r -> true));
+	}
+
+	// collectSoundTracks(BmsAt, BmsAt, IntPredicate)
+	// NullPointerException isCollect が null
+	@Test
+	public void testCollectSoundTracks3_NullIsCollect() {
+		var c = chartForCollectSoundTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectSoundTracks(BmsPoint.of(0, 0), BmsPoint.of(10, 0), null));
+	}
+
+	// collectSoundTracks(int, double, int, double, IntPredicate)
+	// 終了を含む指定範囲のトラックIDが収集されること
+	@Test
+	public void testCollectSoundTracks4_Normal() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(1, 96, 3, 0, r -> true);
+		assertEquals(List.of(6, 7, 8), List.copyOf(ids));
+	}
+
+	// collectSoundTracks(int, double, int, double, IntPredicate)
+	// 楽曲位置情報が0件の時、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks4_Empty() {
+		var c = chartEmpty();
+		var ids = c.collectSoundTracks(0, 0, 10, 0, r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(int, double, int, double, IntPredicate)
+	// 開始・終了が逆転しても例外はスローされず、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks4_ReverseRange() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(10, 0, 0, 0, r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(int, double, int, double, IntPredicate)
+	// 開始・終了に同じ値を指定すると、その位置と完全に一致する楽曲位置情報のみが収集対象になること
+	@Test
+	public void testCollectSoundTracks4_Pinpoint() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(3, 96, 3, 96, r -> true);
+		assertEquals(List.of(4, 8), List.copyOf(ids));
+	}
+
+	// collectSoundTracks(int, double, int, double, IntPredicate)
+	// 最初の楽曲位置情報より前方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks4_BehindHead() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(0, 0, 0, 191, r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(int, double, int, double, IntPredicate)
+	// 最後の楽曲位置情報より後方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks4_AheadTail() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(4, 1, 10, 0, r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(int, double, int, double, IntPredicate)
+	// NullPointerException isCollect が null
+	@Test
+	public void testCollectSoundTracks4_NullIsCollect() {
+		var c = chartForCollectSoundTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectSoundTracks(0, 0, 10, 0, null));
+	}
+
+	// collectSoundTracks(int, int, IntPredicate)
+	// 終了を含む指定範囲のトラックIDが収集されること
+	@Test
+	public void testCollectSoundTracks5_Normal() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(2, 6, r -> true);
+		assertEquals(List.of(6, 7, 8), List.copyOf(ids));
+	}
+
+	// collectSoundTracks(int, int, IntPredicate)
+	// 楽曲位置情報が0件の時、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks5_Empty() {
+		var c = chartEmpty();
+		var ids = c.collectSoundTracks(0, Integer.MAX_VALUE, r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(int, int, IntPredicate)
+	// 開始・終了が逆転しても例外はスローされず、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks5_ReverseRange() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(Integer.MAX_VALUE, 0, r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(int, int, IntPredicate)
+	// 開始・終了に同じ値を指定すると、その位置と完全に一致する楽曲位置情報のみが収集対象になること
+	@Test
+	public void testCollectSoundTracks5_Pinpoint() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(7, 7, r -> true);
+		assertEquals(List.of(4, 8), List.copyOf(ids));
+	}
+
+	// collectSoundTracks(int, int, IntPredicate)
+	// 最後の楽曲位置情報より後方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectSoundTracks5_AheadTail() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(100, Integer.MAX_VALUE, r -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectSoundTracks(int, int, IntPredicate)
+	// 可視オブジェのノート生値が正しくテスター関数に渡されること
+	@Test
+	public void testCollectSoundTracks5_VisibleRaw() {
+		var c = chartForCollectSoundTracks();
+		var ids1 = c.collectSoundTracks(1, 1, r -> {
+			assertTrue(BeMusicSound.isVisible(r));
+			assertEquals(BeMusicDevice.SWITCH11, BeMusicSound.getDevice(r));
+			assertEquals(9, BeMusicSound.getTrackId(r));
+			assertFalse(BeMusicSound.isRestartTrack(r));
+			assertNull(BeMusicSound.getLongNoteMode(r, null));
+			return true;
+		});
+		assertEquals(1, ids1.size());
+		var ids2 = c.collectSoundTracks(2, 2, r -> {
+			assertTrue(BeMusicSound.isVisible(r));
+			assertEquals(BeMusicDevice.SWITCH12, BeMusicSound.getDevice(r));
+			assertEquals(8, BeMusicSound.getTrackId(r));
+			assertTrue(BeMusicSound.isRestartTrack(r));
+			assertNull(BeMusicSound.getLongNoteMode(r, null));
+			return true;
+		});
+		assertEquals(1, ids2.size());
+		var ids3 = c.collectSoundTracks(3, 3, r -> {
+			assertTrue(BeMusicSound.isVisible(r));
+			assertEquals(BeMusicDevice.SWITCH13, BeMusicSound.getDevice(r));
+			assertEquals(7, BeMusicSound.getTrackId(r));
+			assertFalse(BeMusicSound.isRestartTrack(r));
+			assertEquals(BeMusicLongNoteMode.CN, BeMusicSound.getLongNoteMode(r, null));
+			return true;
+		});
+		assertEquals(1, ids3.size());
+	}
+
+	// collectSoundTracks(int, int, IntPredicate)
+	// 不可視オブジェのノート生値が正しくテスター関数に渡されること
+	@Test
+	public void testCollectSoundTracks5_InvisibleRaw() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(5, 5, r -> {
+			assertTrue(BeMusicSound.isInvisible(r));
+			assertEquals(6, BeMusicSound.getTrackId(r));
+			return true;
+		});
+		assertEquals(1, ids.size());
+	}
+
+	// collectSoundTracks(int, int, IntPredicate)
+	// BGMのノート生値が正しくテスター関数に渡されること
+	@Test
+	public void testCollectSoundTracks5_BgmRaw() {
+		var c = chartForCollectSoundTracks();
+		var ids1 = c.collectSoundTracks(7, 8, r -> true);
+		assertEquals(List.of(4, 8, 9), List.copyOf(ids1));
+		var ids2 = c.collectSoundTracks(8, 8, r -> {
+			assertTrue(BeMusicSound.isBgm(r));
+			assertEquals(9, BeMusicSound.getTrackId(r));
+			return true;
+		});
+		assertEquals(1, ids2.size());
+	}
+
+	// collectSoundTracks(int, int, IntPredicate)
+	// テスター関数が false を返すと収集対象外になること
+	@Test
+	public void testCollectSoundTracks5_NotCollect() {
+		var c = chartForCollectSoundTracks();
+		var ids = c.collectSoundTracks(0, Integer.MAX_VALUE, r -> BeMusicSound.isInvisible(r));
+		assertEquals(List.of(6), List.copyOf(ids));
+	}
+
+	// collectSoundTracks(int, int, IntPredicate)
+	// IllegalArgumentException start が負の値
+	@Test
+	public void testCollectSoundTracks5_NegativeStart() {
+		var c = chartForCollectSoundTracks();
+		var ex = IllegalArgumentException.class;
+		assertThrows(ex, () -> c.collectSoundTracks(-1, 0, r -> true));
+	}
+
+	// collectSoundTracks(int, int, IntPredicate)
+	// IllegalArgumentException last が負の値
+	@Test
+	public void testCollectSoundTracks5_NegativeLast() {
+		var c = chartForCollectSoundTracks();
+		var ex = IllegalArgumentException.class;
+		assertThrows(ex, () -> c.collectSoundTracks(0, -1, r -> true));
+	}
+
+	// collectSoundTracks(int, int, IntPredicate)
+	// NullPointerException isCollect が null
+	@Test
+	public void testCollectSoundTracks5_NullIsCollect() {
+		var c = chartForCollectSoundTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectSoundTracks(0, Integer.MAX_VALUE, null));
+	}
+
+	// collectImageTracks(BiPredicate<Integer, Integer>)
+	// 譜面全体のトラックIDが収集されること
+	@Test
+	public void testCollectImageTracks1_Normal() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks((t, v) -> true);
+		assertEquals(List.of(3, 5, 7), List.copyOf(ids));
+	}
+
+	// collectImageTracks(BiPredicate<Integer, Integer>)
+	// 楽曲位置情報が0件の時、空のセットが返されること
+	@Test
+	public void testCollectImageTracks1_Empty() {
+		var c = chartEmpty();
+		var ids = c.collectImageTracks((t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(BiPredicate<Integer, Integer>)
+	// NullPointerException isCollect が null
+	@Test
+	public void testCollectImageTracks1_NullIsCollect() {
+		var c = chartForCollectImageTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectImageTracks(null));
+	}
+
+	// collectImageTracks(double, double, BiPredicate<Integer, Integer>)
+	// 終了を含む指定範囲のトラックIDが収集されること
+	@Test
+	public void testCollectImageTracks2_Normal() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(4.0, 6.0, (t, v) -> true);
+		assertEquals(List.of(5, 7), List.copyOf(ids));
+	}
+
+	// collectImageTracks(double, double, BiPredicate<Integer, Integer>)
+	// 楽曲位置情報が0件の時、空のセットが返されること
+	@Test
+	public void testCollectImageTracks2_Empty() {
+		var c = chartEmpty();
+		var ids = c.collectImageTracks(0.0, 10.0, (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(double, double, BiPredicate<Integer, Integer>)
+	// 開始・終了が逆転しても例外はスローされず、空のセットが返されること
+	@Test
+	public void testCollectImageTracks2_ReverseRange() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(10.0, 0.0, (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(double, double, BiPredicate<Integer, Integer>)
+	// 開始・終了に同じ値を指定すると、その位置と完全に一致する楽曲位置情報のみが収集対象になること
+	@Test
+	public void testCollectImageTracks2_Pinpoint() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(5.0, 5.0, (t, v) -> true);
+		assertEquals(List.of(7), List.copyOf(ids));
+	}
+
+	// collectImageTracks(double, double, BiPredicate<Integer, Integer>)
+	// 最初の楽曲位置情報より前方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectImageTracks2_BehindHead() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(0.0, 1.9, (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(double, double, BiPredicate<Integer, Integer>)
+	// 最後の楽曲位置情報より後方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectImageTracks2_AheadTail() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(7.1, 10.0, (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(double, double, BiPredicate<Integer, Integer>)
+	// IllegalArgumentException timeBegin が負の値
+	@Test
+	public void testCollectImageTracks2_NegativeTimeBegin() {
+		var c = chartForCollectImageTracks();
+		var ex = IllegalArgumentException.class;
+		assertThrows(ex, () -> c.collectImageTracks(-1.0, 10.0, (t, v) -> true));
+	}
+
+	// collectImageTracks(double, double, BiPredicate<Integer, Integer>)
+	// IllegalArgumentException timeEnd が負の値
+	@Test
+	public void testCollectImageTracks2_NegativeTimeEnd() {
+		var c = chartForCollectImageTracks();
+		var ex = IllegalArgumentException.class;
+		assertThrows(ex, () -> c.collectImageTracks(0.0, -1.0, (t, v) -> true));
+	}
+
+	// collectImageTracks(double, double, BiPredicate<Integer, Integer>)
+	// NullPointerException isCollect が null
+	@Test
+	public void testCollectImageTracks2_NullIsCollect() {
+		var c = chartForCollectImageTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectImageTracks(0.0, 10.0, null));
+	}
+
+	// collectImageTracks(BmsAt, BmsAt, BiPredicate<Integer, Integer>)
+	// 終了を含む指定範囲のトラックIDが収集されること
+	@Test
+	public void testCollectImageTracks3_Normal() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(BmsPoint.of(2, 0), BmsPoint.of(3, 0), (t, v) -> true);
+		assertEquals(List.of(5, 7), List.copyOf(ids));
+	}
+
+	// collectImageTracks(BmsAt, BmsAt, BiPredicate<Integer, Integer>)
+	// 楽曲位置情報が0件の時、空のセットが返されること
+	@Test
+	public void testCollectImageTracks3_Empty() {
+		var c = chartEmpty();
+		var ids = c.collectImageTracks(BmsPoint.of(0, 0), BmsPoint.of(10, 0), (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(BmsAt, BmsAt, BiPredicate<Integer, Integer>)
+	// 開始・終了が逆転しても例外はスローされず、空のセットが返されること
+	@Test
+	public void testCollectImageTracks3_ReverseRange() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(BmsPoint.of(10, 0), BmsPoint.of(0, 0), (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(BmsAt, BmsAt, BiPredicate<Integer, Integer>)
+	// 開始・終了に同じ値を指定すると、その位置と完全に一致する楽曲位置情報のみが収集対象になること
+	@Test
+	public void testCollectImageTracks3_Pinpoint() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(BmsPoint.of(2, 96), BmsPoint.of(2, 96), (t, v) -> true);
+		assertEquals(List.of(7), List.copyOf(ids));
+	}
+
+	// collectImageTracks(BmsAt, BmsAt, BiPredicate<Integer, Integer>)
+	// 最初の楽曲位置情報より前方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectImageTracks3_BehindHead() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(BmsPoint.of(0, 0), BmsPoint.of(0, 191), (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(BmsAt, BmsAt, BiPredicate<Integer, Integer>)
+	// 最後の楽曲位置情報より後方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectImageTracks3_AheadTail() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(BmsPoint.of(3, 97), BmsPoint.of(10, 0), (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(BmsAt, BmsAt, BiPredicate<Integer, Integer>)
+	// NullPointerException atBegin が null
+	@Test
+	public void testCollectImageTracks3_NullAtBegin() {
+		var c = chartForCollectImageTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectImageTracks(null, BmsPoint.of(10, 0), (t, v) -> true));
+	}
+
+	// collectImageTracks(BmsAt, BmsAt, BiPredicate<Integer, Integer>)
+	// NullPointerException atLast が null
+	@Test
+	public void testCollectImageTracks3_NullAtLast() {
+		var c = chartForCollectImageTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectImageTracks(BmsPoint.of(0, 0), null, (t, v) -> true));
+	}
+
+	// collectImageTracks(BmsAt, BmsAt, BiPredicate<Integer, Integer>)
+	// NullPointerException isCollect が null
+	@Test
+	public void testCollectImageTracks3_NullIsCollect() {
+		var c = chartForCollectImageTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectImageTracks(BmsPoint.of(0, 0), BmsPoint.of(10, 0), null));
+	}
+
+	// collectImageTracks(int, double, int, double, BiPredicate<Integer, Integer>)
+	// 終了を含む指定範囲のトラックIDが収集されること
+	@Test
+	public void testCollectImageTracks4_Normal() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(2, 0, 3, 0, (t, v) -> true);
+		assertEquals(List.of(5, 7), List.copyOf(ids));
+	}
+
+	// collectImageTracks(int, double, int, double, BiPredicate<Integer, Integer>)
+	// 楽曲位置情報が0件の時、空のセットが返されること
+	@Test
+	public void testCollectImageTracks4_Empty() {
+		var c = chartEmpty();
+		var ids = c.collectImageTracks(0, 0, 10, 0, (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(int, double, int, double, BiPredicate<Integer, Integer>)
+	// 開始・終了が逆転しても例外はスローされず、空のセットが返されること
+	@Test
+	public void testCollectImageTracks4_ReverseRange() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(10, 0, 0, 0, (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(int, double, int, double, BiPredicate<Integer, Integer>)
+	// 開始・終了に同じ値を指定すると、その位置と完全に一致する楽曲位置情報のみが収集対象になること
+	@Test
+	public void testCollectImageTracks4_Pinpoint() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(2, 96, 2, 96, (t, v) -> true);
+		assertEquals(List.of(7), List.copyOf(ids));
+	}
+
+	// collectImageTracks(int, double, int, double, BiPredicate<Integer, Integer>)
+	// 最初の楽曲位置情報より前方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectImageTracks4_BehindHead() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(0, 0, 0, 191, (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(int, double, int, double, BiPredicate<Integer, Integer>)
+	// 最後の楽曲位置情報より後方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectImageTracks4_AheadTail() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(3, 97, 10, 0, (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(int, double, int, double, BiPredicate<Integer, Integer>)
+	// NullPointerException isCollect が null
+	@Test
+	public void testCollectImageTracks4_NullIsCollect() {
+		var c = chartForCollectImageTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectImageTracks(0, 0, 10, 0, null));
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// 終了を含む指定範囲のトラックIDが収集されること
+	@Test
+	public void testCollectImageTracks5_Normal() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(3, 5, (t, v) -> true);
+		assertEquals(List.of(5, 7), List.copyOf(ids));
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// 楽曲位置情報が0件の時、空のセットが返されること
+	@Test
+	public void testCollectImageTracks5_Empty() {
+		var c = chartEmpty();
+		var ids = c.collectImageTracks(0, Integer.MAX_VALUE, (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// 開始・終了が逆転しても例外はスローされず、空のセットが返されること
+	@Test
+	public void testCollectImageTracks5_ReverseRange() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(Integer.MAX_VALUE, 0, (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// 開始・終了に同じ値を指定すると、その位置と完全に一致する楽曲位置情報のみが収集対象になること
+	@Test
+	public void testCollectImageTracks5_Pinpoint() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(4, 4, (t, v) -> true);
+		assertEquals(List.of(7), List.copyOf(ids));
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// 最初の楽曲位置情報より前方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectImageTracks5_BehindHead() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(0, 0, (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// 最後の楽曲位置情報より後方の範囲を指定した場合、空のセットが返されること
+	@Test
+	public void testCollectImageTracks5_AheadTail() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(100, Integer.MAX_VALUE, (t, v) -> true);
+		assertTrue(ids.isEmpty());
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// BGAが正しくテスター関数に渡されること
+	@Test
+	public void testCollectImageTracks5_BgaTest() {
+		var c = chartForCollectImageTracks();
+		var ids1 = c.collectImageTracks(1, 1, (t, v) -> {
+			assertEquals((Integer)0, t);
+			assertEquals((Integer)3, v);
+			return true;
+		});
+		assertEquals(List.of(3), List.copyOf(ids1));
+		var ids2 = c.collectImageTracks(4, 4, (t, v) -> {
+			assertEquals((Integer)0, t);
+			assertEquals((Integer)7, v);
+			return true;
+		});
+		assertEquals(List.of(7), List.copyOf(ids2));
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// BGAレイヤーが正しくテスター関数に渡されること
+	@Test
+	public void testCollectImageTracks5_LayerTest() {
+		var c = chartForCollectImageTracks();
+		var ids1 = c.collectImageTracks(2, 2, (t, v) -> {
+			assertEquals((Integer)1, t);
+			assertEquals((Integer)5, v);
+			return true;
+		});
+		assertEquals(List.of(5), List.copyOf(ids1));
+		var ids2 = c.collectImageTracks(5, 5, (t, v) -> {
+			assertEquals((Integer)1, t);
+			assertEquals((Integer)5, v);
+			return true;
+		});
+		assertEquals(List.of(5), List.copyOf(ids2));
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// プレーミス画像が正しくテスター関数に渡されること
+	@Test
+	public void testCollectImageTracks5_MissTest() {
+		var c = chartForCollectImageTracks();
+		var ids1 = c.collectImageTracks(3, 3, (t, v) -> {
+			assertEquals((Integer)2, t);
+			assertEquals((Integer)7, v);
+			return true;
+		});
+		assertEquals(List.of(7), List.copyOf(ids1));
+		var ids2 = c.collectImageTracks(6, 6, (t, v) -> {
+			assertEquals((Integer)2, t);
+			assertEquals((Integer)3, v);
+			return true;
+		});
+		assertEquals(List.of(3), List.copyOf(ids2));
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// テスター関数が false を返すと収集対象外になること
+	@Test
+	public void testCollectImageTracks5_NotCollect() {
+		var c = chartForCollectImageTracks();
+		var ids = c.collectImageTracks(0, Integer.MAX_VALUE, (t, v) -> t != 1);
+		assertEquals(List.of(3, 7), List.copyOf(ids));
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// IllegalArgumentException start が負の値
+	@Test
+	public void testCollectImageTracks5_NegativeStart() {
+		var c = chartForCollectImageTracks();
+		var ex = IllegalArgumentException.class;
+		assertThrows(ex, () -> c.collectImageTracks(-1, Integer.MAX_VALUE, (t, v) -> true));
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// IllegalArgumentException last が負の値
+	@Test
+	public void testCollectImageTracks5_NegativeLast() {
+		var c = chartForCollectImageTracks();
+		var ex = IllegalArgumentException.class;
+		assertThrows(ex, () -> c.collectImageTracks(0, -1, (t, v) -> true));
+	}
+
+	// collectImageTracks(int, int, BiPredicate<Integer, Integer>)
+	// NullPointerException isCollect が null
+	@Test
+	public void testCollectImageTracks5_NullIsCollect() {
+		var c = chartForCollectImageTracks();
+		var ex = NullPointerException.class;
+		assertThrows(ex, () -> c.collectImageTracks(0, Integer.MAX_VALUE, null));
+	}
+
+	// computeActualPlayTime(IntToDoubleFunction)
+	// 楽曲位置＋サウンド再生時間が最も長い時間が返ること
+	@Test
+	public void testComputeActualPlayTime_Normal() {
+		var c = chartForComputeActualPlayTime();
+		var tm = 0.0;
+
+		// BEAT
+		tm = c.computeActualPlayTime(r -> BeMusicSound.getTrackId(r) == 1 ? 15.0 : 1.0);
+		assertEquals(17.0, tm, 0.00000001);
+
+		// LONG_ON(LN)
+		tm = c.computeActualPlayTime(r -> BeMusicSound.getTrackId(r) == 2 ? 15.0 : 1.0);
+		assertEquals(18.5, tm, 0.00000001);
+
+		// LONG_ON(Switch-CN)
+		tm = c.computeActualPlayTime(r -> BeMusicSound.getTrackId(r) == 3 ? 15.0 : 1.0);
+		assertEquals(20.5, tm, 0.00000001);
+
+		// LONG_ON(Scratch-CN)
+		tm = c.computeActualPlayTime(r -> {
+			var trackId = BeMusicSound.getTrackId(r);
+			return trackId == 4 || trackId == 5 ? 15.0 : 1.0;
+		});
+		assertEquals(23.5, tm, 0.00000001); // CHARGE_OFF(Back-Spin)の音が考慮されること
+
+		// Invisible
+		tm = c.computeActualPlayTime(r -> BeMusicSound.getTrackId(r) == 7 ? 15.0 : 1.0);
+		assertEquals(25.0, tm, 0.00000001);
+
+		// Bgm
+		tm = c.computeActualPlayTime(r -> BeMusicSound.getTrackId(r) == 9 ? 15.0 : 1.0);
+		assertEquals(26.0, tm, 0.00000001);
+	}
+
+	// computeActualPlayTime(IntToDoubleFunction)
+	// サウンド再生を伴わない可視オブジェはサウンド再生時間が加算されないこと(再生時間取得関数に入力されないこと)
+	@Test
+	public void testComputeActualPlayTime_Visible() {
+		var unchecked = new HashSet<>(List.of(1, 2, 3, 4, 5));
+		var c = chartForComputeActualPlayTime();
+		c.computeActualPlayTime(r -> {
+			if (BeMusicSound.isVisible(r)) {
+				assertTrue(BeMusicSound.getNoteType(r).hasSound(BeMusicSound.getDevice(r)));
+				assertTrue(unchecked.remove(BeMusicSound.getTrackId(r)));
+			}
+			return 0.0;
+		});
+		assertTrue(unchecked.isEmpty());
+	}
+
+	// computeActualPlayTime(IntToDoubleFunction)
+	// 楽曲位置情報が存在しない譜面では0が返ること
+	@Test
+	public void testComputeActualPlayTime_Empty() {
+		var c = chartEmpty();
+		var tm = c.computeActualPlayTime(r -> { fail(); return 0.0; });
+		assertEquals(0.0, tm, 0.0);
+	}
+
+	// computeActualPlayTime(IntToDoubleFunction)
+	// NullPointerException getSoundTime が null
+	@Test
+	public void testComputeActualPlayTime_NullGetSoundTime() {
+		var c = chartForComputeActualPlayTime();
+		assertThrows(NullPointerException.class, () -> c.computeActualPlayTime(null));
+	}
+
 	// onCreate()
 	// 正常：オブジェクト構築時に必ず呼ばれ、呼び出し時には各Getterでベースクラスが持つ値を正常に取得できること
 	@Test
@@ -1688,7 +2551,7 @@ public class BeMusicChartTest implements UseTestData {
 					.setIgnoreUnknownMeta(false)
 					.setIgnoreWrongData(false)
 					.load(path);
-		} catch (BmsException | IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -1703,6 +2566,75 @@ public class BeMusicChartTest implements UseTestData {
 
 	private BeMusicChart testCommonChart() {
 		return builder(testCommonContent()).createChart();
+	}
+
+	private static BeMusicChart chartEmpty() {
+		return builder(contentEmpty()).createChart();
+	}
+
+	private static BeMusicChart chartForCollectSoundTracks() {
+		var c = new BmsContent(BeMusicSpec.LATEST);
+		c.edit(() -> {
+			c.setInitialBpm(120.0);
+			c.putNote(BeMusicDevice.SWITCH11.getVisibleChannel().getNumber(), 1, 0,    // M=1, T=0: 2.0s
+					BeMusicSound.makeValue(9, false, null));
+			c.putNote(BeMusicDevice.SWITCH12.getVisibleChannel().getNumber(), 1, 96,   // M=1, T=96: 3.0s
+					BeMusicSound.makeValue(8, true, null));
+			c.putNote(BeMusicDevice.SWITCH13.getLongChannel().getNumber(), 2, 0,       // M=2, T=0: 4.0s
+					BeMusicSound.makeValue(7, false, BeMusicLongNoteMode.CN));
+			c.putNote(BeMusicDevice.SWITCH13.getLongChannel().getNumber(), 2, 48,      // M=2, T=48: 4.5s
+					BeMusicSound.makeValue(7, false, BeMusicLongNoteMode.CN));
+			c.putNote(BeMusicDevice.SWITCH14.getInvisibleChannel().getNumber(), 2, 96, // M=2, T=96: 5.0s
+					BeMusicSound.makeValue(6, false, null));
+			c.putNote(BeMusicDevice.SWITCH15.getMineChannel().getNumber(), 3, 0,       // M=3, T=0: 6.0s
+					BeMusicSound.makeValue(5, false, null));
+			c.putNote(BeMusicChannel.NUM_BGM, 0, 3, 96, 4);                            // M=3, T=96, CI=0: 7.0s
+			c.putNote(BeMusicChannel.NUM_BGM, 1, 3, 96, 8);                            // M=3, T=96, CI=1: 7.0s
+			c.putNote(BeMusicChannel.NUM_BGM, 0, 4, 0, 9);                             // M=4, T=0, CI=0: 8.0s
+		});
+		return builder(c).createChart();
+	}
+
+	private static BeMusicChart chartForCollectImageTracks() {
+		var c = new BmsContent(BeMusicSpec.LATEST);
+		c.edit(() -> {
+			c.setInitialBpm(120.0);
+			c.putNote(BeMusicChannel.NUM_BGA, 1, 0, 3);         // M=1, T=0: 2.0s
+			c.putNote(BeMusicChannel.NUM_BGA_LAYER, 1, 96, 5);  // M=1, T=96: 3.0s
+			c.putNote(BeMusicChannel.NUM_BGA_MISS, 2, 0, 7);    // M=2, T=0: 4.0s
+			c.putNote(BeMusicChannel.NUM_BGA, 2, 96, 7);        // M=2, T=96: 5.0s
+			c.putNote(BeMusicChannel.NUM_BGA_LAYER, 3, 0, 5);   // M=3, T=0: 6.0s
+			c.putNote(BeMusicChannel.NUM_BGA_MISS, 3, 96, 3);   // M=3, T=96: 7.0s
+		});
+		return builder(c).createChart();
+	}
+
+	private static BeMusicChart chartForComputeActualPlayTime() {
+		var c = new BmsContent(BeMusicSpec.LATEST);
+		c.edit(() -> {
+			c.setInitialBpm(120.0);
+			c.putNote(BeMusicDevice.SWITCH11.getVisibleChannel().getNumber(), 1, 0,    // Visible: BEAT: 2.0s
+					BeMusicSound.makeValue(1, false, null));
+			c.putNote(BeMusicDevice.SWITCH12.getLongChannel().getNumber(), 1, 144,     // Visible: LONG_ON(LN): 3.5s
+					BeMusicSound.makeValue(2, false, BeMusicLongNoteMode.LN));
+			c.putNote(BeMusicDevice.SWITCH12.getLongChannel().getNumber(), 2, 48,      // Visible: LONG_OFF: 4.5s
+					BeMusicSound.makeValue(2, false, BeMusicLongNoteMode.LN));
+			c.putNote(BeMusicDevice.SWITCH13.getLongChannel().getNumber(), 2, 144,     // Visible: LONG_ON(CN): 5.5s
+					BeMusicSound.makeValue(3, false, BeMusicLongNoteMode.CN));
+			c.putNote(BeMusicDevice.SWITCH13.getLongChannel().getNumber(), 3, 48,      // Visible: CHARGE_OFF: 6.5s
+					BeMusicSound.makeValue(3, false, BeMusicLongNoteMode.CN));
+			c.putNote(BeMusicDevice.SCRATCH1.getLongChannel().getNumber(), 3, 144,     // Visible: LONG_ON(CN): 7.5s
+					BeMusicSound.makeValue(4, false, BeMusicLongNoteMode.CN));
+			c.putNote(BeMusicDevice.SCRATCH1.getLongChannel().getNumber(), 4, 48,      // Visible: CHARGE_OFF(Scr): 8.5s
+					BeMusicSound.makeValue(5, false, BeMusicLongNoteMode.CN));
+			c.putNote(BeMusicDevice.SWITCH15.getMineChannel().getNumber(), 4, 96,      // Visible: MINE: 9.0s
+					BeMusicSound.makeValue(6, false, null));
+			c.putNote(BeMusicDevice.SWITCH16.getInvisibleChannel().getNumber(), 5, 0,  // Invisible: 10.0s
+					BeMusicSound.makeValue(7, false, null));
+			c.putNote(BeMusicChannel.NUM_BGM, 0, 5, 96, 8);                            // Bgm: CI=0: 11.0s
+			c.putNote(BeMusicChannel.NUM_BGM, 1, 5, 96, 9);                            // Bgm: CI=1: 11.0s
+		});
+		return builder(c).createChart();
 	}
 
 	private static void assertCommonChart(BeMusicChart s) {

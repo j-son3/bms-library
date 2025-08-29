@@ -24,7 +24,7 @@ class RhythmElement extends RatingElement {
 	 * @param side サイド
 	 * @return リズム範囲
 	 */
-	final PulseRange getPulseRange(Rhythm.Side side) {
+	PulseRange getPulseRange(Rhythm.Side side) {
 		return mPulseRanges[side.index];
 	}
 
@@ -33,7 +33,7 @@ class RhythmElement extends RatingElement {
 	 * @param side サイド
 	 * @param pulseRange リズム範囲
 	 */
-	final void setPulseRange(Rhythm.Side side, PulseRange pulseRange) {
+	void setPulseRange(Rhythm.Side side, PulseRange pulseRange) {
 		mPulseRanges[side.index] = pulseRange;
 	}
 

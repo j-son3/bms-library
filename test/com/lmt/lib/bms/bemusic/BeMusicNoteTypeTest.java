@@ -2,6 +2,9 @@ package com.lmt.lib.bms.bemusic;
 
 import static org.junit.Assert.*;
 
+import java.util.Map;
+import java.util.function.Predicate;
+
 import org.junit.Test;
 
 public class BeMusicNoteTypeTest {
@@ -154,5 +157,36 @@ public class BeMusicNoteTypeTest {
 		assertTrue(BeMusicNoteType.LONG_OFF.hasMovement());
 		assertTrue(BeMusicNoteType.CHARGE_OFF.hasMovement());
 		assertFalse(BeMusicNoteType.MINE.hasMovement());
+	}
+
+	// hasSound(BeMusicDevice)
+	// サウンド再生を伴う可能性がある場合trueが返り、それ以外はfalseが返ること
+	@Test
+	public void testHasSound_Normal() {
+		Predicate<BeMusicDevice> allTrue = dev -> true;
+		Predicate<BeMusicDevice> allFalse = dev -> false;
+		Predicate<BeMusicDevice> scratchOnly = dev -> dev.isScratch();
+		var expects = Map.of(
+				BeMusicNoteType.NONE, allFalse,
+				BeMusicNoteType.BEAT, allTrue,
+				BeMusicNoteType.LONG, allFalse,
+				BeMusicNoteType.LONG_ON, allTrue,
+				BeMusicNoteType.LONG_OFF, allFalse,
+				BeMusicNoteType.CHARGE_OFF, scratchOnly,
+				BeMusicNoteType.MINE, allFalse);
+		for (var noteType : BeMusicNoteType.values()) {
+			var fnExpect = expects.get(noteType);
+			for (var i = 0; i < BeMusicDevice.COUNT; i++) {
+				var device = BeMusicDevice.fromIndex(i);
+				assertEquals(fnExpect.test(device), noteType.hasSound(device));
+			}
+		}
+	}
+
+	// hasSound(BeMusicDevice)
+	// 入力デバイスを参照するノート種別では、入力デバイスが null の時に NullPointerException がスローされること
+	@Test
+	public void testHasSound_NullDevice() {
+		assertThrows(NullPointerException.class, () -> BeMusicNoteType.CHARGE_OFF.hasSound(null));
 	}
 }

@@ -3,7 +3,7 @@ package com.lmt.lib.bms.internal;
 /**
  * 変更可能な参照型の32ビット整数値。
  */
-public final class MutableInt extends MutableNumber {
+public class MutableInt extends MutableNumber {
 	/** 値 */
 	private int mValue;
 
@@ -52,7 +52,7 @@ public final class MutableInt extends MutableNumber {
 	 * 値取得
 	 * @return 値
 	 */
-	public final int get() {
+	public int get() {
 		return mValue;
 	}
 
@@ -61,44 +61,44 @@ public final class MutableInt extends MutableNumber {
 	 * @param value 値
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final MutableInt set(int value) {
+	public MutableInt set(int value) {
 		mValue = value;
 		return this;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public final int intValue() {
+	public int intValue() {
 		return mValue;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public final long longValue() {
+	public long longValue() {
 		return mValue;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public final float floatValue() {
+	public float floatValue() {
 		return (float)mValue;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public final double doubleValue() {
+	public double doubleValue() {
 		return (double)mValue;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected final boolean equalsImpl(MutableNumber number) {
+	protected boolean equalsImpl(MutableNumber number) {
 		return mValue == number.intValue();
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected final boolean equalsImpl(Number number) {
+	protected boolean equalsImpl(Number number) {
 		return mValue == number.intValue();
 	}
 }

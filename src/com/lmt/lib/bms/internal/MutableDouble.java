@@ -52,7 +52,7 @@ public class MutableDouble extends MutableNumber {
 	 * 値取得
 	 * @return 値
 	 */
-	public final double get() {
+	public double get() {
 		return mValue;
 	}
 
@@ -61,44 +61,44 @@ public class MutableDouble extends MutableNumber {
 	 * @param value 値
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final MutableDouble set(double value) {
+	public MutableDouble set(double value) {
 		mValue = value;
 		return this;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public final int intValue() {
+	public int intValue() {
 		return (int)mValue;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public final long longValue() {
+	public long longValue() {
 		return (long)mValue;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public final float floatValue() {
+	public float floatValue() {
 		return (float)mValue;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public final double doubleValue() {
+	public double doubleValue() {
 		return mValue;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected final boolean equalsImpl(MutableNumber number) {
+	protected boolean equalsImpl(MutableNumber number) {
 		return mValue == number.doubleValue();
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	protected final boolean equalsImpl(Number number) {
+	protected boolean equalsImpl(Number number) {
 		return mValue == number.doubleValue();
 	}
 }

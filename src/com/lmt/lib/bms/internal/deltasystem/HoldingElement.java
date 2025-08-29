@@ -24,7 +24,7 @@ class HoldingElement extends RatingElement {
 	 * 長押し範囲データ取得
 	 * @return 長押し範囲データ
 	 */
-	final HoldingRange getRange() {
+	HoldingRange getRange() {
 		return mRange;
 	}
 
@@ -32,7 +32,7 @@ class HoldingElement extends RatingElement {
 	 * 長押し範囲データ設定
 	 * @param range 長押し範囲データ
 	 */
-	final void setRange(HoldingRange range) {
+	void setRange(HoldingRange range) {
 		mRange = range;
 	}
 

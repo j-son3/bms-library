@@ -20,19 +20,19 @@ import java.util.stream.Stream;
 		mMaxDelta = maxDelta;
 	}
 
-	public final int getNumber() {
+	public int getNumber() {
 		return mNumber;
 	}
 
-	public final int getMinDelta() {
+	public int getMinDelta() {
 		return mMinDelta;
 	}
 
-	public final int getMaxDelta() {
+	public int getMaxDelta() {
 		return mMaxDelta;
 	}
 
-	public final boolean within(int delta) {
+	public boolean within(int delta) {
 		return (delta >= mMinDelta) && (delta <= mMaxDelta);
 	}
 

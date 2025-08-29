@@ -178,7 +178,7 @@ public class BeMusicHeader {
 	 * <p>BMSコンテンツは、{@link BeMusicSpec}を用いて生成されたBMS仕様に基づくものを指定してください。
 	 * それ以外のBMS仕様に基づいて生成されたBMSコンテンツを指定した場合の動作保証はありません。</p>
 	 * @param content BMSコンテンツ
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 */
 	public BeMusicHeader(BmsContent content) {
 		this(content, ALL);
@@ -192,7 +192,7 @@ public class BeMusicHeader {
 	 * それ以外のBMS仕様に基づいて生成されたBMSコンテンツを指定した場合の動作保証はありません。</p>
 	 * @param content BMSコンテンツ
 	 * @param flags ヘッダ定義収集フラグ
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @see #WAV
 	 * @see #BMP
 	 * @see #BPM
@@ -212,7 +212,7 @@ public class BeMusicHeader {
 	 * @return #BASEの値
 	 * @since 0.8.0
 	 */
-	public final int getBase() {
+	public int getBase() {
 		return mBase;
 	}
 
@@ -220,7 +220,7 @@ public class BeMusicHeader {
 	 * #PLAYERを取得します。
 	 * @return #PLAYERの値
 	 */
-	public final BeMusicPlayer getPlayer() {
+	public BeMusicPlayer getPlayer() {
 		return mPlayer;
 	}
 
@@ -228,7 +228,7 @@ public class BeMusicHeader {
 	 * #GENREを取得します。
 	 * @return #GENREの値
 	 */
-	public final String getGenre() {
+	public String getGenre() {
 		return mGenre;
 	}
 
@@ -236,7 +236,7 @@ public class BeMusicHeader {
 	 * #TITLEを取得します。
 	 * @return #TITLEの値
 	 */
-	public final String getTitle() {
+	public String getTitle() {
 		return mTitle;
 	}
 
@@ -244,7 +244,7 @@ public class BeMusicHeader {
 	 * #SUBTITLEを取得します。
 	 * @return #SUBTITLEの値
 	 */
-	public final String getSubTitle() {
+	public String getSubTitle() {
 		return mSubTitle;
 	}
 
@@ -252,7 +252,7 @@ public class BeMusicHeader {
 	 * #ARTISTを取得します。
 	 * @return #ARTISTの値
 	 */
-	public final String getArtist() {
+	public String getArtist() {
 		return mArtist;
 	}
 
@@ -260,9 +260,9 @@ public class BeMusicHeader {
 	 * #SUBARTISTを取得します。
 	 * @param separator サブアーティストが複数定義されている場合の区切り文字列
 	 * @return #SUBARTISTの値
-	 * @exception NullPointerException separatorがnull
+	 * @throws NullPointerException separatorがnull
 	 */
-	public final String getSubArtist(String separator) {
+	public String getSubArtist(String separator) {
 		assertArgNotNull(separator, "separator");
 		var joiner = new StringJoiner(separator);
 		mSubArtists.forEach(sa -> { joiner.add(sa); });
@@ -273,7 +273,7 @@ public class BeMusicHeader {
 	 * #SUBARTISTを全て取得します。
 	 * @return #SUBARTISTのリスト
 	 */
-	public final List<String> getSubArtists() {
+	public List<String> getSubArtists() {
 		return new ArrayList<>(mSubArtists);
 	}
 
@@ -281,7 +281,7 @@ public class BeMusicHeader {
 	 * #BPM(初期BPM)を取得します。
 	 * @return #BPMの値
 	 */
-	public final double getInitialBpm() {
+	public double getInitialBpm() {
 		return mInitialBpm;
 	}
 
@@ -289,7 +289,7 @@ public class BeMusicHeader {
 	 * #DIFFICULTYを取得します。
 	 * @return #DIFFICULTYの値
 	 */
-	public final BeMusicDifficulty getDifficulty() {
+	public BeMusicDifficulty getDifficulty() {
 		return mDifficulty;
 	}
 
@@ -298,7 +298,7 @@ public class BeMusicHeader {
 	 * @return #CHARTNAMEの値
 	 * @since 0.7.0
 	 */
-	public final String getChartName() {
+	public String getChartName() {
 		return mChartName;
 	}
 
@@ -306,7 +306,7 @@ public class BeMusicHeader {
 	 * #PLAYLEVELを取得します。
 	 * @return #PLAYLEVELの値
 	 */
-	public final String getPlayLevelRaw() {
+	public String getPlayLevelRaw() {
 		return mPlayLevelRaw;
 	}
 
@@ -315,7 +315,7 @@ public class BeMusicHeader {
 	 * <p>元の値が数値書式でない場合、取得される値は0になります。</p>
 	 * @return #PLAYLEVELを数値に変換した値
 	 */
-	public final double getPlayLevel() {
+	public double getPlayLevel() {
 		return mPlayLevel;
 	}
 
@@ -323,7 +323,7 @@ public class BeMusicHeader {
 	 * #RANKを取得します。
 	 * @return #RANKの値
 	 */
-	public final BeMusicRank getRank() {
+	public BeMusicRank getRank() {
 		return mRank;
 	}
 
@@ -333,7 +333,7 @@ public class BeMusicHeader {
 	 * @return #DEFEXRANKの値、またはnull
 	 * @since 0.7.0
 	 */
-	public final Double getDefExRank() {
+	public Double getDefExRank() {
 		return mDefExRank;
 	}
 
@@ -341,7 +341,7 @@ public class BeMusicHeader {
 	 * #TOTALを取得します。
 	 * @return #TOTALの値
 	 */
-	public final double getTotal() {
+	public double getTotal() {
 		return mTotal;
 	}
 
@@ -350,7 +350,7 @@ public class BeMusicHeader {
 	 * @return #COMMENTの値
 	 * @since 0.5.0
 	 */
-	public final String getComment() {
+	public String getComment() {
 		return mComment;
 	}
 
@@ -358,7 +358,7 @@ public class BeMusicHeader {
 	 * #BANNERを取得します。
 	 * @return #BANNERの値
 	 */
-	public final String getBanner() {
+	public String getBanner() {
 		return mBanner;
 	}
 
@@ -366,7 +366,7 @@ public class BeMusicHeader {
 	 * #STAGEFILEを取得します。
 	 * @return #STAGEFILEの値
 	 */
-	public final String getStageFile() {
+	public String getStageFile() {
 		return mStageFile;
 	}
 
@@ -374,7 +374,7 @@ public class BeMusicHeader {
 	 * #BACKBMPを取得します。
 	 * @return #BACKBMPの値
 	 */
-	public final String getBackBmp() {
+	public String getBackBmp() {
 		return mBackBmp;
 	}
 
@@ -383,7 +383,7 @@ public class BeMusicHeader {
 	 * @return #EYECATCHの値
 	 * @since 0.7.0
 	 */
-	public final String getEyecatch() {
+	public String getEyecatch() {
 		return mEyecatch;
 	}
 
@@ -392,7 +392,7 @@ public class BeMusicHeader {
 	 * @return #PREVIEWの値
 	 * @since 0.2.0
 	 */
-	public final String getPreview() {
+	public String getPreview() {
 		return mPreview;
 	}
 
@@ -400,7 +400,7 @@ public class BeMusicHeader {
 	 * #LNOBJを全て取得します。
 	 * @return #LNOBJのリスト
 	 */
-	public final List<Long> getLnObjs() {
+	public List<Long> getLnObjs() {
 		return new ArrayList<>(mLnObjs);
 	}
 
@@ -409,7 +409,7 @@ public class BeMusicHeader {
 	 * @return #LNMODEの値
 	 * @since 0.3.0
 	 */
-	public final BeMusicLongNoteMode getLnMode() {
+	public BeMusicLongNoteMode getLnMode() {
 		return mLnMode;
 	}
 
@@ -417,7 +417,7 @@ public class BeMusicHeader {
 	 * %URLを取得します。
 	 * @return %URLの値
 	 */
-	public final String getUrl() {
+	public String getUrl() {
 		return mUrl;
 	}
 
@@ -425,7 +425,7 @@ public class BeMusicHeader {
 	 * %EMAILを取得します。
 	 * @return %EMAILの値
 	 */
-	public final String getEmail() {
+	public String getEmail() {
 		return mEmail;
 	}
 
@@ -434,7 +434,7 @@ public class BeMusicHeader {
 	 * @param metaIndex メタ情報インデックス
 	 * @return #WAVの値。インデックスに該当する値がない場合空文字。
 	 */
-	public final String getWav(int metaIndex) {
+	public String getWav(int metaIndex) {
 		return Objects.requireNonNullElse(mWavs.get(BmsInt.box(metaIndex)), "");
 	}
 
@@ -443,7 +443,7 @@ public class BeMusicHeader {
 	 * <p>返されるマップは読み取り専用です。</p>
 	 * @return メタ情報インデックスでマップされた#WAVの値
 	 */
-	public final Map<Integer, String> getWavs() {
+	public Map<Integer, String> getWavs() {
 		return mWavs;
 	}
 
@@ -452,7 +452,7 @@ public class BeMusicHeader {
 	 * @param metaIndex メタ情報インデックス
 	 * @return #BMPの値。インデックスに該当する値がない場合空文字。
 	 */
-	public final String getBmp(int metaIndex) {
+	public String getBmp(int metaIndex) {
 		return Objects.requireNonNullElse(mBmps.get(BmsInt.box(metaIndex)), "");
 	}
 
@@ -461,7 +461,7 @@ public class BeMusicHeader {
 	 * <p>返されるマップは読み取り専用です。</p>
 	 * @return メタ情報インデックスでマップされた#BMPの値
 	 */
-	public final Map<Integer, String> getBmps() {
+	public Map<Integer, String> getBmps() {
 		return mBmps;
 	}
 
@@ -470,7 +470,7 @@ public class BeMusicHeader {
 	 * @param metaIndex メタ情報インデックス
 	 * @return #BPMの値。インデックスに該当する値がない場合{@link BmsSpec#BPM_DEFAULT}。
 	 */
-	public final double getBpm(int metaIndex) {
+	public double getBpm(int metaIndex) {
 		var bpm = (mBpms == null) ? null : mBpms.get(BmsInt.box(metaIndex));
 		return (bpm == null) ? BmsSpec.BPM_DEFAULT : bpm;
 	}
@@ -480,7 +480,7 @@ public class BeMusicHeader {
 	 * <p>返されるマップは読み取り専用です。</p>
 	 * @return メタ情報インデックスでマップされた#BPMの値
 	 */
-	public final Map<Integer, Double> getBpms() {
+	public Map<Integer, Double> getBpms() {
 		return mBpms;
 	}
 
@@ -489,7 +489,7 @@ public class BeMusicHeader {
 	 * @param metaIndex メタ情報インデックス
 	 * @return #STOPの値。インデックスに該当する値がない場合0。
 	 */
-	public final double getStop(int metaIndex) {
+	public double getStop(int metaIndex) {
 		var stop = (mStops == null) ? null : mStops.get(BmsInt.box(metaIndex));
 		return (stop == null) ? 0 : stop.doubleValue();
 	}
@@ -499,7 +499,7 @@ public class BeMusicHeader {
 	 * <p>返されるマップは読み取り専用です。</p>
 	 * @return メタ情報インデックスでマップされた#STOPの値
 	 */
-	public final Map<Integer, Double> getStops() {
+	public Map<Integer, Double> getStops() {
 		return mStops;
 	}
 
@@ -508,7 +508,7 @@ public class BeMusicHeader {
 	 * @param metaIndex メタ情報インデックス
 	 * @return #SCROLLの値。インデックスに該当する値がない場合0。
 	 */
-	public final double getScroll(int metaIndex) {
+	public double getScroll(int metaIndex) {
 		var scroll = (mScrolls == null) ? null : mScrolls.get(BmsInt.box(metaIndex));
 		return (scroll == null) ? 0 : scroll.doubleValue();
 	}
@@ -518,7 +518,7 @@ public class BeMusicHeader {
 	 * <p>返されるマップは読み取り専用です。</p>
 	 * @return メタ情報インデックスでマップされた#SCROLLの値
 	 */
-	public final Map<Integer, Double> getScrolls() {
+	public Map<Integer, Double> getScrolls() {
 		return mScrolls;
 	}
 
@@ -527,7 +527,7 @@ public class BeMusicHeader {
 	 * @param metaIndex メタ情報インデックス
 	 * @return #TEXTの値。インデックスに該当する値がない場合空文字。
 	 */
-	public final String getText(int metaIndex) {
+	public String getText(int metaIndex) {
 		return Objects.requireNonNullElse(mTexts.get(BmsInt.box(metaIndex)), "");
 	}
 
@@ -536,7 +536,7 @@ public class BeMusicHeader {
 	 * <p>返されるマップは読み取り専用です。</p>
 	 * @return メタ情報インデックスでマップされた#TEXTの値
 	 */
-	public final Map<Integer, String> getTexts() {
+	public Map<Integer, String> getTexts() {
 		return mTexts;
 	}
 
@@ -545,7 +545,7 @@ public class BeMusicHeader {
 	 * <p>当メソッドは{@link #BeMusicHeader(BmsContent)}と同じ機能を提供します。</p>
 	 * @param content BMSコンテンツ
 	 * @return ヘッダ定義オブジェクト
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @since 0.8.0
 	 */
 	public static BeMusicHeader of(BmsContent content) {
@@ -558,7 +558,7 @@ public class BeMusicHeader {
 	 * @param content BMSコンテンツ
 	 * @param flags ヘッダ定義収集フラグ
 	 * @return ヘッダ定義オブジェクト
-	 * @exception NullPointerException contentがnull
+	 * @throws NullPointerException contentがnull
 	 * @since 0.8.0
 	 */
 	public static BeMusicHeader of(BmsContent content, int flags) {
@@ -572,9 +572,9 @@ public class BeMusicHeader {
 	 * @param content BMSコンテンツ
 	 * @param creator 拡張ヘッダ定義オブジェクト生成関数
 	 * @return 拡張ヘッダ定義オブジェクト
-	 * @exception NullPointerException contentがnull
-	 * @exception NullPointerException creatorがnull
-	 * @exception NullPointerException creatorがnullを返した
+	 * @throws NullPointerException contentがnull
+	 * @throws NullPointerException creatorがnull
+	 * @throws NullPointerException creatorがnullを返した
 	 * @see #of(BmsContent, int, Supplier)
 	 * @since 0.8.0
 	 */
@@ -592,9 +592,9 @@ public class BeMusicHeader {
 	 * @param flags ヘッダ定義収集フラグ
 	 * @param creator 拡張ヘッダ定義オブジェクト生成関数
 	 * @return 拡張ヘッダ定義オブジェクト
-	 * @exception NullPointerException contentがnull
-	 * @exception NullPointerException creatorがnull
-	 * @exception NullPointerException creatorがnullを返した
+	 * @throws NullPointerException contentがnull
+	 * @throws NullPointerException creatorがnull
+	 * @throws NullPointerException creatorがnullを返した
 	 * @see #onCreate(BmsContent, int)
 	 * @since 0.8.0
 	 */
@@ -614,7 +614,7 @@ public class BeMusicHeader {
 	 * @param content BMSコンテンツ
 	 * @param flags ヘッダ定義収集フラグ
 	 */
-	final void setup(BmsContent content, int flags) {
+	void setup(BmsContent content, int flags) {
 		// 取得フラグに関わらず必ず取得するメタ情報
 		mBase = BeMusicMeta.getBase(content);
 		mPlayer = BeMusicMeta.getPlayer(content);

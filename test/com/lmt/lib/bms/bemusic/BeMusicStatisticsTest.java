@@ -3,6 +3,7 @@ package com.lmt.lib.bms.bemusic;
 import static org.junit.Assert.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -32,6 +33,24 @@ public class BeMusicStatisticsTest {
 		assertSame(span2, stat.getSpan(1));
 		assertSame(span3, stat.getSpan(2));
 		assertSame(span4, stat.getSpan(3));
+	}
+
+	// spans()
+	// 正しい順番で期間統計情報を走査するストリームが返ること
+	@Test
+	public void testSpans() {
+		var stat = newInstance();
+		var span1 = new BeMusicTimeSpan();
+		var span2 = new BeMusicTimeSpan();
+		var span3 = new BeMusicTimeSpan();
+		var inList = List.of(span1, span2, span3);
+		stat.setTimeSpanList(inList);
+		assertNotNull(stat.spans());
+		assertEquals(3L, stat.spans().count());
+		var outList = stat.spans().collect(Collectors.toList());
+		assertSame(span1, outList.get(0));
+		assertSame(span2, outList.get(1));
+		assertSame(span3, outList.get(2));
 	}
 
 	// getSpanLength()

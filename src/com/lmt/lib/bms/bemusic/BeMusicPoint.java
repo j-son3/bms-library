@@ -58,7 +58,7 @@ public class BeMusicPoint implements BmsAt {
 	/** BGAノートの数(BGA + Layer + Miss) */
 	static final int BC = 3;
 	/** 当該種別のノートは存在しない */
-	private static final int NA = -1;
+	static final int NA = -1;
 	/** ノート配列の先頭 */
 	private static final int HD = 0;
 	/** 可視オブジェと不可視オブジェの合計数 */
@@ -280,13 +280,13 @@ public class BeMusicPoint implements BmsAt {
 
 	/** {@inheritDoc} */
 	@Override
-	public final int getMeasure() {
+	public int getMeasure() {
 		return mMeasure;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public final double getTick() {
+	public double getTick() {
 		return mTick;
 	}
 
@@ -295,7 +295,7 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>楽曲位置の時間は、小節0・刻み位置0からこの楽曲位置に到達するまでの時間を秒単位で表します。</p>
 	 * @return 楽曲位置の時間
 	 */
-	public final double getTime() {
+	public double getTime() {
 		return mTime;
 	}
 
@@ -304,11 +304,11 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>ノート種別については{@link BeMusicNoteType}を参照してください。</p>
 	 * @param device 入力デバイス
 	 * @return ノート種別
-	 * @exception NullPointerException deviceがnull
+	 * @throws NullPointerException deviceがnull
 	 * @see BeMusicDevice
 	 * @see BeMusicNoteType
 	 */
-	public final BeMusicNoteType getVisibleNoteType(BeMusicDevice device) {
+	public BeMusicNoteType getVisibleNoteType(BeMusicDevice device) {
 		return RawNotes.getNoteType(getRawNote(RawNotes.VISIBLE, device.getIndex()));
 	}
 
@@ -336,7 +336,7 @@ public class BeMusicPoint implements BmsAt {
 	 * </table>
 	 * @param device 入力デバイス
 	 * @return ノートの値
-	 * @exception NullPointerException deviceがnull
+	 * @throws NullPointerException deviceがnull
 	 * @see BeMusicDevice
 	 * @see BeMusicNoteType
 	 * @see BeMusicSound
@@ -345,7 +345,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicChannel#VISIBLE_1P_01
 	 * @see BeMusicChannel#MINE_1P_01
 	 */
-	public final int getVisibleValue(BeMusicDevice device) {
+	public int getVisibleValue(BeMusicDevice device) {
 		return RawNotes.getValue(getRawNote(RawNotes.VISIBLE, device.getIndex()));
 	}
 
@@ -355,7 +355,7 @@ public class BeMusicPoint implements BmsAt {
 	 * どのノート種別でノート数をカウントするべきかは{@link BeMusicNoteType}を参照してください。</p>
 	 * @return ノート数
 	 */
-	public final int getNoteCount() {
+	public int getNoteCount() {
 		return (mCount & 0x0000000f) + ((mCount & 0x000000f0) >> 4);
 	}
 
@@ -365,10 +365,10 @@ public class BeMusicPoint implements BmsAt {
 	 * どのノート種別でノート数をカウントするべきかは{@link BeMusicNoteType}を参照してください。</p>
 	 * @param lane レーン
 	 * @return ノート数
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
-	public final int getNoteCount(BeMusicLane lane) {
+	public int getNoteCount(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return (mCount >> (lane.getIndex() * 4)) & 0x0000000f;
 	}
@@ -378,7 +378,7 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>厳密には{@link BeMusicNoteType#LONG_ON}の数を表します。</p>
 	 * @return ロングノート数
 	 */
-	public final int getLongNoteCount() {
+	public int getLongNoteCount() {
 		return ((mCount & 0x00000f00) >> 8) + ((mCount & 0x0000f000) >> 12);
 	}
 
@@ -387,10 +387,10 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>厳密には{@link BeMusicNoteType#LONG_ON}の数を表します。</p>
 	 * @param lane レーン
 	 * @return ロングノート数
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
-	public final int getLongNoteCount(BeMusicLane lane) {
+	public int getLongNoteCount(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return (mCount >> (8 + (lane.getIndex() * 4))) & 0x0000000f;
 	}
@@ -399,7 +399,7 @@ public class BeMusicPoint implements BmsAt {
 	 * この楽曲位置における地雷オブジェの数を取得します。
 	 * @return 地雷オブジェの数
 	 */
-	public final int getMineCount() {
+	public int getMineCount() {
 		return ((mCount & 0x000f0000) >> 16) + ((mCount & 0x00f00000) >> 20);
 	}
 
@@ -407,10 +407,10 @@ public class BeMusicPoint implements BmsAt {
 	 * この楽曲位置において指定レーンの地雷オブジェの数を取得します。
 	 * @param lane レーン
 	 * @return 地雷オブジェの数
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
-	public final int getMineCount(BeMusicLane lane) {
+	public int getMineCount(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return (mCount >> (16 + (lane.getIndex() * 4))) & 0x0000000f;
 	}
@@ -420,7 +420,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return 視覚効果を持つノートの数
 	 * @since 0.5.0
 	 */
-	public final int getVisualEffectCount() {
+	public int getVisualEffectCount() {
 		return ((mCount & 0x0f000000) >> 24) + ((mCount & 0xf0000000) >> 28);
 	}
 
@@ -428,10 +428,10 @@ public class BeMusicPoint implements BmsAt {
 	 * この楽曲位置において指定レーンで視覚効果を持つノートの数を取得します。
 	 * @param lane レーン
 	 * @return 視覚効果を持つノートの数
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
-	public final int getVisualEffectCount(BeMusicLane lane) {
+	public int getVisualEffectCount(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return (mCount >> (24 + (lane.getIndex() * 4))) & 0x0000000f;
 	}
@@ -443,11 +443,11 @@ public class BeMusicPoint implements BmsAt {
 	 * 可視オブジェ側の音声再生を優先的に行うべきです。</p>
 	 * @param device 入力デバイス
 	 * @return 不可視オブジェの値
-	 * @exception NullPointerException deviceがnull
+	 * @throws NullPointerException deviceがnull
 	 * @see BeMusicDevice
 	 * @see BeMusicSound#getTrackId(int)
 	 */
-	public final int getInvisibleValue(BeMusicDevice device) {
+	public int getInvisibleValue(BeMusicDevice device) {
 		return RawNotes.getValue(getRawNote(RawNotes.INVISIBLE, device.getIndex()));
 	}
 
@@ -457,7 +457,7 @@ public class BeMusicPoint implements BmsAt {
 	 * この楽曲位置のいずれかの入力デバイスに1つでも操作可能ノートがあれば「あり」と見なされます。</p>
 	 * @return この楽曲位置に操作可能ノートが1つでもある場合にtrue
 	 */
-	public final boolean hasPlayableNote() {
+	public boolean hasPlayableNote() {
 		return (mInfo & 0x000000c0) != 0;
 	}
 
@@ -467,10 +467,10 @@ public class BeMusicPoint implements BmsAt {
 	 * この楽曲位置のいずれかの入力デバイスに1つでも操作可能ノートがあれば「あり」と見なされます。</p>
 	 * @param lane レーン
 	 * @return 操作可能ノートが1つでもある場合true
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
-	public final boolean hasPlayableNote(BeMusicLane lane) {
+	public boolean hasPlayableNote(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return (mInfo & (0x00000040 << lane.getIndex())) != 0;
 	}
@@ -483,7 +483,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicNoteType#hasMovement()
 	 * @since 0.5.0
 	 */
-	public final boolean hasMovementNote() {
+	public boolean hasMovementNote() {
 		return (mInfo & 0x00000300) != 0;
 	}
 
@@ -493,11 +493,11 @@ public class BeMusicPoint implements BmsAt {
 	 * この楽曲位置のいずれかの入力デバイスに1つでも何らかの操作を伴うノートがあれば「あり」と見なされます。</p>
 	 * @param lane レーン
 	 * @return 何らかの操作を伴うノートが1つでもある場合true
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @see BeMusicNoteType#hasMovement()
 	 * @since 0.9.0
 	 */
-	public final boolean hasMovementNote(BeMusicLane lane) {
+	public boolean hasMovementNote(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return (mInfo & (0x00000100 << lane.getIndex())) != 0;
 	}
@@ -509,7 +509,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicNoteType#isHolding()
 	 * @since 0.6.0
 	 */
-	public final boolean hasHolding() {
+	public boolean hasHolding() {
 		return (mInfo & 0x00000c00) != 0;
 	}
 
@@ -518,11 +518,11 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>具体的には、{@link BeMusicNoteType#isHolding()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
 	 * @param lane レーン
 	 * @return 長押し継続ノートが1つでもある場合true
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @see BeMusicNoteType#isHolding()
 	 * @since 0.9.0
 	 */
-	public final boolean hasHolding(BeMusicLane lane) {
+	public boolean hasHolding(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return (mInfo & (0x00000400 << lane.getIndex())) != 0;
 	}
@@ -534,7 +534,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicNoteType#isLongNoteHead()
 	 * @since 0.6.0
 	 */
-	public final boolean hasLongNoteHead() {
+	public boolean hasLongNoteHead() {
 		return (mInfo & 0x00003000) != 0;
 	}
 
@@ -543,11 +543,11 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>具体的には、{@link BeMusicNoteType#isLongNoteHead()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
 	 * @param lane レーン
 	 * @return 長押し開始ノートが1つでもある場合true
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @see BeMusicNoteType#isLongNoteHead()
 	 * @since 0.9.0
 	 */
-	public final boolean hasLongNoteHead(BeMusicLane lane) {
+	public boolean hasLongNoteHead(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return (mInfo & (0x00001000 << lane.getIndex())) != 0;
 	}
@@ -559,7 +559,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicNoteType#isLongNoteTail()
 	 * @since 0.6.0
 	 */
-	public final boolean hasLongNoteTail() {
+	public boolean hasLongNoteTail() {
 		return (mInfo & 0x0000c000) != 0;
 	}
 
@@ -568,11 +568,11 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>具体的には、{@link BeMusicNoteType#isLongNoteTail()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
 	 * @param lane レーン
 	 * @return 長押し終了ノートが1つでもある場合true
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @see BeMusicNoteType#isLongNoteTail()
 	 * @since 0.9.0
 	 */
-	public final boolean hasLongNoteTail(BeMusicLane lane) {
+	public boolean hasLongNoteTail(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return (mInfo & (0x00004000 << lane.getIndex())) != 0;
 	}
@@ -584,7 +584,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicNoteType#isLongNoteType()
 	 * @since 0.6.0
 	 */
-	public final boolean hasLongNoteType() {
+	public boolean hasLongNoteType() {
 		return (mInfo & 0x00030000) != 0;
 	}
 
@@ -593,11 +593,11 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>具体的には、{@link BeMusicNoteType#isLongNoteType()}がtrueを返すノートが1個以上存在する場合にtrueを返します。</p>
 	 * @param lane レーン
 	 * @return 長押し関連ノートが1つでもある場合true
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @see BeMusicNoteType#isLongNoteType()
 	 * @since 0.9.0
 	 */
-	public final boolean hasLongNoteType(BeMusicLane lane) {
+	public boolean hasLongNoteType(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
 		return (mInfo & (0x00010000 << lane.getIndex())) != 0;
 	}
@@ -610,7 +610,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicNoteType#hasVisualEffect()
 	 * @since 0.5.0
 	 */
-	public final boolean hasVisualEffect() {
+	public boolean hasVisualEffect() {
 		return getVisualEffectCount() > 0;
 	}
 
@@ -620,11 +620,11 @@ public class BeMusicPoint implements BmsAt {
 	 * この楽曲位置のいずれかの入力デバイスに1つでも視覚効果を持つノートがあれば「あり」と見なされます。</p>
 	 * @param lane レーン
 	 * @return 視覚効果を持つノートが1つでもある場合true
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @see BeMusicNoteType#hasVisualEffect()
 	 * @since 0.9.0
 	 */
-	public final boolean hasVisualEffect(BeMusicLane lane) {
+	public boolean hasVisualEffect(BeMusicLane lane) {
 		return getVisualEffectCount(lane) > 0;
 	}
 
@@ -636,7 +636,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see #hasScroll()
 	 * @since 0.6.0
 	 */
-	public final boolean hasChangeSpeed() {
+	public boolean hasChangeSpeed() {
 		return (mInfo & 0x00000010) != 0;
 	}
 
@@ -652,7 +652,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see #hasMine()
 	 * @since 0.6.0
 	 */
-	public final boolean hasGimmick() {
+	public boolean hasGimmick() {
 		return (mInfo & 0x00000020) != 0;
 	}
 
@@ -663,7 +663,7 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>BMSにて小節長が明示的に指定されたかどうかを参照したい場合は{@link #hasMeasureLength()}を使用してください。</p>
 	 * @return 小節長
 	 */
-	public final double getMeasureLength() {
+	public double getMeasureLength() {
 		return Math.abs(mProperty.length);
 	}
 
@@ -676,7 +676,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicChannel#SCROLL
 	 * @since 0.6.0
 	 */
-	public final double getCurrentScroll() {
+	public double getCurrentScroll() {
 		return mProperty.scroll;
 	}
 
@@ -690,7 +690,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicChannel#BPM
 	 * @see BeMusicChannel#BPM_LEGACY
 	 */
-	public final double getCurrentBpm() {
+	public double getCurrentBpm() {
 		return Math.abs(mProperty.bpm);
 	}
 
@@ -702,7 +702,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see #getCurrentScroll()
 	 * @since 0.6.0
 	 */
-	public final double getCurrentSpeed() {
+	public double getCurrentSpeed() {
 		return getCurrentBpm() * getCurrentScroll();
 	}
 
@@ -715,7 +715,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicMeta#STOP
 	 * @see BeMusicChannel#STOP
 	 */
-	public final double getStop() {
+	public double getStop() {
 		return mProperty.stop;
 	}
 
@@ -723,7 +723,7 @@ public class BeMusicPoint implements BmsAt {
 	 * この楽曲位置でのBGM数を取得します。
 	 * @return BGM数
 	 */
-	public final int getBgmCount() {
+	public int getBgmCount() {
 		var bgmPos = getNotePos(RawNotes.BGM);
 		return (bgmPos == NA) ? 0 : (mNotes.length - bgmPos);
 	}
@@ -735,13 +735,13 @@ public class BeMusicPoint implements BmsAt {
 	 * の該当する音声参照し再生されるべきです。</p>
 	 * @param index インデックス(0～{@link #getBgmCount()}-1)
 	 * @return BGMの値
-	 * @exception IllegalStateException この楽曲位置にBGMが存在しない
-	 * @exception IndexOutOfBoundsException indexがマイナス値または指定可能範囲超過
+	 * @throws IllegalStateException この楽曲位置にBGMが存在しない
+	 * @throws IndexOutOfBoundsException indexがマイナス値または指定可能範囲超過
 	 * @see BeMusicMeta#WAV
 	 * @see BeMusicChannel#BGM
 	 * @see BeMusicSound#getTrackId(int)
 	 */
-	public final int getBgmValue(int index) {
+	public int getBgmValue(int index) {
 		var bgmPos = getNotePos(RawNotes.BGM);
 		assertField(bgmPos != NA, "BGM is nothing.");
 		assertArgIndexRange(index, mNotes.length - bgmPos, "index");
@@ -756,7 +756,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicMeta#BMP
 	 * @see BeMusicChannel#BGA
 	 */
-	public final int getBgaValue() {
+	public int getBgaValue() {
 		return RawNotes.getTrackId(getRawNote(RawNotes.BGA, 0));
 	}
 
@@ -768,7 +768,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicMeta#BMP
 	 * @see BeMusicChannel#BGA_LAYER
 	 */
-	public final int getLayerValue() {
+	public int getLayerValue() {
 		return RawNotes.getTrackId(getRawNote(RawNotes.BGA, 1));
 	}
 
@@ -780,7 +780,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicMeta#BMP
 	 * @see BeMusicChannel#BGA_MISS
 	 */
-	public final int getMissValue() {
+	public int getMissValue() {
 		return RawNotes.getTrackId(getRawNote(RawNotes.BGA, 2));
 	}
 
@@ -792,7 +792,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicMeta#TEXT
 	 * @see BeMusicChannel#TEXT
 	 */
-	public final String getText() {
+	public String getText() {
 		return mProperty.text;
 	}
 
@@ -802,7 +802,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return 楽曲位置に小節線を含んでいる場合true
 	 * @see com.lmt.lib.bms.BmsSpec#CHANNEL_MEASURE
 	 */
-	public final boolean hasMeasureLine() {
+	public boolean hasMeasureLine() {
 		return (mTick == 0);
 	}
 
@@ -812,7 +812,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return 明示的な小節長の指定がある場合true
 	 * @see BeMusicChannel#LENGTH
 	 */
-	public final boolean hasMeasureLength() {
+	public boolean hasMeasureLength() {
 		return (mProperty.length < 0.0);
 	}
 
@@ -823,7 +823,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicChannel#SCROLL
 	 * @since 0.6.0
 	 */
-	public final boolean hasScroll() {
+	public boolean hasScroll() {
 		return mProperty.changeScroll;
 	}
 
@@ -834,7 +834,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicChannel#BPM
 	 * @see BeMusicChannel#BPM_LEGACY
 	 */
-	public final boolean hasBpm() {
+	public boolean hasBpm() {
 		return (mProperty.bpm < 0.0);
 	}
 
@@ -844,7 +844,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicMeta#STOP
 	 * @see BeMusicChannel#STOP
 	 */
-	public final boolean hasStop() {
+	public boolean hasStop() {
 		return (mProperty.stop != 0.0);
 	}
 
@@ -854,7 +854,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see #getMineCount()
 	 * @since 0.6.0
 	 */
-	public final boolean hasMine() {
+	public boolean hasMine() {
 		return (getMineCount() != 0);
 	}
 
@@ -864,7 +864,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicMeta#WAV
 	 * @see BeMusicChannel#BGM
 	 */
-	public final boolean hasBgm() {
+	public boolean hasBgm() {
 		return (mInfo & 0x00000008) != 0;
 	}
 
@@ -874,7 +874,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicMeta#BMP
 	 * @see BeMusicChannel#BGA
 	 */
-	public final boolean hasBga() {
+	public boolean hasBga() {
 		return getBgaValue() != 0;
 	}
 
@@ -884,7 +884,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicMeta#BMP
 	 * @see BeMusicChannel#BGA_LAYER
 	 */
-	public final boolean hasLayer() {
+	public boolean hasLayer() {
 		return getLayerValue() != 0;
 	}
 
@@ -894,7 +894,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicMeta#BMP
 	 * @see BeMusicChannel#BGA_MISS
 	 */
-	public final boolean hasMiss() {
+	public boolean hasMiss() {
 		return getMissValue() != 0;
 	}
 
@@ -905,7 +905,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @see BeMusicChannel#TEXT
 	 * @since 0.9.0
 	 */
-	public final boolean hasText() {
+	public boolean hasText() {
 		return !getText().isEmpty();
 	}
 
@@ -914,10 +914,10 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>当メソッドは{@link #enumSounds(boolean, boolean, boolean, IntConsumer)}を以下のパラメータで呼び出します。</p>
 	 * <pre>enumSounds(true, false, false, action);</pre>
 	 * @param action ノート1個に対して何らかの処理を行う関数
-	 * @exception NullPointerException actionがnull
+	 * @throws NullPointerException actionがnull
 	 * @since 0.8.0
 	 */
-	public final void enumVisibles(IntConsumer action) {
+	public void enumVisibles(IntConsumer action) {
 		enumSounds(true, false, false, action);
 	}
 
@@ -926,10 +926,10 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>当メソッドは{@link #enumSounds(boolean, boolean, boolean, IntConsumer)}を以下のパラメータで呼び出します。</p>
 	 * <pre>enumSounds(false, true, false, action);</pre>
 	 * @param action ノート1個に対して何らかの処理を行う関数
-	 * @exception NullPointerException actionがnull
+	 * @throws NullPointerException actionがnull
 	 * @since 0.8.0
 	 */
-	public final void enumInvisibles(IntConsumer action) {
+	public void enumInvisibles(IntConsumer action) {
 		enumSounds(false, true, false, action);
 	}
 
@@ -938,10 +938,10 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>当メソッドは{@link #enumSounds(boolean, boolean, boolean, IntConsumer)}を以下のパラメータで呼び出します。</p>
 	 * <pre>enumSounds(false, false, true, action);</pre>
 	 * @param action ノート1個に対して何らかの処理を行う関数
-	 * @exception NullPointerException actionがnull
+	 * @throws NullPointerException actionがnull
 	 * @since 0.8.0
 	 */
-	public final void enumBgms(IntConsumer action) {
+	public void enumBgms(IntConsumer action) {
 		enumSounds(false, false, true, action);
 	}
 
@@ -950,10 +950,10 @@ public class BeMusicPoint implements BmsAt {
 	 * <p>当メソッドは{@link #enumSounds(boolean, boolean, boolean, IntConsumer)}を以下のパラメータで呼び出します。</p>
 	 * <pre>enumSounds(true, true, true, action);</pre>
 	 * @param action ノート1個に対して何らかの処理を行う関数
-	 * @exception NullPointerException actionがnull
+	 * @throws NullPointerException actionがnull
 	 * @since 0.8.0
 	 */
-	public final void enumSounds(IntConsumer action) {
+	public void enumSounds(IntConsumer action) {
 		enumSounds(true, true, true, action);
 	}
 
@@ -970,11 +970,11 @@ public class BeMusicPoint implements BmsAt {
 	 * @param invisible 不可視オブジェを列挙するかどうか
 	 * @param bgm BGMを列挙するかどうか
 	 * @param action ノート1個に対して何らかの処理を行う関数
-	 * @exception NullPointerException actionがnull
+	 * @throws NullPointerException actionがnull
 	 * @see BeMusicSound
 	 * @since 0.8.0
 	 */
-	public final void enumSounds(boolean visible, boolean invisible, boolean bgm, IntConsumer action) {
+	public void enumSounds(boolean visible, boolean invisible, boolean bgm, IntConsumer action) {
 		assertArgNotNull(action, "action");
 		var pos = 0;
 		if (visible && ((pos = getNotePos(RawNotes.VISIBLE)) != NA)) {
@@ -996,7 +996,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return 可視オブジェのノートを走査するストリーム
 	 * @since 0.8.0
 	 */
-	public final IntStream visibles() {
+	public IntStream visibles() {
 		return sounds(true, false, false);
 	}
 
@@ -1007,7 +1007,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return 不可視オブジェのノートを走査するストリーム
 	 * @since 0.8.0
 	 */
-	public final IntStream invisibles() {
+	public IntStream invisibles() {
 		return sounds(false, true, false);
 	}
 
@@ -1018,7 +1018,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return BGMのノートを走査するストリーム
 	 * @since 0.8.0
 	 */
-	public final IntStream bgms() {
+	public IntStream bgms() {
 		return sounds(false, false, true);
 	}
 
@@ -1029,7 +1029,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return 全てのサウンドに関連するノートを走査するストリーム
 	 * @since 0.8.0
 	 */
-	public final IntStream sounds() {
+	public IntStream sounds() {
 		return sounds(true, true, true);
 	}
 
@@ -1048,7 +1048,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @return 選択された種類のノートを走査するストリーム
 	 * @since 0.8.0
 	 */
-	public final IntStream sounds(boolean visible, boolean invisible, boolean bgm) {
+	public IntStream sounds(boolean visible, boolean invisible, boolean bgm) {
 		return StreamSupport.intStream(new SoundSpliterator(visible, invisible, bgm), false);
 	}
 
@@ -1076,7 +1076,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @param bg BGAの値(BGA/Layer/Miss) (nullの場合BGAなし)
 	 * @param bgms BGMの値リスト (null不可)
 	 */
-	final void setup(int measure, double tick, double time, PointProperty property,
+	void setup(int measure, double tick, double time, PointProperty property,
 			BeMusicNoteType[] vt, int[] vv, int[] iv, int[] bg, List<Integer> bgms) {
 		// 楽曲位置情報の基本情報を初期化する
 		mMeasure = measure;
@@ -1174,7 +1174,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @param kind ノートの種類を表す値
 	 * @return ベースインデックス値。当該種類のノートがない場合は{@link #NA}
 	 */
-	private int getNotePos(int kind) {
+	int getNotePos(int kind) {
 		return NOTE_POSITIONS[mInfo & 0x0000000f][kind];
 	}
 
@@ -1186,7 +1186,7 @@ public class BeMusicPoint implements BmsAt {
 	 * @param index インデックス値
 	 * @return ノートの生値
 	 */
-	private int getRawNote(int kind, int index) {
+	int getRawNote(int kind, int index) {
 		// 全ノートなしの場合、nullになっている
 		if (mNotes == null) {
 			return 0;

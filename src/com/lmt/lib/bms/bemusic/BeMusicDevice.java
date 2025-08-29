@@ -274,7 +274,7 @@ public enum BeMusicDevice {
 	 * するためのインデックス値として使用することを想定しています。</p>
 	 * @return ラインのインデックス
 	 */
-	public final int getIndex() {
+	public int getIndex() {
 		return mIndex;
 	}
 
@@ -282,7 +282,7 @@ public enum BeMusicDevice {
 	 * この入力デバイスが存在するレーンを取得します。
 	 * @return レーン
 	 */
-	public final BeMusicLane getLane() {
+	public BeMusicLane getLane() {
 		return mLane;
 	}
 
@@ -290,7 +290,7 @@ public enum BeMusicDevice {
 	 * この入力デバイスに対応する可視オブジェチャンネルを取得します。
 	 * @return 可視オブジェチャンネル
 	 */
-	public final BmsChannel getVisibleChannel() {
+	public BmsChannel getVisibleChannel() {
 		return mVisibleChannel;
 	}
 
@@ -298,7 +298,7 @@ public enum BeMusicDevice {
 	 * この入力デバイスに対応する不可視オブジェチャンネルを取得します。
 	 * @return 不可視オブジェチャンネル
 	 */
-	public final BmsChannel getInvisibleChannel() {
+	public BmsChannel getInvisibleChannel() {
 		return mInvisibleChannel;
 	}
 
@@ -306,7 +306,7 @@ public enum BeMusicDevice {
 	 * この入力デバイスに対応する地雷オブジェチャンネルを取得します。
 	 * @return 地雷オブジェチャンネル
 	 */
-	public final BmsChannel getMineChannel() {
+	public BmsChannel getMineChannel() {
 		return mMineChannel;
 	}
 
@@ -316,7 +316,7 @@ public enum BeMusicDevice {
 	 * Be-Musicサブセットでサポートされます。</p>
 	 * @return MGQ形式のロングノートチャンネル
 	 */
-	public final BmsChannel getLongChannel() {
+	public BmsChannel getLongChannel() {
 		return mLongChannel;
 	}
 
@@ -328,7 +328,7 @@ public enum BeMusicDevice {
 	 * @see #isScratch()
 	 * @since 0.5.0
 	 */
-	public final int getSwitchNumber() {
+	public int getSwitchNumber() {
 		return mSwitchNumber;
 	}
 
@@ -337,7 +337,7 @@ public enum BeMusicDevice {
 	 * @return この入力デバイスがスイッチであればtrue、それ以外はfalse
 	 * @since 0.5.0
 	 */
-	public final boolean isSwitch() {
+	public boolean isSwitch() {
 		return mSwitchNumber > 0;
 	}
 
@@ -346,7 +346,7 @@ public enum BeMusicDevice {
 	 * @return この入力デバイスがスクラッチであればtrue、それ以外はfalse
 	 * @since 0.5.0
 	 */
-	public final boolean isScratch() {
+	public boolean isScratch() {
 		return mSwitchNumber == 0;
 	}
 
@@ -356,7 +356,7 @@ public enum BeMusicDevice {
 	 * @see BeMusicLane#PRIMARY
 	 * @since 0.8.0
 	 */
-	public final boolean isPrimary() {
+	public boolean isPrimary() {
 		return mLane == BeMusicLane.PRIMARY;
 	}
 
@@ -366,7 +366,7 @@ public enum BeMusicDevice {
 	 * @see BeMusicLane#SECONDARY
 	 * @since 0.8.0
 	 */
-	public final boolean isSecondary() {
+	public boolean isSecondary() {
 		return mLane == BeMusicLane.SECONDARY;
 	}
 
@@ -394,7 +394,7 @@ public enum BeMusicDevice {
 	 * 入力デバイスのインデックスを用いて対応する入力デバイスを取得します。
 	 * @param index 入力デバイスのインデックス
 	 * @return 入力デバイス
-	 * @exception IndexOutOfBoundsException indexがマイナス値または{@link #COUNT}以上
+	 * @throws IndexOutOfBoundsException indexがマイナス値または{@link #COUNT}以上
 	 */
 	public static BeMusicDevice fromIndex(int index) {
 		return DEVICES[index];
@@ -463,7 +463,7 @@ public enum BeMusicDevice {
 	 * 返されるリストは読み取り専用のため変更することはできません。</p>
 	 * @param lane レーン
 	 * @return 入力デバイスリスト
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @see #orderedByDpList()
 	 */
 	public static List<BeMusicDevice> orderedByDpList(BeMusicLane lane) {
@@ -477,7 +477,7 @@ public enum BeMusicDevice {
 	 * @return レーンの入力デバイスインデックスのベース値
 	 * @see #PRIMARY_BASE
 	 * @see #SECONDARY_BASE
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.8.0
 	 */
 	public static int getBaseIndex(BeMusicLane lane) {
@@ -490,7 +490,7 @@ public enum BeMusicDevice {
 	 * <p>返されるリストは読み取り専用です。リストの内容を変更しようとすると例外がスローされます。</p>
 	 * @param lane レーン
 	 * @return 入力デバイスリスト
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.6.0
 	 */
 	public static List<BeMusicDevice> getDevices(BeMusicLane lane) {
@@ -503,7 +503,7 @@ public enum BeMusicDevice {
 	 * <p>返されるリストは読み取り専用です。リストの内容を変更しようとすると例外がスローされます。</p>
 	 * @param lane レーン
 	 * @return スイッチデバイスリスト
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.6.0
 	 */
 	public static List<BeMusicDevice> getSwitches(BeMusicLane lane) {
@@ -515,7 +515,7 @@ public enum BeMusicDevice {
 	 * 指定レーンに配置されたスクラッチデバイスを取得します。
 	 * @param lane レーン
 	 * @return laneに配置されたスクラッチデバイス
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.6.0
 	 */
 	public static BeMusicDevice getScratch(BeMusicLane lane) {

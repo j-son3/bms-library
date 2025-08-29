@@ -63,7 +63,7 @@ class Scratch {
 		 * 反対操作取得
 		 * @return この操作方向と反対のオブジェクト
 		 */
-		final Direction reverse() {
+		Direction reverse() {
 			return (this == OUTER) ? INNER : OUTER;
 		}
 	}
@@ -293,7 +293,7 @@ class Scratch {
 		 * スクラッチ範囲数取得
 		 * @return スクラッチ範囲数
 		 */
-		final int numRange() {
+		int numRange() {
 			return this.numSingle + this.numPulse + this.numRtrip + this.numSpin;
 		}
 
@@ -301,7 +301,7 @@ class Scratch {
 		 * 総ノート数取得
 		 * @return 総ノート数
 		 */
-		final int numNotes() {
+		int numNotes() {
 			return this.numSwitch + this.numScratch;
 		}
 
@@ -309,7 +309,7 @@ class Scratch {
 		 * 総ノート数のうちスクラッチが占める割合取得
 		 * @return 総ノート数のうちスクラッチが占める割合
 		 */
-		final double numScratchRate() {
+		double numScratchRate() {
 			var numNotes = (double)numNotes();
 			return (numNotes == 0.0) ? 0.0 : (this.numScratch / numNotes);
 		}
@@ -318,7 +318,7 @@ class Scratch {
 		 * 総ノート数のうちスクラッチが占める割合のパーセンテージ取得
 		 * @return 総ノート数のうちスクラッチが占める割合のパーセンテージ
 		 */
-		final double numScratchRatePer() {
+		double numScratchRatePer() {
 			return numScratchRate() * 100.0;
 		}
 
@@ -326,7 +326,7 @@ class Scratch {
 		 * リズム変化頻度(回/秒)取得
 		 * @return リズム変化頻度(回/秒)
 		 */
-		final double changePerSec() {
+		double changePerSec() {
 			return numRange() / this.playTime;
 		}
 
@@ -334,7 +334,7 @@ class Scratch {
 		 * スクラッチ操作時間比率取得
 		 * @return スクラッチ操作時間比率
 		 */
-		final double scratchingRate() {
+		double scratchingRate() {
 			return (this.playTime == 0.0) ? 0.0 : (this.scratchingTime / this.playTime);
 		}
 
@@ -342,7 +342,7 @@ class Scratch {
 		 * スクラッチ操作時間比率のパーセンテージ取得
 		 * @return スクラッチ操作時間比率のパーセンテージ
 		 */
-		final double scratchingRatePer() {
+		double scratchingRatePer() {
 			return scratchingRate() * 100.0;
 		}
 	}

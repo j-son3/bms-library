@@ -53,7 +53,7 @@ public class BmsNote extends BmsTimelineElement {
 	 * の範囲の値を示しますが、0を示すことはありません。</p>
 	 * @return ノートの値
 	 */
-	public final int getValue() {
+	public int getValue() {
 		return mValue;
 	}
 
@@ -61,7 +61,7 @@ public class BmsNote extends BmsTimelineElement {
 	 * ノートに割り当てられた値を設定する。
 	 * @param value ノートの値
 	 */
-	final void setValue(int value) {
+	void setValue(int value) {
 		mValue = value;
 	}
 
@@ -118,10 +118,10 @@ public class BmsNote extends BmsTimelineElement {
 	 * @param address アドレス
 	 * @param value ノートの値
 	 * @return 入力引数の各情報を設定した新しいノートオブジェクト
-	 * @exception NullPointerException addressがnull
+	 * @throws NullPointerException addressがnull
 	 * @since 0.8.0
 	 */
-	public final BmsNote newNote(BmsAddress address, int value) {
+	public BmsNote newNote(BmsAddress address, int value) {
 		assertArgNotNull(address, "address");
 		return newNote(address.getChannel(), address.getIndex(), address.getMeasure(), address.getTick(), value);
 	}
@@ -138,7 +138,7 @@ public class BmsNote extends BmsTimelineElement {
 	 * @return 入力引数の各情報を設定した新しいノートオブジェクト
 	 * @since 0.8.0
 	 */
-	public final BmsNote newNote(int channel, int index, int measure, double tick, int value) {
+	public BmsNote newNote(int channel, int index, int measure, double tick, int value) {
 		var newNote = onNewInstance();
 		newNote.setup(channel, index, measure, tick, value);
 		return newNote;

@@ -37,7 +37,7 @@ public enum BeMusicLane {
 	 * するためのインデックス値として使用することを想定しています。</p>
 	 * @return レーンのインデックス
 	 */
-	public final int getIndex() {
+	public int getIndex() {
 		return mIndex;
 	}
 
@@ -45,7 +45,7 @@ public enum BeMusicLane {
 	 * レーンのインデックスを用いて対応するレーンを取得します。
 	 * @param index レーンのインデックス
 	 * @return レーン
-	 * @exception IndexOutOfBoundsException indexがマイナス値または{@link #COUNT}以上
+	 * @throws IndexOutOfBoundsException indexがマイナス値または{@link #COUNT}以上
 	 */
 	public static BeMusicLane fromIndex(int index) {
 		return LANES[index];

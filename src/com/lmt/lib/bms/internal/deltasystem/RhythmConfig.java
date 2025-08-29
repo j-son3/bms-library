@@ -87,7 +87,7 @@ class RhythmConfig extends RatingConfig {
 	 * @param ctx Delta System用コンテキスト
 	 * @return タイムライン全体の最終評価点影響係数
 	 */
-	final double influenceAllSide(DsContext ctx) {
+	double influenceAllSide(DsContext ctx) {
 		return ctx.dpMode ? this.dpInfluenceAllSide : this.spInfluenceAllSide;
 	}
 
@@ -96,7 +96,7 @@ class RhythmConfig extends RatingConfig {
 	 * @param ctx Delta System用コンテキスト
 	 * @return タイムライン左サイドの最終評価点影響係数
 	 */
-	final double influenceLeftSide(DsContext ctx) {
+	double influenceLeftSide(DsContext ctx) {
 		return ctx.dpMode ? this.dpInfluenceLeftSide : this.spInfluenceLeftSide;
 	}
 
@@ -105,7 +105,7 @@ class RhythmConfig extends RatingConfig {
 	 * @param ctx Delta System用コンテキスト
 	 * @return タイムライン右サイドの最終評価点影響係数
 	 */
-	final double influenceRightSide(DsContext ctx) {
+	double influenceRightSide(DsContext ctx) {
 		return ctx.dpMode ? this.dpInfluenceRightSide : this.spInfluenceRightSide;
 	}
 

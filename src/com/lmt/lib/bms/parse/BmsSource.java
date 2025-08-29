@@ -22,7 +22,7 @@ public class BmsSource {
 	/**
 	 * バイナリフォーマットの入力データオブジェクトを構築します。
 	 * @param binary 入力データ
-	 * @exception NullPointerException binaryがnull
+	 * @throws NullPointerException binaryがnull
 	 */
 	public BmsSource(byte[] binary) {
 		assertArgNotNull(binary, "binary");
@@ -33,7 +33,7 @@ public class BmsSource {
 	/**
 	 * テキストフォーマットの入力データオブジェクトを構築します。
 	 * @param script 入力データ
-	 * @exception NullPointerException scriptがnull
+	 * @throws NullPointerException scriptがnull
 	 */
 	public BmsSource(String script) {
 		assertArgNotNull(script, "script");

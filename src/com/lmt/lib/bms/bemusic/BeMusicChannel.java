@@ -2239,7 +2239,7 @@ public class BeMusicChannel {
 	 * <p>取得したリストは読み取り専用です。</p>
 	 * @param lane レーン
 	 * @return レーンに対応した可視オブジェリスト
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
 	public static List<BmsChannel> visibles(BeMusicLane lane) {
@@ -2252,7 +2252,7 @@ public class BeMusicChannel {
 	 * <p>取得したリストは読み取り専用です。</p>
 	 * @param lane レーン
 	 * @return レーンに対応した不可視オブジェリスト
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
 	public static List<BmsChannel> invisibles(BeMusicLane lane) {
@@ -2265,7 +2265,7 @@ public class BeMusicChannel {
 	 * <p>取得したリストは読み取り専用です。</p>
 	 * @param lane レーン
 	 * @return レーンに対応したロングノートオブジェリスト
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
 	public static List<BmsChannel> longs(BeMusicLane lane) {
@@ -2278,7 +2278,7 @@ public class BeMusicChannel {
 	 * <p>取得したリストは読み取り専用です。</p>
 	 * @param lane レーン
 	 * @return レーンに対応した地雷オブジェリスト
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 * @since 0.9.0
 	 */
 	public static List<BmsChannel> mines(BeMusicLane lane) {
@@ -2291,7 +2291,7 @@ public class BeMusicChannel {
 	 * @param num チャンネル番号の文字列表現
 	 * @return チャンネル番号
 	 */
-	private static final int ch(String num) {
+	private static int ch(String num) {
 		return Integer.parseInt(num, 36);
 	}
 }

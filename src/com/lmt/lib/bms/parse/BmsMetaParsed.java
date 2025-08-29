@@ -59,7 +59,7 @@ public class BmsMetaParsed extends BmsParsed {
 	 * @param value メタ情報の値
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsMetaParsed set(int lineNumber, Object line, BmsMeta meta, int index, String value) {
+	public BmsMetaParsed set(int lineNumber, Object line, BmsMeta meta, int index, String value) {
 		this.lineNumber = lineNumber;
 		this.line = line;
 		this.encodedIndex = null;
@@ -78,7 +78,7 @@ public class BmsMetaParsed extends BmsParsed {
 	 * @param value メタ情報の値
 	 * @return このオブジェクトのインスタンス
 	 */
-	public final BmsMetaParsed set(int lineNumber, Object line, BmsMeta meta, String index, String value) {
+	public BmsMetaParsed set(int lineNumber, Object line, BmsMeta meta, String index, String value) {
 		this.lineNumber = lineNumber;
 		this.line = line;
 		this.encodedIndex = index;

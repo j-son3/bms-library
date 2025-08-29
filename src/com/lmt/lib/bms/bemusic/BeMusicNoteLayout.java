@@ -82,8 +82,8 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * 8文字目に記述してください。</p>
 	 * <p>1つの入力デバイスを複数にアサインすることはできません。そのような指定があった場合は例外をスローします。</p>
 	 * @param layout 主レーンのレイアウト文字列
-	 * @exception NullPointerException layoutがnull
-	 * @exception IllegalArgumentException レイアウト記述ルール違反
+	 * @throws NullPointerException layoutがnull
+	 * @throws IllegalArgumentException レイアウト記述ルール違反
 	 */
 	public BeMusicNoteLayout(String layout) {
 		this(layout, null);
@@ -103,10 +103,10 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * レイアウトを指定することはできません。指定すると例外がスローされます。</p>
 	 * @param primary 主レーンのレイアウト文字列
 	 * @param secondary 副レーンのレイアウト文字列
-	 * @exception NullPointerException primaryがnull
-	 * @exception IllegalArgumentException 主レーンのレイアウト記述ルール違反
-	 * @exception IllegalArgumentException 副レーンのレイアウト記述ルール違反
-	 * @exception IllegalArgumentException 主レーンに副レーンのレイアウト指定時、副レーンのレイアウトが主レーンのレイアウトではない
+	 * @throws NullPointerException primaryがnull
+	 * @throws IllegalArgumentException 主レーンのレイアウト記述ルール違反
+	 * @throws IllegalArgumentException 副レーンのレイアウト記述ルール違反
+	 * @throws IllegalArgumentException 主レーンに副レーンのレイアウト指定時、副レーンのレイアウトが主レーンのレイアウトではない
 	 */
 	public BeMusicNoteLayout(String primary, String secondary) {
 		// PRIMARYのセットアップ
@@ -156,7 +156,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * スクラッチのレイアウト変更は行われないので注意してください。</p>
 	 * @param lane レイアウトパターン生成対象レーン
 	 * @return 指定用レイアウトパターン
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 */
 	public static String generateAnyPatterns(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
@@ -172,7 +172,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * スクラッチのレイアウト変更は行われないので注意してください。</p>
 	 * @param lane レイアウトパターン生成対象レーン
 	 * @return 指定レーン用の全レイアウトパターンリスト
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 */
 	public static List<String> generateAllPatterns(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
@@ -189,7 +189,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * また、スクラッチのレイアウト変更は行われないので注意してください。</p>
 	 * @param lane レイアウトパターン生成対象レーン
 	 * @return 指定レーン用のローテートレイアウトパターンリスト
-	 * @exception NullPointerException laneがnull
+	 * @throws NullPointerException laneがnull
 	 */
 	public static List<String> generateAllRotatePatterns(BeMusicLane lane) {
 		assertArgNotNull(lane, "lane");
@@ -246,7 +246,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * このようなケースではダブルプレー用のレイアウトのほうが大きいと判定されます。</p>
 	 * @param o 比較対象レイアウト
 	 * @return 比較対象レイアウトと等価の場合0、小さければ負の値、大きければ正の値
-	 * @exception NullPointerException oがnull
+	 * @throws NullPointerException oがnull
 	 */
 	@Override
 	public int compareTo(BeMusicNoteLayout o) {
@@ -267,9 +267,9 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * <p>シングルプレー用レイアウトで副レーンの入力デバイスを指定しても効果はありません。</p>
 	 * @param before レイアウト変更前のノートを示す入力デバイス
 	 * @return レイアウト変更後のノートを示す入力デバイス
-	 * @exception NullPointerException beforeがnull
+	 * @throws NullPointerException beforeがnull
 	 */
-	public final BeMusicDevice get(BeMusicDevice before) {
+	public BeMusicDevice get(BeMusicDevice before) {
 		assertArgNotNull(before, "before");
 		return mLayout[before.getIndex()];
 	}
@@ -279,7 +279,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * <p>当メソッドは、オブジェクト構築時に指定したレイアウトパターンを返します。</p>
 	 * @return 主レーン用レイアウトパターン
 	 */
-	public final String getPrimaryPattern() {
+	public String getPrimaryPattern() {
 		return mPrimary;
 	}
 
@@ -289,7 +289,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * 副レーンのレイアウトパターンがnullで返ることに注意してください。</p>
 	 * @return 副レーン用レイアウトパターン
 	 */
-	public final String getSecondaryPattern() {
+	public String getSecondaryPattern() {
 		return mSecondary;
 	}
 
@@ -297,7 +297,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * このレイアウトがシングルプレー用かどうかを判定します。
 	 * @return このレイアウトがシングルプレー用ならtrue
 	 */
-	public final boolean isSinglePlayLayout() {
+	public boolean isSinglePlayLayout() {
 		return (mSecondary == null);
 	}
 
@@ -305,7 +305,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * このレイアウトがダブルプレー用かどうかを判定します。
 	 * @return このレイアウトがダブルプレー用ならtrue
 	 */
-	public final boolean isDoublePlayLayout() {
+	public boolean isDoublePlayLayout() {
 		return (mSecondary != null);
 	}
 
@@ -314,7 +314,7 @@ public class BeMusicNoteLayout implements Comparable<BeMusicNoteLayout> {
 	 * <p>当メソッドはシングルプレー用レイアウトでは必ずfalseを返します。</p>
 	 * @return このレイアウトがFLIPの場合true
 	 */
-	public final boolean isFlip() {
+	public boolean isFlip() {
 		return mIsFlip;
 	}
 

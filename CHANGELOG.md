@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.10.0 / 1.3-D] - 2025-08-30
+### Added
+- BeMusicStatistics に期間統計情報を走査するストリームを返す spans を追加しました。
+- BeMusicChart にサウンドのトラックIDを収集する collectSoundTracks を追加しました。
+- BeMusicChart にイメージのトラックIDを収集する collectImageTracks を追加しました。
+- BeMusicChart に実際の演奏時間を計算する computeActualPlayTime を追加しました。
+- BeMusicNoteType にサウンド再生の可能性有無を判定する hasSound を追加しました。
+- BMS例外の見直しに伴い、BmsHandleException, BmsPanicException を追加しました。
+
+### Changed
+- 各クラス・メソッドから不要な final の記述を除去し、APIの拡張性を確保しました。
+- BmsInt#box がキャッシュ可能な整数値の範囲を拡張しました。
+- BMS例外の見直しに伴い、BmsException の継承元を Exception から IOException に変更しました。
+- BMS例外の見直しに伴い、BmsLoader, BmsSaver, BeMusic#loadContentFrom がスローする例外の内容を変更しました。
+
+### Removed
+- BMS例外の見直しに伴い、BmsErrorType#PANIC を削除しました。このエラー種別は BmsHandleException に置き換えられました。
+
+### Fixed
+- Maven からライブラリのテストを行う際、一部のテスト結果が Fail になることがある不具合を修正しました。
+
 ## [0.9.0 / 1.3-D] - 2025-01-06
 ### Added
 - BmsContent にハッシュ値の出力オプション付きの generateHash(boolean, boolean, boolean) を追加しました。

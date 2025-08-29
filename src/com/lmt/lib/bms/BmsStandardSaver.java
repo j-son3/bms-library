@@ -73,7 +73,7 @@ public class BmsStandardSaver extends BmsSaver {
 	 * @see BmsLibrary#setDefaultCharsets(Charset...)
 	 * @since 0.8.0
 	 */
-	public final Charset getLastProcessedCharset() {
+	public Charset getLastProcessedCharset() {
 		return mLastProcessedCharset;
 	}
 
@@ -93,12 +93,12 @@ public class BmsStandardSaver extends BmsSaver {
 	 * 分解能の指定可能範囲は{@link #PRECISION_MIN}, {@link #PRECISION_MAX}を参照してください。</p>
 	 * @param maxPrecision 配列データ最大分解能
 	 * @return このオブジェクトのインスタンス
-	 * @exception IllegalArgumentException maxPrecisionが{@link #PRECISION_MIN}未満、または{@link #PRECISION_MAX}超過
+	 * @throws IllegalArgumentException maxPrecisionが{@link #PRECISION_MIN}未満、または{@link #PRECISION_MAX}超過
 	 * @see #PRECISION_DEFAULT
 	 * @see #PRECISION_MIN
 	 * @see #PRECISION_MAX
 	 */
-	public final BmsStandardSaver setMaxPrecision(int maxPrecision) {
+	public BmsStandardSaver setMaxPrecision(int maxPrecision) {
 		assertArgRange(maxPrecision, PRECISION_MIN, PRECISION_MAX, "maxPrecision");
 		mMaxPrecision = maxPrecision;
 		return this;
@@ -112,10 +112,10 @@ public class BmsStandardSaver extends BmsSaver {
 	 * その行にはコメント行を表す文字は付加されません。</p>
 	 * @param metaComments メタ情報コメント
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException metaCommentsがnull
-	 * @exception NullPointerException metaCommentsの中にnullが含まれる
+	 * @throws NullPointerException metaCommentsがnull
+	 * @throws NullPointerException metaCommentsの中にnullが含まれる
 	 */
-	public final BmsStandardSaver setMetaComments(Collection<String> metaComments) {
+	public BmsStandardSaver setMetaComments(Collection<String> metaComments) {
 		assertArgNotNull(metaComments, "metaComments");
 		mMetaComments = comments(metaComments);
 		return this;
@@ -130,10 +130,10 @@ public class BmsStandardSaver extends BmsSaver {
 	 * その行にはコメント行を表す文字は付加されません。</p>
 	 * @param channelComments タイムライン要素コメント
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException channelCommentsがnull
-	 * @exception NullPointerException channelCommentsの中にnullが含まれる
+	 * @throws NullPointerException channelCommentsがnull
+	 * @throws NullPointerException channelCommentsの中にnullが含まれる
 	 */
-	public final BmsStandardSaver setChannelComments(Collection<String> channelComments) {
+	public BmsStandardSaver setChannelComments(Collection<String> channelComments) {
 		assertArgNotNull(channelComments, "channelComments");
 		mChannelComments = comments(channelComments);
 		return this;
@@ -148,10 +148,10 @@ public class BmsStandardSaver extends BmsSaver {
 	 * その行にはコメント行を表す文字は付加されません。</p>
 	 * @param footerComments フッターコメント
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException footerCommentsがnull
-	 * @exception NullPointerException footerCommentsの中にnullが含まれる
+	 * @throws NullPointerException footerCommentsがnull
+	 * @throws NullPointerException footerCommentsの中にnullが含まれる
 	 */
-	public final BmsStandardSaver setFooterComments(Collection<String> footerComments) {
+	public BmsStandardSaver setFooterComments(Collection<String> footerComments) {
 		assertArgNotNull(footerComments, "footerComments");
 		mFooterComments = comments(footerComments);
 		return this;
@@ -165,10 +165,10 @@ public class BmsStandardSaver extends BmsSaver {
 	 * これは、当メソッドで文字セットを1個も指定しなかった場合も同様です。</p>
 	 * @param charsets BMSコンテンツのエンコード処理時に使用する文字セットリスト
 	 * @return このオブジェクトのインスタンス
-	 * @exception NullPointerException charsetsにnullが含まれている
+	 * @throws NullPointerException charsetsにnullが含まれている
 	 * @see BmsLibrary#setDefaultCharsets(Charset...)
 	 */
-	public final BmsStandardSaver setCharsets(Charset...charsets) {
+	public BmsStandardSaver setCharsets(Charset...charsets) {
 		mCharsets = Stream.of(charsets)
 				.peek(cs -> assertArgNotNull(cs, "charsets[?]"))
 				.distinct()
@@ -186,7 +186,7 @@ public class BmsStandardSaver extends BmsSaver {
 	 * @return このオブジェクトのインスタンス
 	 * @since 0.8.0
 	 */
-	public final BmsStandardSaver setAddBom(boolean addBom) {
+	public BmsStandardSaver setAddBom(boolean addBom) {
 		mAddBom = addBom;
 		return this;
 	}
@@ -209,8 +209,8 @@ public class BmsStandardSaver extends BmsSaver {
 	 * 尚、当クラスでの出力を行う際にも当メソッドと同じ検査が行われます。</p>
 	 * @param content 検査対象のBMSコンテンツ
 	 * @return 標準フォーマットとの互換性があればtrue、そうでなければfalse
-	 * @exception NullPointerException contentがnull
-	 * @exception IllegalArgumentException contentが編集モード
+	 * @throws NullPointerException contentがnull
+	 * @throws IllegalArgumentException contentが編集モード
 	 * @since 0.8.0
 	 */
 	public static boolean isCompatible(BmsContent content) {
@@ -252,13 +252,12 @@ public class BmsStandardSaver extends BmsSaver {
 	 * と同じ検査アルゴリズムを使用します。具体的な検査処理の詳細は同メソッドの説明を参照してください。</p>
 	 * @param content 出力対象のBMSコンテンツ
 	 * @param dst 出力先ストリーム
-	 * @exception IOException dstへのBMSコンテンツ出力時に入出力エラーが発生した
-	 * @exception BmsException BMSに関連する要因、または出力処理で例外がスローされエラー終了した
-	 * @exception BmsCompatException 指定された全ての文字セットでテキストのエンコードが失敗した
-	 * @exception BmsCompatException 配列データの分解能不足によりノートの欠落が発生した
-	 * @exception BmsCompatException 楽曲の構成が標準フォーマットのデータ表現可能範囲を超えた
+	 * @throws IOException dstへのBMSコンテンツ出力時に入出力エラーが発生した
+	 * @throws BmsCompatException 指定された全ての文字セットでテキストのエンコードが失敗した
+	 * @throws BmsCompatException 配列データの分解能不足によりノートの欠落が発生した
+	 * @throws BmsCompatException 楽曲の構成が標準フォーマットのデータ表現可能範囲を超えた
 	 */
-	protected void onWrite(BmsContent content, OutputStream dst) throws IOException, BmsException {
+	protected void onWrite(BmsContent content, OutputStream dst) throws IOException {
 		// 指定BMSコンテンツを標準フォーマットで完全に表現可能かをチェックする
 		checkContentCompatible(content);
 
@@ -446,7 +445,7 @@ public class BmsStandardSaver extends BmsSaver {
 	 * @param intc 設定された基数に応じた整数オブジェクト
 	 * @param type 変換対象の値のデータ型(配列型)
 	 * @return 文字列に変換された配列データ
-	 * @exception BmsCompatException 分解能不足によるノートの上書き発生
+	 * @throws BmsCompatException 分解能不足によるノートの上書き発生
 	 */
 	private String notesToString(BmsContent content, int channel, int index, int measure, BmsInt intc, BmsType type)
 			throws BmsCompatException {
@@ -607,7 +606,7 @@ public class BmsStandardSaver extends BmsSaver {
 	 * エラーチェック、正規化済みのコメントリスト生成
 	 * @param commentList 処理前のコメントリスト
 	 * @return エラーチェック、正規化済みのコメントリスト
-	 * @exception NullPointerException commentList内にnullがある
+	 * @throws NullPointerException commentList内にnullがある
 	 */
 	private static List<String> comments(Collection<String> commentList) {
 		return commentList.stream()

@@ -68,7 +68,7 @@ public enum BeMusicLongNoteMode {
 	 * <p>この値はメタ情報に設定する値を表します。</p>
 	 * @return ネイティブ値
 	 */
-	public final long getNativeValue() {
+	public long getNativeValue() {
 		return mNativeValue;
 	}
 
@@ -76,7 +76,7 @@ public enum BeMusicLongNoteMode {
 	 * ロングノート終端のノート種別を取得します。
 	 * @return ロングノート終端のノート種別
 	 */
-	public final BeMusicNoteType getTailType() {
+	public BeMusicNoteType getTailType() {
 		return mTailType;
 	}
 
@@ -84,7 +84,7 @@ public enum BeMusicLongNoteMode {
 	 * ロングノート終端をノート数としてカウントするかどうかを判定します。
 	 * @return ロングノート終端をノート数としてカウントする場合はtrue、そうでない場合はfalse
 	 */
-	public final boolean isCountTail() {
+	public boolean isCountTail() {
 		return mTailType.isCountNotes();
 	}
 
@@ -92,7 +92,7 @@ public enum BeMusicLongNoteMode {
 	 * ロングノート継続中に定期的な押下判定を行うかどうかを取得します。
 	 * @return 定期的な押下判定を行う場合はtrue、そうでない場合はfalse
 	 */
-	public final boolean isJudgeRegularly() {
+	public boolean isJudgeRegularly() {
 		return mJudgeRegularly;
 	}
 
